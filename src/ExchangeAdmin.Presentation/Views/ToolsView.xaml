@@ -1,0 +1,154 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.ToolsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Tools" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+        <!-- Tools Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Connection Info -->
+                <GroupBox Header="Connection Information">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" Margin="0,0,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text" Value="Disconnected"/>
+                                    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsExchangeConnected}" Value="True">
+                                            <Setter Property="Text" Value="Connected"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="User:" Margin="0,4,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ConnectedUser, FallbackValue='-'}" Margin="0,4,0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Organization:" Margin="0,4,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ConnectedOrganization, FallbackValue='-'}" Margin="0,4,0,4"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Capabilities:" Margin="0,4,12,0"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,4,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text" Value="Not detected"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasCapabilities}" Value="True">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <Binding Path="Capabilities.Cmdlets.Count" StringFormat="{}{0} cmdlets detected"/>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Worker Status -->
+                <GroupBox Header="Worker Status" Margin="0,8,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Worker State:" Margin="0,0,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{Binding WorkerStateColor}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock Text="{Binding WorkerStateDisplay}"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Worker Running:" Margin="0,4,12,0"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,4,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text" Value="No"/>
+                                    <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsWorkerRunning}" Value="True">
+                                            <Setter Property="Text" Value="Yes"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Quick Actions -->
+                <GroupBox Header="Quick Actions" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Start Worker" Command="{Binding StartWorkerCommand}"
+                                Style="{StaticResource PrimaryButton}"/>
+                        <Button Content="Restart Worker" Command="{Binding RestartWorkerCommand}"/>
+                        <Button Content="Connect Exchange" Command="{Binding ConnectExchangeCommand}"
+                                Style="{StaticResource PrimaryButton}"/>
+                        <Button Content="Disconnect" Command="{Binding DisconnectExchangeCommand}"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Prerequisites -->
+                <GroupBox Header="Prerequisites" Margin="0,8,0,0">
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap">
+                            Required software and configuration:
+                        </TextBlock>
+                        <TextBlock Margin="12,8,0,0" Foreground="{StaticResource SecondaryTextBrush}">
+                            - PowerShell 7+ installed (pwsh)
+                        </TextBlock>
+                        <TextBlock Margin="12,4,0,0" Foreground="{StaticResource SecondaryTextBrush}">
+                            - ExchangeOnlineManagement module: Install-Module ExchangeOnlineManagement
+                        </TextBlock>
+                        <TextBlock Margin="12,4,0,0" Foreground="{StaticResource SecondaryTextBrush}">
+                            - Exchange Online admin permissions
+                        </TextBlock>
+                        <TextBlock Margin="12,4,0,0" Foreground="{StaticResource SecondaryTextBrush}">
+                            - MFA and Conditional Access supported via browser authentication
+                        </TextBlock>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

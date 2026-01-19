@@ -55,6 +55,9 @@ public class OperationDispatcher
                 OperationType.SetMailboxPermission => await HandleSetMailboxPermissionAsync(request, cancellationToken),
                 OperationType.ApplyPermissionsDeltaPlan => await HandleApplyPermissionsDeltaPlanAsync(request, cancellationToken),
                 OperationType.SetMailboxFeature => await HandleSetMailboxFeatureAsync(request, cancellationToken),
+                OperationType.UpdateMailboxSettings => await HandleUpdateMailboxSettingsAsync(request, cancellationToken),
+                OperationType.SetMailboxAutoReplyConfiguration => await HandleSetMailboxAutoReplyConfigurationAsync(request, cancellationToken),
+                OperationType.ConvertMailboxToShared => await HandleConvertMailboxToSharedAsync(request, cancellationToken),
 
                 // Distribution Lists
                 OperationType.GetDistributionLists => await HandleGetDistributionListsAsync(request, cancellationToken),
@@ -62,6 +65,7 @@ public class OperationDispatcher
                 OperationType.GetGroupMembers => await HandleGetGroupMembersAsync(request, cancellationToken),
                 OperationType.ModifyGroupMember => await HandleModifyGroupMemberAsync(request, cancellationToken),
                 OperationType.PreviewDynamicGroupMembers => await HandlePreviewDynamicGroupMembersAsync(request, cancellationToken),
+                OperationType.SetDistributionListSettings => await HandleSetDistributionListSettingsAsync(request, cancellationToken),
 
                 _ => CreateErrorResponse(request.CorrelationId, ErrorCode.OperationNotSupported, $"Operation {request.Operation} is not supported")
             };
@@ -395,6 +399,57 @@ public class OperationDispatcher
         return CreateSuccessResponse(request.CorrelationId, new { Success = true });
     }
 
+    private async Task<ResponseEnvelope> HandleUpdateMailboxSettingsAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var settingsRequest = JsonMessageSerializer.ExtractPayload<UpdateMailboxSettingsRequest>(request.Payload);
+
+        if (settingsRequest == null || string.IsNullOrWhiteSpace(settingsRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.SetMailboxSettingsAsync(
+            settingsRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleSetMailboxAutoReplyConfigurationAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var autoReplyRequest = JsonMessageSerializer.ExtractPayload<SetMailboxAutoReplyConfigurationRequest>(request.Payload);
+
+        if (autoReplyRequest == null || string.IsNullOrWhiteSpace(autoReplyRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.SetMailboxAutoReplyConfigurationAsync(
+            autoReplyRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleConvertMailboxToSharedAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var convertRequest = JsonMessageSerializer.ExtractPayload<ConvertMailboxToSharedRequest>(request.Payload);
+
+        if (convertRequest == null || string.IsNullOrWhiteSpace(convertRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.ConvertMailboxToSharedAsync(
+            convertRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
     #endregion
 
     #region Distribution List Handlers
@@ -490,6 +545,23 @@ public class OperationDispatcher
             cancellationToken: cancellationToken);
 
         return CreateSuccessResponse(request.CorrelationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleSetDistributionListSettingsAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var settingsRequest = JsonMessageSerializer.ExtractPayload<SetDistributionListSettingsRequest>(request.Payload);
+
+        if (settingsRequest == null || string.IsNullOrWhiteSpace(settingsRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoGroupCommands.SetDistributionListSettingsAsync(
+            settingsRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
     }
 
     #endregion

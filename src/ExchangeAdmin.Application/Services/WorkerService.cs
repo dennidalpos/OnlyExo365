@@ -113,6 +113,24 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.SetMailboxFeatureAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> UpdateMailboxSettingsAsync(
+        UpdateMailboxSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.UpdateMailboxSettingsAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> SetMailboxAutoReplyConfigurationAsync(
+        SetMailboxAutoReplyConfigurationRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.SetMailboxAutoReplyConfigurationAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> ConvertMailboxToSharedAsync(
+        ConvertMailboxToSharedRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.ConvertMailboxToSharedAsync(request, eventHandler, cancellationToken);
+
     #endregion
 
     #region Distribution Lists
@@ -140,6 +158,12 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default)
         => _client.ModifyGroupMemberAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> SetDistributionListSettingsAsync(
+        SetDistributionListSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.SetDistributionListSettingsAsync(request, eventHandler, cancellationToken);
 
     public Task<Result<PreviewDynamicGroupMembersResponse>> PreviewDynamicGroupMembersAsync(
         PreviewDynamicGroupMembersRequest request,

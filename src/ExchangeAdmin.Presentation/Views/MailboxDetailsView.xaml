@@ -17,20 +17,20 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}"
+            <Button Grid.Column="0" Content="← Indietro" Command="{Binding BackCommand}"
                     Style="{StaticResource {x:Type Button}}" Margin="0,0,12,0"
-                    ToolTip="Return to mailbox list"/>
+                    ToolTip="Torna all'elenco delle caselle postali"/>
 
             <StackPanel Grid.Column="1" Orientation="Vertical">
-                <TextBlock Text="{Binding DisplayName, FallbackValue='Mailbox Details'}"
+                <TextBlock Text="{Binding DisplayName, FallbackValue='Dettagli casella postale'}"
                            FontSize="20" FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding PrimarySmtpAddress}"
                            Foreground="{StaticResource SecondaryTextBrush}" FontSize="12"/>
             </StackPanel>
 
-            <Button Grid.Column="2" Content="Refresh" Command="{Binding RefreshCommand}"
+            <Button Grid.Column="2" Content="Aggiorna" Command="{Binding RefreshCommand}"
                     Style="{StaticResource PrimaryButton}"
-                    ToolTip="Reload mailbox details and permissions"/>
+                    ToolTip="Ricarica i dettagli e le autorizzazioni della casella postale"/>
         </Grid>
 
         <!-- Main Content with ScrollViewer -->
@@ -41,7 +41,7 @@
                         BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,16"
                         Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
-                        <TextBlock Text="Error" FontWeight="SemiBold" Foreground="{StaticResource ErrorBrush}"/>
+                        <TextBlock Text="Errore" FontWeight="SemiBold" Foreground="{StaticResource ErrorBrush}"/>
                         <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
@@ -50,7 +50,7 @@
                 <StackPanel HorizontalAlignment="Center" Margin="0,32,0,16"
                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
                     <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
-                    <TextBlock Text="Loading mailbox details..." HorizontalAlignment="Center" Margin="0,8,0,0"
+                    <TextBlock Text="Caricamento dettagli in corso..." HorizontalAlignment="Center" Margin="0,8,0,0"
                                Foreground="{StaticResource SecondaryTextBrush}"/>
                 </StackPanel>
 
@@ -58,9 +58,10 @@
                 <StackPanel Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
 
                     <!-- Basic Information -->
-                    <GroupBox Header="Basic Information" Margin="0,0,0,12">
+                    <GroupBox Header="Informazioni di base" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -71,17 +72,20 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Display Name:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome visualizzato:" FontWeight="SemiBold"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}" TextWrapping="Wrap"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Primary Email:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Email principale:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PrimarySmtpAddress}" TextWrapping="Wrap" Margin="0,8,0,0"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Type:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Tipo:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RecipientTypeDetails}" Margin="0,8,0,0"/>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="All Addresses:" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <ItemsControl Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Details.EmailAddresses}" Margin="0,8,0,0">
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Alias:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Details.Alias}" Margin="0,8,0,0"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tutti gli indirizzi:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Details.EmailAddresses}" Margin="0,8,0,0">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,2"/>
@@ -91,8 +95,40 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Features -->
-                    <GroupBox Header="Features" Margin="0,0,0,12">
+                    <!-- Pending Changes -->
+                    <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
+                            BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
+                            Visibility="{Binding HasPendingMailboxChanges, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="⚠ Modifiche non salvate" FontWeight="SemiBold"
+                                       Foreground="{StaticResource WarningBrush}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="Salva" Command="{Binding SaveMailboxChangesCommand}"
+                                        Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                                        ToolTip="Applica tutte le modifiche in sospeso"/>
+                                <Button Content="Annulla" Command="{Binding DiscardMailboxChangesCommand}"
+                                        ToolTip="Annulla le modifiche e ripristina i valori originali"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Actions -->
+                    <GroupBox Header="Azioni" Margin="0,0,0,12"
+                              Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <Button Content="Converti in cassetta postale condivisa"
+                                    Command="{Binding ConvertToSharedMailboxCommand}"
+                                    Style="{StaticResource DangerButton}"
+                                    ToolTip="Converte la mailbox dell'utente in una cassetta condivisa"
+                                    Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="Questa azione è irreversibile senza assistenza amministrativa."
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                                       Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Forwarding & Limits -->
+                    <GroupBox Header="Inoltro e limiti messaggio" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -101,92 +137,152 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="220"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Archive -->
-                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Archive Enabled"
-                                      IsChecked="{Binding Features.ArchiveEnabled, Mode=OneWay}" IsEnabled="False"
-                                      ToolTip="Archive mailbox status (read-only)"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Inoltro (indirizzo):" FontWeight="SemiBold"/>
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding ForwardingAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Destinatario interno per l'inoltro (es. alias o UPN)"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Inoltro (SMTP):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding ForwardingSmtpAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Indirizzo SMTP esterno per l'inoltro (es. utente@dominio.com)"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Recapita anche alla mailbox:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                      IsChecked="{Binding DeliverToMailboxAndForward}"
+                                      Content="Abilitato"
+                                      ToolTip="Se attivo, i messaggi vengono consegnati anche alla mailbox originale"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Limite invio (MaxSend):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding MaxSendSize, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Formato supportato: 25 MB, 1 GB, Unlimited"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Limite ricezione (MaxReceive):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding MaxReceiveSize, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Formato supportato: 25 MB, 1 GB, Unlimited"/>
+
+                            <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Margin="0,6,0,0"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Text="Suggerimento: usa formati come 25 MB, 1 GB oppure Unlimited."/>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Archive -->
+                    <GroupBox Header="Archivio" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Archivio abilitato"
+                                      IsChecked="{Binding ArchiveEnabled}"
+                                      ToolTip="Attiva o disattiva l'archivio della mailbox"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Features.ArchiveName}"
                                        Foreground="{StaticResource SecondaryTextBrush}"/>
 
-                            <!-- Litigation Hold -->
-                            <CheckBox Grid.Row="1" Grid.Column="0" Content="Litigation Hold"
-                                      IsChecked="{Binding Features.LitigationHoldEnabled, Mode=OneWay}"
-                                      Command="{Binding SetFeatureCommand}"
-                                      CommandParameter="{x:Static contracts:MailboxFeature.LitigationHold}"
-                                      Margin="0,8,0,0"
-                                      ToolTip="Preserves all mailbox content for legal discovery. Click to toggle on/off."/>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding Features.LitigationHoldDate, StringFormat='{}Since: {0:yyyy-MM-dd}'}"
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Stato archivio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ArchiveStatus}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="GUID archivio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ArchiveGuid}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Features -->
+                    <GroupBox Header="Funzionalità" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Blocco conservazione legale"
+                                      IsChecked="{Binding LitigationHoldEnabled}"
+                                      ToolTip="Conserva tutti i contenuti per finalità legali"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                <TextBlock Text="{Binding Features.LitigationHoldDate, StringFormat='{}Attivo dal: {0:yyyy-MM-dd}'}"
                                            Foreground="{StaticResource SecondaryTextBrush}"
-                                           Visibility="{Binding Features.LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                                <TextBlock Text="{Binding Features.LitigationHoldOwner, StringFormat='{}Owner: {0}'}"
+                                           Visibility="{Binding LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                                <TextBlock Text="{Binding Features.LitigationHoldOwner, StringFormat='{}Responsabile: {0}'}"
                                            Foreground="{StaticResource SecondaryTextBrush}"
-                                           Visibility="{Binding Features.LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                                           Visibility="{Binding LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
                             </StackPanel>
 
-                            <!-- Audit -->
-                            <CheckBox Grid.Row="2" Grid.Column="0" Content="Audit Enabled"
-                                      IsChecked="{Binding Features.AuditEnabled, Mode=OneWay}"
-                                      Command="{Binding SetFeatureCommand}"
-                                      CommandParameter="{x:Static contracts:MailboxFeature.Audit}"
+                            <CheckBox Grid.Row="1" Grid.Column="0" Content="Audit abilitato"
+                                      IsChecked="{Binding AuditEnabled}"
                                       Margin="0,8,0,0"
-                                      ToolTip="Tracks mailbox access and actions by users and administrators. Click to toggle on/off."/>
-                            <TextBlock Grid.Row="2" Grid.Column="1"
-                                       Text="{Binding Features.AuditLogAgeLimit, StringFormat='{}Age Limit: {0}'}"
+                                      ToolTip="Registra le attività di accesso e modifica della mailbox"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding Features.AuditLogAgeLimit, StringFormat='{}Conservazione log: {0}'}"
                                        Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"/>
 
-                            <!-- Single Item Recovery -->
-                            <CheckBox Grid.Row="3" Grid.Column="0" Content="Single Item Recovery"
-                                      IsChecked="{Binding Features.SingleItemRecoveryEnabled, Mode=OneWay}"
-                                      Command="{Binding SetFeatureCommand}"
-                                      CommandParameter="{x:Static contracts:MailboxFeature.SingleItemRecovery}"
+                            <CheckBox Grid.Row="2" Grid.Column="0" Content="Recupero elementi singoli"
+                                      IsChecked="{Binding SingleItemRecoveryEnabled}"
                                       Margin="0,8,0,0"
-                                      ToolTip="Allows recovery of deleted items beyond retention period. Click to toggle on/off."/>
+                                      ToolTip="Consente il recupero elementi eliminati oltre il periodo di retention"/>
 
-                            <!-- Retention Hold -->
-                            <CheckBox Grid.Row="4" Grid.Column="0" Content="Retention Hold"
-                                      IsChecked="{Binding Features.RetentionHoldEnabled, Mode=OneWay}"
-                                      Command="{Binding SetFeatureCommand}"
-                                      CommandParameter="{x:Static contracts:MailboxFeature.RetentionHold}"
+                            <CheckBox Grid.Row="3" Grid.Column="0" Content="Sospensione retention"
+                                      IsChecked="{Binding RetentionHoldEnabled}"
                                       Margin="0,8,0,0"
-                                      ToolTip="Suspends retention policy processing for this mailbox. Click to toggle on/off."/>
+                                      ToolTip="Sospende l'elaborazione delle policy di retention"/>
+                        </Grid>
+                    </GroupBox>
 
-                            <!-- Forwarding -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Forwarding:" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <StackPanel Grid.Row="5" Grid.Column="1" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding Features.ForwardingSmtpAddress, StringFormat='{}To: {0}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"
-                                           Visibility="{Binding Features.ForwardingSmtpAddress, Converter={StaticResource NullToVisibility}}"/>
-                                <TextBlock Text="{Binding Features.ForwardingAddress, StringFormat='{}To: {0}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"
-                                           Visibility="{Binding Features.ForwardingAddress, Converter={StaticResource NullToVisibility}}"/>
-                                <CheckBox Content="Deliver to Mailbox and Forward"
-                                          IsChecked="{Binding Features.DeliverToMailboxAndForward, Mode=OneWay}"
-                                          IsEnabled="False" Margin="0,4,0,0"/>
-                            </StackPanel>
+                    <!-- Quotas -->
+                    <GroupBox Header="Quote mailbox" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                            <!-- Quotas -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Quotas:" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <StackPanel Grid.Row="6" Grid.Column="1" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding Features.IssueWarningQuota, StringFormat='{}Warning: {0}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBlock Text="{Binding Features.ProhibitSendQuota, StringFormat='{}Prohibit Send: {0}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBlock Text="{Binding Features.ProhibitSendReceiveQuota, StringFormat='{}Prohibit Send/Receive: {0}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
-                            </StackPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Avviso quota:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Features.IssueWarningQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Blocco invio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ProhibitSendQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Blocco invio/ricezione:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ProhibitSendReceiveQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
                         </Grid>
                     </GroupBox>
 
                     <!-- Statistics -->
-                    <GroupBox Header="Statistics" Margin="0,0,0,12"
+                    <GroupBox Header="Statistiche" Margin="0,0,0,12"
                               Visibility="{Binding Statistics, Converter={StaticResource NullToVisibility}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -200,20 +296,20 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Total Size:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Dimensione totale:" FontWeight="SemiBold"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Statistics.TotalItemSize}"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Item Count:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Numero elementi:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Statistics.ItemCount}" Margin="0,8,0,0"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Deleted Items:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Elementi eliminati:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
-                                <TextBlock Text="{Binding Statistics.DeletedItemCount, StringFormat='{}{0} items'}"/>
+                                <TextBlock Text="{Binding Statistics.DeletedItemCount, StringFormat='{}{0} elementi'}"/>
                                 <TextBlock Text="{Binding Statistics.TotalDeletedItemSize}"
                                            Foreground="{StaticResource SecondaryTextBrush}"/>
                             </StackPanel>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Last Logon:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Ultimo accesso:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <TextBlock Grid.Row="3" Grid.Column="1"
                                        Text="{Binding Statistics.LastLogonTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                                        Margin="0,8,0,0"/>
@@ -221,10 +317,10 @@
                     </GroupBox>
 
                     <!-- Inbox Rules -->
-                    <GroupBox Header="Inbox Rules" Margin="0,0,0,12"
+                    <GroupBox Header="Regole posta in arrivo" Margin="0,0,0,12"
                               Visibility="{Binding InboxRules, Converter={StaticResource NullToVisibility}}">
                         <StackPanel>
-                            <TextBlock Text="No inbox rules configured"
+                            <TextBlock Text="Nessuna regola configurata"
                                        Foreground="{StaticResource SecondaryTextBrush}"
                                        Margin="0,8"
                                        Visibility="{Binding InboxRules.Count, Converter={StaticResource ZeroToVisibility}}"/>
@@ -235,9 +331,9 @@
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                                    <TextBlock Text=" (Enabled)" Foreground="{StaticResource SuccessBrush}" Margin="8,0,0,0"
+                                                    <TextBlock Text=" (Attiva)" Foreground="{StaticResource SuccessBrush}" Margin="8,0,0,0"
                                                                Visibility="{Binding Enabled, Converter={StaticResource BoolToVisibility}}"/>
-                                                    <TextBlock Text=" (Disabled)" Foreground="{StaticResource SecondaryTextBrush}" Margin="8,0,0,0"
+                                                    <TextBlock Text=" (Disattiva)" Foreground="{StaticResource SecondaryTextBrush}" Margin="8,0,0,0"
                                                                Visibility="{Binding Enabled, Converter={StaticResource InverseBoolToVisibility}}"/>
                                                 </StackPanel>
                                                 <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
@@ -249,13 +345,13 @@
                                                             BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,0"
                                                             Visibility="{Binding ForwardTo, Converter={StaticResource NullToVisibility}}">
                                                         <StackPanel>
-                                                            <TextBlock Text="⚠ Forwarding Rule Detected" FontWeight="SemiBold"
+                                                            <TextBlock Text="⚠ Regola di inoltro rilevata" FontWeight="SemiBold"
                                                                        Foreground="{StaticResource WarningBrush}"/>
                                                             <ItemsControl ItemsSource="{Binding ForwardTo}">
                                                                 <ItemsControl.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <TextBlock Foreground="{StaticResource WarningBrush}" Margin="0,2">
-                                                                            <Run Text="Forward to: "/><Run Text="{Binding}"/>
+                                                                            <Run Text="Inoltra a: "/><Run Text="{Binding}"/>
                                                                         </TextBlock>
                                                                     </DataTemplate>
                                                                 </ItemsControl.ItemTemplate>
@@ -266,13 +362,13 @@
                                                             BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,0"
                                                             Visibility="{Binding RedirectTo, Converter={StaticResource NullToVisibility}}">
                                                         <StackPanel>
-                                                            <TextBlock Text="⚠ Redirect Rule Detected" FontWeight="SemiBold"
+                                                            <TextBlock Text="⚠ Regola di reindirizzamento rilevata" FontWeight="SemiBold"
                                                                        Foreground="{StaticResource WarningBrush}"/>
                                                             <ItemsControl ItemsSource="{Binding RedirectTo}">
                                                                 <ItemsControl.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <TextBlock Foreground="{StaticResource WarningBrush}" Margin="0,2">
-                                                                            <Run Text="Redirect to: "/><Run Text="{Binding}"/>
+                                                                            <Run Text="Reindirizza a: "/><Run Text="{Binding}"/>
                                                                         </TextBlock>
                                                                     </DataTemplate>
                                                                 </ItemsControl.ItemTemplate>
@@ -289,44 +385,98 @@
                     </GroupBox>
 
                     <!-- Auto Reply -->
-                    <GroupBox Header="Auto-Reply Configuration" Margin="0,0,0,12"
+                    <GroupBox Header="Risposta automatica" Margin="0,0,0,12"
                               Visibility="{Binding AutoReply, Converter={StaticResource NullToVisibility}}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Status:" FontWeight="SemiBold"/>
-                                <TextBlock Text="{Binding AutoReply.AutoReplyState}" Margin="8,0,0,0"/>
+                                <TextBlock Text="Stato:" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding AutoReplyStateLabel}" Margin="8,0,0,0"/>
                             </StackPanel>
-                            <StackPanel Margin="0,8,0,0"
-                                        Visibility="{Binding AutoReply.StartTime, Converter={StaticResource NullToVisibility}}">
-                                <TextBlock Text="{Binding AutoReply.StartTime, StringFormat='{}Start: {0:yyyy-MM-dd HH:mm}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBlock Text="{Binding AutoReply.EndTime, StringFormat='{}End: {0:yyyy-MM-dd HH:mm}'}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <CheckBox Content="Abilita risposta automatica"
+                                      IsChecked="{Binding AutoReplyEnabled}"
+                                      Margin="0,8,0,0"
+                                      ToolTip="Attiva o disattiva le risposte automatiche per questa mailbox"/>
+
+                            <CheckBox Content="Programma un intervallo"
+                                      IsChecked="{Binding AutoReplyScheduled}"
+                                      IsEnabled="{Binding AutoReplyEnabled}"
+                                      Margin="0,4,0,0"
+                                      ToolTip="Imposta un periodo di attivazione programmato"/>
+
+                            <Grid Margin="0,8,0,0"
+                                  Visibility="{Binding AutoReplyScheduled, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Inizio:" FontWeight="SemiBold"/>
+                                <DatePicker Grid.Row="0" Grid.Column="1"
+                                            SelectedDate="{Binding AutoReplyStartDate}"
+                                            Margin="0,0,8,0"/>
+                                <TextBox Grid.Row="0" Grid.Column="2"
+                                         Text="{Binding AutoReplyStartTime, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Formato ora: HH:mm"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Fine:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,8,8,0"
+                                            SelectedDate="{Binding AutoReplyEndDate}"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" Margin="0,8,0,0"
+                                         Text="{Binding AutoReplyEndTime, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Formato ora: HH:mm"/>
+                            </Grid>
+
+                            <TextBlock Text="Messaggio interno:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBox Text="{Binding AutoReplyInternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     IsEnabled="{Binding AutoReplyEnabled}"/>
+
+                            <TextBlock Text="Messaggio esterno:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBox Text="{Binding AutoReplyExternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     IsEnabled="{Binding AutoReplyEnabled}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="Destinatari esterni:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <ComboBox Margin="8,0,0,0" Width="160"
+                                          SelectedValue="{Binding AutoReplyExternalAudience}"
+                                          SelectedValuePath="Tag"
+                                          IsEnabled="{Binding AutoReplyEnabled}">
+                                    <ComboBoxItem Content="Solo contatti" Tag="Known"/>
+                                    <ComboBoxItem Content="Tutti" Tag="All"/>
+                                </ComboBox>
                             </StackPanel>
-                            <TextBlock Text="Internal Message:" FontWeight="SemiBold" Margin="0,8,0,4"
-                                       Visibility="{Binding AutoReply.InternalMessage, Converter={StaticResource NullToVisibility}}"/>
-                            <TextBlock Text="{Binding AutoReply.InternalMessage}" TextWrapping="Wrap"
-                                       Background="{StaticResource TertiaryBackgroundBrush}" Padding="8"
-                                       Visibility="{Binding AutoReply.InternalMessage, Converter={StaticResource NullToVisibility}}"/>
                         </StackPanel>
                     </GroupBox>
 
                     <!-- Permissions Manager -->
-                    <GroupBox Header="Permissions Manager" Margin="0,0,0,12">
+                    <GroupBox Header="Gestione autorizzazioni" Margin="0,0,0,12">
                         <StackPanel>
                             <!-- Pending Changes Warning -->
                             <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                                     BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
                                     Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding PendingActionsCount, StringFormat='{}⚠ {0} pending changes'}"
+                                    <TextBlock Text="{Binding PendingActionsCount, StringFormat='{}⚠ {0} modifiche in sospeso'}"
                                                FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Button Content="Apply Changes" Command="{Binding SavePermissionsCommand}"
+                                        <Button Content="Salva modifiche" Command="{Binding SavePermissionsCommand}"
                                                 Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
-                                                ToolTip="Apply all pending permission changes to Exchange"/>
-                                        <Button Content="Discard" Command="{Binding DiscardPermissionsCommand}"
-                                                ToolTip="Cancel all pending changes and reset to current state"/>
+                                                ToolTip="Applica tutte le modifiche delle autorizzazioni su Exchange"/>
+                                        <Button Content="Annulla" Command="{Binding DiscardPermissionsCommand}"
+                                                ToolTip="Annulla le modifiche e ripristina lo stato attuale"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -347,25 +497,25 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Labels Row -->
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="User Email or Name:" FontSize="11"
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Utente (email o nome):" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Permission Type:" FontSize="11"
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Tipo autorizzazione:" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
 
                                     <!-- Input Controls Row -->
                                     <TextBox Grid.Row="1" Grid.Column="0"
                                              Text="{Binding NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="0,0,8,0"
-                                             ToolTip="Enter user email address or display name"/>
+                                             ToolTip="Inserisci email o nome visualizzato dell'utente"/>
 
                                     <ComboBox Grid.Row="1" Grid.Column="1"
                                               SelectedValue="{Binding NewPermissionType}"
                                               SelectedValuePath="Tag"
                                               Margin="0,0,8,0"
-                                              ToolTip="Select permission type to grant">
-                                        <ComboBoxItem Content="Full Access" Tag="{x:Static contracts:PermissionType.FullAccess}"/>
-                                        <ComboBoxItem Content="Send As" Tag="{x:Static contracts:PermissionType.SendAs}"/>
-                                        <ComboBoxItem Content="Send On Behalf" Tag="{x:Static contracts:PermissionType.SendOnBehalf}"/>
+                                              ToolTip="Seleziona il tipo di autorizzazione da concedere">
+                                        <ComboBoxItem Content="Accesso completo" Tag="{x:Static contracts:PermissionType.FullAccess}"/>
+                                        <ComboBoxItem Content="Invia come" Tag="{x:Static contracts:PermissionType.SendAs}"/>
+                                        <ComboBoxItem Content="Invia per conto di" Tag="{x:Static contracts:PermissionType.SendOnBehalf}"/>
                                     </ComboBox>
 
                                     <ComboBox Grid.Row="1" Grid.Column="2"
@@ -373,20 +523,20 @@
                                               SelectedValuePath="Tag"
                                               Margin="0,0,8,0"
                                               Width="80"
-                                              ToolTip="AutoMapping: automatically adds mailbox to user's Outlook. Only applies to FullAccess permissions.">
+                                              ToolTip="AutoMapping: aggiunge automaticamente la mailbox a Outlook (solo FullAccess)">
                                         <ComboBoxItem Content="True" Tag="True"/>
                                         <ComboBoxItem Content="False" Tag="False"/>
                                     </ComboBox>
 
-                                    <Button Grid.Row="1" Grid.Column="3" Content="Add"
+                                    <Button Grid.Row="1" Grid.Column="3" Content="Aggiungi"
                                             Command="{Binding AddPermissionCommand}"
                                             Style="{StaticResource PrimaryButton}"
-                                            ToolTip="Add permission to pending changes"/>
+                                            ToolTip="Aggiungi l'autorizzazione alle modifiche in sospeso"/>
                                 </Grid>
                             </Border>
 
                             <!-- FullAccess Permissions -->
-                            <TextBlock Text="Full Access Permissions" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="Autorizzazioni accesso completo" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding FullAccessPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
@@ -394,22 +544,22 @@
                                       BorderBrush="{StaticResource BorderBrush}"
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="User" Binding="{Binding User}" Width="*"/>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
                                     <DataGridTemplateColumn Header="AutoMap" Width="100">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ComboBox SelectedValue="{Binding AutoMapping, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           SelectedValuePath="Tag"
                                                           Width="75"
-                                                          ToolTip="AutoMapping: automatically adds mailbox to user's Outlook">
+                                                          ToolTip="AutoMapping: aggiunge automaticamente la mailbox a Outlook">
                                                     <ComboBoxItem Content="True" Tag="True"/>
                                                     <ComboBoxItem Content="False" Tag="False"/>
                                                 </ComboBox>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Inherited" Binding="{Binding IsInherited}" Width="80"/>
-                                    <DataGridTemplateColumn Header="Actions" Width="150">
+                                    <DataGridTextColumn Header="Ereditato" Binding="{Binding IsInherited}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="150">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -419,14 +569,14 @@
                                                             Style="{StaticResource PrimaryButton}"
                                                             Padding="6,4"
                                                             Margin="0,0,4,0"
-                                                            ToolTip="Apply AutoMapping change"
+                                                            ToolTip="Applica la modifica AutoMapping"
                                                             Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
-                                                    <Button Content="Remove"
+                                                    <Button Content="Rimuovi"
                                                             Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}"
                                                             Style="{StaticResource DangerButton}"
                                                             Padding="6,4"
-                                                            ToolTip="Remove this permission"
+                                                            ToolTip="Rimuovi questa autorizzazione"
                                                             Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
                                                 </StackPanel>
                                             </DataTemplate>
@@ -436,7 +586,7 @@
                             </DataGrid>
 
                             <!-- SendAs Permissions -->
-                            <TextBlock Text="Send As Permissions" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="Autorizzazioni Invia come" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding SendAsPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
@@ -444,17 +594,17 @@
                                       BorderBrush="{StaticResource BorderBrush}"
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="User" Binding="{Binding User}" Width="*"/>
-                                    <DataGridTextColumn Header="Inherited" Binding="{Binding IsInherited}" Width="80"/>
-                                    <DataGridTemplateColumn Header="Actions" Width="80">
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
+                                    <DataGridTextColumn Header="Ereditato" Binding="{Binding IsInherited}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="80">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Remove"
+                                                <Button Content="Rimuovi"
                                                         Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource DangerButton}"
                                                         Padding="6,4"
-                                                        ToolTip="Remove this permission"
+                                                        ToolTip="Rimuovi questa autorizzazione"
                                                         Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -463,7 +613,7 @@
                             </DataGrid>
 
                             <!-- SendOnBehalf Permissions -->
-                            <TextBlock Text="Send On Behalf Permissions" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="Autorizzazioni Invia per conto di" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding SendOnBehalfPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
@@ -471,16 +621,16 @@
                                       BorderBrush="{StaticResource BorderBrush}"
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="User" Binding="{Binding}" Width="*"/>
-                                    <DataGridTemplateColumn Header="Actions" Width="80">
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="80">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Remove"
+                                                <Button Content="Rimuovi"
                                                         Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource DangerButton}"
                                                         Padding="6,4"
-                                                        ToolTip="Remove this permission"/>
+                                                        ToolTip="Rimuovi questa autorizzazione"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -498,7 +648,7 @@
                 Visibility="{Binding IsSaving, Converter={StaticResource BoolToVisibility}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
-                <TextBlock Text="Saving changes..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                <TextBlock Text="Salvataggio modifiche..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
             </StackPanel>
         </Border>
     </Grid>

@@ -26,11 +26,15 @@ public enum OperationType
     SetMailboxPermission,
     ApplyPermissionsDeltaPlan,
     SetMailboxFeature,
+    UpdateMailboxSettings,
+    SetMailboxAutoReplyConfiguration,
+    ConvertMailboxToShared,
 
     // Distribution List operations
     GetDistributionLists,
     GetDistributionListDetails,
     GetGroupMembers,
     ModifyGroupMember,
-    PreviewDynamicGroupMembers
+    PreviewDynamicGroupMembers,
+    SetDistributionListSettings
 }

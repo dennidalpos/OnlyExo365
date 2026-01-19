@@ -253,6 +253,75 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
+    /// <summary>
+    /// Update mailbox settings.
+    /// </summary>
+    public async Task<Result> UpdateMailboxSettingsAsync(
+        UpdateMailboxSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.UpdateMailboxSettings,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Update mailbox auto-reply configuration.
+    /// </summary>
+    public async Task<Result> SetMailboxAutoReplyConfigurationAsync(
+        SetMailboxAutoReplyConfigurationRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.SetMailboxAutoReplyConfiguration,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Convert mailbox to shared mailbox.
+    /// </summary>
+    public async Task<Result> ConvertMailboxToSharedAsync(
+        ConvertMailboxToSharedRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.ConvertMailboxToShared,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
     #endregion
 
     #region Distribution Lists
@@ -312,6 +381,29 @@ public class WorkerClient : IAsyncDisposable
     {
         var response = await SendRequestInternalAsync(
             OperationType.ModifyGroupMember,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Update distribution list settings.
+    /// </summary>
+    public async Task<Result> SetDistributionListSettingsAsync(
+        SetDistributionListSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.SetDistributionListSettings,
             request,
             eventHandler,
             cancellationToken);

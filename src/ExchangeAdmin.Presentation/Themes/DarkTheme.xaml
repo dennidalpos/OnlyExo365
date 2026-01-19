@@ -298,9 +298,9 @@
 
     <!-- ToolTip Style -->
     <Style TargetType="ToolTip">
-        <Setter Property="Background" Value="#F0F0F0"/>
-        <Setter Property="Foreground" Value="#1A1A1A"/>
-        <Setter Property="BorderBrush" Value="#707070"/>
+        <Setter Property="Background" Value="#2B2B2B"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#4A4A4A"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="8,4"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -311,7 +311,7 @@
                 <ControlTemplate TargetType="ToolTip">
                     <ControlTemplate.Resources>
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="#1A1A1A"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
                             <Setter Property="FontFamily" Value="Segoe UI"/>
                             <Setter Property="FontSize" Value="12"/>
                         </Style>

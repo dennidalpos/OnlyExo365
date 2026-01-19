@@ -42,9 +42,10 @@
                      Margin="0,0,12,0"/>
 
             <!-- Level Filter -->
-            <ComboBox Grid.Column="1" Width="120" SelectedValue="{Binding Logs.FilterLevel}"
-                      SelectedValuePath="Tag" Margin="0,0,12,0">
-                <ComboBoxItem Content="All" Tag="{x:Static local:LogLevel.Verbose}"
+            <ComboBox Grid.Column="1" Width="120" SelectedValue="{Binding Logs.FilterLevel, Mode=TwoWay}"
+                      SelectedValuePath="Tag" Margin="0,0,12,0"
+                      ToolTip="Filter logs by minimum level">
+                <ComboBoxItem Content="All" Tag="{x:Static local:LogLevel.Verbose}" IsSelected="True"
                               xmlns:local="clr-namespace:ExchangeAdmin.Contracts.Messages;assembly=ExchangeAdmin.Contracts"/>
                 <ComboBoxItem Content="Debug+" Tag="{x:Static local:LogLevel.Debug}"
                               xmlns:local="clr-namespace:ExchangeAdmin.Contracts.Messages;assembly=ExchangeAdmin.Contracts"/>

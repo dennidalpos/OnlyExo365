@@ -416,32 +416,23 @@ public class MailboxDetailsViewModel : ViewModelBase
 
     private void ModifyAutoMapping(object? param)
     {
-        // param format: "user|true" or "user|false"
-        if (param is not string paramStr || string.IsNullOrEmpty(Identity)) return;
+        if (param is not PermissionDisplayItem displayItem || string.IsNullOrEmpty(Identity)) return;
 
-        var parts = paramStr.Split('|');
-        if (parts.Length != 2) return;
-
-        var user = parts[0];
-        if (!bool.TryParse(parts[1], out var newAutoMapping)) return;
-
-        var displayItem = FullAccessPermissions.FirstOrDefault(p => p.User == user);
-        if (displayItem == null) return;
+        var newAutoMapping = displayItem.AutoMapping;
 
         var action = new PermissionDeltaActionDto
         {
             Action = PermissionAction.Modify,
             PermissionType = PermissionType.FullAccess,
-            User = user,
+            User = displayItem.User,
             AutoMapping = newAutoMapping,
-            Description = $"Set AutoMapping to {newAutoMapping} for {user}"
+            Description = $"Set AutoMapping to {newAutoMapping} for {displayItem.User}"
         };
 
         _pendingActions.Add(action);
         HasPendingChanges = _pendingActions.Count > 0;
 
-        // Update display
-        displayItem.AutoMapping = newAutoMapping;
+        // Mark as pending
         displayItem.IsPending = true;
         OnPropertyChanged(nameof(FullAccessPermissions));
 

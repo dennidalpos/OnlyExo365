@@ -395,38 +395,32 @@
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="User" Binding="{Binding User}" Width="*"/>
-                                    <DataGridCheckBoxColumn Header="AutoMap" Binding="{Binding AutoMapping}" Width="80"/>
+                                    <DataGridTemplateColumn Header="AutoMap" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox SelectedValue="{Binding AutoMapping, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          SelectedValuePath="Tag"
+                                                          Width="75"
+                                                          ToolTip="AutoMapping: automatically adds mailbox to user's Outlook">
+                                                    <ComboBoxItem Content="True" Tag="True"/>
+                                                    <ComboBoxItem Content="False" Tag="False"/>
+                                                </ComboBox>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="Inherited" Binding="{Binding IsInherited}" Width="80"/>
-                                    <DataGridTemplateColumn Header="Actions" Width="280">
+                                    <DataGridTemplateColumn Header="Actions" Width="150">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <Button Content="AutoMap: True"
+                                                    <Button Content="Applica"
                                                             Command="{Binding DataContext.ModifyAutoMappingCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                            Style="{StaticResource {x:Type Button}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource PrimaryButton}"
                                                             Padding="6,4"
                                                             Margin="0,0,4,0"
-                                                            ToolTip="Set AutoMapping to True for this permission"
-                                                            Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}">
-                                                        <Button.CommandParameter>
-                                                            <MultiBinding StringFormat="{}{0}|true">
-                                                                <Binding Path="User"/>
-                                                            </MultiBinding>
-                                                        </Button.CommandParameter>
-                                                    </Button>
-                                                    <Button Content="AutoMap: False"
-                                                            Command="{Binding DataContext.ModifyAutoMappingCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                            Style="{StaticResource {x:Type Button}}"
-                                                            Padding="6,4"
-                                                            Margin="0,0,4,0"
-                                                            ToolTip="Set AutoMapping to False for this permission"
-                                                            Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}">
-                                                        <Button.CommandParameter>
-                                                            <MultiBinding StringFormat="{}{0}|false">
-                                                                <Binding Path="User"/>
-                                                            </MultiBinding>
-                                                        </Button.CommandParameter>
-                                                    </Button>
+                                                            ToolTip="Apply AutoMapping change"
+                                                            Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
                                                     <Button Content="Remove"
                                                             Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}"

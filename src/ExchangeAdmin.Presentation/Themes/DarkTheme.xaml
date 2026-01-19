@@ -299,21 +299,24 @@
     <!-- ToolTip Style -->
     <Style TargetType="ToolTip">
         <Setter Property="Background" Value="#F0F0F0"/>
-        <Setter Property="Foreground" Value="Black"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#707070"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="8,4"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontSize" Value="12"/>
+        <Setter Property="HasDropShadow" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}"
+                    <Border Background="#F0F0F0"
+                            BorderBrush="#707070"
+                            BorderThickness="1"
+                            Padding="8,4"
                             CornerRadius="3">
-                        <ContentPresenter TextElement.Foreground="Black"/>
+                        <ContentPresenter TextElement.Foreground="#000000"
+                                        TextElement.FontFamily="Segoe UI"
+                                        TextElement.FontSize="12"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -13,18 +13,18 @@ public partial class App : System.Windows.Application
     private NavigationService? _navigationService;
     private ShellViewModel? _shellViewModel;
 
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool AllocConsole();
+    // [DllImport("kernel32.dll", SetLastError = true)]
+    // [return: MarshalAs(UnmanagedType.Bool)]
+    // private static extern bool AllocConsole();
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // Allocate console for debugging (shows Console.WriteLine output)
-        AllocConsole();
-        Console.WriteLine("[App] Console allocated - UI logs will appear here");
-        Console.WriteLine("[App] Starting ExchangeAdmin Presentation...");
+        // Console disabled - all logs now visible in UI Logs tab
+        // AllocConsole();
+        // Console.WriteLine("[App] Console allocated - UI logs will appear here");
+        // Console.WriteLine("[App] Starting ExchangeAdmin Presentation...");
 
         // Configure services
         var workerOptions = new WorkerSupervisorOptions
@@ -51,7 +51,7 @@ public partial class App : System.Windows.Application
         sharedMailboxListViewModel.RecipientTypeFilter = "SharedMailbox";
 
         // Expose child ViewModels through ShellViewModel
-        Console.WriteLine("[App] Connecting child ViewModels to Shell...");
+        // Console.WriteLine("[App] Connecting child ViewModels to Shell...");
         _shellViewModel.Dashboard = dashboardViewModel;
         _shellViewModel.Mailboxes = mailboxListViewModel;
         _shellViewModel.SharedMailboxes = sharedMailboxListViewModel;
@@ -65,7 +65,7 @@ public partial class App : System.Windows.Application
             DataContext = _shellViewModel
         };
 
-        Console.WriteLine("[App] MainWindow DataContext set to ShellViewModel (child VMs exposed through Shell)");
+        // Console.WriteLine("[App] MainWindow DataContext set to ShellViewModel (child VMs exposed through Shell)");
 
         // Listen for navigation changes to load data
         _navigationService.PageChanged += async (s, page) =>
@@ -97,7 +97,7 @@ public partial class App : System.Windows.Application
         {
             if (e.PropertyName == nameof(ShellViewModel.IsExchangeConnected) && _shellViewModel.IsExchangeConnected)
             {
-                Console.WriteLine("[App] Exchange connected - reloading current page data");
+                // Console.WriteLine("[App] Exchange connected - reloading current page data");
                 // Reload data for the current page
                 switch (_navigationService.CurrentPage)
                 {
@@ -123,7 +123,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        Console.WriteLine("[App] Application exiting - starting cleanup...");
+        // Console.WriteLine("[App] Application exiting - starting cleanup...");
 
         try
         {
@@ -137,11 +137,11 @@ public partial class App : System.Windows.Application
                 disposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
             }
 
-            Console.WriteLine("[App] Cleanup completed successfully");
+            // Console.WriteLine("[App] Cleanup completed successfully");
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"[App] Error during cleanup: {ex.Message}");
+            // Console.WriteLine($"[App] Error during cleanup: {ex.Message}");
         }
 
         base.OnExit(e);

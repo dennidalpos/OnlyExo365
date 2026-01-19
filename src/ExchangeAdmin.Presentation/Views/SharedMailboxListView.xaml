@@ -79,6 +79,8 @@
                       SelectionMode="Single"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
                       Background="{StaticResource SecondaryBackgroundBrush}"

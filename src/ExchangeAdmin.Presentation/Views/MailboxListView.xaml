@@ -156,8 +156,7 @@
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       Background="{StaticResource BorderBrush}"
                       ResizeDirection="Columns"
-                      ResizeBehavior="PreviousAndNext"
-                      Visibility="{Binding MailboxDetails.HasDetails, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibility}}"/>
+                      ResizeBehavior="PreviousAndNext"/>
 
         <!-- Details Panel -->
         <views:MailboxDetailsView Grid.Column="2" DataContext="{Binding MailboxDetails}"

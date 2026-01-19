@@ -49,6 +49,12 @@ public class WorkerSupervisorOptions
     /// Numero di heartbeat consecutivi mancati prima di kill.
     /// </summary>
     public int HeartbeatMissedThreshold { get; set; } = IpcConstants.HeartbeatMissedThreshold;
+
+    /// <summary>
+    /// Ambiente Exchange Online per l'autenticazione (es. O365Europe).
+    /// Se null/empty usa il valore di default del modulo.
+    /// </summary>
+    public string? ExchangeEnvironmentName { get; set; } = "O365Europe";
 }
 
 /// <summary>
@@ -190,6 +196,11 @@ public class WorkerSupervisor : IAsyncDisposable
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
+
+            if (!string.IsNullOrWhiteSpace(_options.ExchangeEnvironmentName))
+            {
+                startInfo.Environment["EXCHANGEADMIN_EXO_ENV"] = _options.ExchangeEnvironmentName;
+            }
 
             _workerProcess = Process.Start(startInfo);
             if (_workerProcess == null)

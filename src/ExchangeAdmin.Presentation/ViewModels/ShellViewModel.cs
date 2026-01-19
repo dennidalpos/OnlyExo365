@@ -16,6 +16,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 /// </summary>
 public sealed class ShellViewModel : ViewModelBase, IDisposable
 {
+    private const string DisableExchangeEnvVar = "EXCHANGEADMIN_DISABLE_EXO";
     private readonly IWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ConnectExchangeUseCase _connectUseCase;
@@ -39,6 +40,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private bool _isGlobalOperationRunning;
     private int _globalProgress;
     private string? _globalStatus;
+    private readonly bool _isExchangeConnectionDisabled;
 
     // Logging
     private bool _isVerboseLoggingEnabled = false;
@@ -57,6 +59,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _workerService = workerService;
         _navigationService = navigationService;
         _connectUseCase = new ConnectExchangeUseCase(workerService);
+        _isExchangeConnectionDisabled = IsEnvironmentFlagEnabled(DisableExchangeEnvVar);
 
         // Subscribe to events
         _workerService.StateChanged += OnWorkerStateChanged;
@@ -157,6 +160,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     public string ExchangeStateDisplay => ExchangeState switch
     {
+        _ when IsExchangeConnectionDisabled => "Disabled (policy)",
         ConnectionState.Connected => $"Connected: {ConnectedUser}",
         ConnectionState.Connecting => "Connecting...",
         ConnectionState.Reconnecting => "Reconnecting...",
@@ -166,6 +170,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     public string ExchangeStateColor => ExchangeState switch
     {
+        _ when IsExchangeConnectionDisabled => "#DCDCAA",
         ConnectionState.Connected => "#4EC9B0",
         ConnectionState.Connecting or ConnectionState.Reconnecting => "#DCDCAA",
         ConnectionState.Failed => "#F14C4C",
@@ -173,6 +178,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     };
 
     public bool IsExchangeConnected => ExchangeState == ConnectionState.Connected;
+    public bool IsExchangeConnectionDisabled => _isExchangeConnectionDisabled;
 
     public string? ConnectedUser
     {
@@ -295,7 +301,8 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
                                   WorkerState != WorkerConnectionState.Stopped;
 
     public bool CanConnectExchange => WorkerState == WorkerConnectionState.Connected &&
-                                       ExchangeState == ConnectionState.Disconnected;
+                                       ExchangeState == ConnectionState.Disconnected &&
+                                       !IsExchangeConnectionDisabled;
 
     public bool CanDisconnectExchange => WorkerState == WorkerConnectionState.Connected &&
                                           ExchangeState == ConnectionState.Connected;
@@ -384,6 +391,16 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private async Task ConnectExchangeAsync(CancellationToken cancellationToken)
     {
+        if (IsExchangeConnectionDisabled)
+        {
+            AddLog(LogLevel.Warning, "Exchange Online connections are disabled by policy (EXCHANGEADMIN_DISABLE_EXO=1).");
+            ErrorDialogService.ShowWarning(
+                "Connection Disabled",
+                "Exchange Online connections are disabled by policy.\n\n" +
+                "To enable connections, unset EXCHANGEADMIN_DISABLE_EXO and restart the application.");
+            return;
+        }
+
         ExchangeState = ConnectionState.Connecting;
         AddLog(LogLevel.Information, "Connecting to Exchange Online...");
 
@@ -551,6 +568,20 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             LogEntries.RemoveAt(LogEntries.Count - 1);
         }
+    }
+
+    private static bool IsEnvironmentFlagEnabled(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        return value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+               value.Equals("on", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

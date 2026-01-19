@@ -306,17 +306,6 @@
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="HasDropShadow" Value="True"/>
-        <Setter Property="Resources">
-            <Setter.Value>
-                <ResourceDictionary>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="#1A1A1A"/>
-                        <Setter Property="FontFamily" Value="Segoe UI"/>
-                        <Setter Property="FontSize" Value="12"/>
-                    </Style>
-                </ResourceDictionary>
-            </Setter.Value>
-        </Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">

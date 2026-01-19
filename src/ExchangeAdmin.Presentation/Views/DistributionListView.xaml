@@ -106,7 +106,9 @@
 
         <!-- Splitter -->
         <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
-                      HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
 
         <!-- Details Panel -->
         <Grid Grid.Column="2" Margin="16,0,0,0">

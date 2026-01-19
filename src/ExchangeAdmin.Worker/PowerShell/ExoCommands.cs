@@ -1,4 +1,5 @@
 using System.Management.Automation;
+using System.Text;
 using ExchangeAdmin.Contracts.Dtos;
 
 namespace ExchangeAdmin.Worker.PowerShell;
@@ -365,6 +366,8 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
     ProhibitSendQuota = if ($mbx.ProhibitSendQuota) {{ $mbx.ProhibitSendQuota.ToString() }} else {{ $null }}
     ProhibitSendReceiveQuota = if ($mbx.ProhibitSendReceiveQuota) {{ $mbx.ProhibitSendReceiveQuota.ToString() }} else {{ $null }}
     IssueWarningQuota = if ($mbx.IssueWarningQuota) {{ $mbx.IssueWarningQuota.ToString() }} else {{ $null }}
+    MaxSendSize = if ($mbx.MaxSendSize) {{ $mbx.MaxSendSize.ToString() }} else {{ $null }}
+    MaxReceiveSize = if ($mbx.MaxReceiveSize) {{ $mbx.MaxReceiveSize.ToString() }} else {{ $null }}
 
     RetentionHoldEnabled = $mbx.RetentionHoldEnabled
     SingleItemRecoveryEnabled = $mbx.SingleItemRecoveryEnabled
@@ -432,6 +435,8 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
                 ProhibitSendQuota = hash["ProhibitSendQuota"]?.ToString(),
                 ProhibitSendReceiveQuota = hash["ProhibitSendReceiveQuota"]?.ToString(),
                 IssueWarningQuota = hash["IssueWarningQuota"]?.ToString(),
+                MaxSendSize = hash["MaxSendSize"]?.ToString(),
+                MaxReceiveSize = hash["MaxReceiveSize"]?.ToString(),
 
                 RetentionHoldEnabled = hash["RetentionHoldEnabled"] as bool? ?? false,
                 SingleItemRecoveryEnabled = hash["SingleItemRecoveryEnabled"] as bool? ?? false,
@@ -631,6 +636,185 @@ catch {{
         }
 
         return null;
+    }
+
+    #endregion
+
+    #region Mailbox Updates
+
+    public async Task SetMailboxSettingsAsync(
+        UpdateMailboxSettingsRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var scriptBuilder = new StringBuilder();
+
+        if (request.ArchiveEnabled.HasValue)
+        {
+            if (request.ArchiveEnabled.Value)
+            {
+                scriptBuilder.AppendLine($"Enable-Mailbox -Identity '{escapedIdentity}' -Archive");
+            }
+            else
+            {
+                scriptBuilder.AppendLine($"Disable-Mailbox -Identity '{escapedIdentity}' -Archive -Confirm:$false");
+            }
+        }
+
+        var setMailboxParams = new List<string>();
+
+        if (request.LitigationHoldEnabled.HasValue)
+        {
+            setMailboxParams.Add($"-LitigationHoldEnabled ${request.LitigationHoldEnabled.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (request.AuditEnabled.HasValue)
+        {
+            setMailboxParams.Add($"-AuditEnabled ${request.AuditEnabled.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (request.SingleItemRecoveryEnabled.HasValue)
+        {
+            setMailboxParams.Add($"-SingleItemRecoveryEnabled ${request.SingleItemRecoveryEnabled.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (request.RetentionHoldEnabled.HasValue)
+        {
+            setMailboxParams.Add($"-RetentionHoldEnabled ${request.RetentionHoldEnabled.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (request.ForwardingAddress != null)
+        {
+            setMailboxParams.Add($"-ForwardingAddress {FormatNullableString(request.ForwardingAddress)}");
+        }
+
+        if (request.ForwardingSmtpAddress != null)
+        {
+            setMailboxParams.Add($"-ForwardingSmtpAddress {FormatNullableString(request.ForwardingSmtpAddress)}");
+        }
+
+        if (request.DeliverToMailboxAndForward.HasValue)
+        {
+            setMailboxParams.Add($"-DeliverToMailboxAndForward ${request.DeliverToMailboxAndForward.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (request.MaxSendSize != null)
+        {
+            setMailboxParams.Add($"-MaxSendSize {FormatNullableString(request.MaxSendSize)}");
+        }
+
+        if (request.MaxReceiveSize != null)
+        {
+            setMailboxParams.Add($"-MaxReceiveSize {FormatNullableString(request.MaxReceiveSize)}");
+        }
+
+        if (setMailboxParams.Count > 0)
+        {
+            scriptBuilder.AppendLine($"Set-Mailbox -Identity '{escapedIdentity}' {string.Join(" ", setMailboxParams)}");
+        }
+
+        if (scriptBuilder.Length == 0)
+        {
+            return;
+        }
+
+        onLog?.Invoke("Information", $"Updating mailbox settings for {request.Identity}...");
+
+        var result = await _engine.ExecuteAsync(scriptBuilder.ToString(), onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to update mailbox settings: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Mailbox settings updated successfully");
+    }
+
+    public async Task SetMailboxAutoReplyConfigurationAsync(
+        SetMailboxAutoReplyConfigurationRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var scriptBuilder = new StringBuilder();
+
+        scriptBuilder.AppendLine("$params = @{}");
+        scriptBuilder.AppendLine($"$params.Identity = '{escapedIdentity}'");
+        scriptBuilder.AppendLine($"$params.AutoReplyState = '{request.AutoReplyState}'");
+
+        if (request.StartTime.HasValue)
+        {
+            scriptBuilder.AppendLine($"$params.StartTime = [datetime]::Parse('{request.StartTime.Value:o}')");
+        }
+
+        if (request.EndTime.HasValue)
+        {
+            scriptBuilder.AppendLine($"$params.EndTime = [datetime]::Parse('{request.EndTime.Value:o}')");
+        }
+
+        if (request.InternalMessage != null)
+        {
+            scriptBuilder.AppendLine($"$params.InternalMessage = {FormatNullableMessage(request.InternalMessage)}");
+        }
+
+        if (request.ExternalMessage != null)
+        {
+            scriptBuilder.AppendLine($"$params.ExternalMessage = {FormatNullableMessage(request.ExternalMessage)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.ExternalAudience))
+        {
+            scriptBuilder.AppendLine($"$params.ExternalAudience = '{request.ExternalAudience.Replace("'", "''")}'");
+        }
+
+        scriptBuilder.AppendLine("Set-MailboxAutoReplyConfiguration @params");
+
+        onLog?.Invoke("Information", $"Updating auto-reply configuration for {request.Identity}...");
+
+        var result = await _engine.ExecuteAsync(scriptBuilder.ToString(), onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to update auto-reply configuration: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Auto-reply configuration updated successfully");
+    }
+
+    public async Task ConvertMailboxToSharedAsync(
+        ConvertMailboxToSharedRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var script = $"Set-Mailbox -Identity '{escapedIdentity}' -Type Shared";
+
+        onLog?.Invoke("Information", $"Converting mailbox {request.Identity} to shared...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to convert mailbox: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Mailbox converted to shared successfully");
     }
 
     #endregion
@@ -961,6 +1145,27 @@ Set-Mailbox -Identity '{escapedIdentity}' -GrantSendOnBehalfTo $current
 
         var single = obj.ToString();
         return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single };
+    }
+
+    private static string FormatNullableString(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "$null";
+        }
+
+        return $"'{value.Replace("'", "''")}'";
+    }
+
+    private static string FormatNullableMessage(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "$null";
+        }
+
+        var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+        return $"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('{base64}'))";
     }
 
     #endregion

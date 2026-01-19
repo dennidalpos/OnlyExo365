@@ -393,6 +393,18 @@ public class ModifyGroupMemberRequest
 }
 
 /// <summary>
+/// Request to update distribution list settings.
+/// </summary>
+public class SetDistributionListSettingsRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("requireSenderAuthenticationEnabled")]
+    public bool? RequireSenderAuthenticationEnabled { get; set; }
+}
+
+/// <summary>
 /// Group member action.
 /// </summary>
 public enum GroupMemberAction

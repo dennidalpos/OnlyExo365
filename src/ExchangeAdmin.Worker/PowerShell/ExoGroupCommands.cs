@@ -598,6 +598,43 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
         return response;
     }
 
+    public async Task SetDistributionListSettingsAsync(
+        SetDistributionListSettingsRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var setParams = new List<string>();
+
+        if (request.RequireSenderAuthenticationEnabled.HasValue)
+        {
+            setParams.Add($"-RequireSenderAuthenticationEnabled ${request.RequireSenderAuthenticationEnabled.Value.ToString().ToLowerInvariant()}");
+        }
+
+        if (setParams.Count == 0)
+        {
+            return;
+        }
+
+        var script = $"Set-DistributionGroup -Identity '{escapedIdentity}' {string.Join(" ", setParams)}";
+
+        onLog?.Invoke("Information", $"Updating distribution list settings for {request.Identity}...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to update distribution list settings: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Distribution list settings updated successfully");
+    }
+
     #endregion
 
     #region Helpers

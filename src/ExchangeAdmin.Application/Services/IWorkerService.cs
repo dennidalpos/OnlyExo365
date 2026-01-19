@@ -155,6 +155,21 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> UpdateMailboxSettingsAsync(
+        UpdateMailboxSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> SetMailboxAutoReplyConfigurationAsync(
+        SetMailboxAutoReplyConfigurationRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> ConvertMailboxToSharedAsync(
+        ConvertMailboxToSharedRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     #endregion
 
     #region Distribution Lists
@@ -188,6 +203,11 @@ public interface IWorkerService
     /// </summary>
     Task<Result> ModifyGroupMemberAsync(
         ModifyGroupMemberRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> SetDistributionListSettingsAsync(
+        SetDistributionListSettingsRequest request,
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 

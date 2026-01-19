@@ -179,6 +179,12 @@ public class MailboxFeaturesDto
     [JsonPropertyName("issueWarningQuota")]
     public string? IssueWarningQuota { get; set; }
 
+    [JsonPropertyName("maxSendSize")]
+    public string? MaxSendSize { get; set; }
+
+    [JsonPropertyName("maxReceiveSize")]
+    public string? MaxReceiveSize { get; set; }
+
     // Other
     [JsonPropertyName("retentionHoldEnabled")]
     public bool RetentionHoldEnabled { get; set; }
@@ -572,6 +578,81 @@ public class SetMailboxFeatureRequest
 
     [JsonPropertyName("parameters")]
     public Dictionary<string, object>? Parameters { get; set; }
+}
+
+/// <summary>
+/// Request to update mailbox settings.
+/// </summary>
+public class UpdateMailboxSettingsRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("archiveEnabled")]
+    public bool? ArchiveEnabled { get; set; }
+
+    [JsonPropertyName("litigationHoldEnabled")]
+    public bool? LitigationHoldEnabled { get; set; }
+
+    [JsonPropertyName("auditEnabled")]
+    public bool? AuditEnabled { get; set; }
+
+    [JsonPropertyName("singleItemRecoveryEnabled")]
+    public bool? SingleItemRecoveryEnabled { get; set; }
+
+    [JsonPropertyName("retentionHoldEnabled")]
+    public bool? RetentionHoldEnabled { get; set; }
+
+    [JsonPropertyName("forwardingAddress")]
+    public string? ForwardingAddress { get; set; }
+
+    [JsonPropertyName("forwardingSmtpAddress")]
+    public string? ForwardingSmtpAddress { get; set; }
+
+    [JsonPropertyName("deliverToMailboxAndForward")]
+    public bool? DeliverToMailboxAndForward { get; set; }
+
+    [JsonPropertyName("maxSendSize")]
+    public string? MaxSendSize { get; set; }
+
+    [JsonPropertyName("maxReceiveSize")]
+    public string? MaxReceiveSize { get; set; }
+}
+
+/// <summary>
+/// Request to update mailbox auto-reply configuration.
+/// </summary>
+public class SetMailboxAutoReplyConfigurationRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("autoReplyState")]
+    public string AutoReplyState { get; set; } = "Disabled";
+
+    [JsonPropertyName("startTime")]
+    public DateTime? StartTime { get; set; }
+
+    [JsonPropertyName("endTime")]
+    public DateTime? EndTime { get; set; }
+
+    [JsonPropertyName("internalMessage")]
+    public string? InternalMessage { get; set; }
+
+    [JsonPropertyName("externalMessage")]
+    public string? ExternalMessage { get; set; }
+
+    [JsonPropertyName("externalAudience")]
+    public string? ExternalAudience { get; set; }
+}
+
+/// <summary>
+/// Request to convert mailbox to shared mailbox.
+/// </summary>
+public class ConvertMailboxToSharedRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
 }
 
 /// <summary>

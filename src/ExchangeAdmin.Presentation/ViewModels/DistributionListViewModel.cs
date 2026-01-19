@@ -46,6 +46,13 @@ public class DistributionListViewModel : ViewModelBase
     // Add/remove member
     private string? _newMemberIdentity;
 
+    // Settings
+    private bool _allowExternalSenders;
+    private bool _originalAllowExternalSenders;
+    private bool _hasPendingSettingsChanges;
+    private bool _isSavingSettings;
+    private bool _isInitializingSettings;
+
     public DistributionListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
     {
         _workerService = workerService;
@@ -73,6 +80,8 @@ public class DistributionListViewModel : ViewModelBase
         PreviewDynamicMembersCommand = new AsyncRelayCommand(PreviewDynamicMembersAsync, () => SelectedDetails != null && SelectedDetails.GroupType == "Dynamic");
         AddMemberCommand = new AsyncRelayCommand(AddMemberAsync, () => CanAddMember);
         RemoveMemberCommand = new AsyncRelayCommand<GroupMemberDto>(RemoveMemberAsync, m => m != null && CanModifyMembers);
+        SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, () => HasPendingSettingsChanges && !IsSavingSettings);
+        DiscardSettingsCommand = new RelayCommand(DiscardSettingsChanges, () => HasPendingSettingsChanges);
     }
 
     #region Properties
@@ -180,6 +189,8 @@ public class DistributionListViewModel : ViewModelBase
                 OnPropertyChanged(nameof(HasDetails));
                 OnPropertyChanged(nameof(IsDynamicGroup));
                 OnPropertyChanged(nameof(CanModifyMembers));
+                OnPropertyChanged(nameof(CanEditSettings));
+                InitializeSettingsFromDetails();
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -219,6 +230,18 @@ public class DistributionListViewModel : ViewModelBase
         }
     }
 
+    public bool IsSavingSettings
+    {
+        get => _isSavingSettings;
+        private set
+        {
+            if (SetProperty(ref _isSavingSettings, value))
+            {
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
     public string? NewMemberIdentity
     {
         get => _newMemberIdentity;
@@ -233,14 +256,39 @@ public class DistributionListViewModel : ViewModelBase
     }
 
     public bool CanAddMember => !string.IsNullOrWhiteSpace(NewMemberIdentity) && CanModifyMembers;
+    public bool CanEditSettings => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup);
+
+    public bool AllowExternalSenders
+    {
+        get => _allowExternalSenders;
+        set
+        {
+            if (SetProperty(ref _allowExternalSenders, value))
+            {
+                UpdatePendingSettingsChanges();
+            }
+        }
+    }
+
+    public bool HasPendingSettingsChanges
+    {
+        get => _hasPendingSettingsChanges;
+        private set
+        {
+            if (SetProperty(ref _hasPendingSettingsChanges, value))
+            {
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
 
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
 
-    public string StatusText => $"{DistributionLists.Count} of {TotalCount} groups";
+    public string StatusText => $"{DistributionLists.Count} di {TotalCount} gruppi";
     public string MembersStatusText => SelectedDetails?.Members != null
-        ? $"{Members.Count} of {SelectedDetails.Members.TotalCount} members"
-        : $"{Members.Count} members";
+        ? $"{Members.Count} di {SelectedDetails.Members.TotalCount} membri"
+        : $"{Members.Count} membri";
 
     #endregion
 
@@ -255,6 +303,8 @@ public class DistributionListViewModel : ViewModelBase
     public ICommand PreviewDynamicMembersCommand { get; }
     public ICommand AddMemberCommand { get; }
     public ICommand RemoveMemberCommand { get; }
+    public ICommand SaveSettingsCommand { get; }
+    public ICommand DiscardSettingsCommand { get; }
 
     #endregion
 
@@ -265,7 +315,7 @@ public class DistributionListViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             DistributionLists.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = "Non connesso a Exchange Online";
             return;
         }
 
@@ -479,7 +529,7 @@ public class DistributionListViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load details";
+                ErrorMessage = result.Error?.Message ?? "Impossibile caricare i dettagli";
                 _shellViewModel.AddLog(LogLevel.Error, $"Distribution list details load failed: {ErrorMessage}");
             }
         }
@@ -671,6 +721,93 @@ public class DistributionListViewModel : ViewModelBase
     public void Cancel()
     {
         _loadCts?.Cancel();
+    }
+
+    private void InitializeSettingsFromDetails()
+    {
+        _isInitializingSettings = true;
+
+        if (SelectedDetails != null)
+        {
+            AllowExternalSenders = !SelectedDetails.RequireSenderAuthenticationEnabled;
+            _originalAllowExternalSenders = AllowExternalSenders;
+        }
+        else
+        {
+            AllowExternalSenders = false;
+            _originalAllowExternalSenders = false;
+        }
+
+        _isInitializingSettings = false;
+        HasPendingSettingsChanges = false;
+    }
+
+    private void UpdatePendingSettingsChanges()
+    {
+        if (_isInitializingSettings)
+        {
+            return;
+        }
+
+        HasPendingSettingsChanges = AllowExternalSenders != _originalAllowExternalSenders;
+    }
+
+    private async Task SaveSettingsAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedDetails == null || !CanEditSettings)
+        {
+            return;
+        }
+
+        IsSavingSettings = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var request = new SetDistributionListSettingsRequest
+            {
+                Identity = SelectedDetails.Identity,
+                RequireSenderAuthenticationEnabled = !AllowExternalSenders
+            };
+
+            _shellViewModel.AddLog(LogLevel.Information, $"Aggiornamento impostazioni lista {SelectedDetails.DisplayName}...");
+
+            var result = await _workerService.SetDistributionListSettingsAsync(request, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                SelectedDetails.RequireSenderAuthenticationEnabled = !AllowExternalSenders;
+                _originalAllowExternalSenders = AllowExternalSenders;
+                HasPendingSettingsChanges = false;
+                _shellViewModel.AddLog(LogLevel.Information, "Impostazioni lista aggiornate");
+            }
+            else
+            {
+                ErrorMessage = result.Error?.Message ?? "Impossibile aggiornare le impostazioni della lista";
+                _shellViewModel.AddLog(LogLevel.Error, $"Aggiornamento lista fallito: {ErrorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"Errore aggiornamento lista: {ex.Message}");
+        }
+        finally
+        {
+            IsSavingSettings = false;
+        }
+    }
+
+    private void DiscardSettingsChanges()
+    {
+        if (_isInitializingSettings)
+        {
+            return;
+        }
+
+        AllowExternalSenders = _originalAllowExternalSenders;
+        HasPendingSettingsChanges = false;
+        _shellViewModel.AddLog(LogLevel.Information, "Modifiche lista annullate");
     }
 
     #endregion

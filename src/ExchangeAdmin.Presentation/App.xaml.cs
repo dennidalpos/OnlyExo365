@@ -30,7 +30,8 @@ public partial class App : System.Windows.Application
         var workerOptions = new WorkerSupervisorOptions
         {
             WorkerPath = "ExchangeAdmin.Worker.exe",
-            MaxRestartAttempts = 3
+            MaxRestartAttempts = 3,
+            ExchangeEnvironmentName = "O365Default"
         };
 
         _workerService = new WorkerService(workerOptions);

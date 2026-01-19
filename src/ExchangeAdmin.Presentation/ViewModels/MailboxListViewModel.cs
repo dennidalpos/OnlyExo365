@@ -178,6 +178,18 @@ public class MailboxListViewModel : ViewModelBase
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         _loadCts?.Cancel();
+        if (!_shellViewModel.IsExchangeConnected)
+        {
+            IsLoading = false;
+            Mailboxes.Clear();
+            ErrorMessage = "Not connected to Exchange Online";
+            TotalCount = 0;
+            HasMore = false;
+            _currentSkip = 0;
+            OnPropertyChanged(nameof(StatusText));
+            return;
+        }
+
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
@@ -252,6 +264,13 @@ public class MailboxListViewModel : ViewModelBase
         if (!HasMore || IsLoading) return;
 
         _loadCts?.Cancel();
+        if (!_shellViewModel.IsExchangeConnected)
+        {
+            IsLoading = false;
+            ErrorMessage = "Not connected to Exchange Online";
+            return;
+        }
+
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;

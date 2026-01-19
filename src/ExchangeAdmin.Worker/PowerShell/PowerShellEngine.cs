@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -58,6 +60,15 @@ public class PowerShellResult
 /// </summary>
 public sealed class PowerShellEngine : IDisposable
 {
+    private const string ExchangeEnvironmentVariable = "EXCHANGEADMIN_EXO_ENV";
+    private static readonly HashSet<string> SupportedExchangeEnvironments = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "O365Default",
+        "O365GermanyCloud",
+        "O365USGovGCCHigh",
+        "O365USGovDoD",
+        "O365China"
+    };
     private Runspace? _runspace;
     private bool _isModuleAvailable;
     private string? _powerShellVersion;
@@ -510,8 +521,11 @@ public sealed class PowerShellEngine : IDisposable
         Console.WriteLine("[PowerShellEngine] Connecting to Exchange Online...");
         Debug.WriteLine("[PowerShellEngine] Connecting to Exchange Online...");
 
+        var exchangeEnvironment = Environment.GetEnvironmentVariable(ExchangeEnvironmentVariable);
+        var connectCommand = BuildConnectExchangeCommand(exchangeEnvironment);
+
         var result = await ExecuteAsync(
-            "Connect-ExchangeOnline -ShowBanner:$false",
+            connectCommand,
             onVerbose: onVerbose,
             onWarning: (level, msg) => Console.WriteLine($"[PS Warning] {msg}"),
             onError: (err) => Console.WriteLine($"[PS Error] {err}"),
@@ -539,6 +553,24 @@ public sealed class PowerShellEngine : IDisposable
         }
 
         return result;
+    }
+
+    private static string BuildConnectExchangeCommand(string? exchangeEnvironment)
+    {
+        const string baseCommand = "Connect-ExchangeOnline -ShowBanner:$false";
+        if (string.IsNullOrWhiteSpace(exchangeEnvironment))
+        {
+            return baseCommand;
+        }
+
+        if (!SupportedExchangeEnvironments.Contains(exchangeEnvironment))
+        {
+            Console.WriteLine($"[PowerShellEngine] Unsupported Exchange environment '{exchangeEnvironment}', falling back to default.");
+            return baseCommand;
+        }
+
+        var sanitized = exchangeEnvironment.Replace("'", "''", StringComparison.Ordinal);
+        return $"{baseCommand} -ExchangeEnvironmentName '{sanitized}'";
     }
 
     /// <summary>

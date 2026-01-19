@@ -79,6 +79,8 @@
                       SelectionMode="Single"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
                       Background="{StaticResource SecondaryBackgroundBrush}"
@@ -153,7 +155,8 @@
         <!-- Splitter -->
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       Background="{StaticResource BorderBrush}"
-                      Visibility="{Binding MailboxDetails.HasDetails, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibility}}"/>
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
 
         <!-- Details Panel -->
         <views:MailboxDetailsView Grid.Column="2" DataContext="{Binding MailboxDetails}"

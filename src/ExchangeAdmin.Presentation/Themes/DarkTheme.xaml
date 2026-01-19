@@ -309,6 +309,13 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#1A1A1A"/>
+                            <Setter Property="FontFamily" Value="Segoe UI"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"

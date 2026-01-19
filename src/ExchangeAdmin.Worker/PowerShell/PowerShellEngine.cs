@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -60,6 +61,14 @@ public class PowerShellResult
 public sealed class PowerShellEngine : IDisposable
 {
     private const string ExchangeEnvironmentVariable = "EXCHANGEADMIN_EXO_ENV";
+    private static readonly HashSet<string> SupportedExchangeEnvironments = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "O365Default",
+        "O365GermanyCloud",
+        "O365USGovGCCHigh",
+        "O365USGovDoD",
+        "O365China"
+    };
     private Runspace? _runspace;
     private bool _isModuleAvailable;
     private string? _powerShellVersion;
@@ -551,6 +560,12 @@ public sealed class PowerShellEngine : IDisposable
         const string baseCommand = "Connect-ExchangeOnline -ShowBanner:$false";
         if (string.IsNullOrWhiteSpace(exchangeEnvironment))
         {
+            return baseCommand;
+        }
+
+        if (!SupportedExchangeEnvironments.Contains(exchangeEnvironment))
+        {
+            Console.WriteLine($"[PowerShellEngine] Unsupported Exchange environment '{exchangeEnvironment}', falling back to default.");
             return baseCommand;
         }
 

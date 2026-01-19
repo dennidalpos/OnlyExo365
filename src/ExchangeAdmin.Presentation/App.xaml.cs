@@ -31,7 +31,7 @@ public partial class App : System.Windows.Application
         {
             WorkerPath = "ExchangeAdmin.Worker.exe",
             MaxRestartAttempts = 3,
-            ExchangeEnvironmentName = "O365Europe"
+            ExchangeEnvironmentName = "O365Default"
         };
 
         _workerService = new WorkerService(workerOptions);

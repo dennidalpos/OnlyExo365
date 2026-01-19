@@ -51,10 +51,10 @@ public class WorkerSupervisorOptions
     public int HeartbeatMissedThreshold { get; set; } = IpcConstants.HeartbeatMissedThreshold;
 
     /// <summary>
-    /// Ambiente Exchange Online per l'autenticazione (es. O365Europe).
+    /// Ambiente Exchange Online per l'autenticazione (es. O365Default).
     /// Se null/empty usa il valore di default del modulo.
     /// </summary>
-    public string? ExchangeEnvironmentName { get; set; } = "O365Europe";
+    public string? ExchangeEnvironmentName { get; set; }
 }
 
 /// <summary>

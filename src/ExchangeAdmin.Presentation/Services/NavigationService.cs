@@ -8,6 +8,7 @@ public enum NavigationPage
     Dashboard,
     Mailboxes,
     SharedMailboxes,
+    MailboxSpace,
     DistributionLists,
     Tools,
     Logs

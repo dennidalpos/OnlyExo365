@@ -322,6 +322,44 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
+    /// <summary>
+    /// Convert mailbox to regular mailbox.
+    /// </summary>
+    public async Task<Result> ConvertMailboxToRegularAsync(
+        ConvertMailboxToRegularRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.ConvertMailboxToRegular,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Get mailbox space report.
+    /// </summary>
+    public async Task<Result<GetMailboxSpaceReportResponse>> GetMailboxSpaceReportAsync(
+        GetMailboxSpaceReportRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetMailboxSpaceReportResponse>(
+            OperationType.GetMailboxSpaceReport,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
     #endregion
 
     #region Distribution Lists

@@ -173,11 +173,20 @@ public class MailboxFeaturesDto
     [JsonPropertyName("prohibitSendQuota")]
     public string? ProhibitSendQuota { get; set; }
 
+    [JsonPropertyName("prohibitSendQuotaBytes")]
+    public long? ProhibitSendQuotaBytes { get; set; }
+
     [JsonPropertyName("prohibitSendReceiveQuota")]
     public string? ProhibitSendReceiveQuota { get; set; }
 
+    [JsonPropertyName("prohibitSendReceiveQuotaBytes")]
+    public long? ProhibitSendReceiveQuotaBytes { get; set; }
+
     [JsonPropertyName("issueWarningQuota")]
     public string? IssueWarningQuota { get; set; }
+
+    [JsonPropertyName("issueWarningQuotaBytes")]
+    public long? IssueWarningQuotaBytes { get; set; }
 
     [JsonPropertyName("maxSendSize")]
     public string? MaxSendSize { get; set; }
@@ -399,6 +408,61 @@ public class GetMailboxesResponse
 
     [JsonPropertyName("searchQuery")]
     public string? SearchQuery { get; set; }
+}
+
+/// <summary>
+/// Mailbox space report item.
+/// </summary>
+public class MailboxSpaceItemDto
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("primarySmtpAddress")]
+    public string PrimarySmtpAddress { get; set; } = string.Empty;
+
+    [JsonPropertyName("totalItemSize")]
+    public string? TotalItemSize { get; set; }
+
+    [JsonPropertyName("totalItemSizeBytes")]
+    public long? TotalItemSizeBytes { get; set; }
+
+    [JsonPropertyName("prohibitSendQuota")]
+    public string? ProhibitSendQuota { get; set; }
+
+    [JsonPropertyName("prohibitSendQuotaBytes")]
+    public long? ProhibitSendQuotaBytes { get; set; }
+
+    [JsonPropertyName("prohibitSendReceiveQuota")]
+    public string? ProhibitSendReceiveQuota { get; set; }
+
+    [JsonPropertyName("prohibitSendReceiveQuotaBytes")]
+    public long? ProhibitSendReceiveQuotaBytes { get; set; }
+
+    [JsonPropertyName("issueWarningQuota")]
+    public string? IssueWarningQuota { get; set; }
+
+    [JsonPropertyName("issueWarningQuotaBytes")]
+    public long? IssueWarningQuotaBytes { get; set; }
+}
+
+/// <summary>
+/// Request mailbox space report.
+/// </summary>
+public class GetMailboxSpaceReportRequest
+{
+}
+
+/// <summary>
+/// Response mailbox space report.
+/// </summary>
+public class GetMailboxSpaceReportResponse
+{
+    [JsonPropertyName("mailboxes")]
+    public List<MailboxSpaceItemDto> Mailboxes { get; set; } = new();
 }
 
 /// <summary>
@@ -650,6 +714,15 @@ public class SetMailboxAutoReplyConfigurationRequest
 /// Request to convert mailbox to shared mailbox.
 /// </summary>
 public class ConvertMailboxToSharedRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Request to convert mailbox to regular mailbox.
+/// </summary>
+public class ConvertMailboxToRegularRequest
 {
     [JsonPropertyName("identity")]
     public string Identity { get; set; } = string.Empty;

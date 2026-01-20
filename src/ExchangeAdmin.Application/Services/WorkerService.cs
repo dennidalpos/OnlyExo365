@@ -131,6 +131,18 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.ConvertMailboxToSharedAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> ConvertMailboxToRegularAsync(
+        ConvertMailboxToRegularRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.ConvertMailboxToRegularAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result<GetMailboxSpaceReportResponse>> GetMailboxSpaceReportAsync(
+        GetMailboxSpaceReportRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetMailboxSpaceReportAsync(request, eventHandler, cancellationToken);
+
     #endregion
 
     #region Distribution Lists

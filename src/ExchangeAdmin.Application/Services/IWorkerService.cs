@@ -170,6 +170,16 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> ConvertMailboxToRegularAsync(
+        ConvertMailboxToRegularRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<GetMailboxSpaceReportResponse>> GetMailboxSpaceReportAsync(
+        GetMailboxSpaceReportRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     #endregion
 
     #region Distribution Lists

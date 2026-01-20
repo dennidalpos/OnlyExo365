@@ -11,7 +11,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- List Panel -->
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" IsEnabled="{Binding SharedMailboxes.IsLoading, Converter={StaticResource InverseBool}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>

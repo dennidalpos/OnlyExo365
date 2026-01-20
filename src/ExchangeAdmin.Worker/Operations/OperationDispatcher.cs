@@ -58,6 +58,8 @@ public class OperationDispatcher
                 OperationType.UpdateMailboxSettings => await HandleUpdateMailboxSettingsAsync(request, cancellationToken),
                 OperationType.SetMailboxAutoReplyConfiguration => await HandleSetMailboxAutoReplyConfigurationAsync(request, cancellationToken),
                 OperationType.ConvertMailboxToShared => await HandleConvertMailboxToSharedAsync(request, cancellationToken),
+                OperationType.ConvertMailboxToRegular => await HandleConvertMailboxToRegularAsync(request, cancellationToken),
+                OperationType.GetMailboxSpaceReport => await HandleGetMailboxSpaceReportAsync(request, cancellationToken),
 
                 // Distribution Lists
                 OperationType.GetDistributionLists => await HandleGetDistributionListsAsync(request, cancellationToken),
@@ -448,6 +450,38 @@ public class OperationDispatcher
             cancellationToken: cancellationToken);
 
         return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleConvertMailboxToRegularAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var convertRequest = JsonMessageSerializer.ExtractPayload<ConvertMailboxToRegularRequest>(request.Payload);
+
+        if (convertRequest == null || string.IsNullOrWhiteSpace(convertRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.ConvertMailboxToRegularAsync(
+            convertRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleGetMailboxSpaceReportAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var reportRequest = JsonMessageSerializer.ExtractPayload<GetMailboxSpaceReportRequest>(request.Payload)
+            ?? new GetMailboxSpaceReportRequest();
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, "Fetching mailbox space report...");
+
+        var response = await _exoCommands.GetMailboxSpaceReportAsync(
+            reportRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, response);
     }
 
     #endregion

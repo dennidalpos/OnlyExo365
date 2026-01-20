@@ -34,7 +34,8 @@
         </Grid>
 
         <!-- Main Content with ScrollViewer -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBool}}">
             <StackPanel>
                 <!-- Error Message -->
                 <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
@@ -114,7 +115,7 @@
 
                     <!-- Actions -->
                     <GroupBox Header="Azioni" Margin="0,0,0,12"
-                              Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}">
+                              Visibility="{Binding HasConversionActions, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <Button Content="Converti in cassetta postale condivisa"
                                     Command="{Binding ConvertToSharedMailboxCommand}"
@@ -124,6 +125,15 @@
                             <TextBlock Text="Questa azione è irreversibile senza assistenza amministrativa."
                                        Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
                                        Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <Button Content="Ripristina mailbox utente"
+                                    Command="{Binding ConvertToRegularMailboxCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,12,0,0"
+                                    ToolTip="Converte la cassetta condivisa in mailbox utente"
+                                    Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="Il ripristino può richiedere alcuni minuti."
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                                       Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
                     </GroupBox>
 
@@ -259,6 +269,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="220"/>
@@ -277,6 +288,11 @@
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Blocco invio/ricezione:" FontWeight="SemiBold" Margin="0,8,0,0"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
                                        Text="{Binding Features.ProhibitSendReceiveQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Spazio utilizzato:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding QuotaUsageSummary}"
                                        Foreground="{StaticResource SecondaryTextBrush}"/>
                         </Grid>
                     </GroupBox>
@@ -642,6 +658,15 @@
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="Caricamento dettagli..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
 
         <!-- Saving Overlay -->
         <Border Grid.Row="0" Grid.RowSpan="2" Background="#CC000000"

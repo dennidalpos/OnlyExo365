@@ -402,6 +402,12 @@ public class SetDistributionListSettingsRequest
 
     [JsonPropertyName("requireSenderAuthenticationEnabled")]
     public bool? RequireSenderAuthenticationEnabled { get; set; }
+
+    [JsonPropertyName("acceptMessagesOnlyFrom")]
+    public List<string>? AcceptMessagesOnlyFrom { get; set; }
+
+    [JsonPropertyName("rejectMessagesFrom")]
+    public List<string>? RejectMessagesFrom { get; set; }
 }
 
 /// <summary>

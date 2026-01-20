@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
@@ -78,6 +80,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         SaveMailboxChangesCommand = new AsyncRelayCommand(SaveMailboxChangesAsync, () => HasPendingMailboxChanges && !IsSaving);
         DiscardMailboxChangesCommand = new RelayCommand(DiscardMailboxChanges, () => HasPendingMailboxChanges);
         ConvertToSharedMailboxCommand = new AsyncRelayCommand(ConvertToSharedMailboxAsync, () => CanConvertToSharedMailbox && !IsSaving);
+        ConvertToRegularMailboxCommand = new AsyncRelayCommand(ConvertToRegularMailboxAsync, () => CanConvertToRegularMailbox && !IsSaving);
 
         AddPermissionCommand = new RelayCommand(AddPermission, () => CanAddPermission);
         RemovePermissionCommand = new RelayCommand<object>(RemovePermission);
@@ -148,6 +151,9 @@ public class MailboxDetailsViewModel : ViewModelBase
                 OnPropertyChanged(nameof(InboxRules));
                 OnPropertyChanged(nameof(AutoReply));
                 OnPropertyChanged(nameof(CanConvertToSharedMailbox));
+                OnPropertyChanged(nameof(CanConvertToRegularMailbox));
+                OnPropertyChanged(nameof(HasConversionActions));
+                OnPropertyChanged(nameof(QuotaUsageSummary));
                 UpdatePermissionsDisplay();
                 InitializeMailboxSettings();
                 CommandManager.InvalidateRequerySuggested();
@@ -165,6 +171,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     public MailboxPermissionsDto? Permissions => Details?.Permissions;
     public List<InboxRuleDto>? InboxRules => Details?.InboxRules;
     public AutoReplyConfigurationDto? AutoReply => Details?.AutoReplyConfiguration;
+    public string QuotaUsageSummary => BuildQuotaUsageSummary();
 
     public bool HasPendingMailboxChanges
     {
@@ -465,6 +472,8 @@ public class MailboxDetailsViewModel : ViewModelBase
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected && !string.IsNullOrEmpty(Identity);
     public bool CanAddPermission => !string.IsNullOrWhiteSpace(NewPermissionUser);
     public bool CanConvertToSharedMailbox => HasDetails && !string.Equals(RecipientTypeDetails, "SharedMailbox", StringComparison.OrdinalIgnoreCase);
+    public bool CanConvertToRegularMailbox => HasDetails && string.Equals(RecipientTypeDetails, "SharedMailbox", StringComparison.OrdinalIgnoreCase);
+    public bool HasConversionActions => CanConvertToSharedMailbox || CanConvertToRegularMailbox;
 
     #endregion
 
@@ -477,6 +486,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     public ICommand SaveMailboxChangesCommand { get; }
     public ICommand DiscardMailboxChangesCommand { get; }
     public ICommand ConvertToSharedMailboxCommand { get; }
+    public ICommand ConvertToRegularMailboxCommand { get; }
     public ICommand AddPermissionCommand { get; }
     public ICommand RemovePermissionCommand { get; }
     public ICommand ModifyAutoMappingCommand { get; }
@@ -842,8 +852,8 @@ public class MailboxDetailsViewModel : ViewModelBase
             AutoReplyStartTime = autoReply.StartTime?.ToString("HH:mm");
             AutoReplyEndDate = autoReply.EndTime?.Date;
             AutoReplyEndTime = autoReply.EndTime?.ToString("HH:mm");
-            AutoReplyInternalMessage = autoReply.InternalMessage ?? string.Empty;
-            AutoReplyExternalMessage = autoReply.ExternalMessage ?? string.Empty;
+            AutoReplyInternalMessage = NormalizeAutoReplyMessage(autoReply.InternalMessage);
+            AutoReplyExternalMessage = NormalizeAutoReplyMessage(autoReply.ExternalMessage);
             AutoReplyExternalAudience = string.IsNullOrWhiteSpace(autoReply.ExternalAudience) ? "All" : autoReply.ExternalAudience;
         }
         else
@@ -1028,6 +1038,9 @@ public class MailboxDetailsViewModel : ViewModelBase
                     }
                 }
 
+                var normalizedInternalMessage = NormalizeAutoReplyMessage(AutoReplyInternalMessage);
+                var normalizedExternalMessage = NormalizeAutoReplyMessage(AutoReplyExternalMessage);
+
                 var autoReplyRequest = new SetMailboxAutoReplyConfigurationRequest
                 {
                     Identity = Identity,
@@ -1036,8 +1049,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                         : "Disabled",
                     StartTime = AutoReplyScheduled ? BuildDateTime(AutoReplyStartDate, AutoReplyStartTime) : null,
                     EndTime = AutoReplyScheduled ? BuildDateTime(AutoReplyEndDate, AutoReplyEndTime) : null,
-                    InternalMessage = AutoReplyInternalMessage ?? string.Empty,
-                    ExternalMessage = AutoReplyExternalMessage ?? string.Empty,
+                    InternalMessage = normalizedInternalMessage,
+                    ExternalMessage = normalizedExternalMessage,
                     ExternalAudience = AutoReplyEnabled ? AutoReplyExternalAudience : null
                 };
 
@@ -1124,6 +1137,57 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
     }
 
+    private async Task ConvertToRegularMailboxAsync(CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(Identity) || !CanConvertToRegularMailbox)
+        {
+            return;
+        }
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Convertire {DisplayName} in mailbox utente?",
+            "Conferma conversione",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        IsSaving = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var request = new ConvertMailboxToRegularRequest
+            {
+                Identity = Identity
+            };
+
+            var result = await _workerService.ConvertMailboxToRegularAsync(request, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, $"Mailbox {Identity} convertita in regolare");
+                await RefreshAsync(cancellationToken);
+            }
+            else
+            {
+                ErrorMessage = result.Error?.Message ?? "Impossibile convertire la mailbox";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"Convert mailbox error: {ex.Message}");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
     private MailboxSettingsSnapshot CaptureMailboxSettingsSnapshot()
     {
         return new MailboxSettingsSnapshot
@@ -1142,13 +1206,86 @@ public class MailboxDetailsViewModel : ViewModelBase
             AutoReplyScheduled = AutoReplyScheduled,
             AutoReplyStartDate = BuildDateTime(AutoReplyStartDate, AutoReplyStartTime),
             AutoReplyEndDate = BuildDateTime(AutoReplyEndDate, AutoReplyEndTime),
-            AutoReplyInternalMessage = NormalizeInput(AutoReplyInternalMessage),
-            AutoReplyExternalMessage = NormalizeInput(AutoReplyExternalMessage),
+            AutoReplyInternalMessage = NormalizeAutoReplyMessage(AutoReplyInternalMessage),
+            AutoReplyExternalMessage = NormalizeAutoReplyMessage(AutoReplyExternalMessage),
             AutoReplyExternalAudience = NormalizeInput(AutoReplyExternalAudience)
         };
     }
 
+    private string BuildQuotaUsageSummary()
+    {
+        if (Statistics == null)
+        {
+            return "Non disponibile";
+        }
+
+        if (Statistics.TotalItemSizeBytes == null)
+        {
+            return Statistics.TotalItemSize ?? "Non disponibile";
+        }
+
+        var quotaBytes = GetEffectiveQuotaBytes();
+        if (quotaBytes == null || quotaBytes.Value <= 0)
+        {
+            return Statistics.TotalItemSize ?? "Non disponibile";
+        }
+
+        var percent = Statistics.TotalItemSizeBytes.Value / (double)quotaBytes.Value * 100;
+        var quotaLabel = GetEffectiveQuotaLabel();
+        var labelSuffix = string.IsNullOrWhiteSpace(quotaLabel) ? string.Empty : $" di {quotaLabel}";
+        return $"{Statistics.TotalItemSize} ({percent:0.0}%{labelSuffix})";
+    }
+
+    private long? GetEffectiveQuotaBytes()
+    {
+        if (Features == null)
+        {
+            return null;
+        }
+
+        return Features.ProhibitSendReceiveQuotaBytes
+            ?? Features.ProhibitSendQuotaBytes
+            ?? Features.IssueWarningQuotaBytes;
+    }
+
+    private string? GetEffectiveQuotaLabel()
+    {
+        if (Features == null)
+        {
+            return null;
+        }
+
+        return Features.ProhibitSendReceiveQuota
+            ?? Features.ProhibitSendQuota
+            ?? Features.IssueWarningQuota;
+    }
+
     private static string NormalizeInput(string? value) => string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+
+    private static string NormalizeAutoReplyMessage(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var stripped = StripHtml(value);
+        return string.IsNullOrWhiteSpace(stripped) ? string.Empty : stripped.Trim();
+    }
+
+    private static string StripHtml(string value)
+    {
+        var normalized = Regex.Replace(value, @"<\s*br\s*/?>", "\n", RegexOptions.IgnoreCase);
+        normalized = Regex.Replace(normalized, @"</\s*p\s*>", "\n", RegexOptions.IgnoreCase);
+        normalized = Regex.Replace(normalized, @"</\s*div\s*>", "\n", RegexOptions.IgnoreCase);
+        normalized = Regex.Replace(normalized, @"<\s*li\s*>", "- ", RegexOptions.IgnoreCase);
+        normalized = Regex.Replace(normalized, @"</\s*li\s*>", "\n", RegexOptions.IgnoreCase);
+        normalized = Regex.Replace(normalized, @"<[^>]+>", string.Empty);
+        normalized = WebUtility.HtmlDecode(normalized);
+        normalized = normalized.Replace("\r", string.Empty);
+        normalized = Regex.Replace(normalized, @"\n{3,}", "\n\n");
+        return normalized.Trim();
+    }
 
     private static bool TryBuildScheduledDateTime(DateTime? date, string? timeText, out DateTime result)
     {

@@ -872,6 +872,8 @@ catch {{
         CancellationToken cancellationToken)
     {
         var script = @"
+$ErrorActionPreference = 'SilentlyContinue'
+
 function Get-BytesFromSize($size) {
     if ($null -eq $size) { return $null }
     $text = $size.ToString()
@@ -881,13 +883,13 @@ function Get-BytesFromSize($size) {
     return $null
 }
 
-$mailboxes = Get-Mailbox -ResultSize Unlimited
+$mailboxes = Get-Mailbox -ResultSize Unlimited -ErrorAction SilentlyContinue
 $report = @()
 
 foreach ($mbx in $mailboxes) {
     $stats = $null
     try {
-        $stats = Get-MailboxStatistics -Identity $mbx.Identity -ErrorAction Stop
+        $stats = Get-MailboxStatistics -Identity $mbx.Identity -ErrorAction SilentlyContinue
     } catch {
         $stats = $null
     }

@@ -327,6 +327,15 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
         var escapedIdentity = request.Identity.Replace("'", "''");
 
         var script = $@"
+function Get-BytesFromSize($size) {{
+    if ($null -eq $size) {{ return $null }}
+    $text = $size.ToString()
+    if ($text -match '\(([\d,]+) bytes\)') {{
+        return [long]($Matches[1] -replace ',', '')
+    }}
+    return $null
+}}
+
 $mbx = Get-Mailbox -Identity '{escapedIdentity}'
 
 @{{
@@ -364,11 +373,11 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
     DeliverToMailboxAndForward = $mbx.DeliverToMailboxAndForward
 
     ProhibitSendQuota = if ($mbx.ProhibitSendQuota) {{ $mbx.ProhibitSendQuota.ToString() }} else {{ $null }}
-    ProhibitSendQuotaBytes = if ($mbx.ProhibitSendQuota -and -not $mbx.ProhibitSendQuota.IsUnlimited) {{ $mbx.ProhibitSendQuota.Value.ToBytes() }} else {{ $null }}
+    ProhibitSendQuotaBytes = Get-BytesFromSize $mbx.ProhibitSendQuota
     ProhibitSendReceiveQuota = if ($mbx.ProhibitSendReceiveQuota) {{ $mbx.ProhibitSendReceiveQuota.ToString() }} else {{ $null }}
-    ProhibitSendReceiveQuotaBytes = if ($mbx.ProhibitSendReceiveQuota -and -not $mbx.ProhibitSendReceiveQuota.IsUnlimited) {{ $mbx.ProhibitSendReceiveQuota.Value.ToBytes() }} else {{ $null }}
+    ProhibitSendReceiveQuotaBytes = Get-BytesFromSize $mbx.ProhibitSendReceiveQuota
     IssueWarningQuota = if ($mbx.IssueWarningQuota) {{ $mbx.IssueWarningQuota.ToString() }} else {{ $null }}
-    IssueWarningQuotaBytes = if ($mbx.IssueWarningQuota -and -not $mbx.IssueWarningQuota.IsUnlimited) {{ $mbx.IssueWarningQuota.Value.ToBytes() }} else {{ $null }}
+    IssueWarningQuotaBytes = Get-BytesFromSize $mbx.IssueWarningQuota
     MaxSendSize = if ($mbx.MaxSendSize) {{ $mbx.MaxSendSize.ToString() }} else {{ $null }}
     MaxReceiveSize = if ($mbx.MaxReceiveSize) {{ $mbx.MaxReceiveSize.ToString() }} else {{ $null }}
 
@@ -496,11 +505,20 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
         var escapedIdentity = identity.Replace("'", "''");
 
         var script = $@"
+function Get-BytesFromSize($size) {{
+    if ($null -eq $size) {{ return $null }}
+    $text = $size.ToString()
+    if ($text -match '\(([\d,]+) bytes\)') {{
+        return [long]($Matches[1] -replace ',', '')
+    }}
+    return $null
+}}
+
 try {{
     $stats = Get-MailboxStatistics -Identity '{escapedIdentity}' -ErrorAction Stop
     @{{
         TotalItemSize = $stats.TotalItemSize.ToString()
-        TotalItemSizeBytes = $stats.TotalItemSize.Value.ToBytes()
+        TotalItemSizeBytes = Get-BytesFromSize $stats.TotalItemSize
         ItemCount = $stats.ItemCount
         DeletedItemCount = $stats.DeletedItemCount
         TotalDeletedItemSize = if ($stats.TotalDeletedItemSize) {{ $stats.TotalDeletedItemSize.ToString() }} else {{ $null }}
@@ -854,6 +872,15 @@ catch {{
         CancellationToken cancellationToken)
     {
         var script = @"
+function Get-BytesFromSize($size) {
+    if ($null -eq $size) { return $null }
+    $text = $size.ToString()
+    if ($text -match '\(([\d,]+) bytes\)') {
+        return [long]($Matches[1] -replace ',', '')
+    }
+    return $null
+}
+
 $mailboxes = Get-Mailbox -ResultSize Unlimited
 $report = @()
 
@@ -870,13 +897,13 @@ foreach ($mbx in $mailboxes) {
         DisplayName = $mbx.DisplayName
         PrimarySmtpAddress = $mbx.PrimarySmtpAddress.ToString()
         TotalItemSize = if ($stats -and $stats.TotalItemSize) { $stats.TotalItemSize.ToString() } else { $null }
-        TotalItemSizeBytes = if ($stats -and $stats.TotalItemSize) { $stats.TotalItemSize.Value.ToBytes() } else { $null }
+        TotalItemSizeBytes = Get-BytesFromSize $stats.TotalItemSize
         ProhibitSendQuota = if ($mbx.ProhibitSendQuota) { $mbx.ProhibitSendQuota.ToString() } else { $null }
-        ProhibitSendQuotaBytes = if ($mbx.ProhibitSendQuota -and -not $mbx.ProhibitSendQuota.IsUnlimited) { $mbx.ProhibitSendQuota.Value.ToBytes() } else { $null }
+        ProhibitSendQuotaBytes = Get-BytesFromSize $mbx.ProhibitSendQuota
         ProhibitSendReceiveQuota = if ($mbx.ProhibitSendReceiveQuota) { $mbx.ProhibitSendReceiveQuota.ToString() } else { $null }
-        ProhibitSendReceiveQuotaBytes = if ($mbx.ProhibitSendReceiveQuota -and -not $mbx.ProhibitSendReceiveQuota.IsUnlimited) { $mbx.ProhibitSendReceiveQuota.Value.ToBytes() } else { $null }
+        ProhibitSendReceiveQuotaBytes = Get-BytesFromSize $mbx.ProhibitSendReceiveQuota
         IssueWarningQuota = if ($mbx.IssueWarningQuota) { $mbx.IssueWarningQuota.ToString() } else { $null }
-        IssueWarningQuotaBytes = if ($mbx.IssueWarningQuota -and -not $mbx.IssueWarningQuota.IsUnlimited) { $mbx.IssueWarningQuota.Value.ToBytes() } else { $null }
+        IssueWarningQuotaBytes = Get-BytesFromSize $mbx.IssueWarningQuota
     }
 }
 

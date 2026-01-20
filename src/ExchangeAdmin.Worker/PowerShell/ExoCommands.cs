@@ -364,8 +364,11 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
     DeliverToMailboxAndForward = $mbx.DeliverToMailboxAndForward
 
     ProhibitSendQuota = if ($mbx.ProhibitSendQuota) {{ $mbx.ProhibitSendQuota.ToString() }} else {{ $null }}
+    ProhibitSendQuotaBytes = if ($mbx.ProhibitSendQuota -and -not $mbx.ProhibitSendQuota.IsUnlimited) {{ $mbx.ProhibitSendQuota.Value.ToBytes() }} else {{ $null }}
     ProhibitSendReceiveQuota = if ($mbx.ProhibitSendReceiveQuota) {{ $mbx.ProhibitSendReceiveQuota.ToString() }} else {{ $null }}
+    ProhibitSendReceiveQuotaBytes = if ($mbx.ProhibitSendReceiveQuota -and -not $mbx.ProhibitSendReceiveQuota.IsUnlimited) {{ $mbx.ProhibitSendReceiveQuota.Value.ToBytes() }} else {{ $null }}
     IssueWarningQuota = if ($mbx.IssueWarningQuota) {{ $mbx.IssueWarningQuota.ToString() }} else {{ $null }}
+    IssueWarningQuotaBytes = if ($mbx.IssueWarningQuota -and -not $mbx.IssueWarningQuota.IsUnlimited) {{ $mbx.IssueWarningQuota.Value.ToBytes() }} else {{ $null }}
     MaxSendSize = if ($mbx.MaxSendSize) {{ $mbx.MaxSendSize.ToString() }} else {{ $null }}
     MaxReceiveSize = if ($mbx.MaxReceiveSize) {{ $mbx.MaxReceiveSize.ToString() }} else {{ $null }}
 
@@ -433,8 +436,11 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
                 DeliverToMailboxAndForward = hash["DeliverToMailboxAndForward"] as bool? ?? false,
 
                 ProhibitSendQuota = hash["ProhibitSendQuota"]?.ToString(),
+                ProhibitSendQuotaBytes = hash["ProhibitSendQuotaBytes"] as long?,
                 ProhibitSendReceiveQuota = hash["ProhibitSendReceiveQuota"]?.ToString(),
+                ProhibitSendReceiveQuotaBytes = hash["ProhibitSendReceiveQuotaBytes"] as long?,
                 IssueWarningQuota = hash["IssueWarningQuota"]?.ToString(),
+                IssueWarningQuotaBytes = hash["IssueWarningQuotaBytes"] as long?,
                 MaxSendSize = hash["MaxSendSize"]?.ToString(),
                 MaxReceiveSize = hash["MaxReceiveSize"]?.ToString(),
 
@@ -815,6 +821,108 @@ catch {{
         }
 
         onLog?.Invoke("Information", "Mailbox converted to shared successfully");
+    }
+
+    public async Task ConvertMailboxToRegularAsync(
+        ConvertMailboxToRegularRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var script = $"Set-Mailbox -Identity '{escapedIdentity}' -Type Regular";
+
+        onLog?.Invoke("Information", $"Converting mailbox {request.Identity} to regular...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to convert mailbox: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Mailbox converted to regular successfully");
+    }
+
+    public async Task<GetMailboxSpaceReportResponse> GetMailboxSpaceReportAsync(
+        GetMailboxSpaceReportRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var script = @"
+$mailboxes = Get-Mailbox -ResultSize Unlimited
+$report = @()
+
+foreach ($mbx in $mailboxes) {
+    $stats = $null
+    try {
+        $stats = Get-MailboxStatistics -Identity $mbx.Identity -ErrorAction Stop
+    } catch {
+        $stats = $null
+    }
+
+    $report += @{
+        Identity = $mbx.Identity.ToString()
+        DisplayName = $mbx.DisplayName
+        PrimarySmtpAddress = $mbx.PrimarySmtpAddress.ToString()
+        TotalItemSize = if ($stats -and $stats.TotalItemSize) { $stats.TotalItemSize.ToString() } else { $null }
+        TotalItemSizeBytes = if ($stats -and $stats.TotalItemSize) { $stats.TotalItemSize.Value.ToBytes() } else { $null }
+        ProhibitSendQuota = if ($mbx.ProhibitSendQuota) { $mbx.ProhibitSendQuota.ToString() } else { $null }
+        ProhibitSendQuotaBytes = if ($mbx.ProhibitSendQuota -and -not $mbx.ProhibitSendQuota.IsUnlimited) { $mbx.ProhibitSendQuota.Value.ToBytes() } else { $null }
+        ProhibitSendReceiveQuota = if ($mbx.ProhibitSendReceiveQuota) { $mbx.ProhibitSendReceiveQuota.ToString() } else { $null }
+        ProhibitSendReceiveQuotaBytes = if ($mbx.ProhibitSendReceiveQuota -and -not $mbx.ProhibitSendReceiveQuota.IsUnlimited) { $mbx.ProhibitSendReceiveQuota.Value.ToBytes() } else { $null }
+        IssueWarningQuota = if ($mbx.IssueWarningQuota) { $mbx.IssueWarningQuota.ToString() } else { $null }
+        IssueWarningQuotaBytes = if ($mbx.IssueWarningQuota -and -not $mbx.IssueWarningQuota.IsUnlimited) { $mbx.IssueWarningQuota.Value.ToBytes() } else { $null }
+    }
+}
+
+$report
+";
+
+        onLog?.Invoke("Information", "Generating mailbox space report...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to get mailbox space report: {result.ErrorMessage}");
+        }
+
+        var response = new GetMailboxSpaceReportResponse();
+
+        foreach (var output in result.Output)
+        {
+            if (output?.BaseObject is System.Collections.Hashtable hash)
+            {
+                response.Mailboxes.Add(new MailboxSpaceItemDto
+                {
+                    Identity = hash["Identity"]?.ToString() ?? string.Empty,
+                    DisplayName = hash["DisplayName"]?.ToString() ?? string.Empty,
+                    PrimarySmtpAddress = hash["PrimarySmtpAddress"]?.ToString() ?? string.Empty,
+                    TotalItemSize = hash["TotalItemSize"]?.ToString(),
+                    TotalItemSizeBytes = hash["TotalItemSizeBytes"] as long?,
+                    ProhibitSendQuota = hash["ProhibitSendQuota"]?.ToString(),
+                    ProhibitSendQuotaBytes = hash["ProhibitSendQuotaBytes"] as long?,
+                    ProhibitSendReceiveQuota = hash["ProhibitSendReceiveQuota"]?.ToString(),
+                    ProhibitSendReceiveQuotaBytes = hash["ProhibitSendReceiveQuotaBytes"] as long?,
+                    IssueWarningQuota = hash["IssueWarningQuota"]?.ToString(),
+                    IssueWarningQuotaBytes = hash["IssueWarningQuotaBytes"] as long?
+                });
+            }
+        }
+
+        onLog?.Invoke("Information", $"Mailbox space report generated: {response.Mailboxes.Count} entries");
+
+        return response;
     }
 
     #endregion

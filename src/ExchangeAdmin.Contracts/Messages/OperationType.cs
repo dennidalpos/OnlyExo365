@@ -29,6 +29,8 @@ public enum OperationType
     UpdateMailboxSettings,
     SetMailboxAutoReplyConfiguration,
     ConvertMailboxToShared,
+    ConvertMailboxToRegular,
+    GetMailboxSpaceReport,
 
     // Distribution List operations
     GetDistributionLists,

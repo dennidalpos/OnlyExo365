@@ -1,3 +1,4 @@
+using System.Linq;
 using ExchangeAdmin.Contracts.Dtos;
 
 namespace ExchangeAdmin.Worker.PowerShell;
@@ -611,6 +612,16 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
             setParams.Add($"-RequireSenderAuthenticationEnabled ${request.RequireSenderAuthenticationEnabled.Value.ToString().ToLowerInvariant()}");
         }
 
+        if (request.AcceptMessagesOnlyFrom != null)
+        {
+            setParams.Add($"-AcceptMessagesOnlyFrom {FormatStringArrayParameter(request.AcceptMessagesOnlyFrom)}");
+        }
+
+        if (request.RejectMessagesFrom != null)
+        {
+            setParams.Add($"-RejectMessagesFrom {FormatStringArrayParameter(request.RejectMessagesFrom)}");
+        }
+
         if (setParams.Count == 0)
         {
             return;
@@ -664,6 +675,22 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
 
         var single = obj.ToString();
         return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single };
+    }
+
+    private static string FormatStringArrayParameter(IEnumerable<string> values)
+    {
+        var sanitized = values
+            .Select(value => value?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => $"'{value!.Replace("'", "''")}'")
+            .ToList();
+
+        if (sanitized.Count == 0)
+        {
+            return "$null";
+        }
+
+        return $"@({string.Join(", ", sanitized)})";
     }
 
     #endregion

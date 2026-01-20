@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ExchangeAdmin.Application.Services;
@@ -49,9 +50,13 @@ public class DistributionListViewModel : ViewModelBase
     // Settings
     private bool _allowExternalSenders;
     private bool _originalAllowExternalSenders;
+    private List<string> _originalAcceptMessagesOnlyFrom = new();
+    private List<string> _originalRejectMessagesFrom = new();
     private bool _hasPendingSettingsChanges;
     private bool _isSavingSettings;
     private bool _isInitializingSettings;
+    private string? _newAcceptedSender;
+    private string? _newRejectedSender;
 
     public DistributionListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
     {
@@ -82,12 +87,18 @@ public class DistributionListViewModel : ViewModelBase
         RemoveMemberCommand = new AsyncRelayCommand<GroupMemberDto>(RemoveMemberAsync, m => m != null && CanModifyMembers);
         SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, () => HasPendingSettingsChanges && !IsSavingSettings);
         DiscardSettingsCommand = new RelayCommand(DiscardSettingsChanges, () => HasPendingSettingsChanges);
+        AddAcceptSenderCommand = new RelayCommand(AddAcceptSender, () => CanAddAcceptSender);
+        RemoveAcceptSenderCommand = new RelayCommand<string>(RemoveAcceptSender, sender => CanRemoveSender(sender));
+        AddRejectSenderCommand = new RelayCommand(AddRejectSender, () => CanAddRejectSender);
+        RemoveRejectSenderCommand = new RelayCommand<string>(RemoveRejectSender, sender => CanRemoveSender(sender));
     }
 
     #region Properties
 
     public ObservableCollection<DistributionListItemDto> DistributionLists { get; } = new();
     public ObservableCollection<GroupMemberDto> Members { get; } = new();
+    public ObservableCollection<string> AcceptMessagesOnlyFrom { get; } = new();
+    public ObservableCollection<string> RejectMessagesFrom { get; } = new();
 
     public bool IsLoading
     {
@@ -190,6 +201,8 @@ public class DistributionListViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsDynamicGroup));
                 OnPropertyChanged(nameof(CanModifyMembers));
                 OnPropertyChanged(nameof(CanEditSettings));
+                OnPropertyChanged(nameof(CanAddAcceptSender));
+                OnPropertyChanged(nameof(CanAddRejectSender));
                 InitializeSettingsFromDetails();
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -258,6 +271,35 @@ public class DistributionListViewModel : ViewModelBase
     public bool CanAddMember => !string.IsNullOrWhiteSpace(NewMemberIdentity) && CanModifyMembers;
     public bool CanEditSettings => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup);
 
+    public string? NewAcceptedSender
+    {
+        get => _newAcceptedSender;
+        set
+        {
+            if (SetProperty(ref _newAcceptedSender, value))
+            {
+                OnPropertyChanged(nameof(CanAddAcceptSender));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewRejectedSender
+    {
+        get => _newRejectedSender;
+        set
+        {
+            if (SetProperty(ref _newRejectedSender, value))
+            {
+                OnPropertyChanged(nameof(CanAddRejectSender));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool CanAddAcceptSender => CanEditSettings && !string.IsNullOrWhiteSpace(NewAcceptedSender);
+    public bool CanAddRejectSender => CanEditSettings && !string.IsNullOrWhiteSpace(NewRejectedSender);
+
     public bool AllowExternalSenders
     {
         get => _allowExternalSenders;
@@ -305,6 +347,10 @@ public class DistributionListViewModel : ViewModelBase
     public ICommand RemoveMemberCommand { get; }
     public ICommand SaveSettingsCommand { get; }
     public ICommand DiscardSettingsCommand { get; }
+    public ICommand AddAcceptSenderCommand { get; }
+    public ICommand RemoveAcceptSenderCommand { get; }
+    public ICommand AddRejectSenderCommand { get; }
+    public ICommand RemoveRejectSenderCommand { get; }
 
     #endregion
 
@@ -723,6 +769,98 @@ public class DistributionListViewModel : ViewModelBase
         _loadCts?.Cancel();
     }
 
+    private void LoadSenderFilters(DistributionListDetailsDto details)
+    {
+        AcceptMessagesOnlyFrom.Clear();
+        foreach (var sender in details.AcceptMessagesOnlyFrom)
+        {
+            AcceptMessagesOnlyFrom.Add(sender);
+        }
+
+        RejectMessagesFrom.Clear();
+        foreach (var sender in details.RejectMessagesFrom)
+        {
+            RejectMessagesFrom.Add(sender);
+        }
+
+        _originalAcceptMessagesOnlyFrom = NormalizeSenderList(details.AcceptMessagesOnlyFrom).ToList();
+        _originalRejectMessagesFrom = NormalizeSenderList(details.RejectMessagesFrom).ToList();
+    }
+
+    private void AddAcceptSender()
+    {
+        if (!CanAddAcceptSender)
+        {
+            return;
+        }
+
+        var normalized = NewAcceptedSender!.Trim();
+        if (!AcceptMessagesOnlyFrom.Any(s => string.Equals(s, normalized, StringComparison.OrdinalIgnoreCase)))
+        {
+            AcceptMessagesOnlyFrom.Add(normalized);
+            UpdatePendingSettingsChanges();
+        }
+
+        NewAcceptedSender = string.Empty;
+    }
+
+    private void RemoveAcceptSender(string? sender)
+    {
+        if (!CanRemoveSender(sender))
+        {
+            return;
+        }
+
+        AcceptMessagesOnlyFrom.Remove(sender!);
+        UpdatePendingSettingsChanges();
+    }
+
+    private void AddRejectSender()
+    {
+        if (!CanAddRejectSender)
+        {
+            return;
+        }
+
+        var normalized = NewRejectedSender!.Trim();
+        if (!RejectMessagesFrom.Any(s => string.Equals(s, normalized, StringComparison.OrdinalIgnoreCase)))
+        {
+            RejectMessagesFrom.Add(normalized);
+            UpdatePendingSettingsChanges();
+        }
+
+        NewRejectedSender = string.Empty;
+    }
+
+    private void RemoveRejectSender(string? sender)
+    {
+        if (!CanRemoveSender(sender))
+        {
+            return;
+        }
+
+        RejectMessagesFrom.Remove(sender!);
+        UpdatePendingSettingsChanges();
+    }
+
+    private bool CanRemoveSender(string? sender) => CanEditSettings && !string.IsNullOrWhiteSpace(sender);
+
+    private static IEnumerable<string> NormalizeSenderList(IEnumerable<string> list)
+    {
+        return list
+            .Select(value => value?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)!;
+    }
+
+    private static bool SenderListEquals(IEnumerable<string> current, IEnumerable<string> original)
+    {
+        var normalizedCurrent = NormalizeSenderList(current).ToList();
+        var normalizedOriginal = NormalizeSenderList(original).ToList();
+        return normalizedCurrent.SequenceEqual(normalizedOriginal, StringComparer.OrdinalIgnoreCase);
+    }
+
     private void InitializeSettingsFromDetails()
     {
         _isInitializingSettings = true;
@@ -731,11 +869,20 @@ public class DistributionListViewModel : ViewModelBase
         {
             AllowExternalSenders = !SelectedDetails.RequireSenderAuthenticationEnabled;
             _originalAllowExternalSenders = AllowExternalSenders;
+            LoadSenderFilters(SelectedDetails);
+            NewAcceptedSender = string.Empty;
+            NewRejectedSender = string.Empty;
         }
         else
         {
             AllowExternalSenders = false;
             _originalAllowExternalSenders = false;
+            AcceptMessagesOnlyFrom.Clear();
+            RejectMessagesFrom.Clear();
+            _originalAcceptMessagesOnlyFrom = new List<string>();
+            _originalRejectMessagesFrom = new List<string>();
+            NewAcceptedSender = string.Empty;
+            NewRejectedSender = string.Empty;
         }
 
         _isInitializingSettings = false;
@@ -749,7 +896,9 @@ public class DistributionListViewModel : ViewModelBase
             return;
         }
 
-        HasPendingSettingsChanges = AllowExternalSenders != _originalAllowExternalSenders;
+        HasPendingSettingsChanges = AllowExternalSenders != _originalAllowExternalSenders
+            || !SenderListEquals(AcceptMessagesOnlyFrom, _originalAcceptMessagesOnlyFrom)
+            || !SenderListEquals(RejectMessagesFrom, _originalRejectMessagesFrom);
     }
 
     private async Task SaveSettingsAsync(CancellationToken cancellationToken)
@@ -764,10 +913,15 @@ public class DistributionListViewModel : ViewModelBase
 
         try
         {
+            var acceptChanged = !SenderListEquals(AcceptMessagesOnlyFrom, _originalAcceptMessagesOnlyFrom);
+            var rejectChanged = !SenderListEquals(RejectMessagesFrom, _originalRejectMessagesFrom);
+
             var request = new SetDistributionListSettingsRequest
             {
                 Identity = SelectedDetails.Identity,
-                RequireSenderAuthenticationEnabled = !AllowExternalSenders
+                RequireSenderAuthenticationEnabled = !AllowExternalSenders,
+                AcceptMessagesOnlyFrom = acceptChanged ? NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
+                RejectMessagesFrom = rejectChanged ? NormalizeSenderList(RejectMessagesFrom).ToList() : null
             };
 
             _shellViewModel.AddLog(LogLevel.Information, $"Aggiornamento impostazioni lista {SelectedDetails.DisplayName}...");
@@ -777,7 +931,11 @@ public class DistributionListViewModel : ViewModelBase
             if (result.IsSuccess)
             {
                 SelectedDetails.RequireSenderAuthenticationEnabled = !AllowExternalSenders;
+                SelectedDetails.AcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
+                SelectedDetails.RejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
                 _originalAllowExternalSenders = AllowExternalSenders;
+                _originalAcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
+                _originalRejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
                 HasPendingSettingsChanges = false;
                 _shellViewModel.AddLog(LogLevel.Information, "Impostazioni lista aggiornate");
             }
@@ -806,6 +964,18 @@ public class DistributionListViewModel : ViewModelBase
         }
 
         AllowExternalSenders = _originalAllowExternalSenders;
+        AcceptMessagesOnlyFrom.Clear();
+        foreach (var sender in _originalAcceptMessagesOnlyFrom)
+        {
+            AcceptMessagesOnlyFrom.Add(sender);
+        }
+
+        RejectMessagesFrom.Clear();
+        foreach (var sender in _originalRejectMessagesFrom)
+        {
+            RejectMessagesFrom.Add(sender);
+        }
+
         HasPendingSettingsChanges = false;
         _shellViewModel.AddLog(LogLevel.Information, "Modifiche lista annullate");
     }

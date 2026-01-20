@@ -51,6 +51,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public MailboxListViewModel? Mailboxes { get; set; }
     public MailboxListViewModel? SharedMailboxes { get; set; }
     public MailboxDetailsViewModel? MailboxDetails { get; set; }
+    public MailboxSpaceViewModel? MailboxSpace { get; set; }
     public DistributionListViewModel? DistributionLists { get; set; }
     public LogsViewModel? Logs { get; set; }
 
@@ -80,6 +81,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         NavigateToDashboardCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Dashboard));
         NavigateToMailboxesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Mailboxes));
         NavigateToSharedMailboxesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.SharedMailboxes));
+        NavigateToMailboxSpaceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailboxSpace));
         NavigateToDistributionListsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.DistributionLists));
         NavigateToToolsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Tools));
         NavigateToLogsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Logs));
@@ -208,6 +210,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
                 OnPropertyChanged(nameof(IsDashboardPage));
                 OnPropertyChanged(nameof(IsMailboxesPage));
                 OnPropertyChanged(nameof(IsSharedMailboxesPage));
+                OnPropertyChanged(nameof(IsMailboxSpacePage));
                 OnPropertyChanged(nameof(IsDistributionListsPage));
                 OnPropertyChanged(nameof(IsToolsPage));
                 OnPropertyChanged(nameof(IsLogsPage));
@@ -219,6 +222,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public bool IsDashboardPage => CurrentPage == NavigationPage.Dashboard;
     public bool IsMailboxesPage => CurrentPage == NavigationPage.Mailboxes;
     public bool IsSharedMailboxesPage => CurrentPage == NavigationPage.SharedMailboxes;
+    public bool IsMailboxSpacePage => CurrentPage == NavigationPage.MailboxSpace;
     public bool IsDistributionListsPage => CurrentPage == NavigationPage.DistributionLists;
     public bool IsToolsPage => CurrentPage == NavigationPage.Tools;
     public bool IsLogsPage => CurrentPage == NavigationPage.Logs;
@@ -228,6 +232,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         NavigationPage.Dashboard => "Dashboard",
         NavigationPage.Mailboxes => "Mailboxes",
         NavigationPage.SharedMailboxes => "Shared Mailboxes",
+        NavigationPage.MailboxSpace => "Spazio mailbox",
         NavigationPage.DistributionLists => "Distribution Lists",
         NavigationPage.Tools => "Tools",
         NavigationPage.Logs => "Logs",
@@ -321,6 +326,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public ICommand NavigateToDashboardCommand { get; }
     public ICommand NavigateToMailboxesCommand { get; }
     public ICommand NavigateToSharedMailboxesCommand { get; }
+    public ICommand NavigateToMailboxSpaceCommand { get; }
     public ICommand NavigateToDistributionListsCommand { get; }
     public ICommand NavigateToToolsCommand { get; }
     public ICommand NavigateToLogsCommand { get; }

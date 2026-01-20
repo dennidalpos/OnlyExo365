@@ -131,6 +131,21 @@
                         </Button.Style>
                     </Button>
 
+                    <!-- Mailbox Space -->
+                    <Button Content="Spazio mailbox" Command="{Binding NavigateToMailboxSpaceCommand}"
+                            HorizontalContentAlignment="Left" Padding="16,10"
+                            Margin="4,2">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMailboxSpacePage}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
                     <!-- Distribution Lists -->
                     <Button Content="Distribution Lists" Command="{Binding NavigateToDistributionListsCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
@@ -193,6 +208,10 @@
                 <!-- Shared Mailboxes Page -->
                 <views:SharedMailboxListView x:Name="SharedMailboxListView"
                                         Visibility="{Binding IsSharedMailboxesPage, Converter={StaticResource BoolToVisibility}}"/>
+
+                <!-- Mailbox Space Page -->
+                <views:MailboxSpaceView x:Name="MailboxSpaceView"
+                                        Visibility="{Binding IsMailboxSpacePage, Converter={StaticResource BoolToVisibility}}"/>
 
                 <!-- Distribution Lists Page -->
                 <views:DistributionListView x:Name="DistributionListView"

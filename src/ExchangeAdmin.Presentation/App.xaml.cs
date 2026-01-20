@@ -45,6 +45,7 @@ public partial class App : System.Windows.Application
         var mailboxListViewModel = new MailboxListViewModel(_workerService, _navigationService, _shellViewModel);
         var sharedMailboxListViewModel = new MailboxListViewModel(_workerService, _navigationService, _shellViewModel);
         var mailboxDetailsViewModel = new MailboxDetailsViewModel(_workerService, _navigationService, _shellViewModel);
+        var mailboxSpaceViewModel = new MailboxSpaceViewModel(_workerService, _navigationService, _shellViewModel);
         var distributionListViewModel = new DistributionListViewModel(_workerService, _navigationService, _shellViewModel);
         var logsViewModel = new LogsViewModel(_shellViewModel);
 
@@ -57,6 +58,7 @@ public partial class App : System.Windows.Application
         _shellViewModel.Mailboxes = mailboxListViewModel;
         _shellViewModel.SharedMailboxes = sharedMailboxListViewModel;
         _shellViewModel.MailboxDetails = mailboxDetailsViewModel;
+        _shellViewModel.MailboxSpace = mailboxSpaceViewModel;
         _shellViewModel.DistributionLists = distributionListViewModel;
         _shellViewModel.Logs = logsViewModel;
 

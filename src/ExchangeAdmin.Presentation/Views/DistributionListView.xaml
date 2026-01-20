@@ -10,7 +10,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- List Panel -->
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" IsEnabled="{Binding DistributionLists.IsLoading, Converter={StaticResource InverseBool}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -102,6 +102,15 @@
                     HorizontalAlignment="Center" Margin="0,12,0,0"
                     Style="{StaticResource PrimaryButton}"
                     Visibility="{Binding DistributionLists.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+            <!-- Loading Overlay -->
+            <Border Background="#80000000"
+                    Visibility="{Binding DistributionLists.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="150" Height="4"/>
+                    <TextBlock Text="Caricamento liste..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Splitter -->
@@ -119,7 +128,8 @@
                        Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource InverseBoolToVisibility}}"/>
 
             <!-- Details Content -->
-            <Grid Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource BoolToVisibility}}">
+            <Grid Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource BoolToVisibility}}"
+                  IsEnabled="{Binding DistributionLists.IsLoadingDetails, Converter={StaticResource InverseBool}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -216,22 +226,72 @@
                     <GroupBox Header="Filtri mittenti" Margin="0,0,0,12">
                         <StackPanel>
                             <TextBlock Text="Accetta solo da:" FontWeight="SemiBold"/>
-                            <ItemsControl ItemsSource="{Binding DistributionLists.SelectedDetails.AcceptMessagesOnlyFrom}">
+                            <ItemsControl ItemsSource="{Binding DistributionLists.AcceptMessagesOnlyFrom}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding}" Margin="0,2"/>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding}" Margin="0,2"/>
+                                            <Button Grid.Column="1" Content="Rimuovi"
+                                                    Command="{Binding DataContext.DistributionLists.RemoveAcceptSenderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource DangerButton}" Padding="6,2"
+                                                    Margin="8,0,0,0"
+                                                    IsEnabled="{Binding DataContext.DistributionLists.CanEditSettings, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
+                            <Grid Margin="0,6,0,0"
+                                  IsEnabled="{Binding DistributionLists.CanEditSettings}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding DistributionLists.NewAcceptedSender, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,8,0"/>
+                                <Button Grid.Column="1" Content="Aggiungi"
+                                        Command="{Binding DistributionLists.AddAcceptSenderCommand}"
+                                        Style="{StaticResource PrimaryButton}"/>
+                            </Grid>
+
                             <TextBlock Text="Rifiuta da:" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <ItemsControl ItemsSource="{Binding DistributionLists.SelectedDetails.RejectMessagesFrom}">
+                            <ItemsControl ItemsSource="{Binding DistributionLists.RejectMessagesFrom}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding}" Margin="0,2"/>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding}" Margin="0,2"/>
+                                            <Button Grid.Column="1" Content="Rimuovi"
+                                                    Command="{Binding DataContext.DistributionLists.RemoveRejectSenderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource DangerButton}" Padding="6,2"
+                                                    Margin="8,0,0,0"
+                                                    IsEnabled="{Binding DataContext.DistributionLists.CanEditSettings, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
+                            <Grid Margin="0,6,0,0"
+                                  IsEnabled="{Binding DistributionLists.CanEditSettings}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding DistributionLists.NewRejectedSender, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,8,0"/>
+                                <Button Grid.Column="1" Content="Aggiungi"
+                                        Command="{Binding DistributionLists.AddRejectSenderCommand}"
+                                        Style="{StaticResource PrimaryButton}"/>
+                            </Grid>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

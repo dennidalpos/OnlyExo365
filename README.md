@@ -180,6 +180,29 @@ Communication between UI and Worker uses Named Pipes with JSON:
 - **Heartbeat**: Worker health monitoring (5s interval)
 - **Cancellation**: Cooperative cancellation via CancellationToken
 
+### Runtime Flow (High-Level)
+
+1. **Presentation app starts** and initializes MVVM navigation.
+2. **Worker supervisor launches** `ExchangeAdmin.Worker.exe` (visible but minimized) for OAuth browser authentication.
+3. **IPC handshake completes** over named pipes; status updates in the UI.
+4. **Connect Exchange** triggers PowerShell `Connect-ExchangeOnline` in the worker.
+5. **Capability detection** runs after auth to enable/disable UI actions.
+6. **User operations** (load mailboxes, edit permissions, etc.) stream progress/logs back to the UI.
+
+### Key Executables
+
+| Executable | Role | Notes |
+|------------|------|-------|
+| `ExchangeAdmin.Presentation.exe` | WPF UI | Launches the worker and shows status/logs |
+| `ExchangeAdmin.Worker.exe` | PowerShell worker | Runs Exchange cmdlets, sends events/logs |
+
+### Configuration & Dependencies
+
+- **PowerShell 7**: Required for the worker runspace.
+- **ExchangeOnlineManagement**: Required PowerShell module for Exchange cmdlets.
+- **Execution policy**: Worker auto-sets `RemoteSigned` if needed.
+- **Authentication**: OAuth browser flow requires a visible (minimized) worker window.
+
 ### Error Handling
 
 Errors are classified and handled appropriately:

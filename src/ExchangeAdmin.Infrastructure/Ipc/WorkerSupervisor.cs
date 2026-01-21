@@ -191,8 +191,8 @@ public class WorkerSupervisor : IAsyncDisposable
             {
                 FileName = workerPath,
                 UseShellExecute = false,
-                CreateNoWindow = false, // Permetti finestre per autenticazione interattiva
-                WindowStyle = ProcessWindowStyle.Minimized, // Minimizza la console
+                CreateNoWindow = true, // Evita la console del worker
+                WindowStyle = ProcessWindowStyle.Hidden, // Nasconde la finestra se presente
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };

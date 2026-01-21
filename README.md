@@ -212,6 +212,7 @@ Communication between UI and Worker uses Named Pipes with JSON:
 - **ExchangeOnlineManagement**: Required PowerShell module for Exchange cmdlets.
 - **Execution policy**: Worker auto-sets `RemoteSigned` if needed.
 - **Authentication**: OAuth browser flow opens in the user's browser.
+- **WAM**: Disabled in the worker session to avoid window-handle issues when running hidden.
 
 ### Error Handling
 

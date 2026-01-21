@@ -557,7 +557,7 @@ public sealed class PowerShellEngine : IDisposable
 
     private static string BuildConnectExchangeCommand(string? exchangeEnvironment)
     {
-        const string baseCommand = "Connect-ExchangeOnline -ShowBanner:$false";
+        const string baseCommand = "$env:EXO_EnableWAM = 0; Connect-ExchangeOnline -ShowBanner:$false";
         if (string.IsNullOrWhiteSpace(exchangeEnvironment))
         {
             return baseCommand;

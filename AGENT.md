@@ -81,6 +81,7 @@ var startInfo = new ProcessStartInfo
 ```
 
 **Why**: The worker should stay in the background while `Connect-ExchangeOnline` opens the browser for OAuth authentication.
+**Note**: WAM is disabled in the worker session (`$env:EXO_EnableWAM = 0`) to avoid window-handle errors when running hidden.
 
 **Location**: `WorkerSupervisor.cs:184-191`
 
@@ -408,8 +409,9 @@ See `Directory.Packages.props` for centralized version management
 ### If user reports "Authentication doesn't work"
 1. Check `WorkerSupervisor.cs` - ensure the worker stays hidden while launching the browser
 2. Look for browser window opening (might be behind other windows)
-3. Check PowerShell errors for module loading issues
-4. Verify ExecutionPolicy is set correctly
+3. Verify the worker session disables WAM (`$env:EXO_EnableWAM = 0`)
+4. Check PowerShell errors for module loading issues
+5. Verify ExecutionPolicy is set correctly
 
 ### If user reports "Too many logs"
 1. Check if Verbose Logging is enabled (checkbox in toolbar)
@@ -473,6 +475,7 @@ When in doubt, **test the changes** with Release build before committing!
 ### Background Worker + Documentation
 - Worker console now stays hidden during normal operation
 - Documentation updated to reflect background launch behavior and log-only output
+- Worker auth disables WAM to prevent window handle errors when hidden
 
 ## Recent Updates (2026-01-18)
 

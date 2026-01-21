@@ -21,6 +21,9 @@
     Create self-contained deployment (includes .NET runtime).
     Output will be larger (~150MB) but doesn't require .NET 8 on target machine.
 
+.PARAMETER Msi
+    Build an MSI installer using WiX Toolset v3.14 and published output.
+
 .PARAMETER Verbose
     Show detailed output from dotnet commands.
 
@@ -36,11 +39,16 @@
     .\build.ps1 -Configuration Debug -Verbose
     # Debug build with verbose output
 
+.EXAMPLE
+    .\build.ps1 -Publish -Msi
+    # Publish and build MSI installer
+
 .NOTES
     Prerequisites:
     - .NET 8 SDK
     - PowerShell 7+
     - Windows (WPF is Windows-only)
+    - WiX Toolset v3.14 (for MSI)
 
     For runtime:
     - PowerShell 7+ (for worker process)
@@ -56,7 +64,9 @@ param(
 
     [switch]$Publish = $true,
 
-    [switch]$SelfContained = $true
+    [switch]$SelfContained = $true,
+
+    [switch]$Msi = $false
 )
 
 # Strict error handling - fail fast
@@ -69,6 +79,9 @@ $SolutionDir = Split-Path -Parent $ScriptDir
 $SolutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
 $OutputDir = Join-Path $SolutionDir "artifacts"
 $PublishDir = Join-Path $OutputDir "publish"
+$InstallerDir = Join-Path $OutputDir "installer"
+$InstallerSourceDir = Join-Path $SolutionDir "installer"
+$WixBin = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
 
 # Timestamp for logging
 $BuildStartTime = Get-Date
@@ -102,6 +115,26 @@ function Stop-WithError {
     Write-Host "========================================" -ForegroundColor Red
     Write-Host ""
     exit $ExitCode
+}
+
+function Get-MsiVersion {
+    param([string]$VersionString)
+
+    if ([string]::IsNullOrWhiteSpace($VersionString)) {
+        return "1.0.0"
+    }
+
+    $cleanVersion = $VersionString.Split('+')[0].Split(' ')[0]
+
+    try {
+        $parsed = [Version]$cleanVersion
+    }
+    catch {
+        return "1.0.0"
+    }
+
+    $build = if ($parsed.Build -ge 0) { $parsed.Build } else { 0 }
+    return "$($parsed.Major).$($parsed.Minor).$build"
 }
 
 function Invoke-DotNet {
@@ -147,6 +180,7 @@ Write-Host "Solution      : $SolutionFile"
 Write-Host "Output        : $OutputDir"
 Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $($SelfContained.IsPresent)"
+Write-Host "MSI           : $($Msi.IsPresent)"
 Write-Host "Started at    : $($BuildStartTime.ToString('HH:mm:ss'))"
 
 # Verify solution exists
@@ -295,6 +329,105 @@ if ($Publish) {
     Write-Info "Total size: $([math]::Round($publishSize, 2)) MB"
 }
 
+if ($Msi) {
+    Write-Step "Building MSI installer"
+
+    if (-not $Publish) {
+        Stop-WithError "MSI build requires published output. Run with -Publish."
+    }
+
+    if (-not (Test-Path $PublishDir)) {
+        Stop-WithError "Publish output not found: $PublishDir"
+    }
+
+    $presentationExe = Join-Path $PublishDir "ExchangeAdmin.Presentation.exe"
+    if (-not (Test-Path $presentationExe)) {
+        Stop-WithError "Presentation executable not found: $presentationExe"
+    }
+
+    $wixCandle = Join-Path $WixBin "candle.exe"
+    $wixLight = Join-Path $WixBin "light.exe"
+    $wixHeat = Join-Path $WixBin "heat.exe"
+
+    foreach ($tool in @($wixCandle, $wixLight, $wixHeat)) {
+        if (-not (Test-Path $tool)) {
+            Stop-WithError "WiX tool not found: $tool"
+        }
+    }
+
+    if (-not (Test-Path $InstallerSourceDir)) {
+        Stop-WithError "Installer source directory not found: $InstallerSourceDir"
+    }
+
+    $wixSource = Join-Path $InstallerSourceDir "ExchangeAdmin.wxs"
+    if (-not (Test-Path $wixSource)) {
+        Stop-WithError "WiX source file not found: $wixSource"
+    }
+
+    if (-not (Test-Path $InstallerDir)) {
+        New-Item -Path $InstallerDir -ItemType Directory -Force | Out-Null
+        Write-Info "Created: $InstallerDir"
+    }
+
+    $wixObjDir = Join-Path $InstallerDir "obj"
+    if (-not (Test-Path $wixObjDir)) {
+        New-Item -Path $wixObjDir -ItemType Directory -Force | Out-Null
+    }
+
+    $harvestFile = Join-Path $InstallerDir "PublishFiles.wxs"
+    $msiOutput = Join-Path $InstallerDir "ExchangeAdmin.msi"
+
+    $rawVersion = (Get-Item $presentationExe).VersionInfo.ProductVersion
+    $msiVersion = Get-MsiVersion -VersionString $rawVersion
+    Write-Info "MSI version: $msiVersion"
+
+    Write-Info "Harvesting publish directory..."
+    & $wixHeat "dir" $PublishDir `
+        "-cg" "PublishFiles" `
+        "-dr" "INSTALLDIR" `
+        "-gg" `
+        "-srd" `
+        "-sfrag" `
+        "-sreg" `
+        "-var" "var.PublishDir" `
+        "-out" $harvestFile
+
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithError "Heat harvesting failed (exit code: $LASTEXITCODE)" $LASTEXITCODE
+    }
+
+    Write-Info "Compiling WiX sources..."
+    & $wixCandle "-nologo" `
+        "-arch" "x64" `
+        "-dPublishDir=$PublishDir" `
+        "-dProductName=ExchangeAdmin" `
+        "-dManufacturer=OnlyExo365" `
+        "-dProductVersion=$msiVersion" `
+        "-out" "$wixObjDir\" `
+        $wixSource `
+        $harvestFile
+
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithError "WiX candle failed (exit code: $LASTEXITCODE)" $LASTEXITCODE
+    }
+
+    $mainObj = Join-Path $wixObjDir "ExchangeAdmin.wixobj"
+    $harvestObj = Join-Path $wixObjDir "PublishFiles.wixobj"
+
+    Write-Info "Linking MSI..."
+    & $wixLight "-nologo" `
+        "-ext" "WixUIExtension" `
+        "-out" $msiOutput `
+        $mainObj `
+        $harvestObj
+
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithError "WiX light failed (exit code: $LASTEXITCODE)" $LASTEXITCODE
+    }
+
+    Write-Success "MSI created: $msiOutput"
+}
+
 # Summary
 $BuildEndTime = Get-Date
 $BuildDuration = $BuildEndTime - $BuildStartTime
@@ -322,6 +455,11 @@ if ($Publish) {
     if (-not $SelfContained) {
         Write-Host "  3. .NET 8 Runtime (framework-dependent build)"
     }
+}
+
+if ($Msi) {
+    Write-Host ""
+    Write-Host "MSI output: $InstallerDir" -ForegroundColor Cyan
 }
 
 Write-Host ""

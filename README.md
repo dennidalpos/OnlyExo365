@@ -112,6 +112,15 @@ The fastest way to build and test:
 .\build\build.ps1 -Clean -Publish -SelfContained
 ```
 
+### MSI Installer
+
+```powershell
+# Publish and build the MSI installer (requires WiX Toolset v3.14)
+.\build\build.ps1 -Publish -Msi
+```
+
+**MSI output:** `artifacts\installer\ExchangeAdmin.msi`
+
 ## Running the Application
 
 1. Launch `ExchangeAdmin.Presentation.exe`

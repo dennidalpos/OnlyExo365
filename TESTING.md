@@ -20,6 +20,13 @@ cd artifacts\publish
 .\ExchangeAdmin.Presentation.exe
 ```
 
+#### MSI Installer
+```powershell
+cd <path-to-repo>\OnlyExo365
+.\build\build.ps1 -Publish -Msi
+```
+Output: `artifacts\installer\ExchangeAdmin.msi`
+
 ### 2. Test Worker Connection
 
 1. **Start Worker**

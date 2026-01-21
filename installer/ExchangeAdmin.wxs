@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?ifndef ProductName ?>
+    <?define ProductName="ExchangeAdmin" ?>
+  <?endif ?>
+  <?ifndef Manufacturer ?>
+    <?define Manufacturer="OnlyExo365" ?>
+  <?endif ?>
+  <?ifndef ProductVersion ?>
+    <?define ProductVersion="1.0.0" ?>
+  <?endif ?>
+
+  <Product
+    Id="*"
+    Name="$(var.ProductName)"
+    Manufacturer="$(var.Manufacturer)"
+    Language="1033"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="A8C31B9E-49D2-4A23-9F57-7A39B3E5BCA2">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLDIR" Name="$(var.ProductName)" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="AppShortcuts" Guid="9E5C9467-5F92-478F-B27F-88B5B7BF9C3A">
+        <Shortcut
+          Id="StartMenuShortcut"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR" />
+        <RemoveFolder Id="RemoveProgramsFolder" On="uninstall" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+          Name="Installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentGroupRef Id="PublishFiles" />
+      <ComponentRef Id="AppShortcuts" />
+    </Feature>
+  </Product>
+</Wix>

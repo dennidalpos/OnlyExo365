@@ -33,7 +33,7 @@
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLDIR" Name="$(var.ProductName)" />
       </Directory>
-      <Directory Id="ProgramMenuFolder">
+      <Directory Id="CommonProgramsFolder">
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
       </Directory>
     </Directory>

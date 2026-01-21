@@ -416,7 +416,6 @@ if ($Msi) {
 
     Write-Info "Linking MSI..."
     & $wixLight "-nologo" `
-        "-arch" "x64" `
         "-ext" "WixUIExtension" `
         "-out" $msiOutput `
         $mainObj `

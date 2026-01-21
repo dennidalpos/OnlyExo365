@@ -72,9 +72,9 @@
           WorkingDirectory="INSTALLDIR" />
         <RemoveFolder Id="RemoveDesktopFolder" On="uninstall" />
         <RegistryValue
-          Root="HKLM"
+          Root="HKCU"
           Key="Software\$(var.Manufacturer)\$(var.ProductName)"
-          Name="DesktopShortcutInstalled"
+          Name="DesktopShortcutInstalledHKCU"
           Type="integer"
           Value="1"
           KeyPath="yes" />

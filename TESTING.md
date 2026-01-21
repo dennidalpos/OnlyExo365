@@ -6,7 +6,7 @@
 
 #### Framework-Dependent Build (Requires .NET 8)
 ```powershell
-cd C:\Users\Utente\Desktop\OnlyExo365
+cd <path-to-repo>\OnlyExo365
 .\build\build.ps1 -Publish
 cd artifacts\publish
 .\ExchangeAdmin.Presentation.exe
@@ -14,7 +14,7 @@ cd artifacts\publish
 
 #### Self-Contained Build (Standalone)
 ```powershell
-cd C:\Users\Utente\Desktop\OnlyExo365
+cd <path-to-repo>\OnlyExo365
 .\build\build.ps1 -Clean -Publish -SelfContained
 cd artifacts\publish
 .\ExchangeAdmin.Presentation.exe

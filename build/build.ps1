@@ -398,6 +398,7 @@ if ($Msi) {
 
     Write-Info "Compiling WiX sources..."
     & $wixCandle "-nologo" `
+        "-arch" "x64" `
         "-dPublishDir=$PublishDir" `
         "-dProductName=ExchangeAdmin" `
         "-dManufacturer=OnlyExo365" `
@@ -415,6 +416,7 @@ if ($Msi) {
 
     Write-Info "Linking MSI..."
     & $wixLight "-nologo" `
+        "-arch" "x64" `
         "-ext" "WixUIExtension" `
         "-out" $msiOutput `
         $mainObj `

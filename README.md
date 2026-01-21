@@ -120,12 +120,13 @@ The fastest way to build and test:
 ```
 
 **MSI output:** `artifacts\installer\ExchangeAdmin.msi`
+**Installer shortcuts:** Start Menu and Desktop entries are created during install.
 
 ## Running the Application
 
 1. Launch `ExchangeAdmin.Presentation.exe`
 2. Click **"Start Worker"** to start the background worker process
-   - A minimized console window will appear (required for authentication)
+   - The worker runs in the background without showing a console window
    - Worker status should show green "Connected" within 3 seconds
 3. Click **"Connect Exchange"** to authenticate
    - Browser window opens automatically for Microsoft 365 authentication
@@ -192,7 +193,7 @@ Communication between UI and Worker uses Named Pipes with JSON:
 ### Runtime Flow (High-Level)
 
 1. **Presentation app starts** and initializes MVVM navigation.
-2. **Worker supervisor launches** `ExchangeAdmin.Worker.exe` (visible but minimized) for OAuth browser authentication.
+2. **Worker supervisor launches** `ExchangeAdmin.Worker.exe` in the background for OAuth browser authentication.
 3. **IPC handshake completes** over named pipes; status updates in the UI.
 4. **Connect Exchange** triggers PowerShell `Connect-ExchangeOnline` in the worker.
 5. **Capability detection** runs after auth to enable/disable UI actions.
@@ -210,7 +211,7 @@ Communication between UI and Worker uses Named Pipes with JSON:
 - **PowerShell 7**: Required for the worker runspace.
 - **ExchangeOnlineManagement**: Required PowerShell module for Exchange cmdlets.
 - **Execution policy**: Worker auto-sets `RemoteSigned` if needed.
-- **Authentication**: OAuth browser flow requires a visible (minimized) worker window.
+- **Authentication**: OAuth browser flow opens in the user's browser.
 
 ### Error Handling
 
@@ -275,7 +276,6 @@ If buttons or features appear disabled:
 ### Application Crash
 
 If the application crashes or exits unexpectedly:
-- Check the Worker console window for errors (maximize it)
 - Review the Logs tab before the crash
 - Ensure all prerequisites are properly installed
 - Try the self-contained build if using framework-dependent

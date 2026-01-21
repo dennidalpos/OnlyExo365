@@ -74,13 +74,13 @@ _runspace = RunspaceFactory.CreateRunspace(iss);
 var startInfo = new ProcessStartInfo
 {
     FileName = workerPath,
-    CreateNoWindow = false,              // ✅ MUST be false
-    WindowStyle = ProcessWindowStyle.Minimized,  // ✅ Minimized but visible
+    CreateNoWindow = true,              // ✅ Hide worker console
+    WindowStyle = ProcessWindowStyle.Hidden,  // ✅ Keep any window hidden
     // ...
 };
 ```
 
-**Why**: `Connect-ExchangeOnline` opens a browser window for OAuth authentication. If `CreateNoWindow = true`, the browser window cannot be created and authentication fails silently.
+**Why**: The worker should stay in the background while `Connect-ExchangeOnline` opens the browser for OAuth authentication.
 
 **Location**: `WorkerSupervisor.cs:184-191`
 
@@ -370,10 +370,9 @@ Before committing changes to IPC or Worker code:
 - ✅ Uses Windows authentication (Named Pipes)
 - ✅ OAuth flow for Exchange (browser-based)
 - ✅ ExecutionPolicy prevents unsigned scripts
-- ⚠️ Worker console visible (minimized) - shows some data
+- ✅ Worker console hidden during operation
 
 ### Future Improvements
-- [ ] Hide Worker console completely (requires alternative auth flow)
 - [ ] Add audit logging for all Exchange operations
 - [ ] Implement role-based access (if multi-user support added)
 
@@ -397,7 +396,7 @@ See `Directory.Packages.props` for centralized version management
 ### If user reports "Worker won't start"
 1. Check that `pwsh.exe` is in PATH
 2. Verify ExchangeOnlineManagement module is installed
-3. Look for errors in Worker console (maximize it)
+3. Look for errors in the Logs tab or captured worker output
 4. Check `Program.cs` EnsureExecutionPolicyAsync logs
 
 ### If user reports "Connection times out"
@@ -407,7 +406,7 @@ See `Directory.Packages.props` for centralized version management
 4. Review IPC initialization sequence in this file
 
 ### If user reports "Authentication doesn't work"
-1. Check `WorkerSupervisor.cs` - ensure `CreateNoWindow = false`
+1. Check `WorkerSupervisor.cs` - ensure the worker stays hidden while launching the browser
 2. Look for browser window opening (might be behind other windows)
 3. Check PowerShell errors for module loading issues
 4. Verify ExecutionPolicy is set correctly
@@ -421,7 +420,7 @@ See `Directory.Packages.props` for centralized version management
 
 - **Don't change IPC initialization** without thorough testing
 - **Don't remove manual Flush calls** - they're intentional
-- **Don't set CreateNoWindow = true** - breaks authentication
+- **Keep the worker hidden** (`CreateNoWindow = true`, `WindowStyle = Hidden`)
 - **Don't assume ExecutionPolicy is set** - verify or set it
 - **Don't add AutoFlush = true** to StreamWriter initializers
 
@@ -460,7 +459,7 @@ When in doubt, **test the changes** with Release build before committing!
 - No export to CSV functionality
 - No dark theme (only light theme)
 - No localization (mixed English/Italian strings)
-- Worker console visible (minimized) during operation
+- Worker output only visible in logs (no console window)
 
 **Next Recommended Tasks**:
 1. Add unit tests for IPC serialization/deserialization
@@ -468,6 +467,12 @@ When in doubt, **test the changes** with Release build before committing!
 3. Implement CSV export for mailbox and distribution list data
 4. Improve error handling with user-friendly dialogs
 5. Add performance monitoring and operation duration tracking
+
+## Recent Updates (2026-01-21)
+
+### Background Worker + Documentation
+- Worker console now stays hidden during normal operation
+- Documentation updated to reflect background launch behavior and log-only output
 
 ## Recent Updates (2026-01-18)
 
@@ -492,5 +497,5 @@ When in doubt, **test the changes** with Release build before committing!
 
 ---
 
-Last Updated: 2026-01-18
-By: Claude Sonnet 4.5 (via Claude Code CLI)
+Last Updated: 2026-01-21
+By: GPT-5.2-Codex (via OpenAI)

@@ -22,6 +22,10 @@
     UpgradeCode="A8C31B9E-49D2-4A23-9F57-7A39B3E5BCA2">
     <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Platform="x64" />
 
+    <Condition Message="$(var.ProductName) requires Windows 10 or later.">
+      <![CDATA[VersionNT >= 1000]]>
+    </Condition>
+
     <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
@@ -36,6 +40,7 @@
       <Directory Id="CommonProgramsFolder">
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
       </Directory>
+      <Directory Id="DesktopFolder" />
     </Directory>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
@@ -57,9 +62,29 @@
       </Component>
     </DirectoryRef>
 
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="0F9B807E-1A20-4A0D-9C0E-0F1B3D8DE59E">
+        <Shortcut
+          Id="DesktopShortcut"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR" />
+        <RemoveFolder Id="RemoveDesktopFolder" On="uninstall" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+          Name="DesktopShortcutInstalled"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
     <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
       <ComponentGroupRef Id="PublishFiles" />
       <ComponentRef Id="AppShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
     </Feature>
   </Product>
 </Wix>

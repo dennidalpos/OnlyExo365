@@ -121,6 +121,21 @@ The fastest way to build and test:
 
 **MSI output:** `artifacts\installer\ExchangeAdmin.msi`
 
+**Percorso di installazione (default):** `C:\Program Files\ExchangeAdmin` (configurabile via UI MSI, proprietà `INSTALLDIR`).
+
+**Collegamento sul desktop:**
+- L'MSI crea un collegamento sul desktop pubblico (tutti gli utenti) usando l'icona estratta da `ExchangeAdmin.Presentation.exe` (compatibile con Windows 10/11/Server, senza aggiungere file binari extra).
+
+**Icona personalizzata per il desktop (opzionale):**
+1. Crea un file `.ico` multi-risoluzione (16, 24, 32, 48, 256 px) per garantire compatibilità con Windows 10/11/Server.
+2. Salvalo ad esempio in `installer\assets\ExchangeAdmin.ico`.
+3. Aggiorna `installer\ExchangeAdmin.wxs` aggiungendo un elemento `Icon` e riferendolo nello shortcut desktop:
+   ```xml
+   <Icon Id="AppDesktopIcon" SourceFile="installer\assets\ExchangeAdmin.ico" />
+   <Shortcut ... Icon="AppDesktopIcon" IconIndex="0" />
+   ```
+4. Ricostruisci l'MSI con `.\build\build.ps1 -Publish -Msi`.
+
 ## Running the Application
 
 1. Launch `ExchangeAdmin.Presentation.exe`

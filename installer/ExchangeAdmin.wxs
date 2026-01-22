@@ -41,7 +41,7 @@
       <Directory Id="CommonProgramsFolder">
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
       </Directory>
-      <Directory Id="DesktopFolder" Name="Desktop" />
+      <Directory Id="CommonDesktopFolder" Name="Desktop" />
     </Directory>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
@@ -63,7 +63,7 @@
       </Component>
     </DirectoryRef>
 
-    <DirectoryRef Id="DesktopFolder">
+    <DirectoryRef Id="CommonDesktopFolder">
       <Component Id="DesktopShortcut" Guid="B1EC8D4F-BE46-4F2D-9B3E-39B5E79E2CE0">
         <Shortcut
           Id="DesktopShortcut"

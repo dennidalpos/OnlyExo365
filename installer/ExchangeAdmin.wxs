@@ -15,6 +15,33 @@
   <?ifndef SystemRoot ?>
     <?define SystemRoot="$(env.SystemRoot)" ?>
   <?endif ?>
+    <Icon Id="SystemAppIcon" SourceFile="$(var.SystemRoot)\System32\shell32.dll" />
+
+      <Directory Id="CommonDesktopFolder" Name="Desktop" />
+    <DirectoryRef Id="CommonDesktopFolder">
+      <Component Id="DesktopShortcut" Guid="B1EC8D4F-BE46-4F2D-9B3E-39B5E79E2CE0">
+        <Shortcut
+          Id="DesktopShortcut"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR"
+          Icon="SystemAppIcon"
+          IconIndex="0" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+          Name="DesktopShortcutInstalled"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+      <ComponentRef Id="DesktopShortcut" />
+  <?ifndef SystemRoot ?>
+    <?define SystemRoot="$(env.SystemRoot)" ?>
+  <?endif ?>
 
   <Product
     Id="$(var.ProductCode)"

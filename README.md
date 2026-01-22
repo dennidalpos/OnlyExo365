@@ -121,6 +121,8 @@ The fastest way to build and test:
 
 **MSI output:** `artifacts\installer\ExchangeAdmin.msi`
 
+**Desktop shortcut:** The MSI installer creates a desktop shortcut that uses a Windows system icon (no custom icon files required).
+
 **Desktop shortcut:** The installer creates a desktop shortcut that uses a standard Windows system icon (no custom icon files required).
 
 ## Running the Application

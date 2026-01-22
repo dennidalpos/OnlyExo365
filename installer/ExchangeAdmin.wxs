@@ -29,6 +29,8 @@
     <UIRef Id="WixUI_InstallDir" />
     <UIRef Id="WixUI_ErrorProgressText" />
 
+    <Icon Id="AppExeIcon" SourceFile="$(var.PublishDir)\ExchangeAdmin.Presentation.exe" />
+
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLDIR" Name="$(var.ProductName)" />
@@ -36,6 +38,7 @@
       <Directory Id="CommonProgramsFolder">
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
       </Directory>
+      <Directory Id="DesktopFolder" />
     </Directory>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
@@ -45,7 +48,18 @@
           Name="$(var.ProductName)"
           Description="ExchangeAdmin"
           Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
-          WorkingDirectory="INSTALLDIR" />
+          WorkingDirectory="INSTALLDIR"
+          Icon="AppExeIcon"
+          IconIndex="0" />
+        <Shortcut
+          Id="DesktopShortcut"
+          Directory="DesktopFolder"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR"
+          Icon="AppExeIcon"
+          IconIndex="0" />
         <RemoveFolder Id="RemoveProgramsFolder" On="uninstall" />
         <RegistryValue
           Root="HKLM"

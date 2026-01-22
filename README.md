@@ -124,7 +124,7 @@ The fastest way to build and test:
 **Percorso di installazione (default):** `C:\Program Files\ExchangeAdmin` (configurabile via UI MSI, proprietà `INSTALLDIR`).
 
 **Collegamento sul desktop:**
-- L'MSI crea un collegamento sul desktop usando l'icona estratta da `ExchangeAdmin.Presentation.exe` (compatibile con Windows 10/11/Server, senza aggiungere file binari extra).
+- L'MSI crea un collegamento sul desktop pubblico (tutti gli utenti) usando l'icona estratta da `ExchangeAdmin.Presentation.exe` (compatibile con Windows 10/11/Server, senza aggiungere file binari extra).
 
 **Icona personalizzata per il desktop (opzionale):**
 1. Crea un file `.ico` multi-risoluzione (16, 24, 32, 48, 256 px) per garantire compatibilità con Windows 10/11/Server.

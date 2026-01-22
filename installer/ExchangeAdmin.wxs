@@ -38,7 +38,7 @@
       <Directory Id="CommonProgramsFolder">
         <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
       </Directory>
-      <Directory Id="DesktopFolder" />
+      <Directory Id="CommonDesktopFolder" />
     </Directory>
 
     <DirectoryRef Id="ApplicationProgramsFolder">
@@ -53,7 +53,7 @@
           IconIndex="0" />
         <Shortcut
           Id="DesktopShortcut"
-          Directory="DesktopFolder"
+          Directory="CommonDesktopFolder"
           Name="$(var.ProductName)"
           Description="ExchangeAdmin"
           Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"

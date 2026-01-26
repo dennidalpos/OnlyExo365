@@ -7,10 +7,10 @@ using ExchangeAdmin.Contracts.Messages;
 
 namespace ExchangeAdmin.Infrastructure.Ipc;
 
-/// <summary>
-/// Client IPC per comunicazione con il worker via Named Pipes.
-/// Implementa framing robusto, protezione da messaggi parziali, e gestione disconnessione.
-/// </summary>
+             
+                                                               
+                                                                                           
+              
 public class IpcClient : IAsyncDisposable
 {
     private readonly string _pipeName;
@@ -34,60 +34,60 @@ public class IpcClient : IAsyncDisposable
     private readonly object _stateLock = new();
     private readonly SemaphoreSlim _sendLock = new(1, 1);
 
-    /// <summary>
-    /// Evento di cambio stato connessione.
-    /// </summary>
+                 
+                                           
+                  
     public event EventHandler<WorkerConnectionState>? ConnectionStateChanged;
 
-    /// <summary>
-    /// Evento ricevuto dal worker (globale).
-    /// </summary>
+                 
+                                             
+                  
     public event EventHandler<EventEnvelope>? EventReceived;
 
-    /// <summary>
-    /// Indica se il client è connesso al worker.
-    /// </summary>
+                 
+                                                  
+                  
     public bool IsConnected => _isConnected;
 
-    /// <summary>
-    /// Crea un nuovo client IPC.
-    /// </summary>
-    /// <param name="pipeName">Nome pipe principale (null = default).</param>
-    /// <param name="eventPipeName">Nome pipe eventi (null = default).</param>
+                 
+                                 
+                  
+                                                                             
+                                                                              
     public IpcClient(string? pipeName = null, string? eventPipeName = null)
     {
         _pipeName = pipeName ?? IpcConstants.PipeName;
         _eventPipeName = eventPipeName ?? IpcConstants.EventPipeName;
     }
 
-    /// <summary>
-    /// Connette al worker e esegue handshake.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Se handshake fallisce o versioni incompatibili.</exception>
-    /// <exception cref="TimeoutException">Se connessione o handshake vanno in timeout.</exception>
+                 
+                                              
+                  
+                                                                                                               
+                                                                                                   
     public async Task<HandshakeResponse> ConnectAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposing();
 
         try
         {
-            // Crea entrambe le pipe
+                                    
             _requestPipe = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
             _eventPipe = new NamedPipeClientStream(".", _eventPipeName, PipeDirection.In, PipeOptions.Asynchronous);
 
-            // Connetti entrambe le pipe PRIMA di creare readers/writers
-            // Questo evita race condition con il server che aspetta entrambe le connessioni
+                                                                        
+                                                                                            
             await Task.WhenAll(
                 _requestPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken),
                 _eventPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken)).ConfigureAwait(false);
 
-            // Ora crea readers/writers DOPO che entrambe le pipe sono connesse
-            // NON usare AutoFlush per evitare flush prematuro durante la creazione
+                                                                               
+                                                                                   
             _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
             _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
             _eventReader = new StreamReader(_eventPipe, Encoding.UTF8, leaveOpen: true);
 
-            // Handshake con timeout dedicato
+                                             
             var handshakeRequest = new HandshakeRequest();
             await SendRawAsync(handshakeRequest, cancellationToken).ConfigureAwait(false);
 
@@ -101,7 +101,7 @@ public class IpcClient : IAsyncDisposable
                 throw new InvalidOperationException("Empty handshake response from worker");
             }
 
-            // Valida dimensione messaggio
+                                          
             if (!IpcConstants.IsValidMessageSize(responseJson.Length))
             {
                 throw new InvalidOperationException($"Handshake response exceeds maximum size ({responseJson.Length} bytes)");
@@ -118,7 +118,7 @@ public class IpcClient : IAsyncDisposable
                 throw new InvalidOperationException($"Handshake failed: {response.ErrorMessage}");
             }
 
-            // Verifica compatibilità versione
+                                               
             if (!ContractVersion.IsCompatible(response.ContractsVersion))
             {
                 throw new InvalidOperationException(
@@ -130,7 +130,7 @@ public class IpcClient : IAsyncDisposable
                 _isConnected = true;
             }
 
-            // Avvia loop eventi (usano il proprio CTS, indipendente dal token di connessione)
+                                                                                              
             _eventLoopCts = new CancellationTokenSource();
             _eventLoopTask = Task.Run(() => EventLoopAsync(_eventLoopCts.Token), CancellationToken.None);
             _responseLoopTask = Task.Run(() => ResponseLoopAsync(_eventLoopCts.Token), CancellationToken.None);
@@ -146,21 +146,21 @@ public class IpcClient : IAsyncDisposable
         }
         catch (Exception)
         {
-            // Cleanup in caso di errore durante connessione
+                                                            
             await DisposeInternalAsync().ConfigureAwait(false);
             throw;
         }
     }
 
-    /// <summary>
-    /// Invia una richiesta e attende la risposta.
-    /// </summary>
-    /// <param name="request">Request envelope.</param>
-    /// <param name="eventHandler">Handler opzionale per eventi streaming.</param>
-    /// <param name="cancellationToken">Token di cancellazione.</param>
-    /// <returns>Response envelope dal worker.</returns>
-    /// <exception cref="InvalidOperationException">Se non connesso.</exception>
-    /// <exception cref="OperationCanceledException">Se cancellato o timeout.</exception>
+                 
+                                                  
+                  
+                                                       
+                                                                                  
+                                                                       
+                                                        
+                                                                                
+                                                                                         
     public async Task<ResponseEnvelope> SendRequestAsync(
         RequestEnvelope request,
         Action<EventEnvelope>? eventHandler = null,
@@ -175,22 +175,22 @@ public class IpcClient : IAsyncDisposable
 
         var tcs = new TaskCompletionSource<ResponseEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        // Registra handler eventi per questa correlazione
+                                                          
         if (eventHandler != null)
         {
             _eventHandlers[request.CorrelationId] = eventHandler;
             _eventCounts[request.CorrelationId] = 0;
         }
 
-        // Registra pending request
+                                   
         _pendingRequests[request.CorrelationId] = tcs;
 
         try
         {
-            // Invia request
+                            
             await SendRawAsync(request, cancellationToken).ConfigureAwait(false);
 
-            // Attendi risposta con timeout
+                                           
             var timeoutMs = request.TimeoutMs > 0 ? request.TimeoutMs : IpcConstants.RequestTimeoutMs;
             using var timeoutCts = new CancellationTokenSource(timeoutMs);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
@@ -217,15 +217,15 @@ public class IpcClient : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Invia richiesta di cancellazione per una operazione.
-    /// Operazione idempotente - non fallisce se request già completata.
-    /// </summary>
-    /// <param name="correlationId">ID correlazione della request da cancellare.</param>
-    /// <param name="cancellationToken">Token di cancellazione per l'invio.</param>
+                 
+                                                            
+                                                                         
+                  
+                                                                                        
+                                                                                   
     public async Task SendCancelAsync(string correlationId, CancellationToken cancellationToken = default)
     {
-        // Idempotente: non fare nulla se non connesso o già disposing
+                                                                       
         if (!_isConnected || _isDisposing)
         {
             return;
@@ -238,16 +238,16 @@ public class IpcClient : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            // Log ma non propagare - cancel è best-effort
+                                                           
             Debug.WriteLine($"[IpcClient] SendCancelAsync failed for {correlationId}: {ex.Message}");
         }
     }
 
-    /// <summary>
-    /// Invia heartbeat ping. Non attende response (gestita nel response loop).
-    /// </summary>
-    /// <param name="sequence">Numero di sequenza heartbeat.</param>
-    /// <param name="cancellationToken">Token di cancellazione.</param>
+                 
+                                                                               
+                  
+                                                                    
+                                                                       
     public async Task<HeartbeatPong?> SendHeartbeatAsync(long sequence, CancellationToken cancellationToken = default)
     {
         if (!_isConnected || _isDisposing)
@@ -280,7 +280,7 @@ public class IpcClient : IAsyncDisposable
 
             var json = JsonMessageSerializer.Serialize(message);
 
-            // Verifica dimensione prima di inviare
+                                                   
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
                 throw new InvalidOperationException($"Message exceeds maximum size ({json.Length} bytes)");
@@ -333,7 +333,7 @@ public class IpcClient : IAsyncDisposable
 
                 Console.WriteLine($"[IpcClient] Received response (length: {line.Length} bytes)");
 
-                // Validazione dimensione messaggio
+                                                   
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
                     Debug.WriteLine($"[IpcClient] ResponseLoop: message too large ({line.Length} bytes), skipping");
@@ -381,22 +381,22 @@ public class IpcClient : IAsyncDisposable
                         break;
 
                     case HeartbeatPong:
-                        // Heartbeat ricevuto - worker è vivo
-                        // Il supervisor gestisce il tracking
+                                                              
+                                                             
                         break;
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            // Shutdown normale
+                               
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[IpcClient] ResponseLoop error: {ex.Message}");
         }
 
-        // Solo se non stiamo già facendo dispose
+                                                  
         if (!_isDisposing)
         {
             await HandleDisconnectionAsync().ConfigureAwait(false);
@@ -426,7 +426,7 @@ public class IpcClient : IAsyncDisposable
                     break;
                 }
 
-                // Validazione dimensione messaggio
+                                                   
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
                     Debug.WriteLine($"[IpcClient] EventLoop: message too large ({line.Length} bytes), skipping");
@@ -449,7 +449,7 @@ public class IpcClient : IAsyncDisposable
                     continue;
                 }
 
-                // Verifica limite eventi per request
+                                                     
                 if (_eventCounts.TryGetValue(evt.CorrelationId, out var count))
                 {
                     if (!IpcConstants.IsEventCountWithinLimit(count))
@@ -460,7 +460,7 @@ public class IpcClient : IAsyncDisposable
                     _eventCounts[evt.CorrelationId] = count + 1;
                 }
 
-                // Notifica handler specifico per correlazione
+                                                              
                 if (_eventHandlers.TryGetValue(evt.CorrelationId, out var handler))
                 {
                     try
@@ -473,7 +473,7 @@ public class IpcClient : IAsyncDisposable
                     }
                 }
 
-                // Notifica handler globale
+                                           
                 try
                 {
                     EventReceived?.Invoke(this, evt);
@@ -486,14 +486,14 @@ public class IpcClient : IAsyncDisposable
         }
         catch (OperationCanceledException)
         {
-            // Shutdown normale
+                               
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[IpcClient] EventLoop error: {ex.Message}");
         }
 
-        // Solo se non stiamo già facendo dispose
+                                                  
         if (!_isDisposing)
         {
             await HandleDisconnectionAsync().ConfigureAwait(false);
@@ -511,7 +511,7 @@ public class IpcClient : IAsyncDisposable
             _isConnected = false;
         }
 
-        // Cancella tutte le pending request con errore appropriato
+                                                                   
         foreach (var kvp in _pendingRequests)
         {
             kvp.Value.TrySetException(new IOException("Connection to worker lost"));
@@ -525,9 +525,9 @@ public class IpcClient : IAsyncDisposable
         await DisposeInternalAsync().ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Disconnette dal worker in modo pulito.
-    /// </summary>
+                 
+                                              
+                  
     public async Task DisconnectAsync()
     {
         lock (_stateLock)
@@ -544,7 +544,7 @@ public class IpcClient : IAsyncDisposable
 
     private async Task DisposeInternalAsync()
     {
-        // Attendi che i loop terminino con timeout
+                                                   
         var loopTimeout = TimeSpan.FromMilliseconds(2000);
 
         try
@@ -560,13 +560,13 @@ public class IpcClient : IAsyncDisposable
         }
         catch
         {
-            // Ignora errori durante cleanup
+                                            
         }
 
         _eventLoopCts?.Dispose();
         _eventLoopCts = null;
 
-        // Dispose in ordine: prima readers/writers, poi pipes
+                                                              
         try { _requestReader?.Dispose(); } catch { }
         try { _requestWriter?.Dispose(); } catch { }
         try { _eventReader?.Dispose(); } catch { }
@@ -588,9 +588,9 @@ public class IpcClient : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Rilascia le risorse asincronamente.
-    /// </summary>
+                 
+                                           
+                  
     public async ValueTask DisposeAsync()
     {
         if (_isDisposing)

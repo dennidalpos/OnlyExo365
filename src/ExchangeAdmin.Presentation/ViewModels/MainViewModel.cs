@@ -9,9 +9,9 @@ using ExchangeAdmin.Presentation.Helpers;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// ViewModel principale della shell.
-/// </summary>
+             
+                                     
+              
 public sealed class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IWorkerService _workerService;
@@ -20,16 +20,16 @@ public sealed class MainViewModel : ViewModelBase, IDisposable
 
     private CancellationTokenSource? _demoOperationCts;
 
-    // Worker state
+                   
     private WorkerConnectionState _workerState = WorkerConnectionState.NotStarted;
     private bool _isWorkerBusy;
 
-    // Exchange connection state
+                                
     private ConnectionState _exchangeState = ConnectionState.Disconnected;
     private string? _connectedUser;
     private string? _connectedOrganization;
 
-    // Demo operation state
+                           
     private bool _isDemoRunning;
     private int _demoProgress;
     private string? _demoStatus;
@@ -37,7 +37,7 @@ public sealed class MainViewModel : ViewModelBase, IDisposable
     private int _demoItemCount = 10;
     private bool _demoSimulateError;
 
-    // Logs
+           
     private const int MaxLogEntries = 500;
 
     public MainViewModel(IWorkerService workerService)
@@ -46,11 +46,11 @@ public sealed class MainViewModel : ViewModelBase, IDisposable
         _connectUseCase = new ConnectExchangeUseCase(workerService);
         _demoUseCase = new DemoOperationUseCase(workerService);
 
-        // Subscribe agli eventi
+                                
         _workerService.StateChanged += OnWorkerStateChanged;
         _workerService.EventReceived += OnEventReceived;
 
-        // Inizializza comandi
+                              
         StartWorkerCommand = new AsyncRelayCommand(StartWorkerAsync, () => CanStartWorker);
         StopWorkerCommand = new AsyncRelayCommand(StopWorkerAsync, () => CanStopWorker);
         RestartWorkerCommand = new AsyncRelayCommand(RestartWorkerAsync, () => CanRestartWorker);
@@ -410,7 +410,7 @@ public sealed class MainViewModel : ViewModelBase, IDisposable
             WorkerState = state;
             AddLog(LogLevel.Information, $"Worker state changed: {state}");
 
-            // Reset exchange state se worker non è più connesso
+                                                                  
             if (state != WorkerConnectionState.Connected && ExchangeState == ConnectionState.Connected)
             {
                 ExchangeState = ConnectionState.Disconnected;
@@ -450,7 +450,7 @@ public sealed class MainViewModel : ViewModelBase, IDisposable
 
         LogEntries.Insert(0, entry);
 
-        // Mantieni solo gli ultimi N log
+                                         
         while (LogEntries.Count > MaxLogEntries)
         {
             LogEntries.RemoveAt(LogEntries.Count - 1);

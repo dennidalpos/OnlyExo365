@@ -2,9 +2,9 @@ using ExchangeAdmin.Domain.Errors;
 
 namespace ExchangeAdmin.Domain.Results;
 
-/// <summary>
-/// Risultato di un'operazione senza valore di ritorno.
-/// </summary>
+             
+                                                       
+              
 public class Result
 {
     public bool IsSuccess { get; protected init; }
@@ -37,9 +37,9 @@ public class Result
     }
 }
 
-/// <summary>
-/// Risultato di un'operazione con valore di ritorno.
-/// </summary>
+             
+                                                     
+              
 public class Result<T> : Result
 {
     public T? Value { get; private init; }
@@ -72,9 +72,9 @@ public class Result<T> : Result
         return Failure(NormalizedError.FromException(ex));
     }
 
-    /// <summary>
-    /// Mappa il risultato su un altro tipo.
-    /// </summary>
+                 
+                                            
+                  
     public Result<TNew> Map<TNew>(Func<T, TNew> mapper)
     {
         if (IsSuccess && Value != null)
@@ -86,9 +86,9 @@ public class Result<T> : Result
         return Result<TNew>.Failure(Error!);
     }
 
-    /// <summary>
-    /// Esegue azione se successo.
-    /// </summary>
+                 
+                                  
+                  
     public Result<T> OnSuccess(Action<T> action)
     {
         if (IsSuccess && Value != null)
@@ -96,9 +96,9 @@ public class Result<T> : Result
         return this;
     }
 
-    /// <summary>
-    /// Esegue azione se fallimento.
-    /// </summary>
+                 
+                                    
+                  
     public Result<T> OnFailure(Action<NormalizedError> action)
     {
         if (IsFailure && Error != null)

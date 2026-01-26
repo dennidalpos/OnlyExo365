@@ -5,16 +5,16 @@ namespace ExchangeAdmin.Worker;
 
 internal class Program
 {
-    /// <summary>
-    /// Verifica e imposta l'Execution Policy per permettere l'esecuzione di moduli PowerShell.
-    /// </summary>
+                 
+                                                                                               
+                  
     private static async Task EnsureExecutionPolicyAsync()
     {
         try
         {
             Console.WriteLine("[Worker] Checking PowerShell Execution Policy...");
 
-            // Usa pwsh per verificare e impostare l'Execution Policy
+                                                                     
             var checkProcess = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "pwsh",
@@ -36,7 +36,7 @@ internal class Program
 
             Console.WriteLine($"[Worker] Current Execution Policy (CurrentUser): {currentPolicy}");
 
-            // Se non è Bypass o Unrestricted, impostiamola
+                                                            
             if (currentPolicy != "Bypass" && currentPolicy != "Unrestricted" && currentPolicy != "RemoteSigned")
             {
                 Console.WriteLine("[Worker] Setting Execution Policy to RemoteSigned for CurrentUser...");
@@ -74,7 +74,7 @@ internal class Program
         catch (Exception ex)
         {
             Console.WriteLine($"[Worker] Warning: Failed to check/set Execution Policy: {ex.Message}");
-            // Non blocchiamo l'avvio se questo fallisce
+                                                        
         }
     }
 
@@ -85,17 +85,17 @@ internal class Program
 
         try
         {
-            // Verifica e correggi Execution Policy se necessario
+                                                                 
             await EnsureExecutionPolicyAsync();
 
-            // Inizializza PowerShell engine
+                                            
             var psEngine = new PowerShellEngine();
             var initResult = await psEngine.InitializeAsync();
 
             if (!initResult.Success)
             {
                 Console.Error.WriteLine($"[Worker] Failed to initialize PowerShell: {initResult.ErrorMessage}");
-                // Continua comunque, gestiremo l'errore nel handshake
+                                                                      
             }
             else
             {
@@ -103,13 +103,13 @@ internal class Program
                 Console.WriteLine($"[Worker] Module available: {initResult.IsModuleAvailable}");
             }
 
-            // Avvia server IPC
+                               
             using var server = new IpcServer(psEngine);
             await server.StartAsync();
 
             Console.WriteLine("[Worker] IPC server started. Waiting for connections...");
 
-            // Attendi shutdown
+                               
             using var shutdownEvent = new ManualResetEventSlim(false);
 
             Console.CancelKeyPress += (s, e) =>
@@ -123,10 +123,10 @@ internal class Program
                 shutdownEvent.Set();
             };
 
-            // Mantieni vivo il processo
+                                        
             while (!shutdownEvent.Wait(1000))
             {
-                // Il server gestisce le richieste in background
+                                                                
             }
 
             Console.WriteLine("[Worker] Shutting down...");

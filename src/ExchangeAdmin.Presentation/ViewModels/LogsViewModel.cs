@@ -6,9 +6,9 @@ using ExchangeAdmin.Presentation.Helpers;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// ViewModel per il visualizzatore log con buffering e auto-scroll intelligente.
-/// </summary>
+             
+                                                                                 
+              
 public sealed class LogsViewModel : ViewModelBase, IDisposable
 {
     private readonly ShellViewModel _shellViewModel;
@@ -21,18 +21,18 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
     private bool _isRefreshing;
     private int _pendingUpdateCount;
 
-    // Buffered filtered logs per ridurre allocazioni
+                                                     
     private List<LogEntry>? _cachedFilteredLogs;
     private bool _filterCacheInvalid = true;
 
-    // Throttling per evitare troppi refresh
+                                            
     private DateTime _lastRefreshTime = DateTime.MinValue;
     private static readonly TimeSpan MinRefreshInterval = TimeSpan.FromMilliseconds(100);
 
-    /// <summary>
-    /// Crea un nuovo ViewModel per i log.
-    /// </summary>
-    /// <param name="shellViewModel">Shell ViewModel che contiene i log.</param>
+                 
+                                          
+                  
+                                                                                
     public LogsViewModel(ShellViewModel shellViewModel)
     {
         _shellViewModel = shellViewModel;
@@ -47,20 +47,20 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         ScrollToTopCommand = new RelayCommand(ScrollToTop);
         ScrollToBottomCommand = new RelayCommand(ScrollToBottom);
 
-        // Subscribe ai cambiamenti della collection
+                                                    
         _shellViewModel.LogEntries.CollectionChanged += OnLogEntriesChanged;
     }
 
     #region Properties
 
-    /// <summary>
-    /// Collection originale dei log dal ShellViewModel.
-    /// </summary>
+                 
+                                                        
+                  
     public ObservableCollection<LogEntry> LogEntries => _shellViewModel.LogEntries;
 
-    /// <summary>
-    /// Livello minimo di log da visualizzare.
-    /// </summary>
+                 
+                                              
+                  
     public LogLevel FilterLevel
     {
         get => _filterLevel;
@@ -74,9 +74,9 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Filtro di ricerca testuale.
-    /// </summary>
+                 
+                                   
+                  
     public string? SearchFilter
     {
         get => _searchFilter;
@@ -90,9 +90,9 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Se true, auto-scroll verso nuovi log (solo se utente non ha scrollato manualmente).
-    /// </summary>
+                 
+                                                                                           
+                  
     public bool AutoScroll
     {
         get => _autoScroll;
@@ -108,23 +108,23 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Indica se l'utente ha scrollato manualmente (disabilita auto-scroll temporaneamente).
-    /// </summary>
+                 
+                                                                                             
+                  
     public bool UserHasScrolled
     {
         get => _userHasScrolled;
         set => SetProperty(ref _userHasScrolled, value);
     }
 
-    /// <summary>
-    /// Indica se è necessario fare auto-scroll (auto-scroll abilitato e utente non ha scrollato).
-    /// </summary>
+                 
+                                                                                                   
+                  
     public bool ShouldAutoScroll => AutoScroll && !_userHasScrolled;
 
-    /// <summary>
-    /// Log filtrati con caching.
-    /// </summary>
+                 
+                                 
+                  
     public IEnumerable<LogEntry> FilteredLogs
     {
         get
@@ -140,14 +140,14 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Numero totale di log entry.
-    /// </summary>
+                 
+                                   
+                  
     public int TotalCount => LogEntries.Count;
 
-    /// <summary>
-    /// Numero di log filtrati visibili.
-    /// </summary>
+                 
+                                        
+                  
     public int FilteredCount
     {
         get
@@ -159,54 +159,54 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>Conteggio log livello Verbose.</summary>
+                                                         
     public int VerboseCount => CountByLevel(LogLevel.Verbose);
 
-    /// <summary>Conteggio log livello Debug.</summary>
+                                                       
     public int DebugCount => CountByLevel(LogLevel.Debug);
 
-    /// <summary>Conteggio log livello Information.</summary>
+                                                             
     public int InfoCount => CountByLevel(LogLevel.Information);
 
-    /// <summary>Conteggio log livello Warning.</summary>
+                                                         
     public int WarningCount => CountByLevel(LogLevel.Warning);
 
-    /// <summary>Conteggio log livello Error.</summary>
+                                                       
     public int ErrorCount => CountByLevel(LogLevel.Error);
 
-    /// <summary>
-    /// Indica se ci sono log in errore.
-    /// </summary>
+                 
+                                        
+                  
     public bool HasErrors => ErrorCount > 0;
 
-    /// <summary>
-    /// Indica se ci sono warning.
-    /// </summary>
+                 
+                                  
+                  
     public bool HasWarnings => WarningCount > 0;
 
     #endregion
 
     #region Commands
 
-    /// <summary>Cancella tutti i log.</summary>
+                                                
     public ICommand ClearLogsCommand { get; }
 
-    /// <summary>Copia i log filtrati negli appunti.</summary>
+                                                              
     public ICommand CopyLogsCommand { get; }
 
-    /// <summary>Scrolla all'inizio dei log.</summary>
+                                                      
     public ICommand ScrollToTopCommand { get; }
 
-    /// <summary>Scrolla alla fine dei log.</summary>
+                                                     
     public ICommand ScrollToBottomCommand { get; }
 
     #endregion
 
     #region Methods
 
-    /// <summary>
-    /// Forza un refresh dei log filtrati.
-    /// </summary>
+                 
+                                          
+                  
     public void Refresh()
     {
         InvalidateFilterCache();
@@ -214,9 +214,9 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         NotifyCountsChanged();
     }
 
-    /// <summary>
-    /// Notifica che l'utente ha scrollato manualmente.
-    /// </summary>
+                 
+                                                       
+                  
     public void NotifyUserScrolled()
     {
         if (AutoScroll)
@@ -227,9 +227,9 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>
-    /// Resetta lo stato di scroll dell'utente (auto-scroll riprende).
-    /// </summary>
+                 
+                                                                      
+                  
     public void ResetUserScroll()
     {
         _userHasScrolled = false;
@@ -242,7 +242,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         _pendingUpdateCount++;
         InvalidateFilterCache();
 
-        // Throttle updates per evitare troppi refresh durante bulk operations
+                                                                              
         var now = DateTime.UtcNow;
         if (now - _lastRefreshTime >= MinRefreshInterval)
         {
@@ -267,19 +267,19 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
 
     private void RebuildFilterCache()
     {
-        // Già dentro lock
+                           
         _cachedFilteredLogs = new List<LogEntry>();
         var searchLower = _searchFilter?.ToLowerInvariant();
 
         foreach (var log in LogEntries)
         {
-            // Filtro per livello
+                                 
             if (log.Level < _filterLevel)
             {
                 continue;
             }
 
-            // Filtro per ricerca
+                                 
             if (!string.IsNullOrEmpty(searchLower))
             {
                 var messageContains = log.Message.ToLowerInvariant().Contains(searchLower);
@@ -363,7 +363,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         _userHasScrolled = false;
         OnPropertyChanged(nameof(UserHasScrolled));
         OnPropertyChanged(nameof(ShouldAutoScroll));
-        // View binderà su questo evento per scrollare
+                                                       
     }
 
     private void ScrollToBottom()
@@ -371,14 +371,14 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         _userHasScrolled = false;
         OnPropertyChanged(nameof(UserHasScrolled));
         OnPropertyChanged(nameof(ShouldAutoScroll));
-        // View binderà su questo evento per scrollare
+                                                       
     }
 
     #endregion
 
-    /// <summary>
-    /// Rilascia le risorse.
-    /// </summary>
+                 
+                            
+                  
     public void Dispose()
     {
         _shellViewModel.LogEntries.CollectionChanged -= OnLogEntriesChanged;

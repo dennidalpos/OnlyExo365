@@ -1,8 +1,8 @@
 namespace ExchangeAdmin.Contracts;
 
-/// <summary>
-/// Versione del contratto IPC. Deve corrispondere tra UI e Worker.
-/// </summary>
+             
+                                                                   
+              
 public static class ContractVersion
 {
     public const int Major = 1;
@@ -23,7 +23,7 @@ public static class ContractVersion
         if (!int.TryParse(parts[0], out var otherMajor))
             return false;
 
-        // Compatibilità: stesso major version
+                                               
         return otherMajor == Major;
     }
 }

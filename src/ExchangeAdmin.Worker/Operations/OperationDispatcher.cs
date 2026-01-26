@@ -4,9 +4,9 @@ using ExchangeAdmin.Worker.PowerShell;
 
 namespace ExchangeAdmin.Worker.Operations;
 
-/// <summary>
-/// Dispatcher per le operazioni worker.
-/// </summary>
+             
+                                        
+              
 public class OperationDispatcher
 {
     private readonly PowerShellEngine _psEngine;
@@ -24,9 +24,9 @@ public class OperationDispatcher
         _exoGroupCommands = new ExoGroupCommands(psEngine, _capabilityDetector);
     }
 
-    /// <summary>
-    /// Dispatch della richiesta all'handler appropriato.
-    /// </summary>
+                 
+                                                         
+                  
     public async Task<ResponseEnvelope> DispatchAsync(RequestEnvelope request, CancellationToken cancellationToken)
     {
         Console.WriteLine($"[OperationDispatcher] Dispatching operation: {request.Operation}");
@@ -34,21 +34,21 @@ public class OperationDispatcher
         {
             return request.Operation switch
             {
-                // Connection
+                             
                 OperationType.ConnectExchangeInteractive => await HandleConnectAsync(request, cancellationToken),
                 OperationType.DisconnectExchange => await HandleDisconnectAsync(request, cancellationToken),
                 OperationType.GetConnectionStatus => await HandleGetConnectionStatusAsync(request, cancellationToken),
 
-                // Capability detection
+                                       
                 OperationType.DetectCapabilities => await HandleDetectCapabilitiesAsync(request, cancellationToken),
 
-                // Demo
+                       
                 OperationType.DemoLongOperation => await HandleDemoOperationAsync(request, cancellationToken),
 
-                // Dashboard
+                            
                 OperationType.GetDashboardStats => await HandleGetDashboardStatsAsync(request, cancellationToken),
 
-                // Mailboxes
+                            
                 OperationType.GetMailboxes => await HandleGetMailboxesAsync(request, cancellationToken),
                 OperationType.GetMailboxDetails => await HandleGetMailboxDetailsAsync(request, cancellationToken),
                 OperationType.GetRetentionPolicies => await HandleGetRetentionPoliciesAsync(request, cancellationToken),
@@ -63,7 +63,7 @@ public class OperationDispatcher
                 OperationType.ConvertMailboxToRegular => await HandleConvertMailboxToRegularAsync(request, cancellationToken),
                 OperationType.GetMailboxSpaceReport => await HandleGetMailboxSpaceReportAsync(request, cancellationToken),
 
-                // Distribution Lists
+                                     
                 OperationType.GetDistributionLists => await HandleGetDistributionListsAsync(request, cancellationToken),
                 OperationType.GetDistributionListDetails => await HandleGetDistributionListDetailsAsync(request, cancellationToken),
                 OperationType.GetGroupMembers => await HandleGetGroupMembersAsync(request, cancellationToken),
@@ -117,7 +117,7 @@ public class OperationDispatcher
             return CreateErrorResponse(request.CorrelationId, code, result.ErrorMessage ?? "Connection failed", isTransient, retryAfter);
         }
 
-        // Get connection info
+                              
         var (isConnected, upn, org) = await _psEngine.GetConnectionStatusAsync(cancellationToken);
 
         var status = new ConnectionStatusDto
@@ -130,7 +130,7 @@ public class OperationDispatcher
 
         await SendLogAsync(request.CorrelationId, LogLevel.Information, $"Connected as {upn} to {org}");
 
-        // Auto-detect capabilities after connection
+                                                    
         await SendLogAsync(request.CorrelationId, LogLevel.Verbose, "Detecting capabilities...");
         try
         {
@@ -158,7 +158,7 @@ public class OperationDispatcher
             return CreateCancelledResponse(request.CorrelationId);
         }
 
-        // Clear capability cache
+                                 
         _capabilityDetector.ClearCache();
 
         var status = new ConnectionStatusDto
@@ -220,7 +220,7 @@ public class OperationDispatcher
             onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
             cancellationToken: cancellationToken);
 
-        // Report warnings
+                          
         foreach (var warning in stats.Warnings)
         {
             await SendLogAsync(request.CorrelationId, LogLevel.Warning, warning);
@@ -383,7 +383,7 @@ public class OperationDispatcher
         await SendLogAsync(request.CorrelationId, LogLevel.Information,
             $"Setting {featureRequest.Feature} = {featureRequest.Enabled} for {featureRequest.Identity}...");
 
-        // Build Set-Mailbox command based on feature
+                                                     
         var escapedIdentity = featureRequest.Identity.Replace("'", "''");
         string script;
 
@@ -659,7 +659,7 @@ public class OperationDispatcher
 
             var percentComplete = (int)((i + 1) * 100.0 / demoRequest.ItemCount);
 
-            // Simulate error if requested
+                                          
             if (demoRequest.SimulateError && percentComplete >= demoRequest.ErrorAtPercent)
             {
                 await SendLogAsync(request.CorrelationId, LogLevel.Error,
@@ -669,7 +669,7 @@ public class OperationDispatcher
                     $"Simulated error at {percentComplete}%");
             }
 
-            // Simulate processing
+                                  
             await Task.Delay(delayPerItem, cancellationToken);
 
             var itemResult = new DemoItemResult
@@ -680,18 +680,18 @@ public class OperationDispatcher
             };
             results.Add(itemResult);
 
-            // Send progress
+                            
             await SendProgressAsync(request.CorrelationId, percentComplete,
                 $"Processing item {i + 1} of {demoRequest.ItemCount}",
                 i + 1, demoRequest.ItemCount);
 
-            // Send partial output every 3 items
+                                                
             if ((i + 1) % 3 == 0 || i == demoRequest.ItemCount - 1)
             {
                 await SendPartialOutputAsync(request.CorrelationId, itemResult, i);
             }
 
-            // Send log periodically
+                                    
             if ((i + 1) % 5 == 0)
             {
                 await SendLogAsync(request.CorrelationId, LogLevel.Verbose,

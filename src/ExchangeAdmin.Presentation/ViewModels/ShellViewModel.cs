@@ -11,9 +11,9 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Main shell view model with navigation.
-/// </summary>
+             
+                                          
+              
 public sealed class ShellViewModel : ViewModelBase, IDisposable
 {
     private const string DisableExchangeEnvVar = "EXCHANGEADMIN_DISABLE_EXO";
@@ -21,32 +21,32 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private readonly NavigationService _navigationService;
     private readonly ConnectExchangeUseCase _connectUseCase;
 
-    // Worker state
+                   
     private WorkerConnectionState _workerState = WorkerConnectionState.NotStarted;
     private bool _isWorkerBusy;
 
-    // Exchange connection state
+                                
     private ConnectionState _exchangeState = ConnectionState.Disconnected;
     private string? _connectedUser;
     private string? _connectedOrganization;
 
-    // Navigation
+                 
     private NavigationPage _currentPage = NavigationPage.Dashboard;
 
-    // Capabilities
+                   
     private CapabilityMapDto? _capabilities;
 
-    // Global progress
+                      
     private bool _isGlobalOperationRunning;
     private int _globalProgress;
     private string? _globalStatus;
     private readonly bool _isExchangeConnectionDisabled;
 
-    // Logging
+              
     private bool _isVerboseLoggingEnabled = false;
     private const int MaxLogEntries = 1000;
 
-    // Child ViewModels
+                       
     public DashboardViewModel? Dashboard { get; set; }
     public MailboxListViewModel? Mailboxes { get; set; }
     public MailboxListViewModel? SharedMailboxes { get; set; }
@@ -62,14 +62,14 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _connectUseCase = new ConnectExchangeUseCase(workerService);
         _isExchangeConnectionDisabled = IsEnvironmentFlagEnabled(DisableExchangeEnvVar);
 
-        // Subscribe to events
+                              
         _workerService.StateChanged += OnWorkerStateChanged;
         _workerService.EventReceived += OnEventReceived;
         _workerService.CapabilitiesUpdated += OnCapabilitiesUpdated;
         _navigationService.PageChanged += OnPageChanged;
         _navigationService.Navigating += OnNavigating;
 
-        // Initialize commands
+                              
         StartWorkerCommand = new AsyncRelayCommand(StartWorkerAsync, () => CanStartWorker);
         StopWorkerCommand = new AsyncRelayCommand(StopWorkerAsync, () => CanStopWorker);
         RestartWorkerCommand = new AsyncRelayCommand(RestartWorkerAsync, () => CanRestartWorker);
@@ -278,7 +278,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _isVerboseLoggingEnabled, value))
             {
-                // Notifica all'utente che il logging è stato attivato/disattivato
+                                                                                   
                 AddLog(value ? LogLevel.Information : LogLevel.Information,
                        value ? "Verbose logging enabled - all PowerShell output will be shown"
                              : "Verbose logging disabled - only important messages will be shown");
@@ -431,7 +431,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             ExchangeState = ConnectionState.Failed;
             AddLog(LogLevel.Error, $"Connection failed: {result.Error?.Message}");
 
-            // Show user-friendly error dialog
+                                              
             if (result.Error != null)
             {
                 ShowErrorDialog("Connection Failed", result.Error);
@@ -474,7 +474,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             WorkerState = state;
             AddLog(LogLevel.Information, $"Worker state changed: {state}");
 
-            // Reset exchange state if worker disconnects
+                                                         
             if (state != WorkerConnectionState.Connected && ExchangeState == ConnectionState.Connected)
             {
                 ExchangeState = ConnectionState.Disconnected;
@@ -524,7 +524,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private void OnNavigating(object? sender, NavigatingEventArgs e)
     {
-        // Check if MailboxDetails has pending changes
+                                                      
         if (MailboxDetails != null && MailboxDetails.HasPendingChanges)
         {
             RunOnUiThread(() =>
@@ -554,7 +554,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     public void AddLog(LogLevel level, string message, string? source = null)
     {
-        // Filtra messaggi verbose se verbose logging è disabilitato
+                                                                     
         if (!_isVerboseLoggingEnabled && level == LogLevel.Verbose)
         {
             return;
@@ -569,7 +569,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
         LogEntries.Insert(0, entry);
 
-        // Keep only last N logs
+                                
         while (LogEntries.Count > MaxLogEntries)
         {
             LogEntries.RemoveAt(LogEntries.Count - 1);
@@ -590,42 +590,42 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
                value.Equals("on", StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// Check if a feature is available.
-    /// </summary>
+                 
+                                        
+                  
     public bool IsFeatureAvailable(Func<FeatureCapabilitiesDto, bool> featureCheck)
     {
         if (Capabilities?.Features == null) return false;
         return featureCheck(Capabilities.Features);
     }
 
-    /// <summary>
-    /// Get tooltip for unavailable feature.
-    /// </summary>
+                 
+                                            
+                  
     public string GetUnavailableTooltip(string featureName)
     {
         return $"{featureName} is not available with your current permissions";
     }
 
-    /// <summary>
-    /// Show error dialog to user with friendly message.
-    /// </summary>
+                 
+                                                        
+                  
     public void ShowErrorDialog(string title, string message, string? details = null)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, message, details));
     }
 
-    /// <summary>
-    /// Show error dialog from NormalizedErrorDto.
-    /// </summary>
+                 
+                                                  
+                  
     public void ShowErrorDialog(string title, NormalizedErrorDto error)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, error));
     }
 
-    /// <summary>
-    /// Show error dialog from NormalizedError.
-    /// </summary>
+                 
+                                               
+                  
     public void ShowErrorDialog(string title, NormalizedError error)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, error));

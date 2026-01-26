@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-/// <summary>
-/// Stato connessione Exchange Online.
-/// </summary>
+             
+                                      
+              
 public enum ConnectionState
 {
     Disconnected,
@@ -14,9 +14,9 @@ public enum ConnectionState
     Failed
 }
 
-/// <summary>
-/// DTO per stato connessione.
-/// </summary>
+             
+                              
+              
 public class ConnectionStatusDto
 {
     [JsonPropertyName("state")]

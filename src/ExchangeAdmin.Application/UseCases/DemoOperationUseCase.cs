@@ -5,9 +5,9 @@ using ExchangeAdmin.Domain.Results;
 
 namespace ExchangeAdmin.Application.UseCases;
 
-/// <summary>
-/// Use case per esecuzione operazione demo con streaming.
-/// </summary>
+             
+                                                          
+              
 public class DemoOperationUseCase
 {
     private readonly IWorkerService _workerService;
@@ -17,17 +17,17 @@ public class DemoOperationUseCase
         _workerService = workerService;
     }
 
-    /// <summary>
-    /// Esegue l'operazione demo.
-    /// </summary>
-    /// <param name="durationSeconds">Durata totale operazione.</param>
-    /// <param name="itemCount">Numero di item da processare.</param>
-    /// <param name="simulateError">Se simulare un errore.</param>
-    /// <param name="errorAtPercent">Percentuale a cui simulare l'errore.</param>
-    /// <param name="onLog">Callback per log.</param>
-    /// <param name="onProgress">Callback per progress.</param>
-    /// <param name="onPartialOutput">Callback per output parziale.</param>
-    /// <param name="cancellationToken">Token di cancellazione.</param>
+                 
+                                 
+                  
+                                                                       
+                                                                     
+                                                                  
+                                                                                 
+                                                     
+                                                               
+                                                                           
+                                                                       
     public async Task<Result<DemoOperationResponse>> ExecuteAsync(
         int durationSeconds = 10,
         int itemCount = 10,

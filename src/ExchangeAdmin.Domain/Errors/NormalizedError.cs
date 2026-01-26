@@ -2,9 +2,9 @@ using ExchangeAdmin.Contracts.Messages;
 
 namespace ExchangeAdmin.Domain.Errors;
 
-/// <summary>
-/// Errore normalizzato per il dominio.
-/// </summary>
+             
+                                       
+              
 public class NormalizedError
 {
     public ErrorCode Code { get; init; }
@@ -16,9 +16,9 @@ public class NormalizedError
 
     private NormalizedError() { }
 
-    /// <summary>
-    /// Crea un errore normalizzato da un'eccezione.
-    /// </summary>
+                 
+                                                    
+                  
     public static NormalizedError FromException(Exception ex)
     {
         var (category, isTransient) = ErrorTaxonomy.Classify(ex.Message, ex.GetType().Name);
@@ -72,9 +72,9 @@ public class NormalizedError
         };
     }
 
-    /// <summary>
-    /// Crea un errore normalizzato da un DTO.
-    /// </summary>
+                 
+                                              
+                  
     public static NormalizedError FromDto(NormalizedErrorDto dto)
     {
         return new NormalizedError
@@ -89,9 +89,9 @@ public class NormalizedError
         };
     }
 
-    /// <summary>
-    /// Converte in DTO per IPC.
-    /// </summary>
+                 
+                                
+                  
     public NormalizedErrorDto ToDto()
     {
         return new NormalizedErrorDto
@@ -106,9 +106,9 @@ public class NormalizedError
         };
     }
 
-    /// <summary>
-    /// Crea errore specifico.
-    /// </summary>
+                 
+                              
+                  
     public static NormalizedError Create(ErrorCode code, string message, bool isTransient = false, TimeSpan? retryAfter = null)
     {
         return new NormalizedError

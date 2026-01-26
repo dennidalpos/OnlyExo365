@@ -1192,6 +1192,9 @@ public class MailboxDetailsViewModel : ViewModelBase
 
             if (settingsChanged || autoReplyChanged || retentionPolicyChanged)
             {
+                _originalMailboxSettings = CaptureMailboxSettingsSnapshot();
+                HasPendingMailboxChanges = false;
+                CommandManager.InvalidateRequerySuggested();
                 await RefreshAsync(cancellationToken);
             }
         }

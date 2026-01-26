@@ -4,9 +4,9 @@ using System.Windows;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Base class per ViewModels con INotifyPropertyChanged.
-/// </summary>
+             
+                                                         
+              
 public abstract class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -26,9 +26,9 @@ public abstract class ViewModelBase : INotifyPropertyChanged
         return true;
     }
 
-    /// <summary>
-    /// Esegue un'azione sul dispatcher UI.
-    /// </summary>
+                 
+                                           
+                  
     protected void RunOnUiThread(Action action)
     {
         if (System.Windows.Application.Current?.Dispatcher?.CheckAccess() == true)
@@ -41,9 +41,9 @@ public abstract class ViewModelBase : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Esegue un'azione asincrona sul dispatcher UI.
-    /// </summary>
+                 
+                                                     
+                  
     protected async Task RunOnUiThreadAsync(Action action)
     {
         if (System.Windows.Application.Current?.Dispatcher?.CheckAccess() == true)

@@ -9,7 +9,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- List Panel -->
+                           
         <Grid Grid.Column="0" IsEnabled="{Binding DistributionLists.IsLoading, Converter={StaticResource InverseBool}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -18,7 +18,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
+                           
             <Grid Grid.Row="0" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -37,7 +37,7 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Search and Filter -->
+                                      
             <Grid Grid.Row="1" Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -51,7 +51,7 @@
                           VerticalAlignment="Center"/>
             </Grid>
 
-            <!-- Group List -->
+                               
             <DataGrid Grid.Row="2" ItemsSource="{Binding DistributionLists.DistributionLists}"
                       SelectedItem="{Binding DistributionLists.SelectedItem}"
                       AutoGenerateColumns="False"
@@ -97,13 +97,13 @@
                 </DataGrid.ColumnHeaderStyle>
             </DataGrid>
 
-            <!-- Load More -->
+                              
             <Button Grid.Row="3" Content="Carica altri" Command="{Binding DistributionLists.LoadMoreCommand}"
                     HorizontalAlignment="Center" Margin="0,12,0,0"
                     Style="{StaticResource PrimaryButton}"
                     Visibility="{Binding DistributionLists.HasMore, Converter={StaticResource BoolToVisibility}}"/>
 
-            <!-- Loading Overlay -->
+                                    
             <Border Background="#80000000"
                     Visibility="{Binding DistributionLists.IsLoading, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -113,24 +113,24 @@
             </Border>
         </Grid>
 
-        <!-- Splitter -->
+                         
         <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       ResizeDirection="Columns"
                       ResizeBehavior="PreviousAndNext"/>
 
-        <!-- Details Panel -->
+                              
         <Grid Grid.Column="2" Margin="16,0,0,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
                 <Grid>
-                    <!-- No Selection -->
+                                         
                     <TextBlock Text="Seleziona un gruppo per vedere i dettagli"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Foreground="{StaticResource SecondaryTextBrush}"
                                Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource InverseBoolToVisibility}}"/>
 
-                    <!-- Details Content -->
+                                            
                     <Grid Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource BoolToVisibility}}"
                           IsEnabled="{Binding DistributionLists.IsLoadingDetails, Converter={StaticResource InverseBool}}">
                         <Grid.RowDefinitions>
@@ -140,7 +140,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Header -->
+                                       
                         <Grid Grid.Row="0" Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -156,7 +156,7 @@
                             <Button Grid.Column="1" Content="Indietro" Command="{Binding DistributionLists.BackCommand}"/>
                         </Grid>
 
-                        <!-- Group Info -->
+                                           
                         <StackPanel Grid.Row="1">
                             <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                                     BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
@@ -299,7 +299,7 @@
                             </GroupBox>
                         </StackPanel>
 
-                        <!-- Members -->
+                                        
                         <GroupBox Grid.Row="2" Header="Membri">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -308,7 +308,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Dynamic Group Warning -->
+                                                              
                                 <Border Grid.Row="0" Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                                         BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8"
                                         Visibility="{Binding DistributionLists.IsDynamicGroup, Converter={StaticResource BoolToVisibility}}">
@@ -320,7 +320,7 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- Members List -->
+                                                     
                                 <ListBox Grid.Row="1" ItemsSource="{Binding DistributionLists.Members}"
                                          Background="{StaticResource SecondaryBackgroundBrush}"
                                          BorderBrush="{StaticResource BorderBrush}">
@@ -348,7 +348,7 @@
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-                                <!-- Add Member -->
+                                                   
                                 <Grid Grid.Row="2" Margin="0,8,0,0"
                                       Visibility="{Binding DistributionLists.CanModifyMembers, Converter={StaticResource BoolToVisibility}}">
                                     <Grid.ColumnDefinitions>
@@ -364,7 +364,7 @@
                             </Grid>
                         </GroupBox>
 
-                        <!-- Load More Members -->
+                                                  
                         <Button Grid.Row="3" Content="Carica altri membri" Command="{Binding DistributionLists.LoadMoreMembersCommand}"
                                 HorizontalAlignment="Center" Margin="0,8,0,0"
                                 Visibility="{Binding DistributionLists.MembersHasMore, Converter={StaticResource BoolToVisibility}}"/>
@@ -372,7 +372,7 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- Loading Overlay -->
+                                    
             <Border Background="#80000000"
                     Visibility="{Binding DistributionLists.IsLoadingDetails, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

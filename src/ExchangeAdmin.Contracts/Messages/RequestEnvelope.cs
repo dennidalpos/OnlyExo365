@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Envelope per una richiesta al worker.
-/// </summary>
+             
+                                         
+              
 public class RequestEnvelope : IpcMessage
 {
     public RequestEnvelope()
@@ -23,9 +23,9 @@ public class RequestEnvelope : IpcMessage
     [JsonPropertyName("payload")]
     public JsonElement? Payload { get; set; }
 
-    /// <summary>
-    /// Timeout specifico per questa request (ms). 0 = usa default.
-    /// </summary>
+                 
+                                                                   
+                  
     [JsonPropertyName("timeoutMs")]
     public int TimeoutMs { get; set; }
 }

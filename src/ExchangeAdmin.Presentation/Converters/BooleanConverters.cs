@@ -5,9 +5,9 @@ using System.Windows.Data;
 
 namespace ExchangeAdmin.Presentation.Converters;
 
-/// <summary>
-/// Converte bool in Visibility.
-/// </summary>
+             
+                                
+              
 public class BoolToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -29,9 +29,9 @@ public class BoolToVisibilityConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Converte bool invertito in Visibility.
-/// </summary>
+             
+                                          
+              
 public class InverseBoolToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -53,9 +53,9 @@ public class InverseBoolToVisibilityConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Inverte un valore booleano.
-/// </summary>
+             
+                               
+              
 public class InverseBoolConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -77,9 +77,9 @@ public class InverseBoolConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Converts a list to a comma-separated string.
-/// </summary>
+             
+                                                
+              
 public class ListToStringConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -100,9 +100,9 @@ public class ListToStringConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Converts null/empty to Visibility (null = Collapsed, not null = Visible).
-/// </summary>
+             
+                                                                             
+              
 public class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -110,11 +110,11 @@ public class NullToVisibilityConverter : IValueConverter
         if (value == null)
             return Visibility.Collapsed;
 
-        // Check for empty strings
+                                  
         if (value is string str && string.IsNullOrEmpty(str))
             return Visibility.Collapsed;
 
-        // Check for empty collections
+                                      
         if (value is System.Collections.IEnumerable enumerable && !enumerable.Cast<object>().Any())
             return Visibility.Collapsed;
 
@@ -127,9 +127,9 @@ public class NullToVisibilityConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Converts zero to Visibility (0 = Collapsed, non-zero = Visible).
-/// </summary>
+             
+                                                                    
+              
 public class ZeroToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

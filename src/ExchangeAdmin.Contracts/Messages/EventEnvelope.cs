@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Envelope per eventi streaming dal worker.
-/// </summary>
+             
+                                             
+              
 public class EventEnvelope : IpcMessage
 {
     public EventEnvelope()
@@ -24,9 +24,9 @@ public class EventEnvelope : IpcMessage
     public JsonElement? Payload { get; set; }
 }
 
-/// <summary>
-/// Payload per evento di log.
-/// </summary>
+             
+                              
+              
 public class LogEventPayload
 {
     [JsonPropertyName("level")]
@@ -40,9 +40,9 @@ public class LogEventPayload
     public string? Source { get; set; }
 }
 
-/// <summary>
-/// Payload per evento di progress.
-/// </summary>
+             
+                                   
+              
 public class ProgressEventPayload
 {
     [JsonPropertyName("percentComplete")]
@@ -58,9 +58,9 @@ public class ProgressEventPayload
     public int? TotalItems { get; set; }
 }
 
-/// <summary>
-/// Payload per output parziale.
-/// </summary>
+             
+                                
+              
 public class PartialOutputPayload
 {
     [JsonPropertyName("data")]

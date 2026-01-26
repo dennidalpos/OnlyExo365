@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-/// <summary>
-/// Dashboard statistics.
-/// </summary>
+             
+                         
+              
 public class DashboardStatsDto
 {
     [JsonPropertyName("retrievedAt")]
@@ -26,9 +26,9 @@ public class DashboardStatsDto
     public int LargeTenantThreshold { get; set; } = 1000;
 }
 
-/// <summary>
-/// Mailbox counts by type.
-/// </summary>
+             
+                           
+              
 public class MailboxCountsDto
 {
     [JsonPropertyName("userMailboxes")]
@@ -50,9 +50,9 @@ public class MailboxCountsDto
     public bool IsApproximate { get; set; }
 }
 
-/// <summary>
-/// Group counts by type.
-/// </summary>
+             
+                         
+              
 public class GroupCountsDto
 {
     [JsonPropertyName("distributionGroups")]
@@ -71,9 +71,9 @@ public class GroupCountsDto
     public int Total => DistributionGroups + DynamicDistributionGroups + (UnifiedGroups ?? 0);
 }
 
-/// <summary>
-/// Request for dashboard stats.
-/// </summary>
+             
+                                
+              
 public class GetDashboardStatsRequest
 {
     [JsonPropertyName("includeUnifiedGroups")]

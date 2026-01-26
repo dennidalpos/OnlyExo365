@@ -1,8 +1,8 @@
 namespace ExchangeAdmin.Presentation.Services;
 
-/// <summary>
-/// Navigation pages.
-/// </summary>
+             
+                     
+              
 public enum NavigationPage
 {
     Dashboard,
@@ -14,9 +14,9 @@ public enum NavigationPage
     Logs
 }
 
-/// <summary>
-/// Navigation service for page management.
-/// </summary>
+             
+                                           
+              
 public class NavigationService
 {
     private NavigationPage _currentPage = NavigationPage.Dashboard;
@@ -63,7 +63,7 @@ public class NavigationService
 
     public void NavigateTo(NavigationPage page)
     {
-        // Allow listeners to cancel navigation if there are unsaved changes
+                                                                            
         var args = new NavigatingEventArgs(page);
         Navigating?.Invoke(this, args);
 
@@ -93,9 +93,9 @@ public class NavigationService
     public bool HasSelection => !string.IsNullOrEmpty(SelectedIdentity);
 }
 
-/// <summary>
-/// Event args for navigation events that can be cancelled.
-/// </summary>
+             
+                                                           
+              
 public class NavigatingEventArgs : EventArgs
 {
     public NavigatingEventArgs(NavigationPage targetPage)

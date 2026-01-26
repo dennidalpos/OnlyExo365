@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Messaggio base IPC con tipo discriminante per deserializzazione.
-/// </summary>
+             
+                                                                    
+              
 public class IpcMessage
 {
     [JsonPropertyName("type")]

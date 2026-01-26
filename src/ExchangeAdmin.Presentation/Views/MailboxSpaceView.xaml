@@ -9,7 +9,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+                       
         <Grid Grid.Row="0" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -27,7 +27,7 @@
                     Style="{StaticResource PrimaryButton}"/>
         </Grid>
 
-        <!-- Error -->
+                      
         <Border Grid.Row="1" Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
                 BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
                 Visibility="{Binding MailboxSpace.HasError, Converter={StaticResource BoolToVisibility}}">
@@ -37,7 +37,7 @@
             </StackPanel>
         </Border>
 
-        <!-- List -->
+                     
         <Grid Grid.Row="2" IsEnabled="{Binding MailboxSpace.IsLoading, Converter={StaticResource InverseBool}}">
             <DataGrid ItemsSource="{Binding MailboxSpace.Mailboxes}"
                       AutoGenerateColumns="False"
@@ -106,7 +106,7 @@
                 </DataGrid.ColumnHeaderStyle>
             </DataGrid>
 
-            <!-- Loading Overlay -->
+                                    
             <Border Background="#80000000"
                     Visibility="{Binding MailboxSpace.IsLoading, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

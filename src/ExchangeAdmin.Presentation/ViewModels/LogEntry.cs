@@ -2,9 +2,9 @@ using ExchangeAdmin.Contracts.Messages;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Entry per il log viewer.
-/// </summary>
+             
+                            
+              
 public class LogEntry
 {
     public DateTime Timestamp { get; init; } = DateTime.Now;

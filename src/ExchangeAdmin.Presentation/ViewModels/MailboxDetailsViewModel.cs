@@ -36,6 +36,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     // Pending mailbox settings
     private bool _hasPendingMailboxChanges;
     private bool _isInitializingMailboxSettings;
+    private bool _isRefreshingRetentionPolicies;
     private MailboxSettingsSnapshot? _originalMailboxSettings;
     private string? _retentionPolicyFallback;
 
@@ -642,9 +643,11 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
 
         IsRetentionPolicyLoading = true;
+        var selectedPolicySnapshot = SelectedRetentionPolicy;
 
         try
         {
+            _isRefreshingRetentionPolicies = true;
             var result = await _workerService.GetRetentionPoliciesAsync(
                 new GetRetentionPoliciesRequest(),
                 cancellationToken: cancellationToken);
@@ -661,6 +664,11 @@ public class MailboxDetailsViewModel : ViewModelBase
                 foreach (var policy in result.Value.Policies.OrderBy(policy => policy.Name))
                 {
                     AvailableRetentionPolicies.Add(policy);
+                }
+
+                if (!string.IsNullOrWhiteSpace(selectedPolicySnapshot))
+                {
+                    SelectedRetentionPolicy = selectedPolicySnapshot;
                 }
 
                 OnPropertyChanged(nameof(SelectedRetentionPolicyDescription));
@@ -682,6 +690,8 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
         finally
         {
+            _isRefreshingRetentionPolicies = false;
+            UpdatePendingMailboxChanges();
             IsRetentionPolicyLoading = false;
         }
     }
@@ -992,7 +1002,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
     private void UpdatePendingMailboxChanges()
     {
-        if (_isInitializingMailboxSettings || _originalMailboxSettings == null)
+        if (_isInitializingMailboxSettings || _isRefreshingRetentionPolicies || _originalMailboxSettings == null)
         {
             return;
         }

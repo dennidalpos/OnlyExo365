@@ -178,6 +178,44 @@ public class WorkerClient : IAsyncDisposable
     }
 
     /// <summary>
+    /// Get retention policies.
+    /// </summary>
+    public async Task<Result<GetRetentionPoliciesResponse>> GetRetentionPoliciesAsync(
+        GetRetentionPoliciesRequest? request = null,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetRetentionPoliciesResponse>(
+            OperationType.GetRetentionPolicies,
+            request ?? new GetRetentionPoliciesRequest(),
+            eventHandler,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Set mailbox retention policy.
+    /// </summary>
+    public async Task<Result> SetRetentionPolicyAsync(
+        SetRetentionPolicyRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.SetRetentionPolicy,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Get mailbox permissions.
     /// </summary>
     public async Task<Result<MailboxPermissionsDto>> GetMailboxPermissionsAsync(

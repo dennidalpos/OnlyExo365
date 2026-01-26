@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -26,6 +27,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     private string? _errorMessage;
     private string? _identity;
     private MailboxDetailsDto? _details;
+    private bool _isRetentionPolicyLoading;
 
     // Delta plan for permissions
     private readonly List<PermissionDeltaActionDto> _pendingActions = new();
@@ -57,6 +59,9 @@ public class MailboxDetailsViewModel : ViewModelBase
     private string? _autoReplyExternalMessage;
     private string? _autoReplyExternalAudience;
 
+    private readonly ObservableCollection<RetentionPolicySummaryDto> _availableRetentionPolicies = new();
+    private string? _selectedRetentionPolicy;
+
     // New permission input
     private string? _newPermissionUser;
     private PermissionType _newPermissionType = PermissionType.FullAccess;
@@ -73,6 +78,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
         // Commands
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
+        RefreshRetentionPoliciesCommand = new AsyncRelayCommand(LoadRetentionPoliciesAsync, () => !IsRetentionPolicyLoading);
         BackCommand = new RelayCommand(GoBack);
         SavePermissionsCommand = new AsyncRelayCommand(SavePermissionsAsync, () => HasPendingChanges && !IsSaving);
         DiscardPermissionsCommand = new RelayCommand(DiscardPendingChanges, () => HasPendingChanges);
@@ -173,6 +179,43 @@ public class MailboxDetailsViewModel : ViewModelBase
     public AutoReplyConfigurationDto? AutoReply => Details?.AutoReplyConfiguration;
     public string QuotaUsageSummary => BuildQuotaUsageSummary();
 
+    public ObservableCollection<RetentionPolicySummaryDto> AvailableRetentionPolicies => _availableRetentionPolicies;
+
+    public string? SelectedRetentionPolicy
+    {
+        get => _selectedRetentionPolicy;
+        set
+        {
+            if (SetProperty(ref _selectedRetentionPolicy, value))
+            {
+                UpdatePendingMailboxChanges();
+                OnPropertyChanged(nameof(SelectedRetentionPolicyDescription));
+                OnPropertyChanged(nameof(SelectedRetentionPolicyRequiresArchive));
+                OnPropertyChanged(nameof(ShowArchiveRequiredWarning));
+            }
+        }
+    }
+
+    public string? SelectedRetentionPolicyDescription
+        => AvailableRetentionPolicies.FirstOrDefault(policy => IsPolicySelected(policy))?.Description;
+
+    public bool SelectedRetentionPolicyRequiresArchive
+        => AvailableRetentionPolicies.FirstOrDefault(policy => IsPolicySelected(policy))?.RequiresArchive ?? false;
+
+    public bool ShowArchiveRequiredWarning => !ArchiveEnabled && SelectedRetentionPolicyRequiresArchive;
+
+    public bool IsRetentionPolicyLoading
+    {
+        get => _isRetentionPolicyLoading;
+        private set
+        {
+            if (SetProperty(ref _isRetentionPolicyLoading, value))
+            {
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
     public bool HasPendingMailboxChanges
     {
         get => _hasPendingMailboxChanges;
@@ -229,6 +272,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             if (SetProperty(ref _archiveEnabled, value))
             {
                 UpdatePendingMailboxChanges();
+                OnPropertyChanged(nameof(ShowArchiveRequiredWarning));
             }
         }
     }
@@ -480,6 +524,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     #region Commands
 
     public ICommand RefreshCommand { get; }
+    public ICommand RefreshRetentionPoliciesCommand { get; }
     public ICommand BackCommand { get; }
     public ICommand SavePermissionsCommand { get; }
     public ICommand DiscardPermissionsCommand { get; }
@@ -559,6 +604,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                 ErrorMessage = result.Error?.Message ?? "Failed to load mailbox details";
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox details load failed: {ErrorMessage}");
             }
+
+            await LoadRetentionPoliciesAsync(_loadCts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -572,6 +619,58 @@ public class MailboxDetailsViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task LoadRetentionPoliciesAsync(CancellationToken cancellationToken)
+    {
+        if (!_shellViewModel.IsExchangeConnected)
+        {
+            return;
+        }
+
+        IsRetentionPolicyLoading = true;
+
+        try
+        {
+            var result = await _workerService.GetRetentionPoliciesAsync(
+                new GetRetentionPoliciesRequest(),
+                cancellationToken: cancellationToken);
+
+            if (result.IsSuccess && result.Value != null)
+            {
+                AvailableRetentionPolicies.Clear();
+                AvailableRetentionPolicies.Add(new RetentionPolicySummaryDto
+                {
+                    Name = string.Empty,
+                    Description = "Nessuna policy assegnata"
+                });
+
+                foreach (var policy in result.Value.Policies.OrderBy(policy => policy.Name))
+                {
+                    AvailableRetentionPolicies.Add(policy);
+                }
+
+                OnPropertyChanged(nameof(SelectedRetentionPolicyDescription));
+                OnPropertyChanged(nameof(SelectedRetentionPolicyRequiresArchive));
+                OnPropertyChanged(nameof(ShowArchiveRequiredWarning));
+            }
+            else if (!result.WasCancelled)
+            {
+                _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? "Impossibile recuperare le retention policy");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Error, $"Retention policies load failed: {ex.Message}");
+        }
+        finally
+        {
+            IsRetentionPolicyLoading = false;
         }
     }
 
@@ -841,6 +940,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         RetentionHoldEnabled = features.RetentionHoldEnabled;
         MaxSendSize = features.MaxSendSize ?? string.Empty;
         MaxReceiveSize = features.MaxReceiveSize ?? string.Empty;
+        SelectedRetentionPolicy = Details.RetentionPolicy ?? string.Empty;
 
         var autoReply = Details.AutoReplyConfiguration;
         if (autoReply != null)
@@ -905,6 +1005,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         RetentionHoldEnabled = _originalMailboxSettings.RetentionHoldEnabled;
         MaxSendSize = _originalMailboxSettings.MaxSendSize;
         MaxReceiveSize = _originalMailboxSettings.MaxReceiveSize;
+        SelectedRetentionPolicy = _originalMailboxSettings.RetentionPolicy;
         AutoReplyEnabled = _originalMailboxSettings.AutoReplyEnabled;
         AutoReplyScheduled = _originalMailboxSettings.AutoReplyScheduled;
         AutoReplyStartDate = _originalMailboxSettings.AutoReplyStartDate?.Date;
@@ -941,6 +1042,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             var normalizedForwardingSmtp = NormalizeInput(ForwardingSmtpAddress);
             var normalizedMaxSend = NormalizeInput(MaxSendSize);
             var normalizedMaxReceive = NormalizeInput(MaxReceiveSize);
+            var normalizedRetentionPolicy = NormalizeInput(SelectedRetentionPolicy);
 
             var settingsChanged = false;
 
@@ -1004,6 +1106,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                 settingsChanged = true;
             }
 
+            var retentionPolicyChanged = !string.Equals(normalizedRetentionPolicy, _originalMailboxSettings.RetentionPolicy, StringComparison.Ordinal);
+
             if (settingsChanged)
             {
                 _shellViewModel.AddLog(LogLevel.Information, "Salvataggio impostazioni mailbox...");
@@ -1014,6 +1118,26 @@ public class MailboxDetailsViewModel : ViewModelBase
                 {
                     ErrorMessage = result.Error?.Message ?? "Impossibile aggiornare le impostazioni della mailbox";
                     _shellViewModel.AddLog(LogLevel.Error, $"Mailbox settings update failed: {ErrorMessage}");
+                    return;
+                }
+            }
+
+            if (retentionPolicyChanged)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, "Salvataggio retention policy...");
+
+                var retentionPolicyRequest = new SetRetentionPolicyRequest
+                {
+                    Identity = Identity,
+                    PolicyName = string.IsNullOrWhiteSpace(normalizedRetentionPolicy) ? null : normalizedRetentionPolicy
+                };
+
+                var retentionPolicyResult = await _workerService.SetRetentionPolicyAsync(retentionPolicyRequest, cancellationToken: cancellationToken);
+
+                if (!retentionPolicyResult.IsSuccess)
+                {
+                    ErrorMessage = retentionPolicyResult.Error?.Message ?? "Impossibile aggiornare la retention policy";
+                    _shellViewModel.AddLog(LogLevel.Error, $"Retention policy update failed: {ErrorMessage}");
                     return;
                 }
             }
@@ -1066,7 +1190,7 @@ public class MailboxDetailsViewModel : ViewModelBase
                 }
             }
 
-            if (settingsChanged || autoReplyChanged)
+            if (settingsChanged || autoReplyChanged || retentionPolicyChanged)
             {
                 await RefreshAsync(cancellationToken);
             }
@@ -1202,6 +1326,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             RetentionHoldEnabled = RetentionHoldEnabled,
             MaxSendSize = NormalizeInput(MaxSendSize),
             MaxReceiveSize = NormalizeInput(MaxReceiveSize),
+            RetentionPolicy = NormalizeInput(SelectedRetentionPolicy),
             AutoReplyEnabled = AutoReplyEnabled,
             AutoReplyScheduled = AutoReplyScheduled,
             AutoReplyStartDate = BuildDateTime(AutoReplyStartDate, AutoReplyStartTime),
@@ -1234,6 +1359,12 @@ public class MailboxDetailsViewModel : ViewModelBase
         var quotaLabel = GetEffectiveQuotaLabel();
         var labelSuffix = string.IsNullOrWhiteSpace(quotaLabel) ? string.Empty : $" di {quotaLabel}";
         return $"{Statistics.TotalItemSize} ({percent:0.0}%{labelSuffix})";
+    }
+
+    private bool IsPolicySelected(RetentionPolicySummaryDto policy)
+    {
+        var selected = SelectedRetentionPolicy ?? string.Empty;
+        return string.Equals(policy.Name, selected, StringComparison.OrdinalIgnoreCase);
     }
 
     private long? GetEffectiveQuotaBytes()
@@ -1349,6 +1480,7 @@ internal sealed class MailboxSettingsSnapshot
     public bool RetentionHoldEnabled { get; set; }
     public string MaxSendSize { get; set; } = string.Empty;
     public string MaxReceiveSize { get; set; } = string.Empty;
+    public string RetentionPolicy { get; set; } = string.Empty;
     public bool AutoReplyEnabled { get; set; }
     public bool AutoReplyScheduled { get; set; }
     public DateTime? AutoReplyStartDate { get; set; }
@@ -1385,6 +1517,7 @@ internal sealed class MailboxSettingsSnapshot
             && RetentionHoldEnabled == other.RetentionHoldEnabled
             && string.Equals(MaxSendSize, other.MaxSendSize, StringComparison.Ordinal)
             && string.Equals(MaxReceiveSize, other.MaxReceiveSize, StringComparison.Ordinal)
+            && string.Equals(RetentionPolicy, other.RetentionPolicy, StringComparison.Ordinal)
             && AutoReplyEquals(other);
     }
 
@@ -1401,6 +1534,7 @@ internal sealed class MailboxSettingsSnapshot
         hash.Add(RetentionHoldEnabled);
         hash.Add(MaxSendSize);
         hash.Add(MaxReceiveSize);
+        hash.Add(RetentionPolicy);
         hash.Add(AutoReplyEnabled);
         hash.Add(AutoReplyScheduled);
         hash.Add(AutoReplyStartDate);

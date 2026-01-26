@@ -85,6 +85,9 @@ public class MailboxDetailsDto
     [JsonPropertyName("emailAddresses")]
     public List<string> EmailAddresses { get; set; } = new();
 
+    [JsonPropertyName("retentionPolicy")]
+    public string? RetentionPolicy { get; set; }
+
     // Features
     [JsonPropertyName("features")]
     public MailboxFeaturesDto Features { get; set; } = new();
@@ -110,6 +113,24 @@ public class MailboxDetailsDto
 
     [JsonPropertyName("whenMailboxCreated")]
     public DateTime? WhenMailboxCreated { get; set; }
+}
+
+/// <summary>
+/// Retention policy summary.
+/// </summary>
+public class RetentionPolicySummaryDto
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("requiresArchive")]
+    public bool RequiresArchive { get; set; }
 }
 
 /// <summary>
@@ -484,6 +505,34 @@ public class GetMailboxDetailsRequest
 
     [JsonPropertyName("includePermissions")]
     public bool IncludePermissions { get; set; } = true;
+}
+
+/// <summary>
+/// Request retention policies list.
+/// </summary>
+public class GetRetentionPoliciesRequest
+{
+}
+
+/// <summary>
+/// Response retention policies list.
+/// </summary>
+public class GetRetentionPoliciesResponse
+{
+    [JsonPropertyName("policies")]
+    public List<RetentionPolicySummaryDto> Policies { get; set; } = new();
+}
+
+/// <summary>
+/// Request to set mailbox retention policy.
+/// </summary>
+public class SetRetentionPolicyRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("policyName")]
+    public string? PolicyName { get; set; }
 }
 
 /// <summary>

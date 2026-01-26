@@ -262,6 +262,71 @@
                         </Grid>
                     </GroupBox>
 
+                    <!-- Retention Policy -->
+                    <GroupBox Header="Retention Policy" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Policy assegnata:" FontWeight="SemiBold"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                <ComboBox ItemsSource="{Binding AvailableRetentionPolicies}"
+                                          SelectedValuePath="Name"
+                                          SelectedValue="{Binding SelectedRetentionPolicy, UpdateSourceTrigger=PropertyChanged}"
+                                          MinWidth="240">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding Name}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Name}" Value="">
+                                                                <Setter Property="Text" Value="Nessuna"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button Content="Aggiorna"
+                                        Command="{Binding RefreshRetentionPoliciesCommand}"
+                                        Margin="8,0,0,0"
+                                        ToolTip="Ricarica l'elenco delle retention policy"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding SelectedRetentionPolicyDescription}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding SelectedRetentionPolicyDescription, Converter={StaticResource NullToVisibility}}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="L’archivio non è obbligatorio per assegnare una retention policy, ma è necessario per applicare tag con azione ‘MoveToArchive’."
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0"/>
+
+                            <Border Grid.Row="3" Grid.Column="1" Background="#3D2200"
+                                    BorderBrush="{StaticResource WarningBrush}"
+                                    BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,8,0,0"
+                                    Visibility="{Binding ShowArchiveRequiredWarning, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Foreground="{StaticResource WarningBrush}" TextWrapping="Wrap"
+                                           Text="⚠ La mailbox non ha un archivio abilitato: alcuni tag di questa policy richiedono l’Archive Mailbox."/>
+                            </Border>
+                        </Grid>
+                    </GroupBox>
+
                     <!-- Quotas -->
                     <GroupBox Header="Quote mailbox" Margin="0,0,0,12">
                         <Grid>

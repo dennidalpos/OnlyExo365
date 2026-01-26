@@ -89,6 +89,18 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.GetMailboxDetailsAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result<GetRetentionPoliciesResponse>> GetRetentionPoliciesAsync(
+        GetRetentionPoliciesRequest? request = null,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetRetentionPoliciesAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> SetRetentionPolicyAsync(
+        SetRetentionPolicyRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.SetRetentionPolicyAsync(request, eventHandler, cancellationToken);
+
     public Task<Result<MailboxPermissionsDto>> GetMailboxPermissionsAsync(
         string identity,
         Action<EventEnvelope>? eventHandler = null,

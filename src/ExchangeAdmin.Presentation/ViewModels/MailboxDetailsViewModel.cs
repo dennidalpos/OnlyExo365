@@ -1122,6 +1122,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                 }
             }
 
+            string? retentionPolicyOverride = null;
+
             if (retentionPolicyChanged)
             {
                 _shellViewModel.AddLog(LogLevel.Information, "Salvataggio retention policy...");
@@ -1140,6 +1142,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                     _shellViewModel.AddLog(LogLevel.Error, $"Retention policy update failed: {ErrorMessage}");
                     return;
                 }
+
+                retentionPolicyOverride = normalizedRetentionPolicy;
             }
 
             var autoReplyChanged = AutoReply != null && !CaptureMailboxSettingsSnapshot().AutoReplyEquals(_originalMailboxSettings);
@@ -1192,10 +1196,14 @@ public class MailboxDetailsViewModel : ViewModelBase
 
             if (settingsChanged || autoReplyChanged || retentionPolicyChanged)
             {
-                _originalMailboxSettings = CaptureMailboxSettingsSnapshot();
                 HasPendingMailboxChanges = false;
                 CommandManager.InvalidateRequerySuggested();
                 await RefreshAsync(cancellationToken);
+
+                if (retentionPolicyOverride != null)
+                {
+                    ApplyRetentionPolicyOverride(retentionPolicyOverride);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -1338,6 +1346,22 @@ public class MailboxDetailsViewModel : ViewModelBase
             AutoReplyExternalMessage = NormalizeAutoReplyMessage(AutoReplyExternalMessage),
             AutoReplyExternalAudience = NormalizeInput(AutoReplyExternalAudience)
         };
+    }
+
+    private void ApplyRetentionPolicyOverride(string policyName)
+    {
+        _isInitializingMailboxSettings = true;
+        SelectedRetentionPolicy = policyName;
+        _isInitializingMailboxSettings = false;
+
+        if (Details != null)
+        {
+            Details.RetentionPolicy = string.IsNullOrWhiteSpace(policyName) ? null : policyName;
+        }
+
+        _originalMailboxSettings = CaptureMailboxSettingsSnapshot();
+        HasPendingMailboxChanges = false;
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private string BuildQuotaUsageSummary()

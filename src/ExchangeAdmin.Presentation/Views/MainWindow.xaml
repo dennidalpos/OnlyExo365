@@ -85,7 +85,7 @@
                                        
             <Border Grid.Column="0" Background="{StaticResource TertiaryBackgroundBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-                <StackPanel Margin="0,8">
+                <StackPanel Margin="0,8" IsEnabled="{Binding CanNavigate}">
                                       
                     <Button Content="Dashboard" Command="{Binding NavigateToDashboardCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"

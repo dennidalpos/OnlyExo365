@@ -79,6 +79,14 @@ public class NavigationService
 
     public void NavigateToDetails(NavigationPage parentPage, string identity, object? item = null)
     {
+        var args = new NavigatingEventArgs(parentPage);
+        Navigating?.Invoke(this, args);
+
+        if (args.Cancel)
+        {
+            return;
+        }
+
         CurrentPage = parentPage;
         SelectedIdentity = identity;
         SelectedItem = item;

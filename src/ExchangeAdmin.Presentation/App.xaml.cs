@@ -61,6 +61,12 @@ public partial class App : System.Windows.Application
         _shellViewModel.MailboxSpace = mailboxSpaceViewModel;
         _shellViewModel.DistributionLists = distributionListViewModel;
         _shellViewModel.Logs = logsViewModel;
+        _shellViewModel.RegisterNavigationStateSource(dashboardViewModel);
+        _shellViewModel.RegisterNavigationStateSource(mailboxListViewModel);
+        _shellViewModel.RegisterNavigationStateSource(sharedMailboxListViewModel);
+        _shellViewModel.RegisterNavigationStateSource(mailboxDetailsViewModel);
+        _shellViewModel.RegisterNavigationStateSource(mailboxSpaceViewModel);
+        _shellViewModel.RegisterNavigationStateSource(distributionListViewModel);
 
                                                                                      
         var mainWindow = new Views.MainWindow
@@ -122,6 +128,7 @@ public partial class App : System.Windows.Application
 
         MainWindow = mainWindow;
         mainWindow.Show();
+        _ = _shellViewModel.StartWorkerOnStartupAsync();
     }
 
     protected override void OnExit(ExitEventArgs e)

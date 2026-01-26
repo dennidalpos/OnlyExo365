@@ -124,6 +124,22 @@ public interface IWorkerService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get retention policies.
+    /// </summary>
+    Task<Result<GetRetentionPoliciesResponse>> GetRetentionPoliciesAsync(
+        GetRetentionPoliciesRequest? request = null,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Set mailbox retention policy.
+    /// </summary>
+    Task<Result> SetRetentionPolicyAsync(
+        SetRetentionPolicyRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get mailbox permissions.
     /// </summary>
     Task<Result<MailboxPermissionsDto>> GetMailboxPermissionsAsync(

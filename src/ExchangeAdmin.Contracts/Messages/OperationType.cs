@@ -22,6 +22,8 @@ public enum OperationType
     // Mailbox operations
     GetMailboxes,
     GetMailboxDetails,
+    GetRetentionPolicies,
+    SetRetentionPolicy,
     GetMailboxPermissions,
     SetMailboxPermission,
     ApplyPermissionsDeltaPlan,

@@ -51,6 +51,8 @@ public class OperationDispatcher
                 // Mailboxes
                 OperationType.GetMailboxes => await HandleGetMailboxesAsync(request, cancellationToken),
                 OperationType.GetMailboxDetails => await HandleGetMailboxDetailsAsync(request, cancellationToken),
+                OperationType.GetRetentionPolicies => await HandleGetRetentionPoliciesAsync(request, cancellationToken),
+                OperationType.SetRetentionPolicy => await HandleSetRetentionPolicyAsync(request, cancellationToken),
                 OperationType.GetMailboxPermissions => await HandleGetMailboxPermissionsAsync(request, cancellationToken),
                 OperationType.SetMailboxPermission => await HandleSetMailboxPermissionAsync(request, cancellationToken),
                 OperationType.ApplyPermissionsDeltaPlan => await HandleApplyPermissionsDeltaPlanAsync(request, cancellationToken),
@@ -267,6 +269,42 @@ public class OperationDispatcher
             cancellationToken: cancellationToken);
 
         return CreateSuccessResponse(request.CorrelationId, details);
+    }
+
+    private async Task<ResponseEnvelope> HandleGetRetentionPoliciesAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        _ = JsonMessageSerializer.ExtractPayload<GetRetentionPoliciesRequest>(request.Payload)
+            ?? new GetRetentionPoliciesRequest();
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, "Fetching retention policies...");
+
+        var policies = await _exoCommands.GetRetentionPoliciesAsync(
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        var response = new GetRetentionPoliciesResponse
+        {
+            Policies = policies
+        };
+
+        return CreateSuccessResponse(request.CorrelationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleSetRetentionPolicyAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var setRequest = JsonMessageSerializer.ExtractPayload<SetRetentionPolicyRequest>(request.Payload);
+
+        if (setRequest == null || string.IsNullOrWhiteSpace(setRequest.Identity))
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.SetRetentionPolicyAsync(
+            setRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, ParseLogLevel(level), msg),
+            cancellationToken: cancellationToken);
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
     }
 
     private async Task<ResponseEnvelope> HandleGetMailboxPermissionsAsync(RequestEnvelope request, CancellationToken cancellationToken)

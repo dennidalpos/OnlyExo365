@@ -348,6 +348,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
     RecipientType = $mbx.RecipientType.ToString()
     RecipientTypeDetails = $mbx.RecipientTypeDetails.ToString()
     EmailAddresses = @($mbx.EmailAddresses | ForEach-Object {{ $_.ToString() }})
+    RetentionPolicy = $mbx.RetentionPolicy
     WhenCreated = $mbx.WhenCreated
     WhenMailboxCreated = $mbx.WhenMailboxCreated
 
@@ -420,6 +421,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
             RecipientType = hash["RecipientType"]?.ToString() ?? "",
             RecipientTypeDetails = hash["RecipientTypeDetails"]?.ToString() ?? "",
             EmailAddresses = ConvertToStringList(hash["EmailAddresses"]),
+            RetentionPolicy = hash["RetentionPolicy"]?.ToString(),
             WhenCreated = hash["WhenCreated"] as DateTime?,
             WhenMailboxCreated = hash["WhenMailboxCreated"] as DateTime?,
             Features = new MailboxFeaturesDto
@@ -495,6 +497,87 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
         onLog?.Invoke("Information", $"Retrieved details for mailbox {details.DisplayName}");
 
         return details;
+    }
+
+    public async Task<List<RetentionPolicySummaryDto>> GetRetentionPoliciesAsync(
+        Action<string, string>? onLog = null,
+        CancellationToken cancellationToken = default)
+    {
+        var script = @"
+$policies = Get-RetentionPolicy
+@($policies | ForEach-Object {
+    $requiresArchive = $false
+    $tagLinks = @($_.RetentionPolicyTagLinks)
+    foreach ($tagLink in $tagLinks) {
+        try {
+            $tag = Get-RetentionPolicyTag -Identity $tagLink -ErrorAction Stop
+            if ($tag.RetentionAction -eq 'MoveToArchive') {
+                $requiresArchive = $true
+                break
+            }
+        }
+        catch {
+        }
+    }
+    @{
+        Id = $_.Guid.ToString()
+        Name = $_.Name
+        Description = $_.Description
+        RequiresArchive = $requiresArchive
+    }
+})
+";
+
+        onLog?.Invoke("Verbose", "Fetching retention policies...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to get retention policies: {result.ErrorMessage}");
+        }
+
+        var policies = new List<RetentionPolicySummaryDto>();
+
+        foreach (var output in result.Output)
+        {
+            if (output.BaseObject is object[] array)
+            {
+                foreach (var item in array)
+                {
+                    if (item is System.Collections.Hashtable itemHash)
+                    {
+                        policies.Add(new RetentionPolicySummaryDto
+                        {
+                            Id = itemHash["Id"]?.ToString(),
+                            Name = itemHash["Name"]?.ToString() ?? string.Empty,
+                            Description = itemHash["Description"]?.ToString(),
+                            RequiresArchive = itemHash["RequiresArchive"] as bool? ?? false
+                        });
+                    }
+                }
+
+                continue;
+            }
+
+            if (output.BaseObject is System.Collections.Hashtable hash)
+            {
+                policies.Add(new RetentionPolicySummaryDto
+                {
+                    Id = hash["Id"]?.ToString(),
+                    Name = hash["Name"]?.ToString() ?? string.Empty,
+                    Description = hash["Description"]?.ToString(),
+                    RequiresArchive = hash["RequiresArchive"] as bool? ?? false
+                });
+            }
+        }
+
+        return policies;
     }
 
     private async Task<MailboxStatisticsDto?> GetMailboxStatisticsAsync(
@@ -758,6 +841,32 @@ catch {{
         }
 
         onLog?.Invoke("Information", "Mailbox settings updated successfully");
+    }
+
+    public async Task SetRetentionPolicyAsync(
+        SetRetentionPolicyRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var policyValue = FormatNullableString(request.PolicyName);
+        var script = $"Set-Mailbox -Identity '{escapedIdentity}' -RetentionPolicy {policyValue}";
+
+        onLog?.Invoke("Information", $"Updating retention policy for {request.Identity}...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to update retention policy: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Retention policy updated successfully");
     }
 
     public async Task SetMailboxAutoReplyConfigurationAsync(

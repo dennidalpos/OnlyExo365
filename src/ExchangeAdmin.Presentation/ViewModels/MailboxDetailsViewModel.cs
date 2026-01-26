@@ -552,14 +552,14 @@ public class MailboxDetailsViewModel : ViewModelBase
             _navigationService.CurrentPage == NavigationPage.SharedMailboxes)
         {
             Identity = identity;
+            Details = null;
+            _retentionPolicyFallback = null;
+            _originalMailboxSettings = null;
+            HasPendingMailboxChanges = false;
+            ClearPendingActions();
             if (!string.IsNullOrEmpty(identity))
             {
                 _ = LoadAsync(identity);
-            }
-            else
-            {
-                Details = null;
-                ClearPendingActions();
             }
         }
     }
@@ -574,6 +574,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     {
         if (string.IsNullOrEmpty(Identity)) return;
 
+        var identitySnapshot = Identity;
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -596,6 +597,11 @@ public class MailboxDetailsViewModel : ViewModelBase
                 request,
                 eventHandler: null,
                 cancellationToken: _loadCts.Token);
+
+            if (!string.Equals(Identity, identitySnapshot, StringComparison.Ordinal))
+            {
+                return;
+            }
 
             if (result.IsSuccess && result.Value != null)
             {

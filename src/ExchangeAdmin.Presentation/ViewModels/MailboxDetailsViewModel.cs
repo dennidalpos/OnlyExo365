@@ -37,6 +37,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     private bool _hasPendingMailboxChanges;
     private bool _isInitializingMailboxSettings;
     private MailboxSettingsSnapshot? _originalMailboxSettings;
+    private string? _retentionPolicyFallback;
 
     private string? _forwardingAddress;
     private string? _forwardingSmtpAddress;
@@ -147,6 +148,11 @@ public class MailboxDetailsViewModel : ViewModelBase
         {
             if (SetProperty(ref _details, value))
             {
+                if (!string.IsNullOrWhiteSpace(_details?.RetentionPolicy))
+                {
+                    _retentionPolicyFallback = _details.RetentionPolicy;
+                }
+
                 OnPropertyChanged(nameof(HasDetails));
                 OnPropertyChanged(nameof(DisplayName));
                 OnPropertyChanged(nameof(PrimarySmtpAddress));
@@ -546,14 +552,14 @@ public class MailboxDetailsViewModel : ViewModelBase
             _navigationService.CurrentPage == NavigationPage.SharedMailboxes)
         {
             Identity = identity;
+            Details = null;
+            _retentionPolicyFallback = null;
+            _originalMailboxSettings = null;
+            HasPendingMailboxChanges = false;
+            ClearPendingActions();
             if (!string.IsNullOrEmpty(identity))
             {
                 _ = LoadAsync(identity);
-            }
-            else
-            {
-                Details = null;
-                ClearPendingActions();
             }
         }
     }
@@ -568,6 +574,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     {
         if (string.IsNullOrEmpty(Identity)) return;
 
+        var identitySnapshot = Identity;
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -590,6 +597,11 @@ public class MailboxDetailsViewModel : ViewModelBase
                 request,
                 eventHandler: null,
                 cancellationToken: _loadCts.Token);
+
+            if (!string.Equals(Identity, identitySnapshot, StringComparison.Ordinal))
+            {
+                return;
+            }
 
             if (result.IsSuccess && result.Value != null)
             {
@@ -940,7 +952,10 @@ public class MailboxDetailsViewModel : ViewModelBase
         RetentionHoldEnabled = features.RetentionHoldEnabled;
         MaxSendSize = features.MaxSendSize ?? string.Empty;
         MaxReceiveSize = features.MaxReceiveSize ?? string.Empty;
-        SelectedRetentionPolicy = Details.RetentionPolicy ?? string.Empty;
+        var retentionPolicy = !string.IsNullOrWhiteSpace(Details.RetentionPolicy)
+            ? Details.RetentionPolicy
+            : _retentionPolicyFallback ?? string.Empty;
+        SelectedRetentionPolicy = retentionPolicy;
 
         var autoReply = Details.AutoReplyConfiguration;
         if (autoReply != null)
@@ -1122,6 +1137,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                 }
             }
 
+            string? retentionPolicyOverride = null;
+
             if (retentionPolicyChanged)
             {
                 _shellViewModel.AddLog(LogLevel.Information, "Salvataggio retention policy...");
@@ -1140,6 +1157,8 @@ public class MailboxDetailsViewModel : ViewModelBase
                     _shellViewModel.AddLog(LogLevel.Error, $"Retention policy update failed: {ErrorMessage}");
                     return;
                 }
+
+                retentionPolicyOverride = normalizedRetentionPolicy;
             }
 
             var autoReplyChanged = AutoReply != null && !CaptureMailboxSettingsSnapshot().AutoReplyEquals(_originalMailboxSettings);
@@ -1192,7 +1211,14 @@ public class MailboxDetailsViewModel : ViewModelBase
 
             if (settingsChanged || autoReplyChanged || retentionPolicyChanged)
             {
+                HasPendingMailboxChanges = false;
+                CommandManager.InvalidateRequerySuggested();
                 await RefreshAsync(cancellationToken);
+
+                if (retentionPolicyOverride != null)
+                {
+                    ApplyRetentionPolicyOverride(retentionPolicyOverride);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -1335,6 +1361,23 @@ public class MailboxDetailsViewModel : ViewModelBase
             AutoReplyExternalMessage = NormalizeAutoReplyMessage(AutoReplyExternalMessage),
             AutoReplyExternalAudience = NormalizeInput(AutoReplyExternalAudience)
         };
+    }
+
+    private void ApplyRetentionPolicyOverride(string policyName)
+    {
+        _isInitializingMailboxSettings = true;
+        SelectedRetentionPolicy = policyName;
+        _isInitializingMailboxSettings = false;
+        _retentionPolicyFallback = policyName;
+
+        if (Details != null)
+        {
+            Details.RetentionPolicy = string.IsNullOrWhiteSpace(policyName) ? null : policyName;
+        }
+
+        _originalMailboxSettings = CaptureMailboxSettingsSnapshot();
+        HasPendingMailboxChanges = false;
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private string BuildQuotaUsageSummary()

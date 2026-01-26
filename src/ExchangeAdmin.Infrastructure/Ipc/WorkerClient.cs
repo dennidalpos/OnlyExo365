@@ -6,10 +6,10 @@ using ExchangeAdmin.Domain.Results;
 
 namespace ExchangeAdmin.Infrastructure.Ipc;
 
-/// <summary>
-/// High-level client for worker operations.
-/// Wraps IpcClient with strong typing and error handling.
-/// </summary>
+
+
+
+
 public class WorkerClient : IAsyncDisposable
 {
     private readonly WorkerSupervisor _supervisor;
@@ -44,9 +44,9 @@ public class WorkerClient : IAsyncDisposable
 
     #region Connection
 
-    /// <summary>
-    /// Connect to Exchange Online (interactive).
-    /// </summary>
+    
+    
+    
     public async Task<Result<ConnectionStatusDto>> ConnectExchangeAsync(
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default)
@@ -57,7 +57,7 @@ public class WorkerClient : IAsyncDisposable
             eventHandler,
             cancellationToken);
 
-        // Auto-detect capabilities after successful connection
+        
         if (result.IsSuccess && result.Value?.State == ConnectionState.Connected)
         {
             _ = DetectCapabilitiesAsync(forceRefresh: true, cancellationToken: CancellationToken.None);
@@ -66,9 +66,9 @@ public class WorkerClient : IAsyncDisposable
         return result;
     }
 
-    /// <summary>
-    /// Disconnect from Exchange Online.
-    /// </summary>
+    
+    
+    
     public async Task<Result> DisconnectExchangeAsync(CancellationToken cancellationToken = default)
     {
         var response = await SendRequestInternalAsync(
@@ -77,7 +77,7 @@ public class WorkerClient : IAsyncDisposable
             null,
             cancellationToken);
 
-        // Clear capabilities on disconnect
+        
         _capabilities = null;
 
         if (response.WasCancelled)
@@ -89,9 +89,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Get current connection status.
-    /// </summary>
+    
+    
+    
     public async Task<Result<ConnectionStatusDto>> GetConnectionStatusAsync(CancellationToken cancellationToken = default)
     {
         return await ExecuteOperationAsync<ConnectionStatusDto>(
@@ -101,9 +101,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Detect available capabilities.
-    /// </summary>
+    
+    
+    
     public async Task<Result<CapabilityMapDto>> DetectCapabilitiesAsync(
         bool forceRefresh = false,
         Action<EventEnvelope>? eventHandler = null,
@@ -128,9 +128,9 @@ public class WorkerClient : IAsyncDisposable
 
     #region Dashboard
 
-    /// <summary>
-    /// Get dashboard statistics.
-    /// </summary>
+    
+    
+    
     public async Task<Result<DashboardStatsDto>> GetDashboardStatsAsync(
         GetDashboardStatsRequest? request = null,
         Action<EventEnvelope>? eventHandler = null,
@@ -147,9 +147,9 @@ public class WorkerClient : IAsyncDisposable
 
     #region Mailboxes
 
-    /// <summary>
-    /// Get mailbox list with paging.
-    /// </summary>
+    
+    
+    
     public async Task<Result<GetMailboxesResponse>> GetMailboxesAsync(
         GetMailboxesRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -162,9 +162,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Get mailbox details.
-    /// </summary>
+    
+    
+    
     public async Task<Result<MailboxDetailsDto>> GetMailboxDetailsAsync(
         GetMailboxDetailsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -177,9 +177,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Get retention policies.
-    /// </summary>
+    
+    
+    
     public async Task<Result<GetRetentionPoliciesResponse>> GetRetentionPoliciesAsync(
         GetRetentionPoliciesRequest? request = null,
         Action<EventEnvelope>? eventHandler = null,
@@ -192,9 +192,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Set mailbox retention policy.
-    /// </summary>
+    
+    
+    
     public async Task<Result> SetRetentionPolicyAsync(
         SetRetentionPolicyRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -215,9 +215,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Get mailbox permissions.
-    /// </summary>
+    
+    
+    
     public async Task<Result<MailboxPermissionsDto>> GetMailboxPermissionsAsync(
         string identity,
         Action<EventEnvelope>? eventHandler = null,
@@ -230,9 +230,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Set mailbox permission.
-    /// </summary>
+    
+    
+    
     public async Task<Result> SetMailboxPermissionAsync(
         SetMailboxPermissionRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -253,9 +253,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Apply permissions delta plan.
-    /// </summary>
+    
+    
+    
     public async Task<Result<ApplyPermissionsDeltaPlanResponse>> ApplyPermissionsDeltaPlanAsync(
         ApplyPermissionsDeltaPlanRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -268,9 +268,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Set mailbox feature.
-    /// </summary>
+    
+    
+    
     public async Task<Result> SetMailboxFeatureAsync(
         SetMailboxFeatureRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -291,9 +291,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Update mailbox settings.
-    /// </summary>
+    
+    
+    
     public async Task<Result> UpdateMailboxSettingsAsync(
         UpdateMailboxSettingsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -314,9 +314,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Update mailbox auto-reply configuration.
-    /// </summary>
+    
+    
+    
     public async Task<Result> SetMailboxAutoReplyConfigurationAsync(
         SetMailboxAutoReplyConfigurationRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -337,9 +337,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Convert mailbox to shared mailbox.
-    /// </summary>
+    
+    
+    
     public async Task<Result> ConvertMailboxToSharedAsync(
         ConvertMailboxToSharedRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -360,9 +360,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Convert mailbox to regular mailbox.
-    /// </summary>
+    
+    
+    
     public async Task<Result> ConvertMailboxToRegularAsync(
         ConvertMailboxToRegularRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -383,9 +383,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Get mailbox space report.
-    /// </summary>
+    
+    
+    
     public async Task<Result<GetMailboxSpaceReportResponse>> GetMailboxSpaceReportAsync(
         GetMailboxSpaceReportRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -402,9 +402,9 @@ public class WorkerClient : IAsyncDisposable
 
     #region Distribution Lists
 
-    /// <summary>
-    /// Get distribution lists with paging.
-    /// </summary>
+    
+    
+    
     public async Task<Result<GetDistributionListsResponse>> GetDistributionListsAsync(
         GetDistributionListsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -417,9 +417,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Get distribution list details.
-    /// </summary>
+    
+    
+    
     public async Task<Result<DistributionListDetailsDto>> GetDistributionListDetailsAsync(
         GetDistributionListDetailsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -432,9 +432,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Get group members with paging.
-    /// </summary>
+    
+    
+    
     public async Task<Result<GroupMembersPageDto>> GetGroupMembersAsync(
         GetGroupMembersRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -447,9 +447,9 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Modify group member.
-    /// </summary>
+    
+    
+    
     public async Task<Result> ModifyGroupMemberAsync(
         ModifyGroupMemberRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -470,9 +470,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Update distribution list settings.
-    /// </summary>
+    
+    
+    
     public async Task<Result> SetDistributionListSettingsAsync(
         SetDistributionListSettingsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -493,9 +493,9 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Preview dynamic distribution group members.
-    /// </summary>
+    
+    
+    
     public async Task<Result<PreviewDynamicGroupMembersResponse>> PreviewDynamicGroupMembersAsync(
         PreviewDynamicGroupMembersRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -512,9 +512,9 @@ public class WorkerClient : IAsyncDisposable
 
     #region Demo
 
-    /// <summary>
-    /// Run demo long operation with streaming.
-    /// </summary>
+    
+    
+    
     public async Task<Result<DemoOperationResponse>> RunDemoOperationAsync(
         DemoOperationRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -529,9 +529,9 @@ public class WorkerClient : IAsyncDisposable
 
     #endregion
 
-    /// <summary>
-    /// Cancel an operation in progress.
-    /// </summary>
+    
+    
+    
     public async Task CancelOperationAsync(string correlationId)
     {
         if (_supervisor.State != WorkerConnectionState.Connected)
@@ -587,11 +587,11 @@ public class WorkerClient : IAsyncDisposable
             Payload = payload != null ? JsonMessageSerializer.ToJsonElement(payload) : null
         };
 
-        // Setup cancellation
+        
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var correlationId = request.CorrelationId;
 
-        // Register for cancellation
+        
         var registration = cancellationToken.Register(async () =>
         {
             await _supervisor.IpcClient.SendCancelAsync(correlationId);

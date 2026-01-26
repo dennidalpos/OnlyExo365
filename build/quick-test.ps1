@@ -1,13 +1,7 @@
 #!/usr/bin/env pwsh
-#Requires -Version 7.0
 
-<#
-.SYNOPSIS
-    Quick build and test script for ExchangeAdmin
 
-.DESCRIPTION
-    Cleans old builds, compiles, publishes, and launches the application
-#>
+
 
 param(
     [switch]$SkipClean,
@@ -17,7 +11,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Colors
+
 $Red = "`e[31m"
 $Green = "`e[32m"
 $Yellow = "`e[33m"
@@ -44,7 +38,7 @@ function Write-Warning {
     Write-Host "${Yellow}⚠${Reset} ${Message}"
 }
 
-# Get script directory and project root
+
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $ProjectRoot = Split-Path -Parent $ScriptDir
 $PublishDir = Join-Path $ProjectRoot "artifacts\publish"
@@ -57,10 +51,10 @@ Write-Host "${Blue}║${Reset}  ExchangeAdmin Quick Build & Test  ${Blue}║${Re
 Write-Host "${Blue}╔════════════════════════════════════════╗${Reset}"
 Write-Host ""
 
-# Change to project root
+
 Set-Location $ProjectRoot
 
-# Step 1: Clean old builds
+
 if (-not $SkipClean -and -not $LaunchOnly) {
     Write-Step "Cleaning old builds..."
 
@@ -92,7 +86,7 @@ if (-not $SkipClean -and -not $LaunchOnly) {
     Write-Success "Cleaned $cleanedCount directories"
 }
 
-# Step 2: Build
+
 if (-not $SkipBuild -and -not $LaunchOnly) {
     Write-Step "Building solution..."
 
@@ -107,11 +101,11 @@ if (-not $SkipBuild -and -not $LaunchOnly) {
     Write-Success "Build completed"
 }
 
-# Step 3: Publish
+
 if (-not $LaunchOnly) {
     Write-Step "Publishing applications..."
 
-    # Publish Presentation
+    
     $publishResult = dotnet publish -c Release src/ExchangeAdmin.Presentation/ExchangeAdmin.Presentation.csproj `
         -o $PublishDir --nologo --verbosity quiet --no-build 2>&1
 
@@ -121,7 +115,7 @@ if (-not $LaunchOnly) {
         exit 1
     }
 
-    # Publish Worker
+    
     $publishResult = dotnet publish -c Release src/ExchangeAdmin.Worker/ExchangeAdmin.Worker.csproj `
         -o $PublishDir --nologo --verbosity quiet --no-build 2>&1
 
@@ -134,7 +128,7 @@ if (-not $LaunchOnly) {
     Write-Success "Published to: $PublishDir"
 }
 
-# Step 4: Verify executables exist
+
 Write-Step "Verifying executables..."
 
 if (-not (Test-Path $PresentationExe)) {
@@ -149,7 +143,7 @@ if (-not (Test-Path $WorkerExe)) {
 
 Write-Success "Executables verified"
 
-# Step 5: Launch
+
 Write-Host ""
 Write-Host "${Green}╔════════════════════════════════════════╗${Reset}"
 Write-Host "${Green}║${Reset}       Launching Application        ${Green}║${Reset}"
@@ -161,7 +155,7 @@ Write-Host ""
 Write-Warning "Press Ctrl+C in this terminal to stop tracking the application"
 Write-Host ""
 
-# Launch the application
+
 try {
     $process = Start-Process -FilePath $PresentationExe -WorkingDirectory $PublishDir -PassThru
 
@@ -170,7 +164,7 @@ try {
     Write-Host "${Blue}Waiting for application to exit...${Reset}"
     Write-Host "${Yellow}(The Worker console window will open separately)${Reset}"
 
-    # Wait for the process to exit
+    
     $process.WaitForExit()
 
     Write-Host ""

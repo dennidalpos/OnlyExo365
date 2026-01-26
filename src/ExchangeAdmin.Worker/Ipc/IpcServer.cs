@@ -9,10 +9,10 @@ using ExchangeAdmin.Worker.PowerShell;
 
 namespace ExchangeAdmin.Worker.Ipc;
 
-/// <summary>
-/// Server IPC Named Pipes per il worker.
-/// Implementa framing robusto, limiti difensivi, e gestione cancel idempotente.
-/// </summary>
+
+
+
+
 public sealed class IpcServer : IDisposable
 {
     private readonly PowerShellEngine _psEngine;
@@ -36,24 +36,24 @@ public sealed class IpcServer : IDisposable
     private volatile bool _isDisposing;
     private string? _clientId;
 
-    /// <summary>
-    /// Crea un nuovo server IPC.
-    /// </summary>
-    /// <param name="psEngine">Engine PowerShell per esecuzione comandi.</param>
+    
+    
+    
+    
     public IpcServer(PowerShellEngine psEngine)
     {
         _psEngine = psEngine;
         _dispatcher = new OperationDispatcher(psEngine, SendEventAsync);
     }
 
-    /// <summary>
-    /// Avvia il server IPC e attende connessione client.
-    /// </summary>
+    
+    
+    
     public async Task StartAsync()
     {
         _serverCts = new CancellationTokenSource();
 
-        // Crea pipe principale per request/response
+        
         _requestPipe = new NamedPipeServerStream(
             IpcConstants.PipeName,
             PipeDirection.InOut,
@@ -63,7 +63,7 @@ public sealed class IpcServer : IDisposable
             IpcConstants.PipeBufferSize,
             IpcConstants.PipeBufferSize);
 
-        // Crea pipe eventi
+        
         _eventPipe = new NamedPipeServerStream(
             IpcConstants.EventPipeName,
             PipeDirection.Out,
@@ -75,14 +75,14 @@ public sealed class IpcServer : IDisposable
 
         Console.WriteLine($"[IPC] Waiting for client connection on {IpcConstants.PipeName}...");
 
-        // Attendi connessione su entrambe le pipe
+        
         await Task.WhenAll(
             _requestPipe.WaitForConnectionAsync(_serverCts.Token),
             _eventPipe.WaitForConnectionAsync(_serverCts.Token)).ConfigureAwait(false);
 
         Console.WriteLine("[IPC] Client connected");
 
-        // Crea readers/writers SENZA AutoFlush per evitare flush prematuro
+        
         _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
         _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
         _eventWriter = new StreamWriter(_eventPipe, Encoding.UTF8, leaveOpen: true);
@@ -91,19 +91,19 @@ public sealed class IpcServer : IDisposable
 
         _isRunning = true;
 
-        // Avvia loop richieste
+        
         _requestLoopTask = RequestLoopAsync(_serverCts.Token);
     }
 
-    /// <summary>
-    /// Ferma il server IPC in modo pulito.
-    /// </summary>
+    
+    
+    
     public async Task StopAsync()
     {
         _isRunning = false;
         _serverCts?.Cancel();
 
-        // Cancella tutte le operazioni attive
+        
         foreach (var kvp in _activeOperations)
         {
             try
@@ -112,7 +112,7 @@ public sealed class IpcServer : IDisposable
             }
             catch (ObjectDisposedException)
             {
-                // Già disposed
+                
             }
         }
         _activeOperations.Clear();
@@ -126,7 +126,7 @@ public sealed class IpcServer : IDisposable
             }
             catch
             {
-                // Ignora errori durante shutdown
+                
             }
         }
 
@@ -156,7 +156,7 @@ public sealed class IpcServer : IDisposable
                     break;
                 }
 
-                // Validazione dimensione messaggio
+                
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
                     Console.WriteLine($"[IPC] Message too large ({line.Length} bytes), rejecting");
@@ -180,13 +180,13 @@ public sealed class IpcServer : IDisposable
                     continue;
                 }
 
-                // Gestisci messaggio in background (non bloccare il loop)
+                
                 _ = HandleMessageAsync(message, cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
-            // Shutdown normale
+            
         }
         catch (Exception ex)
         {
@@ -261,10 +261,10 @@ public sealed class IpcServer : IDisposable
     {
         Console.WriteLine($"[IPC] Request: {request.Operation} (correlation: {request.CorrelationId})");
 
-        // Inizializza contatore eventi per questa request
+        
         _eventCounts[request.CorrelationId] = 0;
 
-        // Crea CancellationToken per questa operazione
+        
         CancellationTokenSource? operationCts = null;
         try
         {
@@ -276,7 +276,7 @@ public sealed class IpcServer : IDisposable
         }
         catch (ObjectDisposedException)
         {
-            // Server in shutdown
+            
             return;
         }
         catch (OperationCanceledException)
@@ -320,7 +320,7 @@ public sealed class IpcServer : IDisposable
                 }
                 catch
                 {
-                    // Ignora errori dispose
+                    
                 }
 
                 operationCts = null;
@@ -328,9 +328,9 @@ public sealed class IpcServer : IDisposable
         }
     }
 
-    /// <summary>
-    /// Gestisce richiesta di cancellazione. Idempotente - non fallisce se operazione già completata.
-    /// </summary>
+    
+    
+    
     private void HandleCancel(CancelRequest cancel)
     {
         Console.WriteLine($"[IPC] Cancel request for correlation: {cancel.CorrelationId}");
@@ -351,13 +351,13 @@ public sealed class IpcServer : IDisposable
             }
             catch (ObjectDisposedException)
             {
-                // Operazione già completata e CTS disposed
+                
                 Console.WriteLine($"[IPC] Operation already completed: {cancel.CorrelationId}");
             }
         }
         else
         {
-            // Operazione non trovata - già completata o mai esistita
+            
             Console.WriteLine($"[IPC] Cancel ignored - operation not found: {cancel.CorrelationId}");
         }
     }
@@ -386,7 +386,7 @@ public sealed class IpcServer : IDisposable
         {
             var json = JsonMessageSerializer.Serialize(message);
 
-            // Verifica dimensione prima di inviare
+            
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
                 Console.Error.WriteLine($"[IPC] Response too large ({json.Length} bytes), dropping");
@@ -404,7 +404,7 @@ public sealed class IpcServer : IDisposable
         }
         catch (ObjectDisposedException)
         {
-            // Pipe già chiusa
+            
         }
     }
 
@@ -415,7 +415,7 @@ public sealed class IpcServer : IDisposable
             return;
         }
 
-        // Verifica limite eventi per request
+        
         if (_eventCounts.TryGetValue(evt.CorrelationId, out var count))
         {
             if (!IpcConstants.IsEventCountWithinLimit(count))
@@ -436,7 +436,7 @@ public sealed class IpcServer : IDisposable
 
             var json = JsonMessageSerializer.Serialize(evt);
 
-            // Verifica dimensione prima di inviare
+            
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
                 Console.Error.WriteLine($"[IPC] Event too large ({json.Length} bytes), dropping");
@@ -452,7 +452,7 @@ public sealed class IpcServer : IDisposable
         }
         catch (ObjectDisposedException)
         {
-            // Pipe già chiusa
+            
         }
         finally
         {
@@ -475,9 +475,9 @@ public sealed class IpcServer : IDisposable
         _eventPipe = null;
     }
 
-    /// <summary>
-    /// Rilascia le risorse.
-    /// </summary>
+    
+    
+    
     public void Dispose()
     {
         if (_isDisposing)
@@ -489,7 +489,7 @@ public sealed class IpcServer : IDisposable
 
         _serverCts?.Cancel();
 
-        // Cancella tutte le operazioni attive
+        
         foreach (var kvp in _activeOperations)
         {
             try
@@ -499,7 +499,7 @@ public sealed class IpcServer : IDisposable
             }
             catch
             {
-                // Ignora
+                
             }
         }
         _activeOperations.Clear();

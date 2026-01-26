@@ -9,7 +9,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+        
         <Grid Grid.Row="0" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -54,11 +54,11 @@
                     ToolTip="Ricarica i dettagli e le autorizzazioni della casella postale"/>
         </Grid>
 
-        <!-- Main Content with ScrollViewer -->
+        
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                       IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBool}}">
             <StackPanel>
-                <!-- Error Message -->
+                
                 <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
                         BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,16"
                         Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
@@ -68,7 +68,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Loading Indicator -->
+                
                 <StackPanel HorizontalAlignment="Center" Margin="0,32,0,16"
                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
                     <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
@@ -76,10 +76,10 @@
                                Foreground="{StaticResource SecondaryTextBrush}"/>
                 </StackPanel>
 
-                <!-- Details Content -->
+                
                 <StackPanel Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
 
-                    <!-- Basic Information -->
+                    
                     <GroupBox Header="Informazioni di base" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -117,7 +117,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Actions -->
+                    
                     <GroupBox Header="Azioni" Margin="0,0,0,12"
                               Visibility="{Binding HasConversionActions, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
@@ -141,7 +141,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- Forwarding & Limits -->
+                    
                     <GroupBox Header="Inoltro e limiti messaggio" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -189,7 +189,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Archive -->
+                    
                     <GroupBox Header="Archivio" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -220,7 +220,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Features -->
+                    
                     <GroupBox Header="Funzionalità" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -266,7 +266,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Retention Policy -->
+                    
                     <GroupBox Header="Retention Policy" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -331,7 +331,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Quotas -->
+                    
                     <GroupBox Header="Quote mailbox" Margin="0,0,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -366,7 +366,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Statistics -->
+                    
                     <GroupBox Header="Statistiche" Margin="0,0,0,12"
                               Visibility="{Binding Statistics, Converter={StaticResource NullToVisibility}}">
                         <Grid>
@@ -401,7 +401,7 @@
                         </Grid>
                     </GroupBox>
 
-                    <!-- Inbox Rules -->
+                    
                     <GroupBox Header="Regole posta in arrivo" Margin="0,0,0,12"
                               Visibility="{Binding InboxRules, Converter={StaticResource NullToVisibility}}">
                         <StackPanel>
@@ -424,7 +424,7 @@
                                                 <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
                                                            Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0"/>
 
-                                                <!-- Forwarding Warning -->
+                                                
                                                 <StackPanel>
                                                     <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                                                             BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,0"
@@ -469,7 +469,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- Auto Reply -->
+                    
                     <GroupBox Header="Risposta automatica" Margin="0,0,0,12"
                               Visibility="{Binding AutoReply, Converter={StaticResource NullToVisibility}}">
                         <StackPanel>
@@ -546,10 +546,10 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- Permissions Manager -->
+                    
                     <GroupBox Header="Gestione autorizzazioni" Margin="0,0,0,12">
                         <StackPanel>
-                            <!-- Pending Changes Warning -->
+                            
                             <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                                     BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
                                     Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
@@ -566,7 +566,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Add New Permission -->
+                            
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                                     CornerRadius="4" Padding="12" Margin="0,0,0,12">
                                 <Grid>
@@ -581,13 +581,13 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Labels Row -->
+                                    
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Utente (email o nome):" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Tipo autorizzazione:" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
 
-                                    <!-- Input Controls Row -->
+                                    
                                     <TextBox Grid.Row="1" Grid.Column="0"
                                              Text="{Binding NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="0,0,8,0"
@@ -620,7 +620,7 @@
                                 </Grid>
                             </Border>
 
-                            <!-- FullAccess Permissions -->
+                            
                             <TextBlock Text="Autorizzazioni accesso completo" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding FullAccessPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
@@ -670,7 +670,7 @@
                                 </DataGrid.Columns>
                             </DataGrid>
 
-                            <!-- SendAs Permissions -->
+                            
                             <TextBlock Text="Autorizzazioni Invia come" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding SendAsPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
@@ -697,7 +697,7 @@
                                 </DataGrid.Columns>
                             </DataGrid>
 
-                            <!-- SendOnBehalf Permissions -->
+                            
                             <TextBlock Text="Autorizzazioni Invia per conto di" FontWeight="SemiBold" Margin="0,8,0,4"/>
                             <DataGrid ItemsSource="{Binding SendOnBehalfPermissions}"
                                       AutoGenerateColumns="False" IsReadOnly="True"
@@ -728,7 +728,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Loading Overlay -->
+        
         <Border Grid.Row="0" Grid.RowSpan="2" Background="#80000000"
                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -737,7 +737,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Saving Overlay -->
+        
         <Border Grid.Row="0" Grid.RowSpan="2" Background="#CC000000"
                 Visibility="{Binding IsSaving, Converter={StaticResource BoolToVisibility}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

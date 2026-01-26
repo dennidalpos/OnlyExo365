@@ -4,7 +4,6 @@ using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
-using ExchangeAdmin.Presentation.Helpers;
 using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
@@ -16,7 +15,7 @@ public class MailboxSpaceViewModel : ViewModelBase
     private bool _isLoading;
     private string? _errorMessage;
 
-    public MailboxSpaceViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
+    public MailboxSpaceViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
         _workerService = workerService;
         _shellViewModel = shellViewModel;

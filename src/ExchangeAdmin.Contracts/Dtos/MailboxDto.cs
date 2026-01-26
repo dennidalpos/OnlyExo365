@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-/// <summary>
-/// Mailbox list item (lightweight).
-/// </summary>
+
+
+
 public class MailboxListItemDto
 {
     [JsonPropertyName("identity")]
@@ -32,9 +32,9 @@ public class MailboxListItemDto
     public bool IsInactiveMailbox { get; set; }
 }
 
-/// <summary>
-/// Full mailbox DTO (backward compatibility).
-/// </summary>
+
+
+
 public class MailboxDto : MailboxListItemDto
 {
     [JsonPropertyName("userPrincipalName")]
@@ -53,9 +53,9 @@ public class MailboxDto : MailboxListItemDto
     public DateTime? WhenMailboxCreated { get; set; }
 }
 
-/// <summary>
-/// Mailbox details (full information).
-/// </summary>
+
+
+
 public class MailboxDetailsDto
 {
     [JsonPropertyName("identity")]
@@ -88,23 +88,23 @@ public class MailboxDetailsDto
     [JsonPropertyName("retentionPolicy")]
     public string? RetentionPolicy { get; set; }
 
-    // Features
+    
     [JsonPropertyName("features")]
     public MailboxFeaturesDto Features { get; set; } = new();
 
-    // Statistics (loaded separately)
+    
     [JsonPropertyName("statistics")]
     public MailboxStatisticsDto? Statistics { get; set; }
 
-    // Rules
+    
     [JsonPropertyName("inboxRules")]
     public List<InboxRuleDto>? InboxRules { get; set; }
 
-    // Auto-reply
+    
     [JsonPropertyName("autoReplyConfiguration")]
     public AutoReplyConfigurationDto? AutoReplyConfiguration { get; set; }
 
-    // Permissions
+    
     [JsonPropertyName("permissions")]
     public MailboxPermissionsDto? Permissions { get; set; }
 
@@ -115,9 +115,9 @@ public class MailboxDetailsDto
     public DateTime? WhenMailboxCreated { get; set; }
 }
 
-/// <summary>
-/// Retention policy summary.
-/// </summary>
+
+
+
 public class RetentionPolicySummaryDto
 {
     [JsonPropertyName("id")]
@@ -133,12 +133,12 @@ public class RetentionPolicySummaryDto
     public bool RequiresArchive { get; set; }
 }
 
-/// <summary>
-/// Mailbox features state.
-/// </summary>
+
+
+
 public class MailboxFeaturesDto
 {
-    // Archive
+    
     [JsonPropertyName("archiveEnabled")]
     public bool ArchiveEnabled { get; set; }
 
@@ -151,7 +151,7 @@ public class MailboxFeaturesDto
     [JsonPropertyName("archiveStatus")]
     public string? ArchiveStatus { get; set; }
 
-    // Litigation Hold
+    
     [JsonPropertyName("litigationHoldEnabled")]
     public bool LitigationHoldEnabled { get; set; }
 
@@ -164,7 +164,7 @@ public class MailboxFeaturesDto
     [JsonPropertyName("litigationHoldDuration")]
     public string? LitigationHoldDuration { get; set; }
 
-    // Audit
+    
     [JsonPropertyName("auditEnabled")]
     public bool AuditEnabled { get; set; }
 
@@ -180,7 +180,7 @@ public class MailboxFeaturesDto
     [JsonPropertyName("auditOwner")]
     public List<string>? AuditOwner { get; set; }
 
-    // Forwarding
+    
     [JsonPropertyName("forwardingAddress")]
     public string? ForwardingAddress { get; set; }
 
@@ -190,7 +190,7 @@ public class MailboxFeaturesDto
     [JsonPropertyName("deliverToMailboxAndForward")]
     public bool DeliverToMailboxAndForward { get; set; }
 
-    // Quotas
+    
     [JsonPropertyName("prohibitSendQuota")]
     public string? ProhibitSendQuota { get; set; }
 
@@ -215,7 +215,7 @@ public class MailboxFeaturesDto
     [JsonPropertyName("maxReceiveSize")]
     public string? MaxReceiveSize { get; set; }
 
-    // Other
+    
     [JsonPropertyName("retentionHoldEnabled")]
     public bool RetentionHoldEnabled { get; set; }
 
@@ -229,9 +229,9 @@ public class MailboxFeaturesDto
     public bool HiddenFromAddressListsEnabled { get; set; }
 }
 
-/// <summary>
-/// Mailbox statistics.
-/// </summary>
+
+
+
 public class MailboxStatisticsDto
 {
     [JsonPropertyName("totalItemSize")]
@@ -256,9 +256,9 @@ public class MailboxStatisticsDto
     public DateTime? LastLogoffTime { get; set; }
 }
 
-/// <summary>
-/// Inbox rule.
-/// </summary>
+
+
+
 public class InboxRuleDto
 {
     [JsonPropertyName("name")]
@@ -292,9 +292,9 @@ public class InboxRuleDto
     public string? MoveToFolder { get; set; }
 }
 
-/// <summary>
-/// Auto-reply configuration.
-/// </summary>
+
+
+
 public class AutoReplyConfigurationDto
 {
     [JsonPropertyName("autoReplyState")]
@@ -316,9 +316,9 @@ public class AutoReplyConfigurationDto
     public string? ExternalAudience { get; set; }
 }
 
-/// <summary>
-/// Mailbox permissions container.
-/// </summary>
+
+
+
 public class MailboxPermissionsDto
 {
     [JsonPropertyName("fullAccessPermissions")]
@@ -331,9 +331,9 @@ public class MailboxPermissionsDto
     public List<string> SendOnBehalfPermissions { get; set; } = new();
 }
 
-/// <summary>
-/// Mailbox permission entry (FullAccess).
-/// </summary>
+
+
+
 public class MailboxPermissionEntryDto
 {
     [JsonPropertyName("identity")]
@@ -354,14 +354,14 @@ public class MailboxPermissionEntryDto
     [JsonPropertyName("inheritanceType")]
     public string? InheritanceType { get; set; }
 
-    // For AutoMapping
+    
     [JsonPropertyName("autoMapping")]
     public bool? AutoMapping { get; set; }
 }
 
-/// <summary>
-/// Recipient permission entry (SendAs).
-/// </summary>
+
+
+
 public class RecipientPermissionEntryDto
 {
     [JsonPropertyName("identity")]
@@ -380,9 +380,9 @@ public class RecipientPermissionEntryDto
     public bool IsInherited { get; set; }
 }
 
-/// <summary>
-/// Request mailbox list with paging.
-/// </summary>
+
+
+
 public class GetMailboxesRequest
 {
     [JsonPropertyName("recipientTypeDetails")]
@@ -407,9 +407,9 @@ public class GetMailboxesRequest
     public bool SortDescending { get; set; }
 }
 
-/// <summary>
-/// Response mailbox list with paging.
-/// </summary>
+
+
+
 public class GetMailboxesResponse
 {
     [JsonPropertyName("mailboxes")]
@@ -431,9 +431,9 @@ public class GetMailboxesResponse
     public string? SearchQuery { get; set; }
 }
 
-/// <summary>
-/// Mailbox space report item.
-/// </summary>
+
+
+
 public class MailboxSpaceItemDto
 {
     [JsonPropertyName("identity")]
@@ -470,25 +470,25 @@ public class MailboxSpaceItemDto
     public long? IssueWarningQuotaBytes { get; set; }
 }
 
-/// <summary>
-/// Request mailbox space report.
-/// </summary>
+
+
+
 public class GetMailboxSpaceReportRequest
 {
 }
 
-/// <summary>
-/// Response mailbox space report.
-/// </summary>
+
+
+
 public class GetMailboxSpaceReportResponse
 {
     [JsonPropertyName("mailboxes")]
     public List<MailboxSpaceItemDto> Mailboxes { get; set; } = new();
 }
 
-/// <summary>
-/// Request mailbox details.
-/// </summary>
+
+
+
 public class GetMailboxDetailsRequest
 {
     [JsonPropertyName("identity")]
@@ -507,25 +507,25 @@ public class GetMailboxDetailsRequest
     public bool IncludePermissions { get; set; } = true;
 }
 
-/// <summary>
-/// Request retention policies list.
-/// </summary>
+
+
+
 public class GetRetentionPoliciesRequest
 {
 }
 
-/// <summary>
-/// Response retention policies list.
-/// </summary>
+
+
+
 public class GetRetentionPoliciesResponse
 {
     [JsonPropertyName("policies")]
     public List<RetentionPolicySummaryDto> Policies { get; set; } = new();
 }
 
-/// <summary>
-/// Request to set mailbox retention policy.
-/// </summary>
+
+
+
 public class SetRetentionPolicyRequest
 {
     [JsonPropertyName("identity")]
@@ -535,18 +535,18 @@ public class SetRetentionPolicyRequest
     public string? PolicyName { get; set; }
 }
 
-/// <summary>
-/// Request mailbox permissions.
-/// </summary>
+
+
+
 public class GetMailboxPermissionsRequest
 {
     [JsonPropertyName("identity")]
     public string Identity { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Request to set mailbox permission.
-/// </summary>
+
+
+
 public class SetMailboxPermissionRequest
 {
     [JsonPropertyName("identity")]
@@ -565,9 +565,9 @@ public class SetMailboxPermissionRequest
     public bool? AutoMapping { get; set; }
 }
 
-/// <summary>
-/// Permission type.
-/// </summary>
+
+
+
 public enum PermissionType
 {
     FullAccess,
@@ -575,9 +575,9 @@ public enum PermissionType
     SendOnBehalf
 }
 
-/// <summary>
-/// Permission action.
-/// </summary>
+
+
+
 public enum PermissionAction
 {
     Add,
@@ -585,9 +585,9 @@ public enum PermissionAction
     Modify
 }
 
-/// <summary>
-/// Delta plan for permissions.
-/// </summary>
+
+
+
 public class PermissionsDeltaPlanDto
 {
     [JsonPropertyName("identity")]
@@ -606,9 +606,9 @@ public class PermissionsDeltaPlanDto
     public bool HasChanges => Actions.Count > 0;
 }
 
-/// <summary>
-/// Single permission delta action.
-/// </summary>
+
+
+
 public class PermissionDeltaActionDto
 {
     [JsonPropertyName("action")]
@@ -627,9 +627,9 @@ public class PermissionDeltaActionDto
     public string Description { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Request to apply permissions delta plan.
-/// </summary>
+
+
+
 public class ApplyPermissionsDeltaPlanRequest
 {
     [JsonPropertyName("identity")]
@@ -639,9 +639,9 @@ public class ApplyPermissionsDeltaPlanRequest
     public List<PermissionDeltaActionDto> Actions { get; set; } = new();
 }
 
-/// <summary>
-/// Result of applying permissions delta plan.
-/// </summary>
+
+
+
 public class ApplyPermissionsDeltaPlanResponse
 {
     [JsonPropertyName("identity")]
@@ -660,9 +660,9 @@ public class ApplyPermissionsDeltaPlanResponse
     public List<PermissionActionResultDto> Results { get; set; } = new();
 }
 
-/// <summary>
-/// Result of a single permission action.
-/// </summary>
+
+
+
 public class PermissionActionResultDto
 {
     [JsonPropertyName("action")]
@@ -675,9 +675,9 @@ public class PermissionActionResultDto
     public string? ErrorMessage { get; set; }
 }
 
-/// <summary>
-/// Request to set mailbox feature.
-/// </summary>
+
+
+
 public class SetMailboxFeatureRequest
 {
     [JsonPropertyName("identity")]
@@ -693,9 +693,9 @@ public class SetMailboxFeatureRequest
     public Dictionary<string, object>? Parameters { get; set; }
 }
 
-/// <summary>
-/// Request to update mailbox settings.
-/// </summary>
+
+
+
 public class UpdateMailboxSettingsRequest
 {
     [JsonPropertyName("identity")]
@@ -732,9 +732,9 @@ public class UpdateMailboxSettingsRequest
     public string? MaxReceiveSize { get; set; }
 }
 
-/// <summary>
-/// Request to update mailbox auto-reply configuration.
-/// </summary>
+
+
+
 public class SetMailboxAutoReplyConfigurationRequest
 {
     [JsonPropertyName("identity")]
@@ -759,27 +759,27 @@ public class SetMailboxAutoReplyConfigurationRequest
     public string? ExternalAudience { get; set; }
 }
 
-/// <summary>
-/// Request to convert mailbox to shared mailbox.
-/// </summary>
+
+
+
 public class ConvertMailboxToSharedRequest
 {
     [JsonPropertyName("identity")]
     public string Identity { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Request to convert mailbox to regular mailbox.
-/// </summary>
+
+
+
 public class ConvertMailboxToRegularRequest
 {
     [JsonPropertyName("identity")]
     public string Identity { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Mailbox features that can be toggled.
-/// </summary>
+
+
+
 public enum MailboxFeature
 {
     Archive,

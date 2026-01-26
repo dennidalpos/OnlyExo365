@@ -7,9 +7,9 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Dashboard view model with statistics.
-/// </summary>
+
+
+
 public class DashboardViewModel : ViewModelBase
 {
     private readonly IWorkerService _workerService;
@@ -158,7 +158,7 @@ public class DashboardViewModel : ViewModelBase
                 Console.WriteLine($"[DashboardViewModel] Stats loaded - Mailboxes: {result.Value.MailboxCounts.Total}, Groups: {result.Value.GroupCounts.Total}");
                 Stats = result.Value;
 
-                // Log warnings
+                
                 foreach (var warning in result.Value.Warnings)
                 {
                     _shellViewModel.AddLog(LogLevel.Warning, warning);
@@ -166,7 +166,7 @@ public class DashboardViewModel : ViewModelBase
             }
             else if (result.WasCancelled)
             {
-                // Ignore
+                
             }
             else
             {
@@ -176,7 +176,7 @@ public class DashboardViewModel : ViewModelBase
                 ErrorMessage = errorDetails;
                 _shellViewModel.AddLog(LogLevel.Error, $"Dashboard load failed: {errorDetails}");
 
-                // Also log to console for debugging
+                
                 Console.WriteLine($"[DashboardViewModel] Error: {errorDetails}");
                 if (result.Error != null)
                 {
@@ -186,7 +186,7 @@ public class DashboardViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {

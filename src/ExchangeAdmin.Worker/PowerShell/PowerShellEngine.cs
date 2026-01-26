@@ -6,58 +6,58 @@ using System.Management.Automation.Runspaces;
 
 namespace ExchangeAdmin.Worker.PowerShell;
 
-/// <summary>
-/// Risultato inizializzazione PowerShell.
-/// </summary>
+
+
+
 public class PowerShellInitResult
 {
-    /// <summary>True se inizializzazione riuscita.</summary>
+    
     public bool Success { get; init; }
 
-    /// <summary>Versione PowerShell rilevata.</summary>
+    
     public string? PowerShellVersion { get; init; }
 
-    /// <summary>True se ExchangeOnlineManagement module è disponibile.</summary>
+    
     public bool IsModuleAvailable { get; init; }
 
-    /// <summary>Messaggio di errore in caso di fallimento.</summary>
+    
     public string? ErrorMessage { get; init; }
 }
 
-/// <summary>
-/// Risultato esecuzione comando PowerShell.
-/// </summary>
+
+
+
 public class PowerShellResult
 {
-    /// <summary>True se esecuzione completata senza errori.</summary>
+    
     public bool Success { get; init; }
 
-    /// <summary>Output objects dal comando.</summary>
+    
     public List<PSObject> Output { get; init; } = new();
 
-    /// <summary>Errori rilevati durante esecuzione.</summary>
+    
     public List<ErrorRecord> Errors { get; init; } = new();
 
-    /// <summary>Messaggi verbose.</summary>
+    
     public List<string> Verbose { get; init; } = new();
 
-    /// <summary>Messaggi warning.</summary>
+    
     public List<string> Warning { get; init; } = new();
 
-    /// <summary>True se l'operazione è stata cancellata.</summary>
+    
     public bool WasCancelled { get; init; }
 
-    /// <summary>Messaggio di errore principale.</summary>
+    
     public string? ErrorMessage { get; init; }
 
-    /// <summary>True se il runspace è in stato corrotto e richiede reset.</summary>
+    
     public bool RunspaceCorrupted { get; init; }
 }
 
-/// <summary>
-/// Engine PowerShell per l'esecuzione dei comandi Exchange Online.
-/// Gestisce runspace lifecycle, pipeline cleanup, e recovery da stati corrotti.
-/// </summary>
+
+
+
+
 public sealed class PowerShellEngine : IDisposable
 {
     private const string ExchangeEnvironmentVariable = "EXCHANGEADMIN_EXO_ENV";
@@ -80,31 +80,31 @@ public sealed class PowerShellEngine : IDisposable
     private int _consecutiveFailures;
     private const int MaxConsecutiveFailuresBeforeReset = 3;
 
-    /// <summary>Indica se l'engine è inizializzato.</summary>
+    
     public bool IsInitialized => _isInitialized;
 
-    /// <summary>Indica se è connesso a Exchange Online.</summary>
+    
     public bool IsConnected => _isConnected;
 
-    /// <summary>Indica se il modulo EXO è disponibile.</summary>
+    
     public bool IsModuleAvailable => _isModuleAvailable;
 
-    /// <summary>Versione PowerShell.</summary>
+    
     public string? PowerShellVersion => _powerShellVersion;
 
-    /// <summary>
-    /// Inizializza il runspace PowerShell.
-    /// </summary>
+    
+    
+    
     public async Task<PowerShellInitResult> InitializeAsync()
     {
         try
         {
             Debug.WriteLine("[PowerShellEngine] Initializing...");
 
-            // Crea runspace con default session state
+            
             var iss = InitialSessionState.CreateDefault();
 
-            // Imposta Execution Policy per permettere script firmati e moduli
+            
             iss.ExecutionPolicy = Microsoft.PowerShell.ExecutionPolicy.RemoteSigned;
 
             _runspace = RunspaceFactory.CreateRunspace(iss);
@@ -112,7 +112,7 @@ public sealed class PowerShellEngine : IDisposable
 
             Debug.WriteLine($"[PowerShellEngine] Runspace opened, state: {_runspace.RunspaceStateInfo.State}");
 
-            // Ottieni versione PowerShell
+            
             using var ps = System.Management.Automation.PowerShell.Create();
             ps.Runspace = _runspace;
             ps.AddScript("$PSVersionTable.PSVersion.ToString()");
@@ -122,7 +122,7 @@ public sealed class PowerShellEngine : IDisposable
 
             Debug.WriteLine($"[PowerShellEngine] PowerShell version: {_powerShellVersion}");
 
-            // Verifica disponibilità modulo ExchangeOnlineManagement
+            
             ps.Commands.Clear();
             ps.AddScript("Get-Module -ListAvailable -Name ExchangeOnlineManagement | Select-Object -First 1");
 
@@ -133,7 +133,7 @@ public sealed class PowerShellEngine : IDisposable
 
             if (_isModuleAvailable)
             {
-                // Importa il modulo
+                
                 ps.Commands.Clear();
                 ps.AddScript("Import-Module ExchangeOnlineManagement -ErrorAction Stop");
                 await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
@@ -173,18 +173,18 @@ public sealed class PowerShellEngine : IDisposable
         }
     }
 
-    /// <summary>
-    /// Esegue un comando PowerShell con supporto cancellazione e streaming output.
-    /// Gestisce cleanup della pipeline e recovery da stati corrotti.
-    /// </summary>
-    /// <param name="script">Script PowerShell da eseguire.</param>
-    /// <param name="parameters">Parametri opzionali.</param>
-    /// <param name="onVerbose">Callback per messaggi verbose.</param>
-    /// <param name="onWarning">Callback per messaggi warning.</param>
-    /// <param name="onError">Callback per errori.</param>
-    /// <param name="onOutput">Callback per output objects.</param>
-    /// <param name="cancellationToken">Token di cancellazione.</param>
-    /// <returns>Risultato dell'esecuzione.</returns>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public async Task<PowerShellResult> ExecuteAsync(
         string script,
         Dictionary<string, object>? parameters = null,
@@ -212,7 +212,7 @@ public sealed class PowerShellEngine : IDisposable
             };
         }
 
-        // Verifica stato runspace prima di acquisire lock
+        
         if (!IsRunspaceUsable())
         {
             Debug.WriteLine("[PowerShellEngine] Runspace not usable, attempting recovery...");
@@ -235,7 +235,7 @@ public sealed class PowerShellEngine : IDisposable
 
         try
         {
-#pragma warning disable CA2000 // Dispose handled in finally block below
+#pragma warning disable CA2000 
             ps = System.Management.Automation.PowerShell.Create();
 #pragma warning restore CA2000
             ps.Runspace = _runspace;
@@ -250,7 +250,7 @@ public sealed class PowerShellEngine : IDisposable
                 }
             }
 
-            // Setup stream handlers
+            
             var verbose = new List<string>();
             var warnings = new List<string>();
             var errors = new List<ErrorRecord>();
@@ -288,7 +288,7 @@ public sealed class PowerShellEngine : IDisposable
                 }
             };
 
-            // Registra per cancellazione
+            
             var registration = cancellationToken.Register(() =>
             {
                 try
@@ -304,7 +304,7 @@ public sealed class PowerShellEngine : IDisposable
 
             try
             {
-                // Esegui con output streaming
+                
                 Console.WriteLine($"[PowerShellEngine] Starting script execution (length: {script.Length} chars)");
                 var scriptPreview = script.Length > 100 ? script.Substring(0, 100) + "..." : script;
                 Console.WriteLine($"[PowerShellEngine] Script preview: {scriptPreview.Replace("\n", " ").Replace("\r", "")}");
@@ -342,7 +342,7 @@ public sealed class PowerShellEngine : IDisposable
                     };
                 }
 
-                // Reset failure counter on success
+                
                 if (!ps.HadErrors)
                 {
                     _consecutiveFailures = 0;
@@ -411,7 +411,7 @@ public sealed class PowerShellEngine : IDisposable
         }
         finally
         {
-            // Cleanup della PowerShell instance
+            
             if (ps != null)
             {
                 try
@@ -423,16 +423,16 @@ public sealed class PowerShellEngine : IDisposable
                     Debug.WriteLine($"[PowerShellEngine] Error disposing PowerShell: {ex.Message}");
                 }
 
-                ps = null; // Indica all'analyzer che è stato gestito
+                ps = null; 
             }
 
             _executionLock.Release();
         }
     }
 
-    /// <summary>
-    /// Verifica se il runspace è in uno stato utilizzabile.
-    /// </summary>
+    
+    
+    
     private bool IsRunspaceUsable()
     {
         if (_runspace == null)
@@ -451,16 +451,16 @@ public sealed class PowerShellEngine : IDisposable
         }
     }
 
-    /// <summary>
-    /// Tenta di recuperare il runspace da uno stato corrotto.
-    /// </summary>
+    
+    
+    
     private async Task<bool> TryRecoverRunspaceAsync()
     {
         Debug.WriteLine("[PowerShellEngine] Attempting runspace recovery...");
 
         try
         {
-            // Chiudi vecchio runspace se esiste
+            
             if (_runspace != null)
             {
                 try
@@ -475,12 +475,12 @@ public sealed class PowerShellEngine : IDisposable
                 _runspace = null;
             }
 
-            // Ricrea runspace
+            
             var iss = InitialSessionState.CreateDefault();
             _runspace = RunspaceFactory.CreateRunspace(iss);
             _runspace.Open();
 
-            // Re-importa modulo se era disponibile
+            
             if (_isModuleAvailable)
             {
                 using var ps = System.Management.Automation.PowerShell.Create();
@@ -490,7 +490,7 @@ public sealed class PowerShellEngine : IDisposable
             }
 
             _consecutiveFailures = 0;
-            _isConnected = false; // Reset connection state - richiede riconnessione
+            _isConnected = false; 
 
             Debug.WriteLine("[PowerShellEngine] Runspace recovery successful");
             return true;
@@ -502,9 +502,9 @@ public sealed class PowerShellEngine : IDisposable
         }
     }
 
-    /// <summary>
-    /// Connetti a Exchange Online (interattivo).
-    /// </summary>
+    
+    
+    
     public async Task<PowerShellResult> ConnectExchangeInteractiveAsync(
         Action<string, string>? onVerbose = null,
         CancellationToken cancellationToken = default)
@@ -542,7 +542,7 @@ public sealed class PowerShellEngine : IDisposable
             Console.WriteLine($"[PowerShellEngine] Connection failed: {result.ErrorMessage}");
             Debug.WriteLine($"[PowerShellEngine] Connection failed: {result.ErrorMessage}");
 
-            // Log dettagli degli errori
+            
             if (result.Errors != null && result.Errors.Any())
             {
                 foreach (var err in result.Errors)
@@ -573,9 +573,9 @@ public sealed class PowerShellEngine : IDisposable
         return $"{baseCommand} -ExchangeEnvironmentName '{sanitized}'";
     }
 
-    /// <summary>
-    /// Disconnetti da Exchange Online.
-    /// </summary>
+    
+    
+    
     public async Task<PowerShellResult> DisconnectExchangeAsync(CancellationToken cancellationToken = default)
     {
         Debug.WriteLine("[PowerShellEngine] Disconnecting from Exchange Online...");
@@ -591,9 +591,9 @@ public sealed class PowerShellEngine : IDisposable
         return result;
     }
 
-    /// <summary>
-    /// Verifica connessione attiva.
-    /// </summary>
+    
+    
+    
     public async Task<(bool IsConnected, string? UserPrincipalName, string? Organization)> GetConnectionStatusAsync(
         CancellationToken cancellationToken = default)
     {
@@ -658,9 +658,9 @@ public sealed class PowerShellEngine : IDisposable
         }
     }
 
-    /// <summary>
-    /// Rilascia le risorse.
-    /// </summary>
+    
+    
+    
     public void Dispose()
     {
         if (_isDisposing)

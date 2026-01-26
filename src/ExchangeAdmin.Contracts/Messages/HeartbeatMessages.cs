@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Ping heartbeat dal client al worker.
-/// </summary>
+
+
+
 public class HeartbeatPing : IpcMessage
 {
     public HeartbeatPing()
@@ -16,9 +16,9 @@ public class HeartbeatPing : IpcMessage
     public long Sequence { get; set; }
 }
 
-/// <summary>
-/// Pong heartbeat dal worker al client.
-/// </summary>
+
+
+
 public class HeartbeatPong : IpcMessage
 {
     public HeartbeatPong()

@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header / Toolbar -->
+        
         <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
                 Padding="12,8">
@@ -26,7 +26,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Title -->
+                
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Exchange Admin" FontSize="16" FontWeight="SemiBold"
                                Foreground="{StaticResource PrimaryTextBrush}"/>
@@ -34,7 +34,7 @@
                                Foreground="{StaticResource SecondaryTextBrush}"/>
                 </StackPanel>
 
-                <!-- Worker Controls -->
+                
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
                             VerticalAlignment="Center">
                     <Button Content="Start Worker" Command="{Binding StartWorkerCommand}"
@@ -46,7 +46,7 @@
 
                 </StackPanel>
 
-                <!-- Status Indicators -->
+                
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="12,0">
                         <TextBlock Text="Worker:" Foreground="{StaticResource SecondaryTextBrush}"
@@ -75,18 +75,18 @@
             </Grid>
         </Border>
 
-        <!-- Main Content with Sidebar -->
+        
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="180"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Sidebar Navigation -->
+            
             <Border Grid.Column="0" Background="{StaticResource TertiaryBackgroundBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
                 <StackPanel Margin="0,8">
-                    <!-- Dashboard -->
+                    
                     <Button Content="Dashboard" Command="{Binding NavigateToDashboardCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -101,7 +101,7 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- Mailboxes -->
+                    
                     <Button Content="Mailboxes" Command="{Binding NavigateToMailboxesCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -116,7 +116,7 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- Shared Mailboxes -->
+                    
                     <Button Content="Shared Mailboxes" Command="{Binding NavigateToSharedMailboxesCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -131,7 +131,7 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- Mailbox Space -->
+                    
                     <Button Content="Spazio mailbox" Command="{Binding NavigateToMailboxSpaceCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -146,7 +146,7 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- Distribution Lists -->
+                    
                     <Button Content="Distribution Lists" Command="{Binding NavigateToDistributionListsCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -163,7 +163,7 @@
 
                     <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
 
-                    <!-- Tools -->
+                    
                     <Button Content="Tools" Command="{Binding NavigateToToolsCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -178,7 +178,7 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- Logs -->
+                    
                     <Button Content="Logs" Command="{Binding NavigateToLogsCommand}"
                             HorizontalContentAlignment="Left" Padding="16,10"
                             Margin="4,2">
@@ -195,39 +195,39 @@
                 </StackPanel>
             </Border>
 
-            <!-- Content Area -->
+            
             <Grid Grid.Column="1" Background="{StaticResource PrimaryBackgroundBrush}">
-                <!-- Dashboard Page -->
+                
                 <views:DashboardView x:Name="DashboardView"
                                       Visibility="{Binding IsDashboardPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Mailboxes Page -->
+                
                 <views:MailboxListView x:Name="MailboxListView"
                                         Visibility="{Binding IsMailboxesPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Shared Mailboxes Page -->
+                
                 <views:SharedMailboxListView x:Name="SharedMailboxListView"
                                         Visibility="{Binding IsSharedMailboxesPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Mailbox Space Page -->
+                
                 <views:MailboxSpaceView x:Name="MailboxSpaceView"
                                         Visibility="{Binding IsMailboxSpacePage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Distribution Lists Page -->
+                
                 <views:DistributionListView x:Name="DistributionListView"
                                              Visibility="{Binding IsDistributionListsPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Tools Page -->
+                
                 <views:ToolsView x:Name="ToolsView"
                                   Visibility="{Binding IsToolsPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                <!-- Logs Page -->
+                
                 <views:LogsView x:Name="LogsView"
                                  Visibility="{Binding IsLogsPage, Converter={StaticResource BoolToVisibility}}"/>
             </Grid>
         </Grid>
 
-        <!-- Status Bar -->
+        
         <Border Grid.Row="2" Background="{StaticResource TertiaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="12,4">
@@ -238,7 +238,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Global Status -->
+                
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="{Binding GlobalStatus, FallbackValue='Ready'}"
                                Foreground="{StaticResource SecondaryTextBrush}"/>
@@ -247,7 +247,7 @@
                                  Visibility="{Binding IsGlobalOperationRunning, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
 
-                <!-- Connected User -->
+                
                 <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0"
                            Foreground="{StaticResource SecondaryTextBrush}"
                            Visibility="{Binding IsExchangeConnected, Converter={StaticResource BoolToVisibility}}">
@@ -255,7 +255,7 @@
                     <Run Text="{Binding ConnectedUser, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
                 </TextBlock>
 
-                <!-- Version -->
+                
                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
                            Foreground="{StaticResource SecondaryTextBrush}"
                            Text="v1.0.0"/>

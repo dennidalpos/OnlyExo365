@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Risposta handshake dal worker al client.
-/// </summary>
+
+
+
 public class HandshakeResponse : IpcMessage
 {
     public HandshakeResponse()

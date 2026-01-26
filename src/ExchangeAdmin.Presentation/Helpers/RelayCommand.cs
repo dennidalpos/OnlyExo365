@@ -2,9 +2,9 @@ using System.Windows.Input;
 
 namespace ExchangeAdmin.Presentation.Helpers;
 
-/// <summary>
-/// Command sincrono generico.
-/// </summary>
+
+
+
 public class RelayCommand : ICommand
 {
     private readonly Action<object?> _execute;
@@ -37,9 +37,9 @@ public class RelayCommand : ICommand
     }
 }
 
-/// <summary>
-/// Generic relay command with parameter.
-/// </summary>
+
+
+
 public class RelayCommand<T> : ICommand
 {
     private readonly Action<T?> _execute;
@@ -80,9 +80,9 @@ public class RelayCommand<T> : ICommand
     }
 }
 
-/// <summary>
-/// Command asincrono con supporto cancellazione.
-/// </summary>
+
+
+
 public class AsyncRelayCommand : ICommand
 {
     private readonly Func<CancellationToken, Task> _execute;
@@ -128,7 +128,7 @@ public class AsyncRelayCommand : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Cancellazione gestita
+            
         }
         finally
         {
@@ -150,9 +150,9 @@ public class AsyncRelayCommand : ICommand
     }
 }
 
-/// <summary>
-/// Generic async relay command with parameter.
-/// </summary>
+
+
+
 public class AsyncRelayCommand<T> : ICommand
 {
     private readonly Func<T?, CancellationToken, Task> _execute;
@@ -208,7 +208,7 @@ public class AsyncRelayCommand<T> : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Cancellation handled
+            
         }
         finally
         {

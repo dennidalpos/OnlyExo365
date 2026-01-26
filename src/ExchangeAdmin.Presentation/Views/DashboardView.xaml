@@ -10,7 +10,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+        
         <Grid Grid.Row="0" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -23,7 +23,7 @@
                     Style="{StaticResource PrimaryButton}"/>
         </Grid>
 
-        <!-- Warnings -->
+        
         <Border Grid.Row="1" Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
                 BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,16"
                 Visibility="{Binding Dashboard.HasWarnings, Converter={StaticResource BoolToVisibility}}">
@@ -40,14 +40,14 @@
             </StackPanel>
         </Border>
 
-        <!-- Statistics Cards -->
+        
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Mailbox Counts -->
+            
             <GroupBox Grid.Column="0" Header="Mailboxes" Margin="0,0,8,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -63,7 +63,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- User Mailboxes -->
+                    
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="User Mailboxes"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Dashboard.UserMailboxCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right">
@@ -76,19 +76,19 @@
                     <Button Grid.Row="0" Grid.ColumnSpan="2" Command="{Binding NavigateToMailboxesCommand}"
                             Opacity="0" Cursor="Hand" Background="Transparent" BorderThickness="0"/>
 
-                    <!-- Shared Mailboxes -->
+                    
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Shared Mailboxes" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Dashboard.SharedMailboxCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
                     <Button Grid.Row="1" Grid.ColumnSpan="2" Command="{Binding NavigateToSharedMailboxesCommand}"
                             Opacity="0" Cursor="Hand" Background="Transparent" BorderThickness="0"/>
 
-                    <!-- Room Mailboxes -->
+                    
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Room Mailboxes" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Dashboard.RoomMailboxCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
 
-                    <!-- Equipment Mailboxes -->
+                    
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Equipment Mailboxes" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Dashboard.EquipmentMailboxCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
@@ -96,7 +96,7 @@
                     <Separator Grid.Row="4" Grid.ColumnSpan="2" Margin="0,12,0,8"
                                Background="{StaticResource BorderBrush}"/>
 
-                    <!-- Total -->
+                    
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="Total" FontWeight="SemiBold"/>
                     <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <TextBlock Text="{Binding Dashboard.TotalMailboxCount}" FontWeight="Bold" FontSize="18"
@@ -108,7 +108,7 @@
                 </Grid>
             </GroupBox>
 
-            <!-- Group Counts -->
+            
             <GroupBox Grid.Column="1" Header="Distribution Groups" Margin="8,0,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -123,19 +123,19 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Distribution Groups -->
+                    
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Distribution Groups"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Dashboard.DistributionGroupCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right" Foreground="{StaticResource InfoBrush}"/>
                     <Button Grid.Row="0" Grid.ColumnSpan="2" Command="{Binding NavigateToDistributionListsCommand}"
                             Opacity="0" Cursor="Hand" Background="Transparent" BorderThickness="0"/>
 
-                    <!-- Dynamic Distribution Groups -->
+                    
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Dynamic Groups" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Dashboard.DynamicDistributionGroupCount}" FontWeight="SemiBold"
                                HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
 
-                    <!-- M365 Groups (Unified) -->
+                    
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="M365 Groups" Margin="0,8,0,0"
                                Visibility="{Binding Dashboard.ShowUnifiedGroups, Converter={StaticResource BoolToVisibility}}"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Dashboard.UnifiedGroupCount}" FontWeight="SemiBold"
@@ -145,7 +145,7 @@
                     <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,12,0,8"
                                Background="{StaticResource BorderBrush}"/>
 
-                    <!-- Total -->
+                    
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Total" FontWeight="SemiBold"/>
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Dashboard.TotalGroupCount}" FontWeight="Bold" FontSize="18"
                                HorizontalAlignment="Right" Foreground="{StaticResource AccentBrush}"/>
@@ -153,9 +153,9 @@
             </GroupBox>
         </Grid>
 
-        <!-- Loading/Error -->
+        
         <Grid Grid.Row="3" Margin="0,16,0,0">
-            <!-- Loading -->
+            
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top"
                         Visibility="{Binding Dashboard.IsLoading, Converter={StaticResource BoolToVisibility}}">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
@@ -163,7 +163,7 @@
                            Foreground="{StaticResource SecondaryTextBrush}"/>
             </StackPanel>
 
-            <!-- Error -->
+            
             <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
                     BorderThickness="1" CornerRadius="4" Padding="12"
                     HorizontalAlignment="Center" VerticalAlignment="Top"

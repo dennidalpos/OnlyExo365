@@ -3,20 +3,20 @@ using ExchangeAdmin.Contracts.Dtos;
 
 namespace ExchangeAdmin.Worker.PowerShell;
 
-/// <summary>
-/// Detects available Exchange Online cmdlets and their parameters.
-/// </summary>
+
+
+
 public class CapabilityDetector
 {
     private readonly PowerShellEngine _engine;
     private CapabilityMapDto? _cachedCapabilities;
 
-    /// <summary>
-    /// List of cmdlets to detect.
-    /// </summary>
+    
+    
+    
     private static readonly string[] CmdletsToDetect = new[]
     {
-        // Mailbox
+        
         "Get-Mailbox",
         "Set-Mailbox",
         "Get-MailboxStatistics",
@@ -30,25 +30,25 @@ public class CapabilityDetector
         "Get-InboxRule",
         "Get-MailboxAutoReplyConfiguration",
 
-        // Distribution Groups
+        
         "Get-DistributionGroup",
         "Set-DistributionGroup",
         "Get-DistributionGroupMember",
         "Add-DistributionGroupMember",
         "Remove-DistributionGroupMember",
 
-        // Dynamic Distribution Groups
+        
         "Get-DynamicDistributionGroup",
         "Get-DynamicDistributionGroupMember",
 
-        // Unified Groups (M365 Groups)
+        
         "Get-UnifiedGroup",
         "Get-UnifiedGroupLinks",
 
-        // Recipients
+        
         "Get-Recipient",
 
-        // Connection
+        
         "Get-ConnectionInformation"
     };
 
@@ -57,14 +57,14 @@ public class CapabilityDetector
         _engine = engine;
     }
 
-    /// <summary>
-    /// Gets cached capabilities or detects them.
-    /// </summary>
+    
+    
+    
     public CapabilityMapDto? CachedCapabilities => _cachedCapabilities;
 
-    /// <summary>
-    /// Detects available cmdlets and parameters.
-    /// </summary>
+    
+    
+    
     public async Task<CapabilityMapDto> DetectCapabilitiesAsync(
         bool forceRefresh = false,
         Action<string, string>? onLog = null,
@@ -82,7 +82,7 @@ public class CapabilityDetector
             DetectedAt = DateTime.UtcNow
         };
 
-        // Build script to detect all cmdlets at once
+        
         var script = BuildDetectionScript();
 
         var result = await _engine.ExecuteAsync(
@@ -102,7 +102,7 @@ public class CapabilityDetector
             return _cachedCapabilities;
         }
 
-        // Parse results
+        
         var detectedCmdlets = new Dictionary<string, CmdletCapabilityDto>();
 
         foreach (var output in result.Output)
@@ -139,9 +139,9 @@ public class CapabilityDetector
         return capabilities;
     }
 
-    /// <summary>
-    /// Builds the PowerShell script to detect cmdlets.
-    /// </summary>
+    
+    
+    
     private string BuildDetectionScript()
     {
         var cmdletList = string.Join("','", CmdletsToDetect);
@@ -175,9 +175,9 @@ $results
 ";
     }
 
-    /// <summary>
-    /// Builds feature capabilities from detected cmdlets.
-    /// </summary>
+    
+    
+    
     private FeatureCapabilitiesDto BuildFeatureCapabilities(Dictionary<string, CmdletCapabilityDto> cmdlets)
     {
         bool IsAvailable(string name) => cmdlets.TryGetValue(name, out var c) && c.IsAvailable;
@@ -186,7 +186,7 @@ $results
 
         return new FeatureCapabilitiesDto
         {
-            // Mailbox features
+            
             CanGetMailbox = IsAvailable("Get-Mailbox"),
             CanSetMailbox = IsAvailable("Set-Mailbox"),
             CanGetMailboxStatistics = IsAvailable("Get-MailboxStatistics"),
@@ -197,35 +197,35 @@ $results
             CanAddRecipientPermission = IsAvailable("Add-RecipientPermission"),
             CanRemoveRecipientPermission = IsAvailable("Remove-RecipientPermission"),
 
-            // Mailbox feature toggles (check Set-Mailbox parameters)
+            
             CanSetArchive = HasParameter("Set-Mailbox", "ArchiveDatabase") || IsAvailable("Enable-Mailbox"),
             CanSetLitigationHold = HasParameter("Set-Mailbox", "LitigationHoldEnabled"),
             CanSetAudit = HasParameter("Set-Mailbox", "AuditEnabled"),
 
-            // Rules and auto-reply
+            
             CanGetInboxRule = IsAvailable("Get-InboxRule"),
             CanGetMailboxAutoReplyConfiguration = IsAvailable("Get-MailboxAutoReplyConfiguration"),
 
-            // Distribution groups
+            
             CanGetDistributionGroup = IsAvailable("Get-DistributionGroup"),
             CanSetDistributionGroup = IsAvailable("Set-DistributionGroup"),
             CanGetDistributionGroupMember = IsAvailable("Get-DistributionGroupMember"),
             CanAddDistributionGroupMember = IsAvailable("Add-DistributionGroupMember"),
             CanRemoveDistributionGroupMember = IsAvailable("Remove-DistributionGroupMember"),
 
-            // Dynamic distribution groups
+            
             CanGetDynamicDistributionGroup = IsAvailable("Get-DynamicDistributionGroup"),
             CanGetDynamicDistributionGroupMember = IsAvailable("Get-DynamicDistributionGroupMember"),
 
-            // Unified groups (M365 Groups)
+            
             CanGetUnifiedGroup = IsAvailable("Get-UnifiedGroup"),
             CanGetUnifiedGroupLinks = IsAvailable("Get-UnifiedGroupLinks")
         };
     }
 
-    /// <summary>
-    /// Builds default capabilities when detection fails.
-    /// </summary>
+    
+    
+    
     private CapabilityMapDto BuildDefaultCapabilities()
     {
         var cmdlets = new Dictionary<string, CmdletCapabilityDto>();
@@ -248,9 +248,9 @@ $results
         };
     }
 
-    /// <summary>
-    /// Clears cached capabilities.
-    /// </summary>
+    
+    
+    
     public void ClearCache()
     {
         _cachedCapabilities = null;

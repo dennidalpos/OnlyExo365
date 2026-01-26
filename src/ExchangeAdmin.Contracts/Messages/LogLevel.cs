@@ -1,8 +1,8 @@
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Livelli di log.
-/// </summary>
+
+
+
 public enum LogLevel
 {
     Verbose,

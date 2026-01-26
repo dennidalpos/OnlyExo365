@@ -10,9 +10,9 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Distribution list view model with paging and search.
-/// </summary>
+
+
+
 public class DistributionListViewModel : ViewModelBase
 {
     private readonly IWorkerService _workerService;
@@ -22,32 +22,32 @@ public class DistributionListViewModel : ViewModelBase
     private readonly DispatcherTimer _searchDebounceTimer;
     private CancellationTokenSource? _loadCts;
 
-    // List state
+    
     private bool _isLoading;
     private string? _errorMessage;
     private string? _searchQuery;
     private bool _includeDynamic = true;
 
-    // Paging
+    
     private int _totalCount;
     private int _currentSkip;
     private const int PageSize = 50;
     private bool _hasMore;
 
-    // Selection and details
+    
     private DistributionListItemDto? _selectedItem;
     private DistributionListDetailsDto? _selectedDetails;
     private bool _isLoadingDetails;
 
-    // Members paging
+    
     private int _membersCurrentSkip;
     private bool _membersHasMore;
     private bool _isLoadingMembers;
 
-    // Add/remove member
+    
     private string? _newMemberIdentity;
 
-    // Settings
+    
     private bool _allowExternalSenders;
     private bool _originalAllowExternalSenders;
     private List<string> _originalAcceptMessagesOnlyFrom = new();
@@ -64,17 +64,17 @@ public class DistributionListViewModel : ViewModelBase
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
 
-        // Search debounce timer (300ms)
+        
         _searchDebounceTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(300)
         };
         _searchDebounceTimer.Tick += OnSearchDebounceElapsed;
 
-        // Listen for selection changes
+        
         _navigationService.SelectedIdentityChanged += OnSelectedIdentityChanged;
 
-        // Commands
+        
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
         CancelCommand = new RelayCommand(Cancel, () => IsLoading);
@@ -445,7 +445,7 @@ public class DistributionListViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -503,7 +503,7 @@ public class DistributionListViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -560,7 +560,7 @@ public class DistributionListViewModel : ViewModelBase
             {
                 SelectedDetails = result.Value;
 
-                // Populate members
+                
                 if (result.Value.Members != null)
                 {
                     foreach (var member in result.Value.Members.Members)
@@ -710,7 +710,7 @@ public class DistributionListViewModel : ViewModelBase
                 _shellViewModel.AddLog(LogLevel.Information, "Member added successfully");
                 NewMemberIdentity = string.Empty;
 
-                // Refresh members
+                
                 Members.Clear();
                 _membersCurrentSkip = 0;
                 await LoadDetailsAsync(SelectedDetails.Identity);

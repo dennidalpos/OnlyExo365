@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Envelope per una risposta dal worker.
-/// </summary>
+
+
+
 public class ResponseEnvelope : IpcMessage
 {
     public ResponseEnvelope()

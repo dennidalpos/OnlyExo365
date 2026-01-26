@@ -1,6 +1,4 @@
 @echo off
-REM Quick build and test launcher for ExchangeAdmin
-REM Requires PowerShell 7+ (pwsh.exe)
 
 where pwsh.exe >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (

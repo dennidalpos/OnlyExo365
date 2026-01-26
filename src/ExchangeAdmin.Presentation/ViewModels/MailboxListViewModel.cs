@@ -9,9 +9,9 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Mailbox list view model with paging and search.
-/// </summary>
+
+
+
 public class MailboxListViewModel : ViewModelBase
 {
     private readonly IWorkerService _workerService;
@@ -21,19 +21,19 @@ public class MailboxListViewModel : ViewModelBase
     private readonly DispatcherTimer _searchDebounceTimer;
     private CancellationTokenSource? _loadCts;
 
-    // List state
+    
     private bool _isLoading;
     private string? _errorMessage;
     private string? _searchQuery;
     private string _recipientTypeFilter = "UserMailbox";
 
-    // Paging
+    
     private int _totalCount;
     private int _currentSkip;
     private const int PageSize = 50;
     private bool _hasMore;
 
-    // Selection
+    
     private MailboxListItemDto? _selectedMailbox;
 
     public MailboxListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
@@ -42,14 +42,14 @@ public class MailboxListViewModel : ViewModelBase
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
 
-        // Search debounce timer (300ms)
+        
         _searchDebounceTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(300)
         };
         _searchDebounceTimer.Tick += OnSearchDebounceElapsed;
 
-        // Commands
+        
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
         CancelCommand = new RelayCommand(Cancel, () => IsLoading);
@@ -95,7 +95,7 @@ public class MailboxListViewModel : ViewModelBase
         {
             if (SetProperty(ref _searchQuery, value))
             {
-                // Debounce search
+                
                 _searchDebounceTimer.Stop();
                 _searchDebounceTimer.Start();
             }
@@ -231,7 +231,7 @@ public class MailboxListViewModel : ViewModelBase
             }
             else if (result.WasCancelled)
             {
-                // Ignore
+                
             }
             else
             {
@@ -245,7 +245,7 @@ public class MailboxListViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -310,7 +310,7 @@ public class MailboxListViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -331,7 +331,7 @@ public class MailboxListViewModel : ViewModelBase
     private void ViewDetails(MailboxListItemDto? mailbox)
     {
         if (mailbox == null) return;
-        // Use CurrentPage to support both Mailboxes and SharedMailboxes pages
+        
         _navigationService.NavigateToDetails(_navigationService.CurrentPage, mailbox.Identity, mailbox);
     }
 

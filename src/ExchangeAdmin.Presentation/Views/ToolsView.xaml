@@ -8,10 +8,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+        
         <TextBlock Grid.Row="0" Text="Tools" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16"/>
 
-        <!-- Tools Content -->
+        
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock Margin="0,0,0,8"
@@ -19,7 +19,7 @@
                            TextWrapping="Wrap"
                            Visibility="{Binding IsExchangeConnectionDisabled, Converter={StaticResource BoolToVisibility}}"
                            Text="Exchange Online connections are disabled by policy (EXCHANGEADMIN_DISABLE_EXO=1)."/>
-                <!-- Connection Info -->
+                
                 <GroupBox Header="Connection Information">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -79,7 +79,7 @@
                     </Grid>
                 </GroupBox>
 
-                <!-- Worker Status -->
+                
                 <GroupBox Header="Worker Status" Margin="0,8,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -121,7 +121,7 @@
                     </Grid>
                 </GroupBox>
 
-                <!-- Quick Actions -->
+                
                 <GroupBox Header="Quick Actions" Margin="0,8,0,0">
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Start Worker" Command="{Binding StartWorkerCommand}"
@@ -133,7 +133,7 @@
                     </StackPanel>
                 </GroupBox>
 
-                <!-- Prerequisites -->
+                
                 <GroupBox Header="Prerequisites" Margin="0,8,0,0">
                     <StackPanel>
                         <TextBlock TextWrapping="Wrap">

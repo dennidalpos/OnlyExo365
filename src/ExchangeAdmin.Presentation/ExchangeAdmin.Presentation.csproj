@@ -21,7 +21,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
 
-  <!-- Copy Worker executable to output directory -->
+  
   <Target Name="CopyWorkerToOutput" AfterTargets="Build">
     <ItemGroup>
       <WorkerFiles Include="..\ExchangeAdmin.Worker\bin\$(Configuration)\net8.0\**\*.*" />

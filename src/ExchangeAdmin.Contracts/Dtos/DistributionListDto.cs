@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-/// <summary>
-/// Distribution list item (lightweight).
-/// </summary>
+
+
+
 public class DistributionListItemDto
 {
     [JsonPropertyName("identity")]
@@ -41,9 +41,9 @@ public class DistributionListItemDto
     public int? MemberCount { get; set; }
 }
 
-/// <summary>
-/// Full distribution list DTO (backward compatibility).
-/// </summary>
+
+
+
 public class DistributionListDto : DistributionListItemDto
 {
     [JsonPropertyName("whenCreated")]
@@ -53,9 +53,9 @@ public class DistributionListDto : DistributionListItemDto
     public DateTime? WhenChanged { get; set; }
 }
 
-/// <summary>
-/// Distribution list details (full information).
-/// </summary>
+
+
+
 public class DistributionListDetailsDto
 {
     [JsonPropertyName("identity")]
@@ -112,14 +112,14 @@ public class DistributionListDetailsDto
     [JsonPropertyName("whenChanged")]
     public DateTime? WhenChanged { get; set; }
 
-    // Members (loaded with paging)
+    
     [JsonPropertyName("members")]
     public GroupMembersPageDto? Members { get; set; }
 }
 
-/// <summary>
-/// Dynamic distribution list details.
-/// </summary>
+
+
+
 public class DynamicDistributionListDetailsDto
 {
     [JsonPropertyName("identity")]
@@ -167,7 +167,7 @@ public class DynamicDistributionListDetailsDto
     [JsonPropertyName("whenChanged")]
     public DateTime? WhenChanged { get; set; }
 
-    // Preview members (loaded on demand)
+    
     [JsonPropertyName("previewMembers")]
     public GroupMembersPageDto? PreviewMembers { get; set; }
 
@@ -175,9 +175,9 @@ public class DynamicDistributionListDetailsDto
     public string? PreviewWarning { get; set; }
 }
 
-/// <summary>
-/// Unified group (Microsoft 365 Group) details.
-/// </summary>
+
+
+
 public class UnifiedGroupDetailsDto
 {
     [JsonPropertyName("identity")]
@@ -225,7 +225,7 @@ public class UnifiedGroupDetailsDto
     [JsonPropertyName("whenChanged")]
     public DateTime? WhenChanged { get; set; }
 
-    // Members (loaded with paging via Get-UnifiedGroupLinks)
+    
     [JsonPropertyName("members")]
     public GroupMembersPageDto? Members { get; set; }
 
@@ -233,9 +233,9 @@ public class UnifiedGroupDetailsDto
     public List<GroupMemberDto>? Owners { get; set; }
 }
 
-/// <summary>
-/// DTO per membro distribution list.
-/// </summary>
+
+
+
 public class DistributionListMemberDto
 {
     [JsonPropertyName("identity")]
@@ -251,9 +251,9 @@ public class DistributionListMemberDto
     public string RecipientType { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// Group member.
-/// </summary>
+
+
+
 public class GroupMemberDto
 {
     [JsonPropertyName("identity")]
@@ -269,9 +269,9 @@ public class GroupMemberDto
     public string? RecipientType { get; set; }
 }
 
-/// <summary>
-/// Page of group members.
-/// </summary>
+
+
+
 public class GroupMembersPageDto
 {
     [JsonPropertyName("members")]
@@ -290,9 +290,9 @@ public class GroupMembersPageDto
     public bool HasMore { get; set; }
 }
 
-/// <summary>
-/// Request distribution list.
-/// </summary>
+
+
+
 public class GetDistributionListsRequest
 {
     [JsonPropertyName("searchQuery")]
@@ -317,9 +317,9 @@ public class GetDistributionListsRequest
     public bool SortDescending { get; set; }
 }
 
-/// <summary>
-/// Response distribution list.
-/// </summary>
+
+
+
 public class GetDistributionListsResponse
 {
     [JsonPropertyName("distributionLists")]
@@ -341,9 +341,9 @@ public class GetDistributionListsResponse
     public string? SearchQuery { get; set; }
 }
 
-/// <summary>
-/// Request distribution list details.
-/// </summary>
+
+
+
 public class GetDistributionListDetailsRequest
 {
     [JsonPropertyName("identity")]
@@ -356,9 +356,9 @@ public class GetDistributionListDetailsRequest
     public int MembersPageSize { get; set; } = 50;
 }
 
-/// <summary>
-/// Request group members.
-/// </summary>
+
+
+
 public class GetGroupMembersRequest
 {
     [JsonPropertyName("identity")]
@@ -374,9 +374,9 @@ public class GetGroupMembersRequest
     public int Skip { get; set; }
 }
 
-/// <summary>
-/// Request to add/remove group member.
-/// </summary>
+
+
+
 public class ModifyGroupMemberRequest
 {
     [JsonPropertyName("identity")]
@@ -392,9 +392,9 @@ public class ModifyGroupMemberRequest
     public string GroupType { get; set; } = "DistributionGroup";
 }
 
-/// <summary>
-/// Request to update distribution list settings.
-/// </summary>
+
+
+
 public class SetDistributionListSettingsRequest
 {
     [JsonPropertyName("identity")]
@@ -410,18 +410,18 @@ public class SetDistributionListSettingsRequest
     public List<string>? RejectMessagesFrom { get; set; }
 }
 
-/// <summary>
-/// Group member action.
-/// </summary>
+
+
+
 public enum GroupMemberAction
 {
     Add,
     Remove
 }
 
-/// <summary>
-/// Request to preview dynamic distribution group members.
-/// </summary>
+
+
+
 public class PreviewDynamicGroupMembersRequest
 {
     [JsonPropertyName("identity")]
@@ -431,9 +431,9 @@ public class PreviewDynamicGroupMembersRequest
     public int MaxResults { get; set; } = 100;
 }
 
-/// <summary>
-/// Response for preview dynamic group members.
-/// </summary>
+
+
+
 public class PreviewDynamicGroupMembersResponse
 {
     [JsonPropertyName("identity")]

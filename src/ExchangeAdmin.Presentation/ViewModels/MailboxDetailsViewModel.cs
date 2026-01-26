@@ -11,9 +11,9 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-/// <summary>
-/// Mailbox details view model with permissions manager.
-/// </summary>
+
+
+
 public class MailboxDetailsViewModel : ViewModelBase
 {
     private readonly IWorkerService _workerService;
@@ -29,11 +29,11 @@ public class MailboxDetailsViewModel : ViewModelBase
     private MailboxDetailsDto? _details;
     private bool _isRetentionPolicyLoading;
 
-    // Delta plan for permissions
+    
     private readonly List<PermissionDeltaActionDto> _pendingActions = new();
     private bool _hasPendingChanges;
 
-    // Pending mailbox settings
+    
     private bool _hasPendingMailboxChanges;
     private bool _isInitializingMailboxSettings;
     private MailboxSettingsSnapshot? _originalMailboxSettings;
@@ -63,7 +63,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     private readonly ObservableCollection<RetentionPolicySummaryDto> _availableRetentionPolicies = new();
     private string? _selectedRetentionPolicy;
 
-    // New permission input
+    
     private string? _newPermissionUser;
     private PermissionType _newPermissionType = PermissionType.FullAccess;
     private bool _newPermissionAutoMapping = true;
@@ -74,10 +74,10 @@ public class MailboxDetailsViewModel : ViewModelBase
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
 
-        // Listen for selection changes
+        
         _navigationService.SelectedIdentityChanged += OnSelectedIdentityChanged;
 
-        // Commands
+        
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         RefreshRetentionPoliciesCommand = new AsyncRelayCommand(LoadRetentionPoliciesAsync, () => !IsRetentionPolicyLoading);
         BackCommand = new RelayCommand(GoBack);
@@ -473,7 +473,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         ? AutoReplyScheduled ? "Programmato" : "Attivo"
         : "Disattivato";
 
-    // Permissions display
+    
     public ObservableCollection<PermissionDisplayItem> FullAccessPermissions { get; } = new();
     public ObservableCollection<PermissionDisplayItem> SendAsPermissions { get; } = new();
     public ObservableCollection<string> SendOnBehalfPermissions { get; } = new();
@@ -493,7 +493,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
     public int PendingActionsCount => _pendingActions.Count;
 
-    // New permission input
+    
     public string? NewPermissionUser
     {
         get => _newPermissionUser;
@@ -609,7 +609,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             }
             else if (result.WasCancelled)
             {
-                // Ignore
+                
             }
             else
             {
@@ -621,7 +621,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -674,7 +674,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -742,7 +742,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         _pendingActions.Add(action);
         HasPendingChanges = _pendingActions.Count > 0;
 
-        // Add to display
+        
         switch (NewPermissionType)
         {
             case PermissionType.FullAccess:
@@ -783,7 +783,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             permType = displayItem.PermissionType;
             user = displayItem.User;
 
-            // Remove from display
+            
             switch (permType)
             {
                 case PermissionType.FullAccess:
@@ -837,7 +837,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         _pendingActions.Add(action);
         HasPendingChanges = _pendingActions.Count > 0;
 
-        // Mark as pending
+        
         displayItem.IsPending = true;
         OnPropertyChanged(nameof(FullAccessPermissions));
 
@@ -892,7 +892,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
                 ClearPendingActions();
 
-                // Refresh to get updated permissions
+                
                 await RefreshAsync(cancellationToken);
             }
             else if (!result.WasCancelled)
@@ -902,7 +902,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -920,7 +920,7 @@ public class MailboxDetailsViewModel : ViewModelBase
     private void DiscardPendingChanges()
     {
         ClearPendingActions();
-        UpdatePermissionsDisplay(); // Reset to current state
+        UpdatePermissionsDisplay(); 
         _shellViewModel.AddLog(LogLevel.Information, "Discarded pending permission changes");
     }
 
@@ -1223,7 +1223,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-            // Ignore
+            
         }
         catch (Exception ex)
         {
@@ -1589,9 +1589,9 @@ internal sealed class MailboxSettingsSnapshot
     }
 }
 
-/// <summary>
-/// Permission display item.
-/// </summary>
+
+
+
 public class PermissionDisplayItem
 {
     public string User { get; set; } = string.Empty;

@@ -4,9 +4,9 @@ using ExchangeAdmin.Contracts.Dtos;
 
 namespace ExchangeAdmin.Worker.PowerShell;
 
-/// <summary>
-/// Exchange Online command execution helpers.
-/// </summary>
+
+
+
 public class ExoCommands
 {
     private readonly PowerShellEngine _engine;
@@ -20,9 +20,9 @@ public class ExoCommands
 
     #region Dashboard
 
-    /// <summary>
-    /// Gets dashboard statistics.
-    /// </summary>
+    
+    
+    
     public async Task<DashboardStatsDto> GetDashboardStatsAsync(
         GetDashboardStatsRequest request,
         Action<string, string>? onLog = null,
@@ -33,7 +33,7 @@ public class ExoCommands
 
         onLog?.Invoke("Verbose", "Fetching mailbox counts...");
 
-        // Get mailbox counts by type
+        
         var mailboxScript = @"
 $counts = @{
     UserMailboxes = 0
@@ -95,7 +95,7 @@ $counts
 
         onLog?.Invoke("Verbose", "Fetching group counts...");
 
-        // Get distribution group counts
+        
         var groupScript = @"
 $counts = @{
     DistributionGroups = 0
@@ -136,7 +136,7 @@ $counts
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get unified groups if requested and available
+        
         var capabilities = _capabilityDetector.CachedCapabilities;
         if (request.IncludeUnifiedGroups && capabilities?.Features.CanGetUnifiedGroup == true)
         {
@@ -171,7 +171,7 @@ catch {
             }
         }
 
-        // Check for large tenant
+        
         var totalMailboxes = stats.MailboxCounts.Total;
         if (totalMailboxes > stats.LargeTenantThreshold)
         {
@@ -189,9 +189,9 @@ catch {
 
     #region Mailboxes
 
-    /// <summary>
-    /// Gets mailbox list with paging.
-    /// </summary>
+    
+    
+    
     public async Task<GetMailboxesResponse> GetMailboxesAsync(
         GetMailboxesRequest request,
         Action<string, string>? onLog = null,
@@ -205,7 +205,7 @@ catch {
             SearchQuery = request.SearchQuery
         };
 
-        // Build filter
+        
         var filterParts = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(request.RecipientTypeDetails))
@@ -220,12 +220,12 @@ catch {
 
         var filterParam = filterParts.Count > 0 ? $"-Filter \"{string.Join(" -and ", filterParts)}\"" : "";
 
-        // Build script
+        
         var script = $@"
 $allMailboxes = Get-Mailbox -ResultSize Unlimited {filterParam}
 ";
 
-        // Add search if specified
+        
         if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
             var escapedSearch = request.SearchQuery.Replace("'", "''");
@@ -238,7 +238,7 @@ $allMailboxes = $allMailboxes | Where-Object {{
 ";
         }
 
-        // Sort
+        
         var sortProperty = string.IsNullOrWhiteSpace(request.SortBy) ? "DisplayName" : request.SortBy;
         var sortDirection = request.SortDescending ? "-Descending" : "";
         script += $@"
@@ -316,9 +316,9 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
         return response;
     }
 
-    /// <summary>
-    /// Gets mailbox details.
-    /// </summary>
+    
+    
+    
     public async Task<MailboxDetailsDto> GetMailboxDetailsAsync(
         GetMailboxDetailsRequest request,
         Action<string, string>? onLog = null,
@@ -464,7 +464,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get statistics if requested
+        
         if (request.IncludeStatistics)
         {
             details.Statistics = await GetMailboxStatisticsAsync(request.Identity, onLog, cancellationToken);
@@ -472,7 +472,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get inbox rules if requested
+        
         if (request.IncludeRules)
         {
             details.InboxRules = await GetInboxRulesAsync(request.Identity, onLog, cancellationToken);
@@ -480,7 +480,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get auto-reply if requested
+        
         if (request.IncludeAutoReply)
         {
             details.AutoReplyConfiguration = await GetAutoReplyConfigurationAsync(request.Identity, onLog, cancellationToken);
@@ -488,7 +488,7 @@ $mbx = Get-Mailbox -Identity '{escapedIdentity}'
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get permissions if requested
+        
         if (request.IncludePermissions)
         {
             details.Permissions = await GetMailboxPermissionsAsync(request.Identity, onLog, cancellationToken);
@@ -1067,9 +1067,9 @@ $report
 
     #region Permissions
 
-    /// <summary>
-    /// Gets mailbox permissions.
-    /// </summary>
+    
+    
+    
     public async Task<MailboxPermissionsDto> GetMailboxPermissionsAsync(
         string identity,
         Action<string, string>? onLog,
@@ -1078,7 +1078,7 @@ $report
         var permissions = new MailboxPermissionsDto();
         var escapedIdentity = identity.Replace("'", "''");
 
-        // Get FullAccess permissions
+        
         var fullAccessScript = $@"
 try {{
     $perms = Get-MailboxPermission -Identity '{escapedIdentity}' -ErrorAction Stop |
@@ -1125,7 +1125,7 @@ catch {{
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get SendAs permissions
+        
         var sendAsScript = $@"
 try {{
     $perms = Get-RecipientPermission -Identity '{escapedIdentity}' -ErrorAction Stop |
@@ -1170,7 +1170,7 @@ catch {{
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get SendOnBehalf from mailbox
+        
         var sendOnBehalfScript = $@"
 try {{
     $mbx = Get-Mailbox -Identity '{escapedIdentity}' -ErrorAction Stop
@@ -1202,9 +1202,9 @@ catch {{
         return permissions;
     }
 
-    /// <summary>
-    /// Sets a mailbox permission.
-    /// </summary>
+    
+    
+    
     public async Task SetMailboxPermissionAsync(
         SetMailboxPermissionRequest request,
         Action<string, string>? onLog,
@@ -1303,9 +1303,9 @@ Set-Mailbox -Identity '{escapedIdentity}' -GrantSendOnBehalfTo $current
         onLog?.Invoke("Information", $"Successfully {actionPastTense} {request.PermissionType} permission");
     }
 
-    /// <summary>
-    /// Applies a permissions delta plan.
-    /// </summary>
+    
+    
+    
     public async Task<ApplyPermissionsDeltaPlanResponse> ApplyPermissionsDeltaPlanAsync(
         ApplyPermissionsDeltaPlanRequest request,
         Action<string, string>? onLog,

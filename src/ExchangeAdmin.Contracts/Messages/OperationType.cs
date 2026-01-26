@@ -1,25 +1,25 @@
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Tipi di operazione supportate dal worker.
-/// </summary>
+
+
+
 public enum OperationType
 {
-    // Connection management
+    
     ConnectExchangeInteractive,
     DisconnectExchange,
     GetConnectionStatus,
 
-    // Capability detection
+    
     DetectCapabilities,
 
-    // Demo/Test
+    
     DemoLongOperation,
 
-    // Dashboard
+    
     GetDashboardStats,
 
-    // Mailbox operations
+    
     GetMailboxes,
     GetMailboxDetails,
     GetRetentionPolicies,
@@ -34,7 +34,7 @@ public enum OperationType
     ConvertMailboxToRegular,
     GetMailboxSpaceReport,
 
-    // Distribution List operations
+    
     GetDistributionLists,
     GetDistributionListDetails,
     GetGroupMembers,

@@ -3,9 +3,9 @@ using ExchangeAdmin.Contracts.Dtos;
 
 namespace ExchangeAdmin.Worker.PowerShell;
 
-/// <summary>
-/// Exchange Online group command execution helpers.
-/// </summary>
+
+
+
 public class ExoGroupCommands
 {
     private readonly PowerShellEngine _engine;
@@ -19,9 +19,9 @@ public class ExoGroupCommands
 
     #region Distribution Lists
 
-    /// <summary>
-    /// Gets distribution list with paging.
-    /// </summary>
+    
+    
+    
     public async Task<GetDistributionListsResponse> GetDistributionListsAsync(
         GetDistributionListsRequest request,
         Action<string, string>? onLog = null,
@@ -35,7 +35,7 @@ public class ExoGroupCommands
             SearchQuery = request.SearchQuery
         };
 
-        // Build script
+        
         var script = @"
 $allGroups = @()
 
@@ -49,7 +49,7 @@ foreach ($dg in $dgs) {
 }
 ";
 
-        // Add dynamic groups if requested
+        
         if (request.IncludeDynamic)
         {
             script += @"
@@ -64,7 +64,7 @@ foreach ($ddg in $ddgs) {
 ";
         }
 
-        // Add search filter
+        
         if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
             var escapedSearch = request.SearchQuery.Replace("'", "''");
@@ -77,7 +77,7 @@ $allGroups = $allGroups | Where-Object {{
 ";
         }
 
-        // Sort
+        
         var sortProperty = string.IsNullOrWhiteSpace(request.SortBy) ? "DisplayName" : request.SortBy;
         var sortDirection = request.SortDescending ? "-Descending" : "";
 
@@ -161,9 +161,9 @@ $pagedGroups = $allGroups | Select-Object -Skip {request.Skip} -First {request.P
         return response;
     }
 
-    /// <summary>
-    /// Gets distribution list details.
-    /// </summary>
+    
+    
+    
     public async Task<DistributionListDetailsDto> GetDistributionListDetailsAsync(
         GetDistributionListDetailsRequest request,
         Action<string, string>? onLog = null,
@@ -171,7 +171,7 @@ $pagedGroups = $allGroups | Select-Object -Skip {request.Skip} -First {request.P
     {
         var escapedIdentity = request.Identity.Replace("'", "''");
 
-        // First, determine if this is a dynamic group
+        
         var typeCheckScript = $@"
 $dg = $null
 $isDynamic = $false
@@ -214,7 +214,7 @@ catch {{
             return await GetDynamicDistributionListDetailsAsync(request, onLog, cancellationToken);
         }
 
-        // Get static distribution group details
+        
         var script = $@"
 $dg = Get-DistributionGroup -Identity '{escapedIdentity}'
 
@@ -279,7 +279,7 @@ $dg = Get-DistributionGroup -Identity '{escapedIdentity}'
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Get members if requested
+        
         if (request.IncludeMembers)
         {
             details.Members = await GetGroupMembersPageAsync(
@@ -340,7 +340,7 @@ $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
             throw new InvalidOperationException("Failed to parse dynamic distribution list data");
         }
 
-        // Map to regular details DTO but mark as dynamic
+        
         var details = new DistributionListDetailsDto
         {
             Identity = hash["Identity"]?.ToString() ?? "",
@@ -357,15 +357,15 @@ $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
             WhenChanged = hash["WhenChanged"] as DateTime?
         };
 
-        // Note: Members for dynamic groups require preview (performance warning)
-        // Don't auto-load members
+        
+        
 
         return details;
     }
 
-    /// <summary>
-    /// Gets group members with paging.
-    /// </summary>
+    
+    
+    
     public async Task<GroupMembersPageDto> GetGroupMembersPageAsync(
         string identity,
         string groupType,
@@ -380,7 +380,7 @@ $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
 
         if (groupType == "DynamicDistributionGroup")
         {
-            // Dynamic groups need Get-DynamicDistributionGroupMember
+            
             script = $@"
 $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
 $allMembers = Get-Recipient -RecipientPreviewFilter $ddg.RecipientFilter -ResultSize Unlimited
@@ -403,7 +403,7 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
         }
         else
         {
-            // Regular distribution group
+            
             script = $@"
 $allMembers = Get-DistributionGroupMember -Identity '{escapedIdentity}' -ResultSize Unlimited
 
@@ -473,9 +473,9 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
         return page;
     }
 
-    /// <summary>
-    /// Adds or removes a group member.
-    /// </summary>
+    
+    
+    
     public async Task ModifyGroupMemberAsync(
         ModifyGroupMemberRequest request,
         Action<string, string>? onLog,
@@ -515,9 +515,9 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
         onLog?.Invoke("Information", $"Successfully {(request.Action == GroupMemberAction.Add ? "added" : "removed")} member");
     }
 
-    /// <summary>
-    /// Previews dynamic distribution group members.
-    /// </summary>
+    
+    
+    
     public async Task<PreviewDynamicGroupMembersResponse> PreviewDynamicGroupMembersAsync(
         PreviewDynamicGroupMembersRequest request,
         Action<string, string>? onLog,

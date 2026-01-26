@@ -1,8 +1,8 @@
 namespace ExchangeAdmin.Domain.DeltaPlan;
 
-/// <summary>
-/// Tipo di azione nel piano delta.
-/// </summary>
+
+
+
 public enum DeltaActionType
 {
     Add,
@@ -11,9 +11,9 @@ public enum DeltaActionType
     NoChange
 }
 
-/// <summary>
-/// Singola azione nel piano delta.
-/// </summary>
+
+
+
 public class DeltaAction<T>
 {
     public DeltaActionType ActionType { get; init; }
@@ -21,20 +21,20 @@ public class DeltaAction<T>
     public string? Key { get; init; }
     public string? Description { get; init; }
 
-    /// <summary>
-    /// Per Modify: valore corrente.
-    /// </summary>
+    
+    
+    
     public object? CurrentValue { get; init; }
 
-    /// <summary>
-    /// Per Modify: valore desiderato.
-    /// </summary>
+    
+    
+    
     public object? DesiredValue { get; init; }
 }
 
-/// <summary>
-/// Piano delta risultante dal confronto desired vs current state.
-/// </summary>
+
+
+
 public class DeltaPlan<T>
 {
     public List<DeltaAction<T>> Actions { get; init; } = new();
@@ -47,19 +47,19 @@ public class DeltaPlan<T>
     public bool HasChanges => Actions.Any(a => a.ActionType != DeltaActionType.NoChange);
 }
 
-/// <summary>
-/// Calcolatore di piano delta generico.
-/// </summary>
+
+
+
 public static class DeltaPlanCalculator
 {
-    /// <summary>
-    /// Calcola il piano delta tra stato desiderato e corrente.
-    /// </summary>
-    /// <typeparam name="T">Tipo degli elementi.</typeparam>
-    /// <param name="desired">Stato desiderato.</param>
-    /// <param name="current">Stato corrente.</param>
-    /// <param name="keySelector">Selettore chiave univoca.</param>
-    /// <param name="equalityComparer">Comparatore per determinare se un elemento è modificato.</param>
+    
+    
+    
+    
+    
+    
+    
+    
     public static DeltaPlan<T> Calculate<T>(
         IEnumerable<T> desired,
         IEnumerable<T> current,
@@ -73,12 +73,12 @@ public static class DeltaPlanCalculator
 
         var comparer = equalityComparer ?? ((a, b) => EqualityComparer<T>.Default.Equals(a, b));
 
-        // Trova elementi da aggiungere o modificare
+        
         foreach (var (key, desiredItem) in desiredDict)
         {
             if (currentDict.TryGetValue(key, out var currentItem))
             {
-                // Esiste in entrambi - verifica se modificato
+                
                 if (!comparer(desiredItem, currentItem))
                 {
                     actions.Add(new DeltaAction<T>
@@ -103,7 +103,7 @@ public static class DeltaPlanCalculator
             }
             else
             {
-                // Non esiste nel corrente - da aggiungere
+                
                 actions.Add(new DeltaAction<T>
                 {
                     ActionType = DeltaActionType.Add,
@@ -114,7 +114,7 @@ public static class DeltaPlanCalculator
             }
         }
 
-        // Trova elementi da rimuovere
+        
         foreach (var (key, currentItem) in currentDict)
         {
             if (!desiredDict.ContainsKey(key))

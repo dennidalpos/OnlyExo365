@@ -4,14 +4,14 @@ using ExchangeAdmin.Domain.Errors;
 
 namespace ExchangeAdmin.Presentation.Services;
 
-/// <summary>
-/// Service for displaying user-friendly error dialogs.
-/// </summary>
+
+
+
 public class ErrorDialogService
 {
-    /// <summary>
-    /// Shows an error dialog with user-friendly message.
-    /// </summary>
+    
+    
+    
     public static void ShowError(string title, string message, string? details = null)
     {
         var displayMessage = message;
@@ -27,9 +27,9 @@ public class ErrorDialogService
             MessageBoxImage.Error);
     }
 
-    /// <summary>
-    /// Shows an error dialog from a NormalizedErrorDto.
-    /// </summary>
+    
+    
+    
     public static void ShowError(string title, NormalizedErrorDto error)
     {
         var message = GetUserFriendlyMessage(error);
@@ -38,9 +38,9 @@ public class ErrorDialogService
         ShowError(title, message, details);
     }
 
-    /// <summary>
-    /// Shows an error dialog from a NormalizedError.
-    /// </summary>
+    
+    
+    
     public static void ShowError(string title, NormalizedError error)
     {
         var message = GetUserFriendlyMessage(error.ToDto());
@@ -49,9 +49,9 @@ public class ErrorDialogService
         ShowError(title, message, details);
     }
 
-    /// <summary>
-    /// Shows a warning dialog.
-    /// </summary>
+    
+    
+    
     public static void ShowWarning(string title, string message)
     {
         MessageBox.Show(
@@ -61,9 +61,9 @@ public class ErrorDialogService
             MessageBoxImage.Warning);
     }
 
-    /// <summary>
-    /// Shows an information dialog.
-    /// </summary>
+    
+    
+    
     public static void ShowInfo(string title, string message)
     {
         MessageBox.Show(
@@ -73,9 +73,9 @@ public class ErrorDialogService
             MessageBoxImage.Information);
     }
 
-    /// <summary>
-    /// Shows a confirmation dialog and returns user's choice.
-    /// </summary>
+    
+    
+    
     public static bool ShowConfirmation(string title, string message)
     {
         var result = MessageBox.Show(
@@ -87,15 +87,15 @@ public class ErrorDialogService
         return result == MessageBoxResult.Yes;
     }
 
-    /// <summary>
-    /// Converts technical error messages to user-friendly messages.
-    /// </summary>
+    
+    
+    
     private static string GetUserFriendlyMessage(NormalizedErrorDto error)
     {
-        // Map error codes to friendly messages
+        
         return error.Code switch
         {
-            // Authentication errors
+            
             ErrorCode.AuthenticationFailed => "Authentication failed. Please check your credentials and try again.",
 
             ErrorCode.ConditionalAccessBlocked => "Access blocked by Conditional Access policy.\n\n" +
@@ -107,12 +107,12 @@ public class ErrorDialogService
             ErrorCode.TokenExpired => "Your session has expired.\n\n" +
                                     "Please disconnect and reconnect to Exchange Online.",
 
-            // Permission errors
+            
             ErrorCode.PermissionDenied or ErrorCode.InsufficientPrivileges =>
                 "You don't have permission to perform this operation.\n\n" +
                 "Please contact your Exchange administrator to request the necessary permissions.",
 
-            // Operation errors
+            
             ErrorCode.CmdletNotAvailable => "The required PowerShell command is not available.\n\n" +
                                           "Please ensure the ExchangeOnlineManagement module is properly installed.",
 
@@ -124,7 +124,7 @@ public class ErrorDialogService
             ErrorCode.OperationNotSupported => "This operation is not supported.\n\n" +
                                              "The feature may not be available with your Exchange configuration.",
 
-            // Transient errors
+            
             ErrorCode.Throttling => "The Exchange server is limiting the number of requests.\n\n" +
                                   "Please wait a moment. The operation will be retried automatically." +
                                   (error.RetryAfterSeconds.HasValue ? $"\n\nRetry after: {error.RetryAfterSeconds} seconds" : ""),
@@ -138,12 +138,12 @@ public class ErrorDialogService
             ErrorCode.Timeout => "The operation timed out.\n\n" +
                                "This may be due to network issues or server load. Please try again.",
 
-            // Resource errors
+            
             ErrorCode.ResourceNotFound => $"The requested resource was not found.\n\n{error.Message}",
 
             ErrorCode.ResourceAlreadyExists => $"The resource already exists.\n\n{error.Message}",
 
-            // Worker errors
+            
             ErrorCode.WorkerNotRunning => "The background worker is not running.\n\n" +
                                         "Please start the worker before connecting to Exchange Online.",
 
@@ -153,7 +153,7 @@ public class ErrorDialogService
             ErrorCode.IpcError => "Communication error with the background worker.\n\n" +
                                 "Try restarting the worker or the application.",
 
-            // Unknown
+            
             ErrorCode.Unknown or _ => !string.IsNullOrEmpty(error.Message)
                                     ? $"An error occurred:\n\n{error.Message}"
                                     : "An unexpected error occurred. Please check the logs for more information."

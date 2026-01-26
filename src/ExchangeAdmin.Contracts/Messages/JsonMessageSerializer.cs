@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Messages;
 
-/// <summary>
-/// Serializzatore JSON condiviso per messaggi IPC.
-/// </summary>
+
+
+
 public static class JsonMessageSerializer
 {
     private static readonly JsonSerializerOptions Options = new()
@@ -37,11 +37,11 @@ public static class JsonMessageSerializer
 
     public static IpcMessage? DeserializeMessage(string json)
     {
-        // Prima deserializzo come oggetto base per leggere il tipo
+        
         var baseMessage = JsonSerializer.Deserialize<IpcMessage>(json, Options);
         if (baseMessage == null) return null;
 
-        // Poi deserializzo come tipo specifico
+        
         return baseMessage.Type switch
         {
             MessageType.HandshakeRequest => JsonSerializer.Deserialize<HandshakeRequest>(json, Options),

@@ -5,9 +5,9 @@ using ExchangeAdmin.Infrastructure.Ipc;
 
 namespace ExchangeAdmin.Application.Services;
 
-/// <summary>
-/// Worker service implementation.
-/// </summary>
+
+
+
 public class WorkerService : IWorkerService, IAsyncDisposable
 {
     private readonly WorkerClient _client;

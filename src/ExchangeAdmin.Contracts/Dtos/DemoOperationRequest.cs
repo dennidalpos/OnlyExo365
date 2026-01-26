@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-/// <summary>
-/// Richiesta per operazione demo lunga.
-/// </summary>
+
+
+
 public class DemoOperationRequest
 {
     [JsonPropertyName("durationSeconds")]
@@ -20,9 +20,9 @@ public class DemoOperationRequest
     public int ErrorAtPercent { get; set; } = 50;
 }
 
-/// <summary>
-/// Risposta operazione demo.
-/// </summary>
+
+
+
 public class DemoOperationResponse
 {
     [JsonPropertyName("processedItems")]
@@ -35,9 +35,9 @@ public class DemoOperationResponse
     public List<DemoItemResult> Results { get; set; } = new();
 }
 
-/// <summary>
-/// Risultato singolo item demo.
-/// </summary>
+
+
+
 public class DemoItemResult
 {
     [JsonPropertyName("itemId")]

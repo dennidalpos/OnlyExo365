@@ -33,7 +33,6 @@ public class IpcClient : IAsyncDisposable
     private volatile bool _isDisposing;
     private readonly object _stateLock = new();
     private readonly SemaphoreSlim _sendLock = new(1, 1);
-    private readonly StringBuilder _partialMessageBuffer = new();
 
     /// <summary>
     /// Evento di cambio stato connessione.
@@ -140,7 +139,12 @@ public class IpcClient : IAsyncDisposable
 
             return response;
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (OperationCanceledException)
+        {
+            await DisposeInternalAsync().ConfigureAwait(false);
+            throw;
+        }
+        catch (Exception)
         {
             // Cleanup in caso di errore durante connessione
             await DisposeInternalAsync().ConfigureAwait(false);

@@ -67,6 +67,7 @@ public static class JsonMessageSerializer
     public static JsonElement ToJsonElement<T>(T value)
     {
         var json = JsonSerializer.Serialize(value, Options);
-        return JsonDocument.Parse(json).RootElement.Clone();
+        using var document = JsonDocument.Parse(json);
+        return document.RootElement.Clone();
     }
 }

@@ -11,7 +11,7 @@
         </Grid.ColumnDefinitions>
 
                            
-        <Grid Grid.Column="0" IsEnabled="{Binding Mailboxes.IsLoading, Converter={StaticResource InverseBool}}">
+        <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -76,6 +76,7 @@
                       SelectedItem="{Binding Mailboxes.SelectedMailbox}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
+                      IsEnabled="{Binding Mailboxes.IsLoading, Converter={StaticResource InverseBool}}"
                       SelectionMode="Single"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
@@ -145,7 +146,8 @@
         </Grid>
 
                               
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0"
+                        IsEnabled="{Binding Mailboxes.IsLoading, Converter={StaticResource InverseBool}}">
                 <Button Content="Load More" Command="{Binding Mailboxes.LoadMoreCommand}"
                         Style="{StaticResource PrimaryButton}"
                         Visibility="{Binding Mailboxes.HasMore, Converter={StaticResource BoolToVisibility}}"/>

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Application.UseCases;
@@ -41,6 +43,8 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private int _globalProgress;
     private string? _globalStatus;
     private readonly bool _isExchangeConnectionDisabled;
+    private bool _isNavigationLocked;
+    private readonly List<INotifyPropertyChanged> _navigationStateSources = new();
 
               
     private bool _isVerboseLoggingEnabled = false;
@@ -256,7 +260,13 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public bool IsGlobalOperationRunning
     {
         get => _isGlobalOperationRunning;
-        private set => SetProperty(ref _isGlobalOperationRunning, value);
+        private set
+        {
+            if (SetProperty(ref _isGlobalOperationRunning, value))
+            {
+                UpdateNavigationLock();
+            }
+        }
     }
 
     public int GlobalProgress
@@ -270,6 +280,20 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         get => _globalStatus;
         set => SetProperty(ref _globalStatus, value);
     }
+
+    public bool IsNavigationLocked
+    {
+        get => _isNavigationLocked;
+        private set
+        {
+            if (SetProperty(ref _isNavigationLocked, value))
+            {
+                OnPropertyChanged(nameof(CanNavigate));
+            }
+        }
+    }
+
+    public bool CanNavigate => !IsNavigationLocked;
 
     public bool IsVerboseLoggingEnabled
     {
@@ -524,6 +548,20 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private void OnNavigating(object? sender, NavigatingEventArgs e)
     {
+        if (IsNavigationLocked)
+        {
+            RunOnUiThread(() =>
+            {
+                System.Windows.MessageBox.Show(
+                    "An operation is currently running. Please wait for data loading or changes to finish before navigating.",
+                    "Operation in Progress",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            });
+            e.Cancel = true;
+            return;
+        }
+
                                                       
         if (MailboxDetails != null && MailboxDetails.HasPendingChanges)
         {
@@ -590,6 +628,51 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
                value.Equals("on", StringComparison.OrdinalIgnoreCase);
     }
 
+    public void RegisterNavigationStateSource(INotifyPropertyChanged source)
+    {
+        if (_navigationStateSources.Contains(source))
+        {
+            return;
+        }
+
+        _navigationStateSources.Add(source);
+        source.PropertyChanged += OnNavigationStateSourceChanged;
+        UpdateNavigationLock();
+    }
+
+    public Task StartWorkerOnStartupAsync()
+    {
+        if (!CanStartWorker)
+        {
+            return Task.CompletedTask;
+        }
+
+        return StartWorkerAsync(CancellationToken.None);
+    }
+
+    private void OnNavigationStateSourceChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateNavigationLock();
+    }
+
+    private void UpdateNavigationLock()
+    {
+        var isBlocked =
+            IsGlobalOperationRunning ||
+            (Dashboard?.IsLoading ?? false) ||
+            (Mailboxes?.IsLoading ?? false) ||
+            (SharedMailboxes?.IsLoading ?? false) ||
+            (MailboxSpace?.IsLoading ?? false) ||
+            (DistributionLists?.IsLoading ?? false) ||
+            (DistributionLists?.IsLoadingDetails ?? false) ||
+            (DistributionLists?.IsLoadingMembers ?? false) ||
+            (MailboxDetails?.IsLoading ?? false) ||
+            (MailboxDetails?.IsRetentionPolicyLoading ?? false) ||
+            (MailboxDetails?.IsSaving ?? false);
+
+        IsNavigationLocked = isBlocked;
+    }
+
                  
                                         
                   
@@ -640,5 +723,10 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _workerService.CapabilitiesUpdated -= OnCapabilitiesUpdated;
         _navigationService.PageChanged -= OnPageChanged;
         _navigationService.Navigating -= OnNavigating;
+
+        foreach (var source in _navigationStateSources)
+        {
+            source.PropertyChanged -= OnNavigationStateSourceChanged;
+        }
     }
 }

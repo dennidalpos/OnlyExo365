@@ -10,7 +10,7 @@
         </Grid.ColumnDefinitions>
 
                            
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" IsEnabled="{Binding DistributionLists.IsLoading, Converter={StaticResource InverseBool}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -56,7 +56,6 @@
                       SelectedItem="{Binding DistributionLists.SelectedItem}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
-                      IsEnabled="{Binding DistributionLists.IsLoading, Converter={StaticResource InverseBool}}"
                       SelectionMode="Single"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
@@ -102,7 +101,6 @@
             <Button Grid.Row="3" Content="Carica altri" Command="{Binding DistributionLists.LoadMoreCommand}"
                     HorizontalAlignment="Center" Margin="0,12,0,0"
                     Style="{StaticResource PrimaryButton}"
-                    IsEnabled="{Binding DistributionLists.IsLoading, Converter={StaticResource InverseBool}}"
                     Visibility="{Binding DistributionLists.HasMore, Converter={StaticResource BoolToVisibility}}"/>
 
                                     

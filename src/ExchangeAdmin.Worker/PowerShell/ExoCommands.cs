@@ -1174,7 +1174,25 @@ catch {{
         var sendOnBehalfScript = $@"
 try {{
     $mbx = Get-Mailbox -Identity '{escapedIdentity}' -ErrorAction Stop
-    @($mbx.GrantSendOnBehalfTo | ForEach-Object {{ $_.ToString() }})
+    @($mbx.GrantSendOnBehalfTo | ForEach-Object {{
+        $rawIdentity = $_.ToString()
+        $displayName = $null
+        try {{
+            $recipient = Get-Recipient -Identity $rawIdentity -ErrorAction Stop
+            if ($recipient.DisplayName) {{
+                $displayName = $recipient.DisplayName
+            }}
+            elseif ($recipient.PrimarySmtpAddress) {{
+                $displayName = $recipient.PrimarySmtpAddress.ToString()
+            }}
+        }}
+        catch {{
+        }}
+        @{{
+            Identity = $rawIdentity
+            DisplayName = if ($displayName) {{ $displayName }} else {{ $rawIdentity }}
+        }}
+    }})
 }}
 catch {{
     @()
@@ -1189,10 +1207,13 @@ catch {{
         {
             foreach (var output in sendOnBehalfResult.Output)
             {
-                var value = output.BaseObject?.ToString();
-                if (!string.IsNullOrEmpty(value))
+                if (output.BaseObject is System.Collections.Hashtable hash)
                 {
-                    permissions.SendOnBehalfPermissions.Add(value);
+                    permissions.SendOnBehalfPermissions.Add(new SendOnBehalfPermissionEntryDto
+                    {
+                        Identity = hash["Identity"]?.ToString() ?? string.Empty,
+                        DisplayName = hash["DisplayName"]?.ToString() ?? string.Empty
+                    });
                 }
             }
         }

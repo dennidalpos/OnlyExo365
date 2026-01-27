@@ -138,6 +138,7 @@ public partial class App : System.Windows.Application
         try
         {
             _shellViewModel?.Dispose();
+            _workerService?.StopWorkerAsync().GetAwaiter().GetResult();
 
             if (_workerService is IAsyncDisposable disposable)
             {

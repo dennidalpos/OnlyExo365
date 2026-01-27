@@ -477,7 +477,7 @@ public class MailboxDetailsViewModel : ViewModelBase
                           
     public ObservableCollection<PermissionDisplayItem> FullAccessPermissions { get; } = new();
     public ObservableCollection<PermissionDisplayItem> SendAsPermissions { get; } = new();
-    public ObservableCollection<string> SendOnBehalfPermissions { get; } = new();
+    public ObservableCollection<PermissionDisplayItem> SendOnBehalfPermissions { get; } = new();
 
     public bool HasPendingChanges
     {
@@ -727,7 +727,13 @@ public class MailboxDetailsViewModel : ViewModelBase
 
         foreach (var user in Permissions.SendOnBehalfPermissions)
         {
-            SendOnBehalfPermissions.Add(user);
+            var displayName = string.IsNullOrWhiteSpace(user.DisplayName) ? user.Identity : user.DisplayName;
+            SendOnBehalfPermissions.Add(new PermissionDisplayItem
+            {
+                User = displayName,
+                Identity = user.Identity,
+                PermissionType = PermissionType.SendOnBehalf
+            });
         }
     }
 
@@ -773,7 +779,13 @@ public class MailboxDetailsViewModel : ViewModelBase
                 });
                 break;
             case PermissionType.SendOnBehalf:
-                SendOnBehalfPermissions.Add(NewPermissionUser.Trim());
+                SendOnBehalfPermissions.Add(new PermissionDisplayItem
+                {
+                    User = NewPermissionUser.Trim(),
+                    Identity = NewPermissionUser.Trim(),
+                    PermissionType = PermissionType.SendOnBehalf,
+                    IsPending = true
+                });
                 break;
         }
 
@@ -791,7 +803,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         if (param is PermissionDisplayItem displayItem)
         {
             permType = displayItem.PermissionType;
-            user = displayItem.User;
+            user = string.IsNullOrWhiteSpace(displayItem.Identity) ? displayItem.User : displayItem.Identity;
 
                                   
             switch (permType)
@@ -802,13 +814,10 @@ public class MailboxDetailsViewModel : ViewModelBase
                 case PermissionType.SendAs:
                     SendAsPermissions.Remove(displayItem);
                     break;
+                case PermissionType.SendOnBehalf:
+                    SendOnBehalfPermissions.Remove(displayItem);
+                    break;
             }
-        }
-        else if (param is string sendOnBehalfUser)
-        {
-            permType = PermissionType.SendOnBehalf;
-            user = sendOnBehalfUser;
-            SendOnBehalfPermissions.Remove(sendOnBehalfUser);
         }
         else
         {
@@ -839,7 +848,7 @@ public class MailboxDetailsViewModel : ViewModelBase
         {
             Action = PermissionAction.Modify,
             PermissionType = PermissionType.FullAccess,
-            User = displayItem.User,
+            User = string.IsNullOrWhiteSpace(displayItem.Identity) ? displayItem.User : displayItem.Identity,
             AutoMapping = newAutoMapping,
             Description = $"Set AutoMapping to {newAutoMapping} for {displayItem.User}"
         };
@@ -1605,6 +1614,7 @@ internal sealed class MailboxSettingsSnapshot
 public class PermissionDisplayItem
 {
     public string User { get; set; } = string.Empty;
+    public string Identity { get; set; } = string.Empty;
     public PermissionType PermissionType { get; set; }
     public bool? AutoMapping { get; set; }
     public bool IsInherited { get; set; }

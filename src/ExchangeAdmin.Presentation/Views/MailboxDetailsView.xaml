@@ -32,17 +32,29 @@
                                Text="{Binding DisplayName, FallbackValue='Dettagli casella postale'}"
                                FontSize="20" FontWeight="SemiBold"/>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                VerticalAlignment="Center" Margin="12,0,0,0"
-                                Visibility="{Binding HasPendingMailboxChanges, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Text="⚠ Modifiche da applicare"
-                                   Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <Button Content="Salva modifiche" Command="{Binding SaveMailboxChangesCommand}"
-                                Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
-                                ToolTip="Applica tutte le modifiche in sospeso"/>
-                        <Button Content="Annulla" Command="{Binding DiscardMailboxChangesCommand}"
-                                ToolTip="Annulla le modifiche e ripristina i valori originali"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding HasPendingMailboxChanges, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="⚠ Modifiche mailbox da applicare"
+                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Content="Salva" Command="{Binding SaveMailboxChangesCommand}"
+                                    Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                                    ToolTip="Applica tutte le modifiche in sospeso"/>
+                            <Button Content="Annulla" Command="{Binding DiscardMailboxChangesCommand}"
+                                    ToolTip="Annulla le modifiche e ripristina i valori originali"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
+                                    Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding PendingActionsCount, StringFormat='{}⚠ {0} modifiche autorizzazioni'}"
+                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Content="Salva" Command="{Binding SavePermissionsCommand}"
+                                    Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                                    ToolTip="Applica tutte le modifiche delle autorizzazioni su Exchange"/>
+                            <Button Content="Annulla" Command="{Binding DiscardPermissionsCommand}"
+                                    ToolTip="Annulla le modifiche e ripristina lo stato attuale"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="{Binding PrimarySmtpAddress}"
@@ -550,22 +562,6 @@
                     <GroupBox Header="Gestione autorizzazioni" Margin="0,0,0,12">
                         <StackPanel>
                                                             
-                            <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
-                                    BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12"
-                                    Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding PendingActionsCount, StringFormat='{}⚠ {0} modifiche in sospeso'}"
-                                               FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Button Content="Salva modifiche" Command="{Binding SavePermissionsCommand}"
-                                                Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
-                                                ToolTip="Applica tutte le modifiche delle autorizzazioni su Exchange"/>
-                                        <Button Content="Annulla" Command="{Binding DiscardPermissionsCommand}"
-                                                ToolTip="Annulla le modifiche e ripristina lo stato attuale"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
                                                        
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                                     CornerRadius="4" Padding="12" Margin="0,0,0,12">
@@ -585,6 +581,8 @@
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Utente (email o nome):" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Tipo autorizzazione:" FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="AutoMap:" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
 
                                                                
@@ -706,7 +704,7 @@
                                       BorderBrush="{StaticResource BorderBrush}"
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Utente" Binding="{Binding}" Width="*"/>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
                                     <DataGridTemplateColumn Header="Azioni" Width="80">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

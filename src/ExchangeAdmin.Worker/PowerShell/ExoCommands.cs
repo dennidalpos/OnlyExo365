@@ -1188,10 +1188,10 @@ try {{
         }}
         catch {{
         }}
-        @{
+        @{{
             Identity = $rawIdentity
             DisplayName = if ($displayName) {{ $displayName }} else {{ $rawIdentity }}
-        }
+        }}
     }})
 }}
 catch {{

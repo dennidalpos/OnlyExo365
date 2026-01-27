@@ -328,7 +328,7 @@ public class MailboxPermissionsDto
     public List<RecipientPermissionEntryDto> SendAsPermissions { get; set; } = new();
 
     [JsonPropertyName("sendOnBehalfPermissions")]
-    public List<string> SendOnBehalfPermissions { get; set; } = new();
+    public List<SendOnBehalfPermissionEntryDto> SendOnBehalfPermissions { get; set; } = new();
 }
 
              
@@ -378,6 +378,18 @@ public class RecipientPermissionEntryDto
 
     [JsonPropertyName("isInherited")]
     public bool IsInherited { get; set; }
+}
+
+            
+                            
+              
+public class SendOnBehalfPermissionEntryDto
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
 }
 
              

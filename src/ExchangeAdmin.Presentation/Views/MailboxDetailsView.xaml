@@ -586,6 +586,8 @@
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Tipo autorizzazione:" FontSize="11"
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="AutoMap:" FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
 
                                                                
                                     <TextBox Grid.Row="1" Grid.Column="0"
@@ -706,7 +708,7 @@
                                       BorderBrush="{StaticResource BorderBrush}"
                                       MaxHeight="200" Margin="0,0,0,12">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Utente" Binding="{Binding}" Width="*"/>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
                                     <DataGridTemplateColumn Header="Azioni" Width="80">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

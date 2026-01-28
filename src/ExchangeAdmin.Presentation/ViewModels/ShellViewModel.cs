@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Threading;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Application.UseCases;
 using ExchangeAdmin.Contracts.Dtos;
@@ -13,9 +14,6 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-             
-                                          
-              
 public sealed class ShellViewModel : ViewModelBase, IDisposable
 {
     private const string DisableExchangeEnvVar = "EXCHANGEADMIN_DISABLE_EXO";
@@ -23,22 +21,17 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private readonly NavigationService _navigationService;
     private readonly ConnectExchangeUseCase _connectUseCase;
 
-                   
     private WorkerConnectionState _workerState = WorkerConnectionState.NotStarted;
     private bool _isWorkerBusy;
 
-                                
     private ConnectionState _exchangeState = ConnectionState.Disconnected;
     private string? _connectedUser;
     private string? _connectedOrganization;
 
-                 
     private NavigationPage _currentPage = NavigationPage.Dashboard;
 
-                   
     private CapabilityMapDto? _capabilities;
 
-                      
     private bool _isGlobalOperationRunning;
     private int _globalProgress;
     private string? _globalStatus;
@@ -46,11 +39,9 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private bool _isNavigationLocked;
     private readonly List<INotifyPropertyChanged> _navigationStateSources = new();
 
-              
     private bool _isVerboseLoggingEnabled = false;
     private const int MaxLogEntries = 1000;
 
-                       
     public DashboardViewModel? Dashboard { get; set; }
     public MailboxListViewModel? Mailboxes { get; set; }
     public MailboxListViewModel? SharedMailboxes { get; set; }
@@ -66,14 +57,12 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _connectUseCase = new ConnectExchangeUseCase(workerService);
         _isExchangeConnectionDisabled = IsEnvironmentFlagEnabled(DisableExchangeEnvVar);
 
-                              
         _workerService.StateChanged += OnWorkerStateChanged;
         _workerService.EventReceived += OnEventReceived;
         _workerService.CapabilitiesUpdated += OnCapabilitiesUpdated;
         _navigationService.PageChanged += OnPageChanged;
         _navigationService.Navigating += OnNavigating;
 
-                              
         StartWorkerCommand = new AsyncRelayCommand(StartWorkerAsync, () => CanStartWorker);
         StopWorkerCommand = new AsyncRelayCommand(StopWorkerAsync, () => CanStopWorker);
         RestartWorkerCommand = new AsyncRelayCommand(RestartWorkerAsync, () => CanRestartWorker);
@@ -104,16 +93,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _workerState, value))
             {
-                OnPropertyChanged(nameof(WorkerStateDisplay));
-                OnPropertyChanged(nameof(WorkerStateColor));
-                OnPropertyChanged(nameof(CanStartWorker));
-                OnPropertyChanged(nameof(CanStopWorker));
-                OnPropertyChanged(nameof(CanRestartWorker));
-                OnPropertyChanged(nameof(CanKillWorker));
-                OnPropertyChanged(nameof(CanConnectExchange));
-                OnPropertyChanged(nameof(CanDisconnectExchange));
-                OnPropertyChanged(nameof(IsWorkerRunning));
-                CommandManager.InvalidateRequerySuggested();
+                NotifyWorkerStatePropertiesChanged();
             }
         }
     }
@@ -154,12 +134,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _exchangeState, value))
             {
-                OnPropertyChanged(nameof(ExchangeStateDisplay));
-                OnPropertyChanged(nameof(ExchangeStateColor));
-                OnPropertyChanged(nameof(IsExchangeConnected));
-                OnPropertyChanged(nameof(CanConnectExchange));
-                OnPropertyChanged(nameof(CanDisconnectExchange));
-                CommandManager.InvalidateRequerySuggested();
+                NotifyExchangeStatePropertiesChanged();
             }
         }
     }
@@ -211,14 +186,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _currentPage, value))
             {
-                OnPropertyChanged(nameof(IsDashboardPage));
-                OnPropertyChanged(nameof(IsMailboxesPage));
-                OnPropertyChanged(nameof(IsSharedMailboxesPage));
-                OnPropertyChanged(nameof(IsMailboxSpacePage));
-                OnPropertyChanged(nameof(IsDistributionListsPage));
-                OnPropertyChanged(nameof(IsToolsPage));
-                OnPropertyChanged(nameof(IsLogsPage));
-                OnPropertyChanged(nameof(CurrentPageTitle));
+                NotifyNavigationPropertiesChanged();
             }
         }
     }
@@ -302,7 +270,6 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _isVerboseLoggingEnabled, value))
             {
-                                                                                   
                 AddLog(value ? LogLevel.Information : LogLevel.Information,
                        value ? "Verbose logging enabled - all PowerShell output will be shown"
                              : "Verbose logging disabled - only important messages will be shown");
@@ -455,7 +422,6 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             ExchangeState = ConnectionState.Failed;
             AddLog(LogLevel.Error, $"Connection failed: {result.Error?.Message}");
 
-                                              
             if (result.Error != null)
             {
                 ShowErrorDialog("Connection Failed", result.Error);
@@ -498,7 +464,6 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             WorkerState = state;
             AddLog(LogLevel.Information, $"Worker state changed: {state}");
 
-                                                         
             if (state != WorkerConnectionState.Connected && ExchangeState == ConnectionState.Connected)
             {
                 ExchangeState = ConnectionState.Disconnected;
@@ -562,7 +527,6 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             return;
         }
 
-                                                      
         if (MailboxDetails != null && MailboxDetails.HasPendingChanges)
         {
             RunOnUiThread(() =>
@@ -590,9 +554,89 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     #region Helpers
 
+    // Batched property change notifications for performance
+    private static readonly string[] WorkerStateProperties =
+    {
+        nameof(WorkerStateDisplay),
+        nameof(WorkerStateColor),
+        nameof(CanStartWorker),
+        nameof(CanStopWorker),
+        nameof(CanRestartWorker),
+        nameof(CanKillWorker),
+        nameof(CanConnectExchange),
+        nameof(CanDisconnectExchange),
+        nameof(IsWorkerRunning)
+    };
+
+    private static readonly string[] ExchangeStateProperties =
+    {
+        nameof(ExchangeStateDisplay),
+        nameof(ExchangeStateColor),
+        nameof(IsExchangeConnected),
+        nameof(CanConnectExchange),
+        nameof(CanDisconnectExchange)
+    };
+
+    private static readonly string[] NavigationProperties =
+    {
+        nameof(IsDashboardPage),
+        nameof(IsMailboxesPage),
+        nameof(IsSharedMailboxesPage),
+        nameof(IsMailboxSpacePage),
+        nameof(IsDistributionListsPage),
+        nameof(IsToolsPage),
+        nameof(IsLogsPage),
+        nameof(CurrentPageTitle)
+    };
+
+    private void NotifyWorkerStatePropertiesChanged()
+    {
+        foreach (var prop in WorkerStateProperties)
+        {
+            OnPropertyChanged(prop);
+        }
+        InvalidateCommandsOnUiThread();
+    }
+
+    private void NotifyExchangeStatePropertiesChanged()
+    {
+        foreach (var prop in ExchangeStateProperties)
+        {
+            OnPropertyChanged(prop);
+        }
+        InvalidateCommandsOnUiThread();
+    }
+
+    private void NotifyNavigationPropertiesChanged()
+    {
+        foreach (var prop in NavigationProperties)
+        {
+            OnPropertyChanged(prop);
+        }
+    }
+
+    private void InvalidateCommandsOnUiThread()
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null)
+        {
+            CommandManager.InvalidateRequerySuggested();
+            return;
+        }
+
+        if (dispatcher.CheckAccess())
+        {
+            CommandManager.InvalidateRequerySuggested();
+        }
+        else
+        {
+            dispatcher.BeginInvoke(DispatcherPriority.Background,
+                new Action(() => CommandManager.InvalidateRequerySuggested()));
+        }
+    }
+
     public void AddLog(LogLevel level, string message, string? source = null)
     {
-                                                                     
         if (!_isVerboseLoggingEnabled && level == LogLevel.Verbose)
         {
             return;
@@ -605,12 +649,11 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
             Source = source ?? "UI"
         };
 
-        LogEntries.Insert(0, entry);
+        LogEntries.Add(entry);
 
-                                
-        while (LogEntries.Count > MaxLogEntries)
+        if (LogEntries.Count > MaxLogEntries)
         {
-            LogEntries.RemoveAt(LogEntries.Count - 1);
+            LogEntries.RemoveAt(0);
         }
     }
 
@@ -673,42 +716,27 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         IsNavigationLocked = isBlocked;
     }
 
-                 
-                                        
-                  
     public bool IsFeatureAvailable(Func<FeatureCapabilitiesDto, bool> featureCheck)
     {
         if (Capabilities?.Features == null) return false;
         return featureCheck(Capabilities.Features);
     }
 
-                 
-                                            
-                  
     public string GetUnavailableTooltip(string featureName)
     {
         return $"{featureName} is not available with your current permissions";
     }
 
-                 
-                                                        
-                  
     public void ShowErrorDialog(string title, string message, string? details = null)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, message, details));
     }
 
-                 
-                                                  
-                  
     public void ShowErrorDialog(string title, NormalizedErrorDto error)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, error));
     }
 
-                 
-                                               
-                  
     public void ShowErrorDialog(string title, NormalizedError error)
     {
         RunOnUiThread(() => ErrorDialogService.ShowError(title, error));

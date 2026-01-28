@@ -77,21 +77,40 @@ public class InverseBoolConverter : IValueConverter
     }
 }
 
-             
-                                                
-              
+/// <summary>
+/// Converts a list of strings to a comma-separated string.
+/// Optimized to avoid unnecessary allocations.
+/// </summary>
 public class ListToStringConverter : IValueConverter
 {
+    private static readonly string EmptyResult = "-";
+
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is IEnumerable<string> list)
+        if (value is not IEnumerable<string> enumerable)
+            return EmptyResult;
+
+        // Avoid ToList() allocation by checking if it's already a list/array
+        if (value is IList<string> list)
         {
-            var items = list.ToList();
-            if (items.Count == 0)
-                return "-";
-            return string.Join(", ", items);
+            if (list.Count == 0)
+                return EmptyResult;
+            return string.Join(", ", list);
         }
-        return "-";
+
+        if (value is string[] array)
+        {
+            if (array.Length == 0)
+                return EmptyResult;
+            return string.Join(", ", array);
+        }
+
+        // Fallback for other IEnumerable types - use iterator directly
+        using var enumerator = enumerable.GetEnumerator();
+        if (!enumerator.MoveNext())
+            return EmptyResult;
+
+        return string.Join(", ", enumerable);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -100,9 +119,10 @@ public class ListToStringConverter : IValueConverter
     }
 }
 
-             
-                                                                             
-              
+/// <summary>
+/// Returns Collapsed for null, empty strings, or empty collections.
+/// Optimized to avoid LINQ allocations.
+/// </summary>
 public class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -110,13 +130,26 @@ public class NullToVisibilityConverter : IValueConverter
         if (value == null)
             return Visibility.Collapsed;
 
-                                  
-        if (value is string str && string.IsNullOrEmpty(str))
-            return Visibility.Collapsed;
+        // Check for empty string
+        if (value is string str)
+            return string.IsNullOrEmpty(str) ? Visibility.Collapsed : Visibility.Visible;
 
-                                      
-        if (value is System.Collections.IEnumerable enumerable && !enumerable.Cast<object>().Any())
-            return Visibility.Collapsed;
+        // Check for empty collection - avoid Cast<object>().Any() allocation
+        if (value is System.Collections.ICollection collection)
+            return collection.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        if (value is System.Collections.IEnumerable enumerable)
+        {
+            var enumerator = enumerable.GetEnumerator();
+            try
+            {
+                return enumerator.MoveNext() ? Visibility.Visible : Visibility.Collapsed;
+            }
+            finally
+            {
+                (enumerator as IDisposable)?.Dispose();
+            }
+        }
 
         return Visibility.Visible;
     }

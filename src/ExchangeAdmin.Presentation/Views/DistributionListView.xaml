@@ -64,7 +64,12 @@
                       Background="{StaticResource SecondaryBackgroundBrush}"
                       BorderBrush="{StaticResource BorderBrush}"
                       RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      ScrollViewer.IsDeferredScrollingEnabled="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nome visualizzato" Binding="{Binding DisplayName}" Width="*"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding PrimarySmtpAddress}" Width="*"/>

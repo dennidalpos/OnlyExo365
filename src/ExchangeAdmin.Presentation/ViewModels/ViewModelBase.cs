@@ -4,9 +4,6 @@ using System.Windows;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-             
-                                                         
-              
 public abstract class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -26,37 +23,41 @@ public abstract class ViewModelBase : INotifyPropertyChanged
         return true;
     }
 
-                 
-                                           
-                  
     protected void RunOnUiThread(Action action)
     {
-        if (System.Windows.Application.Current?.Dispatcher?.CheckAccess() == true)
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null)
+        {
+            action();
+            return;
+        }
+
+        if (dispatcher.CheckAccess())
         {
             action();
         }
         else
         {
-            System.Windows.Application.Current?.Dispatcher?.Invoke(action);
+            dispatcher.Invoke(action);
         }
     }
 
-                 
-                                                     
-                  
     protected async Task RunOnUiThreadAsync(Action action)
     {
-        if (System.Windows.Application.Current?.Dispatcher?.CheckAccess() == true)
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null)
+        {
+            action();
+            return;
+        }
+
+        if (dispatcher.CheckAccess())
         {
             action();
         }
         else
         {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher != null)
-            {
-                await dispatcher.InvokeAsync(action);
-            }
+            await dispatcher.InvokeAsync(action);
         }
     }
 }

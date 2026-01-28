@@ -19,8 +19,10 @@ public class MailboxDetailsViewModel : ViewModelBase
     private readonly IWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
+    private readonly CacheService _cacheService;
 
     private CancellationTokenSource? _loadCts;
+    private static readonly TimeSpan RetentionPolicyCacheTtl = TimeSpan.FromMinutes(10);
 
     private bool _isLoading;
     private bool _isSaving;
@@ -69,11 +71,12 @@ public class MailboxDetailsViewModel : ViewModelBase
     private PermissionType _newPermissionType = PermissionType.FullAccess;
     private bool _newPermissionAutoMapping = true;
 
-    public MailboxDetailsViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
+    public MailboxDetailsViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel, CacheService cacheService)
     {
         _workerService = workerService;
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
+        _cacheService = cacheService;
 
                                        
         _navigationService.SelectedIdentityChanged += OnSelectedIdentityChanged;
@@ -142,6 +145,24 @@ public class MailboxDetailsViewModel : ViewModelBase
         private set => SetProperty(ref _identity, value);
     }
 
+    // Batched property names for Details change notification
+    private static readonly string[] DetailsRelatedProperties =
+    {
+        nameof(HasDetails),
+        nameof(DisplayName),
+        nameof(PrimarySmtpAddress),
+        nameof(RecipientTypeDetails),
+        nameof(Features),
+        nameof(Statistics),
+        nameof(Permissions),
+        nameof(InboxRules),
+        nameof(AutoReply),
+        nameof(CanConvertToSharedMailbox),
+        nameof(CanConvertToRegularMailbox),
+        nameof(HasConversionActions),
+        nameof(QuotaUsageSummary)
+    };
+
     public MailboxDetailsDto? Details
     {
         get => _details;
@@ -154,19 +175,12 @@ public class MailboxDetailsViewModel : ViewModelBase
                     _retentionPolicyFallback = _details.RetentionPolicy;
                 }
 
-                OnPropertyChanged(nameof(HasDetails));
-                OnPropertyChanged(nameof(DisplayName));
-                OnPropertyChanged(nameof(PrimarySmtpAddress));
-                OnPropertyChanged(nameof(RecipientTypeDetails));
-                OnPropertyChanged(nameof(Features));
-                OnPropertyChanged(nameof(Statistics));
-                OnPropertyChanged(nameof(Permissions));
-                OnPropertyChanged(nameof(InboxRules));
-                OnPropertyChanged(nameof(AutoReply));
-                OnPropertyChanged(nameof(CanConvertToSharedMailbox));
-                OnPropertyChanged(nameof(CanConvertToRegularMailbox));
-                OnPropertyChanged(nameof(HasConversionActions));
-                OnPropertyChanged(nameof(QuotaUsageSummary));
+                // Batch notify all related properties
+                foreach (var prop in DetailsRelatedProperties)
+                {
+                    OnPropertyChanged(prop);
+                }
+
                 UpdatePermissionsDisplay();
                 InitializeMailboxSettings();
                 CommandManager.InvalidateRequerySuggested();
@@ -560,8 +574,20 @@ public class MailboxDetailsViewModel : ViewModelBase
             ClearPendingActions();
             if (!string.IsNullOrEmpty(identity))
             {
-                _ = LoadAsync(identity);
+                SafeLoadAsync(identity);
             }
+        }
+    }
+
+    private async void SafeLoadAsync(string identity)
+    {
+        try
+        {
+            await LoadAsync(identity);
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Error, $"Load failed: {ex.Message}");
         }
     }
 
@@ -648,11 +674,35 @@ public class MailboxDetailsViewModel : ViewModelBase
         try
         {
             _isRefreshingRetentionPolicies = true;
-            var result = await _workerService.GetRetentionPoliciesAsync(
-                new GetRetentionPoliciesRequest(),
-                cancellationToken: cancellationToken);
 
-            if (result.IsSuccess && result.Value != null)
+            // Try to load from cache first
+            var cachedPolicies = _cacheService.Get<List<RetentionPolicySummaryDto>>(CacheService.Keys.RetentionPolicies);
+
+            List<RetentionPolicySummaryDto>? policies = null;
+
+            if (cachedPolicies != null)
+            {
+                policies = cachedPolicies;
+            }
+            else
+            {
+                var result = await _workerService.GetRetentionPoliciesAsync(
+                    new GetRetentionPoliciesRequest(),
+                    cancellationToken: cancellationToken);
+
+                if (result.IsSuccess && result.Value != null)
+                {
+                    policies = result.Value.Policies.OrderBy(policy => policy.Name).ToList();
+                    // Cache the policies
+                    _cacheService.Set(CacheService.Keys.RetentionPolicies, policies, RetentionPolicyCacheTtl);
+                }
+                else if (!result.WasCancelled)
+                {
+                    _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? "Impossibile recuperare le retention policy");
+                }
+            }
+
+            if (policies != null)
             {
                 AvailableRetentionPolicies.Clear();
                 AvailableRetentionPolicies.Add(new RetentionPolicySummaryDto
@@ -661,7 +711,7 @@ public class MailboxDetailsViewModel : ViewModelBase
                     Description = "Nessuna policy assegnata"
                 });
 
-                foreach (var policy in result.Value.Policies.OrderBy(policy => policy.Name))
+                foreach (var policy in policies)
                 {
                     AvailableRetentionPolicies.Add(policy);
                 }
@@ -675,14 +725,10 @@ public class MailboxDetailsViewModel : ViewModelBase
                 OnPropertyChanged(nameof(SelectedRetentionPolicyRequiresArchive));
                 OnPropertyChanged(nameof(ShowArchiveRequiredWarning));
             }
-            else if (!result.WasCancelled)
-            {
-                _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? "Impossibile recuperare le retention policy");
-            }
         }
         catch (OperationCanceledException)
         {
-                     
+            // Cancelled
         }
         catch (Exception ex)
         {

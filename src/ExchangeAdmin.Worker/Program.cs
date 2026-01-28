@@ -10,11 +10,11 @@ internal class Program
                   
     private static async Task EnsureExecutionPolicyAsync()
     {
+        const string source = "Worker";
         try
         {
-            Console.WriteLine("[Worker] Checking PowerShell Execution Policy...");
+            ConsoleLogger.Info(source, "Checking PowerShell Execution Policy...");
 
-                                                                     
             var checkProcess = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = "pwsh",
@@ -27,19 +27,18 @@ internal class Program
             using var process = System.Diagnostics.Process.Start(checkProcess);
             if (process == null)
             {
-                Console.WriteLine("[Worker] Warning: Could not check Execution Policy");
+                ConsoleLogger.Warning(source, "Could not check Execution Policy");
                 return;
             }
 
             var currentPolicy = (await process.StandardOutput.ReadToEndAsync()).Trim();
             await process.WaitForExitAsync();
 
-            Console.WriteLine($"[Worker] Current Execution Policy (CurrentUser): {currentPolicy}");
+            ConsoleLogger.Debug(source, $"Current Execution Policy (CurrentUser): {currentPolicy}");
 
-                                                            
             if (currentPolicy != "Bypass" && currentPolicy != "Unrestricted" && currentPolicy != "RemoteSigned")
             {
-                Console.WriteLine("[Worker] Setting Execution Policy to RemoteSigned for CurrentUser...");
+                ConsoleLogger.Info(source, "Setting Execution Policy to RemoteSigned for CurrentUser...");
 
                 var setProcess = new System.Diagnostics.ProcessStartInfo
                 {
@@ -57,59 +56,54 @@ internal class Program
                     await setProc.WaitForExitAsync();
                     if (setProc.ExitCode == 0)
                     {
-                        Console.WriteLine("[Worker] Execution Policy updated successfully");
+                        ConsoleLogger.Success(source, "Execution Policy updated successfully");
                     }
                     else
                     {
                         var error = await setProc.StandardError.ReadToEndAsync();
-                        Console.WriteLine($"[Worker] Warning: Could not set Execution Policy: {error}");
+                        ConsoleLogger.Warning(source, $"Could not set Execution Policy: {error}");
                     }
                 }
             }
             else
             {
-                Console.WriteLine("[Worker] Execution Policy is already acceptable");
+                ConsoleLogger.Success(source, "Execution Policy is already acceptable");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Worker] Warning: Failed to check/set Execution Policy: {ex.Message}");
-                                                        
+            ConsoleLogger.Warning(source, $"Failed to check/set Execution Policy: {ex.Message}");
         }
     }
 
     private static async Task<int> Main(string[] args)
     {
-        Console.WriteLine($"[Worker] Starting ExchangeAdmin.Worker v1.0.0");
-        Console.WriteLine($"[Worker] Process ID: {Environment.ProcessId}");
+        const string source = "Worker";
+        ConsoleLogger.Info(source, "Starting ExchangeAdmin.Worker v1.0.0");
+        ConsoleLogger.Debug(source, $"Process ID: {Environment.ProcessId}");
 
         try
         {
-                                                                 
             await EnsureExecutionPolicyAsync();
 
-                                            
             var psEngine = new PowerShellEngine();
             var initResult = await psEngine.InitializeAsync();
 
             if (!initResult.Success)
             {
-                Console.Error.WriteLine($"[Worker] Failed to initialize PowerShell: {initResult.ErrorMessage}");
-                                                                      
+                ConsoleLogger.Error(source, $"Failed to initialize PowerShell: {initResult.ErrorMessage}");
             }
             else
             {
-                Console.WriteLine($"[Worker] PowerShell initialized. Version: {initResult.PowerShellVersion}");
-                Console.WriteLine($"[Worker] Module available: {initResult.IsModuleAvailable}");
+                ConsoleLogger.Success(source, $"PowerShell initialized. Version: {initResult.PowerShellVersion}");
+                ConsoleLogger.Info(source, $"Module available: {initResult.IsModuleAvailable}");
             }
 
-                               
             using var server = new IpcServer(psEngine);
             await server.StartAsync();
 
-            Console.WriteLine("[Worker] IPC server started. Waiting for connections...");
+            ConsoleLogger.Success(source, "IPC server started. Waiting for connections...");
 
-                               
             using var shutdownEvent = new ManualResetEventSlim(false);
 
             Console.CancelKeyPress += (s, e) =>
@@ -123,13 +117,11 @@ internal class Program
                 shutdownEvent.Set();
             };
 
-                                        
             while (!shutdownEvent.Wait(1000))
             {
-                                                                
             }
 
-            Console.WriteLine("[Worker] Shutting down...");
+            ConsoleLogger.Warning(source, "Shutting down...");
             await server.StopAsync();
 
             psEngine.Dispose();
@@ -138,7 +130,7 @@ internal class Program
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"[Worker] Fatal error: {ex}");
+            ConsoleLogger.Error(source, $"Fatal error: {ex}");
             return 1;
         }
     }

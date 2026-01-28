@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:ExchangeAdmin.Presentation.ViewModels"
         xmlns:views="clr-namespace:ExchangeAdmin.Presentation.Views"
+        xmlns:ipc="clr-namespace:ExchangeAdmin.Infrastructure.Ipc;assembly=ExchangeAdmin.Infrastructure"
+        xmlns:dtos="clr-namespace:ExchangeAdmin.Contracts.Dtos;assembly=ExchangeAdmin.Contracts"
         Title="Exchange Admin - Exchange Online Management"
         Height="800" Width="1200"
         MinHeight="600" MinWidth="900"
@@ -15,7 +17,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-                                 
         <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
                 Padding="12,8">
@@ -26,7 +27,6 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                              
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Exchange Admin" FontSize="16" FontWeight="SemiBold"
                                Foreground="{StaticResource PrimaryTextBrush}"/>
@@ -34,7 +34,6 @@
                                Foreground="{StaticResource SecondaryTextBrush}"/>
                 </StackPanel>
 
-                                        
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
                             VerticalAlignment="Center">
                     <Button Content="Start Worker" Command="{Binding StartWorkerCommand}"
@@ -46,15 +45,36 @@
 
                 </StackPanel>
 
-                                          
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="12,0">
                         <TextBlock Text="Worker:" Foreground="{StaticResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <Ellipse Width="10" Height="10" VerticalAlignment="Center">
-                            <Ellipse.Fill>
-                                <SolidColorBrush Color="{Binding WorkerStateColor}"/>
-                            </Ellipse.Fill>
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Connected}">
+                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Starting}">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.WaitingForHandshake}">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Restarting}">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Crashed}">
+                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Unresponsive}">
+                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
                         </Ellipse>
                         <TextBlock Text="{Binding WorkerStateDisplay}"
                                    VerticalAlignment="Center" Margin="6,0,0,0"/>
@@ -64,9 +84,28 @@
                         <TextBlock Text="Exchange:" Foreground="{StaticResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <Ellipse Width="10" Height="10" VerticalAlignment="Center">
-                            <Ellipse.Fill>
-                                <SolidColorBrush Color="{Binding ExchangeStateColor}"/>
-                            </Ellipse.Fill>
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Connected}">
+                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Connecting}">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Reconnecting}">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Failed}">
+                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsExchangeConnectionDisabled}" Value="True">
+                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
                         </Ellipse>
                         <TextBlock Text="{Binding ExchangeStateDisplay}"
                                    VerticalAlignment="Center" Margin="6,0,0,0"/>
@@ -75,159 +114,134 @@
             </Grid>
         </Border>
 
-                                          
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="180"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-                                       
             <Border Grid.Column="0" Background="{StaticResource TertiaryBackgroundBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
                 <StackPanel Margin="0,8" IsEnabled="{Binding CanNavigate}">
-                                      
                     <Button Content="Dashboard" Command="{Binding NavigateToDashboardCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDashboardPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
-                                      
                     <Button Content="Mailboxes" Command="{Binding NavigateToMailboxesCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailboxesPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
-                                             
                     <Button Content="Shared Mailboxes" Command="{Binding NavigateToSharedMailboxesCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSharedMailboxesPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
-                                          
                     <Button Content="Spazio mailbox" Command="{Binding NavigateToMailboxSpaceCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailboxSpacePage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
-                                               
                     <Button Content="Distribution Lists" Command="{Binding NavigateToDistributionListsCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDistributionListsPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
                     <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
 
-                                  
                     <Button Content="Tools" Command="{Binding NavigateToToolsCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsToolsPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
 
-                                 
                     <Button Content="Logs" Command="{Binding NavigateToLogsCommand}"
-                            HorizontalContentAlignment="Left" Padding="16,10"
-                            Margin="4,2">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsLogsPage}" Value="True">
                                         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
+                        </Button.Resources>
                     </Button>
                 </StackPanel>
             </Border>
 
-                                 
             <Grid Grid.Column="1" Background="{StaticResource PrimaryBackgroundBrush}">
-                                       
                 <views:DashboardView x:Name="DashboardView"
                                       Visibility="{Binding IsDashboardPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                       
                 <views:MailboxListView x:Name="MailboxListView"
                                         Visibility="{Binding IsMailboxesPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                              
                 <views:SharedMailboxListView x:Name="SharedMailboxListView"
                                         Visibility="{Binding IsSharedMailboxesPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                           
                 <views:MailboxSpaceView x:Name="MailboxSpaceView"
                                         Visibility="{Binding IsMailboxSpacePage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                                
                 <views:DistributionListView x:Name="DistributionListView"
                                              Visibility="{Binding IsDistributionListsPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                   
                 <views:ToolsView x:Name="ToolsView"
                                   Visibility="{Binding IsToolsPage, Converter={StaticResource BoolToVisibility}}"/>
 
-                                  
                 <views:LogsView x:Name="LogsView"
                                  Visibility="{Binding IsLogsPage, Converter={StaticResource BoolToVisibility}}"/>
             </Grid>
         </Grid>
 
-                           
         <Border Grid.Row="2" Background="{StaticResource TertiaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="12,4">
@@ -238,7 +252,6 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                                      
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="{Binding GlobalStatus, FallbackValue='Ready'}"
                                Foreground="{StaticResource SecondaryTextBrush}"/>
@@ -247,7 +260,6 @@
                                  Visibility="{Binding IsGlobalOperationRunning, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
 
-                                       
                 <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0"
                            Foreground="{StaticResource SecondaryTextBrush}"
                            Visibility="{Binding IsExchangeConnected, Converter={StaticResource BoolToVisibility}}">
@@ -255,7 +267,6 @@
                     <Run Text="{Binding ConnectedUser, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
                 </TextBlock>
 
-                                
                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
                            Foreground="{StaticResource SecondaryTextBrush}"
                            Text="v1.0.0"/>

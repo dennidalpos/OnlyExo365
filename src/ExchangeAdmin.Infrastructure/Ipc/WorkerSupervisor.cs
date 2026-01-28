@@ -186,20 +186,18 @@ public class WorkerSupervisor : IAsyncDisposable
 
             Console.WriteLine($"[Supervisor] Starting worker: {workerPath}");
 
-                                                                               
             var startInfo = new ProcessStartInfo
             {
                 FileName = workerPath,
-                UseShellExecute = false,
-                CreateNoWindow = false,                                                    
-                WindowStyle = ProcessWindowStyle.Minimized,                        
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
+                UseShellExecute = true,
+                CreateNoWindow = false,
+                WindowStyle = ProcessWindowStyle.Normal
             };
 
             if (!string.IsNullOrWhiteSpace(_options.ExchangeEnvironmentName))
             {
-                startInfo.Environment["EXCHANGEADMIN_EXO_ENV"] = _options.ExchangeEnvironmentName;
+                startInfo.EnvironmentVariables["EXCHANGEADMIN_EXO_ENV"] = _options.ExchangeEnvironmentName;
+                startInfo.UseShellExecute = false;
             }
 
             _workerProcess = Process.Start(startInfo);
@@ -212,24 +210,6 @@ public class WorkerSupervisor : IAsyncDisposable
             }
 
             Console.WriteLine($"[Supervisor] Worker started, PID: {_workerProcess.Id}");
-
-                                       
-            _workerProcess.OutputDataReceived += (s, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    Console.WriteLine($"[Worker OUT] {e.Data}");
-                }
-            };
-            _workerProcess.ErrorDataReceived += (s, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    Console.WriteLine($"[Worker ERR] {e.Data}");
-                }
-            };
-            _workerProcess.BeginOutputReadLine();
-            _workerProcess.BeginErrorReadLine();
 
             SetState(WorkerConnectionState.WaitingForHandshake);
 

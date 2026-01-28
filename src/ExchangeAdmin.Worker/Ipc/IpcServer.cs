@@ -73,21 +73,19 @@ public sealed class IpcServer : IDisposable
             IpcConstants.PipeBufferSize,
             0);
 
-        Console.WriteLine($"[IPC] Waiting for client connection on {IpcConstants.PipeName}...");
+        ConsoleLogger.Info("IPC", $"Waiting for client connection on {IpcConstants.PipeName}...");
 
-                                                  
         await Task.WhenAll(
             _requestPipe.WaitForConnectionAsync(_serverCts.Token),
             _eventPipe.WaitForConnectionAsync(_serverCts.Token)).ConfigureAwait(false);
 
-        Console.WriteLine("[IPC] Client connected");
+        ConsoleLogger.Success("IPC", "Client connected");
 
-                                                                           
         _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
         _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
         _eventWriter = new StreamWriter(_eventPipe, Encoding.UTF8, leaveOpen: true);
 
-        Console.WriteLine("[IPC] Readers/writers created successfully");
+        ConsoleLogger.Debug("IPC", "Readers/writers created successfully");
 
         _isRunning = true;
 
@@ -146,20 +144,19 @@ public sealed class IpcServer : IDisposable
                 }
                 catch (IOException ex)
                 {
-                    Console.WriteLine($"[IPC] RequestLoop IOException: {ex.Message}");
+                    ConsoleLogger.Error("IPC", $"RequestLoop IOException: {ex.Message}");
                     break;
                 }
 
                 if (line == null)
                 {
-                    Console.WriteLine("[IPC] Client disconnected (null read)");
+                    ConsoleLogger.Warning("IPC", "Client disconnected (null read)");
                     break;
                 }
 
-                                                   
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
-                    Console.WriteLine($"[IPC] Message too large ({line.Length} bytes), rejecting");
+                    ConsoleLogger.Warning("IPC", $"Message too large ({line.Length} bytes), rejecting");
                     continue;
                 }
 
@@ -170,13 +167,13 @@ public sealed class IpcServer : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[IPC] JSON parse error: {ex.Message}");
+                    ConsoleLogger.Error("IPC", $"JSON parse error: {ex.Message}");
                     continue;
                 }
 
                 if (message == null)
                 {
-                    Console.WriteLine($"[IPC] Invalid message received (unknown type)");
+                    ConsoleLogger.Warning("IPC", "Invalid message received (unknown type)");
                     continue;
                 }
 
@@ -186,15 +183,14 @@ public sealed class IpcServer : IDisposable
         }
         catch (OperationCanceledException)
         {
-                               
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"[IPC] Request loop fatal error: {ex.Message}");
+            ConsoleLogger.Error("IPC", $"Request loop fatal error: {ex.Message}");
         }
         finally
         {
-            Console.WriteLine("[IPC] Request loop terminated");
+            ConsoleLogger.Info("IPC", "Request loop terminated");
         }
     }
 
@@ -221,20 +217,20 @@ public sealed class IpcServer : IDisposable
                     break;
 
                 default:
-                    Console.WriteLine($"[IPC] Unknown message type: {message.Type}");
+                    ConsoleLogger.Warning("IPC", $"Unknown message type: {message.Type}");
                     break;
             }
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"[IPC] Error handling message {message.Type}: {ex.Message}");
+            ConsoleLogger.Error("IPC", $"Error handling message {message.Type}: {ex.Message}");
         }
     }
 
     private async Task HandleHandshakeAsync(HandshakeRequest request)
     {
-        Console.WriteLine($"[IPC] Handshake request from client {request.ClientId}");
-        Console.WriteLine($"[IPC] Client contracts version: {request.ContractsVersion}");
+        ConsoleLogger.Info("IPC", $"Handshake request from client {request.ClientId}");
+        ConsoleLogger.Debug("IPC", $"Client contracts version: {request.ContractsVersion}");
 
         _clientId = request.ClientId;
 
@@ -250,16 +246,22 @@ public sealed class IpcServer : IDisposable
             ErrorMessage = isCompatible ? null : $"Incompatible contracts version. Worker: {ContractVersion.Version}, Client: {request.ContractsVersion}"
         };
 
-        Console.WriteLine($"[IPC] Sending handshake response...");
+        ConsoleLogger.Verbose("IPC", "Sending handshake response...");
         await SendResponseRawAsync(response).ConfigureAwait(false);
-        Console.WriteLine($"[IPC] Handshake response sent successfully");
 
-        Console.WriteLine($"[IPC] Handshake completed. Compatible: {isCompatible}");
+        if (isCompatible)
+        {
+            ConsoleLogger.Success("IPC", "Handshake completed successfully");
+        }
+        else
+        {
+            ConsoleLogger.Error("IPC", $"Handshake failed - incompatible version");
+        }
     }
 
     private async Task HandleRequestAsync(RequestEnvelope request, CancellationToken serverCancellation)
     {
-        Console.WriteLine($"[IPC] Request: {request.Operation} (correlation: {request.CorrelationId})");
+        ConsoleLogger.Info("IPC", $"Request: {request.Operation} (correlation: {request.CorrelationId})");
 
                                                           
         _eventCounts[request.CorrelationId] = 0;
@@ -291,7 +293,7 @@ public sealed class IpcServer : IDisposable
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"[IPC] Operation error: {ex.Message}");
+            ConsoleLogger.Error("IPC", $"Operation error: {ex.Message}");
 
             var response = new ResponseEnvelope
             {
@@ -328,12 +330,9 @@ public sealed class IpcServer : IDisposable
         }
     }
 
-                 
-                                                                                                      
-                  
     private void HandleCancel(CancelRequest cancel)
     {
-        Console.WriteLine($"[IPC] Cancel request for correlation: {cancel.CorrelationId}");
+        ConsoleLogger.Warning("IPC", $"Cancel request for correlation: {cancel.CorrelationId}");
 
         if (_activeOperations.TryGetValue(cancel.CorrelationId, out var cts))
         {
@@ -342,23 +341,21 @@ public sealed class IpcServer : IDisposable
                 if (!cts.IsCancellationRequested)
                 {
                     cts.Cancel();
-                    Console.WriteLine($"[IPC] Cancellation signaled for: {cancel.CorrelationId}");
+                    ConsoleLogger.Warning("IPC", $"Cancellation signaled for: {cancel.CorrelationId}");
                 }
                 else
                 {
-                    Console.WriteLine($"[IPC] Already cancelled: {cancel.CorrelationId}");
+                    ConsoleLogger.Debug("IPC", $"Already cancelled: {cancel.CorrelationId}");
                 }
             }
             catch (ObjectDisposedException)
             {
-                                                            
-                Console.WriteLine($"[IPC] Operation already completed: {cancel.CorrelationId}");
+                ConsoleLogger.Debug("IPC", $"Operation already completed: {cancel.CorrelationId}");
             }
         }
         else
         {
-                                                                      
-            Console.WriteLine($"[IPC] Cancel ignored - operation not found: {cancel.CorrelationId}");
+            ConsoleLogger.Debug("IPC", $"Cancel ignored - operation not found: {cancel.CorrelationId}");
         }
     }
 
@@ -378,7 +375,7 @@ public sealed class IpcServer : IDisposable
     {
         if (_requestWriter == null || _isDisposing)
         {
-            Console.WriteLine("[IPC] Cannot send response - writer is null or disposing");
+            ConsoleLogger.Warning("IPC", "Cannot send response - writer is null or disposing");
             return;
         }
 
@@ -386,21 +383,20 @@ public sealed class IpcServer : IDisposable
         {
             var json = JsonMessageSerializer.Serialize(message);
 
-                                                   
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
-                Console.Error.WriteLine($"[IPC] Response too large ({json.Length} bytes), dropping");
+                ConsoleLogger.Error("IPC", $"Response too large ({json.Length} bytes), dropping");
                 return;
             }
 
-            Console.WriteLine($"[IPC] Sending response (length: {json.Length} bytes, type: {typeof(T).Name})");
+            ConsoleLogger.Verbose("IPC", $"Sending response ({json.Length} bytes, type: {typeof(T).Name})");
             await _requestWriter.WriteLineAsync(json).ConfigureAwait(false);
             await _requestWriter.FlushAsync().ConfigureAwait(false);
-            Console.WriteLine($"[IPC] Response sent successfully");
+            ConsoleLogger.Debug("IPC", "Response sent successfully");
         }
         catch (IOException ex)
         {
-            Console.Error.WriteLine($"[IPC] Failed to send response: {ex.Message}");
+            ConsoleLogger.Error("IPC", $"Failed to send response: {ex.Message}");
         }
         catch (ObjectDisposedException)
         {
@@ -439,7 +435,7 @@ public sealed class IpcServer : IDisposable
                                                    
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
-                Console.Error.WriteLine($"[IPC] Event too large ({json.Length} bytes), dropping");
+                ConsoleLogger.Error("IPC", $"Event too large ({json.Length} bytes), dropping");
                 return;
             }
 

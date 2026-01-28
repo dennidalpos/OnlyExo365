@@ -11,6 +11,7 @@ public partial class App : System.Windows.Application
 {
     private IWorkerService? _workerService;
     private NavigationService? _navigationService;
+    private CacheService? _cacheService;
     private ShellViewModel? _shellViewModel;
 
                                                        
@@ -36,15 +37,16 @@ public partial class App : System.Windows.Application
 
         _workerService = new WorkerService(workerOptions);
         _navigationService = new NavigationService();
+        _cacheService = new CacheService();
 
-                                 
+        // Create shell view model
         _shellViewModel = new ShellViewModel(_workerService, _navigationService);
 
-                                  
-        var dashboardViewModel = new DashboardViewModel(_workerService, _navigationService, _shellViewModel);
+        // Create child view models with cache service
+        var dashboardViewModel = new DashboardViewModel(_workerService, _navigationService, _shellViewModel, _cacheService);
         var mailboxListViewModel = new MailboxListViewModel(_workerService, _navigationService, _shellViewModel);
         var sharedMailboxListViewModel = new MailboxListViewModel(_workerService, _navigationService, _shellViewModel);
-        var mailboxDetailsViewModel = new MailboxDetailsViewModel(_workerService, _navigationService, _shellViewModel);
+        var mailboxDetailsViewModel = new MailboxDetailsViewModel(_workerService, _navigationService, _shellViewModel, _cacheService);
         var mailboxSpaceViewModel = new MailboxSpaceViewModel(_workerService, _navigationService, _shellViewModel);
         var distributionListViewModel = new DistributionListViewModel(_workerService, _navigationService, _shellViewModel);
         var logsViewModel = new LogsViewModel(_shellViewModel);

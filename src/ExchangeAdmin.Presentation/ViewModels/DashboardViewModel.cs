@@ -15,6 +15,7 @@ public class DashboardViewModel : ViewModelBase
     private readonly IWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
+    private readonly CacheService _cacheService;
 
     private CancellationTokenSource? _loadCts;
 
@@ -22,11 +23,14 @@ public class DashboardViewModel : ViewModelBase
     private DashboardStatsDto? _stats;
     private string? _errorMessage;
 
-    public DashboardViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
+    private static readonly TimeSpan DashboardCacheTtl = TimeSpan.FromMinutes(5);
+
+    public DashboardViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel, CacheService cacheService)
     {
         _workerService = workerService;
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
+        _cacheService = cacheService;
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         NavigateToMailboxesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Mailboxes));
@@ -132,6 +136,15 @@ public class DashboardViewModel : ViewModelBase
             return;
         }
 
+        // Try to load from cache first for instant display
+        var cached = _cacheService.Get<DashboardStatsDto>(CacheService.Keys.DashboardStats);
+        if (cached != null)
+        {
+            Stats = cached;
+            ErrorMessage = null;
+            return;
+        }
+
         await RefreshAsync(CancellationToken.None);
     }
 
@@ -145,20 +158,18 @@ public class DashboardViewModel : ViewModelBase
 
         try
         {
-            Console.WriteLine("[DashboardViewModel] Requesting dashboard stats...");
             var result = await _workerService.GetDashboardStatsAsync(
                 new GetDashboardStatsRequest { IncludeUnifiedGroups = true },
                 eventHandler: null,
                 cancellationToken: _loadCts.Token);
 
-            Console.WriteLine($"[DashboardViewModel] Response received - IsSuccess: {result.IsSuccess}, HasValue: {result.Value != null}");
-
             if (result.IsSuccess && result.Value != null)
             {
-                Console.WriteLine($"[DashboardViewModel] Stats loaded - Mailboxes: {result.Value.MailboxCounts.Total}, Groups: {result.Value.GroupCounts.Total}");
                 Stats = result.Value;
 
-                               
+                // Cache the result for faster subsequent loads
+                _cacheService.Set(CacheService.Keys.DashboardStats, result.Value, DashboardCacheTtl);
+
                 foreach (var warning in result.Value.Warnings)
                 {
                     _shellViewModel.AddLog(LogLevel.Warning, warning);
@@ -166,7 +177,7 @@ public class DashboardViewModel : ViewModelBase
             }
             else if (result.WasCancelled)
             {
-                         
+                // Cancelled
             }
             else
             {
@@ -175,24 +186,16 @@ public class DashboardViewModel : ViewModelBase
                     : "Failed to load dashboard (no error details)";
                 ErrorMessage = errorDetails;
                 _shellViewModel.AddLog(LogLevel.Error, $"Dashboard load failed: {errorDetails}");
-
-                                                    
-                Console.WriteLine($"[DashboardViewModel] Error: {errorDetails}");
-                if (result.Error != null)
-                {
-                    Console.WriteLine($"[DashboardViewModel] ErrorCode: {result.Error.Code}, IsTransient: {result.Error.IsTransient}");
-                }
             }
         }
         catch (OperationCanceledException)
         {
-                     
+            // Cancelled
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
             _shellViewModel.AddLog(LogLevel.Error, $"Dashboard exception: {ex.GetType().Name} - {ex.Message}");
-            Console.WriteLine($"[DashboardViewModel] Exception: {ex}");
         }
         finally
         {

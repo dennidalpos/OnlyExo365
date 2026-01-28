@@ -29,7 +29,7 @@ public class OperationDispatcher
                   
     public async Task<ResponseEnvelope> DispatchAsync(RequestEnvelope request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[OperationDispatcher] Dispatching operation: {request.Operation}");
+        ConsoleLogger.Info("Dispatcher", $"Dispatching operation: {request.Operation}");
         try
         {
             return request.Operation switch
@@ -80,8 +80,8 @@ public class OperationDispatcher
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[OperationDispatcher] Exception in DispatchAsync: {ex.GetType().Name} - {ex.Message}");
-            Console.WriteLine($"[OperationDispatcher] Stack trace: {ex.StackTrace}");
+            ConsoleLogger.Error("Dispatcher", $"Exception: {ex.GetType().Name} - {ex.Message}");
+            ConsoleLogger.Verbose("Dispatcher", $"Stack trace: {ex.StackTrace}");
             var (code, isTransient, retryAfter) = ErrorClassifier.Classify(ex);
             await SendLogAsync(request.CorrelationId, LogLevel.Error, $"Operation failed: {ex.Message}");
             return CreateErrorResponse(request.CorrelationId, code, ex.Message, isTransient, retryAfter);
@@ -93,23 +93,23 @@ public class OperationDispatcher
     private async Task<ResponseEnvelope> HandleConnectAsync(RequestEnvelope request, CancellationToken cancellationToken)
     {
         await SendLogAsync(request.CorrelationId, LogLevel.Information, "Starting Exchange Online connection...");
-        Console.WriteLine($"[OperationDispatcher] Calling ConnectExchangeInteractiveAsync for correlation {request.CorrelationId}");
+        ConsoleLogger.Info("Dispatcher", $"Connecting to Exchange Online (correlation: {request.CorrelationId})");
 
         var result = await _psEngine.ConnectExchangeInteractiveAsync(
             onVerbose: async (level, msg) => await SendLogAsync(request.CorrelationId, LogLevel.Verbose, msg),
             cancellationToken: cancellationToken);
 
-        Console.WriteLine($"[OperationDispatcher] ConnectExchangeInteractiveAsync completed. Success: {result.Success}, WasCancelled: {result.WasCancelled}");
+        ConsoleLogger.Debug("Dispatcher", $"ConnectExchangeInteractiveAsync completed. Success: {result.Success}, WasCancelled: {result.WasCancelled}");
 
         if (result.WasCancelled)
         {
-            Console.WriteLine($"[OperationDispatcher] Connection was cancelled");
+            ConsoleLogger.Warning("Dispatcher", "Connection was cancelled");
             return CreateCancelledResponse(request.CorrelationId);
         }
 
         if (!result.Success)
         {
-            Console.WriteLine($"[OperationDispatcher] Connection failed: {result.ErrorMessage}");
+            ConsoleLogger.Error("Dispatcher", $"Connection failed: {result.ErrorMessage}");
             var (code, isTransient, retryAfter) = result.Errors.Any()
                 ? ErrorClassifier.Classify(result.Errors.First())
                 : (ErrorCode.AuthenticationFailed, false, (int?)null);

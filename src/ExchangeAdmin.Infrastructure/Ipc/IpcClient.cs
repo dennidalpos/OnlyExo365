@@ -7,10 +7,6 @@ using ExchangeAdmin.Contracts.Messages;
 
 namespace ExchangeAdmin.Infrastructure.Ipc;
 
-             
-                                                               
-                                                                                           
-              
 public class IpcClient : IAsyncDisposable
 {
     private readonly string _pipeName;
@@ -34,60 +30,35 @@ public class IpcClient : IAsyncDisposable
     private readonly object _stateLock = new();
     private readonly SemaphoreSlim _sendLock = new(1, 1);
 
-                 
-                                           
-                  
     public event EventHandler<WorkerConnectionState>? ConnectionStateChanged;
 
-                 
-                                             
-                  
     public event EventHandler<EventEnvelope>? EventReceived;
 
-                 
-                                                  
-                  
     public bool IsConnected => _isConnected;
 
-                 
-                                 
-                  
-                                                                             
-                                                                              
     public IpcClient(string? pipeName = null, string? eventPipeName = null)
     {
         _pipeName = pipeName ?? IpcConstants.PipeName;
         _eventPipeName = eventPipeName ?? IpcConstants.EventPipeName;
     }
 
-                 
-                                              
-                  
-                                                                                                               
-                                                                                                   
     public async Task<HandshakeResponse> ConnectAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposing();
 
         try
         {
-                                    
             _requestPipe = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
             _eventPipe = new NamedPipeClientStream(".", _eventPipeName, PipeDirection.In, PipeOptions.Asynchronous);
 
-                                                                        
-                                                                                            
             await Task.WhenAll(
                 _requestPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken),
                 _eventPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken)).ConfigureAwait(false);
 
-                                                                               
-                                                                                   
             _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
             _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
             _eventReader = new StreamReader(_eventPipe, Encoding.UTF8, leaveOpen: true);
 
-                                             
             var handshakeRequest = new HandshakeRequest();
             await SendRawAsync(handshakeRequest, cancellationToken).ConfigureAwait(false);
 
@@ -101,7 +72,6 @@ public class IpcClient : IAsyncDisposable
                 throw new InvalidOperationException("Empty handshake response from worker");
             }
 
-                                          
             if (!IpcConstants.IsValidMessageSize(responseJson.Length))
             {
                 throw new InvalidOperationException($"Handshake response exceeds maximum size ({responseJson.Length} bytes)");
@@ -118,7 +88,6 @@ public class IpcClient : IAsyncDisposable
                 throw new InvalidOperationException($"Handshake failed: {response.ErrorMessage}");
             }
 
-                                               
             if (!ContractVersion.IsCompatible(response.ContractsVersion))
             {
                 throw new InvalidOperationException(
@@ -130,7 +99,6 @@ public class IpcClient : IAsyncDisposable
                 _isConnected = true;
             }
 
-                                                                                              
             _eventLoopCts = new CancellationTokenSource();
             _eventLoopTask = Task.Run(() => EventLoopAsync(_eventLoopCts.Token), CancellationToken.None);
             _responseLoopTask = Task.Run(() => ResponseLoopAsync(_eventLoopCts.Token), CancellationToken.None);
@@ -146,21 +114,11 @@ public class IpcClient : IAsyncDisposable
         }
         catch (Exception)
         {
-                                                            
             await DisposeInternalAsync().ConfigureAwait(false);
             throw;
         }
     }
 
-                 
-                                                  
-                  
-                                                       
-                                                                                  
-                                                                       
-                                                        
-                                                                                
-                                                                                         
     public async Task<ResponseEnvelope> SendRequestAsync(
         RequestEnvelope request,
         Action<EventEnvelope>? eventHandler = null,
@@ -175,22 +133,18 @@ public class IpcClient : IAsyncDisposable
 
         var tcs = new TaskCompletionSource<ResponseEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-                                                          
         if (eventHandler != null)
         {
             _eventHandlers[request.CorrelationId] = eventHandler;
             _eventCounts[request.CorrelationId] = 0;
         }
 
-                                   
         _pendingRequests[request.CorrelationId] = tcs;
 
         try
         {
-                            
             await SendRawAsync(request, cancellationToken).ConfigureAwait(false);
 
-                                           
             var timeoutMs = request.TimeoutMs > 0 ? request.TimeoutMs : IpcConstants.RequestTimeoutMs;
             using var timeoutCts = new CancellationTokenSource(timeoutMs);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
@@ -217,15 +171,8 @@ public class IpcClient : IAsyncDisposable
         }
     }
 
-                 
-                                                            
-                                                                         
-                  
-                                                                                        
-                                                                                   
     public async Task SendCancelAsync(string correlationId, CancellationToken cancellationToken = default)
     {
-                                                                       
         if (!_isConnected || _isDisposing)
         {
             return;
@@ -238,16 +185,10 @@ public class IpcClient : IAsyncDisposable
         }
         catch (Exception ex)
         {
-                                                           
             Debug.WriteLine($"[IpcClient] SendCancelAsync failed for {correlationId}: {ex.Message}");
         }
     }
 
-                 
-                                                                               
-                  
-                                                                    
-                                                                       
     public async Task<HeartbeatPong?> SendHeartbeatAsync(long sequence, CancellationToken cancellationToken = default)
     {
         if (!_isConnected || _isDisposing)
@@ -280,7 +221,6 @@ public class IpcClient : IAsyncDisposable
 
             var json = JsonMessageSerializer.Serialize(message);
 
-                                                   
             if (!IpcConstants.IsValidMessageSize(json.Length))
             {
                 throw new InvalidOperationException($"Message exceeds maximum size ({json.Length} bytes)");
@@ -327,17 +267,12 @@ public class IpcClient : IAsyncDisposable
                 if (line == null)
                 {
                     Debug.WriteLine("[IpcClient] ResponseLoop: pipe closed (null read)");
-                    Console.WriteLine("[IpcClient] ResponseLoop: pipe closed (null read)");
                     break;
                 }
 
-                Console.WriteLine($"[IpcClient] Received response (length: {line.Length} bytes)");
-
-                                                   
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
                     Debug.WriteLine($"[IpcClient] ResponseLoop: message too large ({line.Length} bytes), skipping");
-                    Console.WriteLine($"[IpcClient] ResponseLoop: message too large ({line.Length} bytes), skipping");
                     continue;
                 }
 
@@ -345,58 +280,40 @@ public class IpcClient : IAsyncDisposable
                 try
                 {
                     message = JsonMessageSerializer.DeserializeMessage(line);
-                    Console.WriteLine($"[IpcClient] Message deserialized: {message?.GetType().Name}");
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[IpcClient] ResponseLoop: JSON parse error: {ex.Message}");
-                    Console.WriteLine($"[IpcClient] ResponseLoop: JSON parse error: {ex.Message}");
                     continue;
                 }
 
                 if (message == null)
                 {
-                    Console.WriteLine("[IpcClient] Deserialized message is null, skipping");
                     continue;
                 }
 
                 switch (message)
                 {
                     case ResponseEnvelope response:
-                        Console.WriteLine($"[IpcClient] Processing ResponseEnvelope for correlation: {response.CorrelationId}");
-                        Console.WriteLine($"[IpcClient] Response - Success: {response.Success}, WasCancelled: {response.WasCancelled}, HasPayload: {response.Payload != null}");
-                        if (response.Error != null)
-                        {
-                            Console.WriteLine($"[IpcClient] Response has ERROR - Code: {response.Error.Code}, Message: {response.Error.Message}");
-                        }
                         if (_pendingRequests.TryGetValue(response.CorrelationId, out var tcs))
                         {
-                            Console.WriteLine($"[IpcClient] Found pending request, setting result");
                             tcs.TrySetResult(response);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[IpcClient] WARNING: No pending request found for correlation {response.CorrelationId}");
                         }
                         break;
 
                     case HeartbeatPong:
-                                                              
-                                                             
                         break;
                 }
             }
         }
         catch (OperationCanceledException)
         {
-                               
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[IpcClient] ResponseLoop error: {ex.Message}");
         }
 
-                                                  
         if (!_isDisposing)
         {
             await HandleDisconnectionAsync().ConfigureAwait(false);
@@ -426,7 +343,6 @@ public class IpcClient : IAsyncDisposable
                     break;
                 }
 
-                                                   
                 if (!IpcConstants.IsValidMessageSize(line.Length))
                 {
                     Debug.WriteLine($"[IpcClient] EventLoop: message too large ({line.Length} bytes), skipping");
@@ -449,7 +365,6 @@ public class IpcClient : IAsyncDisposable
                     continue;
                 }
 
-                                                     
                 if (_eventCounts.TryGetValue(evt.CorrelationId, out var count))
                 {
                     if (!IpcConstants.IsEventCountWithinLimit(count))
@@ -460,7 +375,6 @@ public class IpcClient : IAsyncDisposable
                     _eventCounts[evt.CorrelationId] = count + 1;
                 }
 
-                                                              
                 if (_eventHandlers.TryGetValue(evt.CorrelationId, out var handler))
                 {
                     try
@@ -473,7 +387,6 @@ public class IpcClient : IAsyncDisposable
                     }
                 }
 
-                                           
                 try
                 {
                     EventReceived?.Invoke(this, evt);
@@ -486,14 +399,12 @@ public class IpcClient : IAsyncDisposable
         }
         catch (OperationCanceledException)
         {
-                               
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[IpcClient] EventLoop error: {ex.Message}");
         }
 
-                                                  
         if (!_isDisposing)
         {
             await HandleDisconnectionAsync().ConfigureAwait(false);
@@ -511,7 +422,6 @@ public class IpcClient : IAsyncDisposable
             _isConnected = false;
         }
 
-                                                                   
         foreach (var kvp in _pendingRequests)
         {
             kvp.Value.TrySetException(new IOException("Connection to worker lost"));
@@ -525,9 +435,6 @@ public class IpcClient : IAsyncDisposable
         await DisposeInternalAsync().ConfigureAwait(false);
     }
 
-                 
-                                              
-                  
     public async Task DisconnectAsync()
     {
         lock (_stateLock)
@@ -544,7 +451,6 @@ public class IpcClient : IAsyncDisposable
 
     private async Task DisposeInternalAsync()
     {
-                                                   
         var loopTimeout = TimeSpan.FromMilliseconds(2000);
 
         try
@@ -560,13 +466,11 @@ public class IpcClient : IAsyncDisposable
         }
         catch
         {
-                                            
         }
 
         _eventLoopCts?.Dispose();
         _eventLoopCts = null;
 
-                                                              
         try { _requestReader?.Dispose(); } catch { }
         try { _requestWriter?.Dispose(); } catch { }
         try { _eventReader?.Dispose(); } catch { }
@@ -588,9 +492,6 @@ public class IpcClient : IAsyncDisposable
         }
     }
 
-                 
-                                           
-                  
     public async ValueTask DisposeAsync()
     {
         if (_isDisposing)

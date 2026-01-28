@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using System.Windows.Threading;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
@@ -9,31 +8,25 @@ using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
-             
-                                                   
-              
 public class MailboxListViewModel : ViewModelBase
 {
     private readonly IWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
 
-    private readonly DispatcherTimer _searchDebounceTimer;
+    private readonly DebounceHelper _searchDebounce = new();
     private CancellationTokenSource? _loadCts;
 
-                 
     private bool _isLoading;
     private string? _errorMessage;
     private string? _searchQuery;
     private string _recipientTypeFilter = "UserMailbox";
 
-             
     private int _totalCount;
     private int _currentSkip;
     private const int PageSize = 50;
     private bool _hasMore;
 
-                
     private MailboxListItemDto? _selectedMailbox;
 
     public MailboxListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
@@ -42,14 +35,6 @@ public class MailboxListViewModel : ViewModelBase
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
 
-                                        
-        _searchDebounceTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(300)
-        };
-        _searchDebounceTimer.Tick += OnSearchDebounceElapsed;
-
-                   
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
         CancelCommand = new RelayCommand(Cancel, () => IsLoading);
@@ -95,9 +80,8 @@ public class MailboxListViewModel : ViewModelBase
         {
             if (SetProperty(ref _searchQuery, value))
             {
-                                  
-                _searchDebounceTimer.Stop();
-                _searchDebounceTimer.Start();
+                // Use DebounceHelper for more efficient debouncing
+                _searchDebounce.Debounce(SafeRefreshAsync, 300);
             }
         }
     }
@@ -109,7 +93,7 @@ public class MailboxListViewModel : ViewModelBase
         {
             if (SetProperty(ref _recipientTypeFilter, value))
             {
-                _ = RefreshAsync(CancellationToken.None);
+                SafeRefreshAsync();
             }
         }
     }
@@ -163,6 +147,18 @@ public class MailboxListViewModel : ViewModelBase
 
     #region Methods
 
+    private async void SafeRefreshAsync()
+    {
+        try
+        {
+            await RefreshAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Error, $"Refresh failed: {ex.Message}");
+        }
+    }
+
     public async Task LoadAsync()
     {
         if (!_shellViewModel.IsExchangeConnected)
@@ -195,7 +191,6 @@ public class MailboxListViewModel : ViewModelBase
         IsLoading = true;
         ErrorMessage = null;
         _currentSkip = 0;
-        Mailboxes.Clear();
 
         try
         {
@@ -207,21 +202,15 @@ public class MailboxListViewModel : ViewModelBase
                 Skip = 0
             };
 
-            Console.WriteLine($"[MailboxListViewModel] Requesting mailboxes...");
             var result = await _workerService.GetMailboxesAsync(
                 request,
                 eventHandler: null,
                 cancellationToken: _loadCts.Token);
 
-            Console.WriteLine($"[MailboxListViewModel] Response received - IsSuccess: {result.IsSuccess}, HasValue: {result.Value != null}");
-
             if (result.IsSuccess && result.Value != null)
             {
-                Console.WriteLine($"[MailboxListViewModel] Mailboxes loaded - Count: {result.Value.Mailboxes.Count}, TotalCount: {result.Value.TotalCount}, HasMore: {result.Value.HasMore}");
-                foreach (var mailbox in result.Value.Mailboxes)
-                {
-                    Mailboxes.Add(mailbox);
-                }
+                // Use ReplaceAll for smoother UI updates instead of Clear + Add
+                Mailboxes.ReplaceAll(result.Value.Mailboxes);
 
                 TotalCount = result.Value.TotalCount;
                 HasMore = result.Value.HasMore;
@@ -231,7 +220,6 @@ public class MailboxListViewModel : ViewModelBase
             }
             else if (result.WasCancelled)
             {
-                         
             }
             else
             {
@@ -240,18 +228,15 @@ public class MailboxListViewModel : ViewModelBase
                     : "Failed to load mailboxes (no error details)";
                 ErrorMessage = errorDetails;
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox load failed: {errorDetails}");
-                Console.WriteLine($"[MailboxListViewModel] Error: {errorDetails}");
             }
         }
         catch (OperationCanceledException)
         {
-                     
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox exception: {ex.GetType().Name} - {ex.Message}");
-            Console.WriteLine($"[MailboxListViewModel] Exception: {ex}");
         }
         finally
         {
@@ -310,7 +295,6 @@ public class MailboxListViewModel : ViewModelBase
         }
         catch (OperationCanceledException)
         {
-                     
         }
         catch (Exception ex)
         {
@@ -322,16 +306,9 @@ public class MailboxListViewModel : ViewModelBase
         }
     }
 
-    private void OnSearchDebounceElapsed(object? sender, EventArgs e)
-    {
-        _searchDebounceTimer.Stop();
-        _ = RefreshAsync(CancellationToken.None);
-    }
-
     private void ViewDetails(MailboxListItemDto? mailbox)
     {
         if (mailbox == null) return;
-                                                                              
         _navigationService.NavigateToDetails(_navigationService.CurrentPage, mailbox.Identity, mailbox);
     }
 

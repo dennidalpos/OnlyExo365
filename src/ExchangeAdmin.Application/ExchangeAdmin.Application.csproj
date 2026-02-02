@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>ExchangeAdmin.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExchangeAdmin.Contracts\ExchangeAdmin.Contracts.csproj" />
+    <ProjectReference Include="..\ExchangeAdmin.Domain\ExchangeAdmin.Domain.csproj" />
+    <ProjectReference Include="..\ExchangeAdmin.Infrastructure\ExchangeAdmin.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

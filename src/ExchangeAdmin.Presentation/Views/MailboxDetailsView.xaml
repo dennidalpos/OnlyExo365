@@ -1,0 +1,945 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.MailboxDetailsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:contracts="clr-namespace:ExchangeAdmin.Contracts.Dtos;assembly=ExchangeAdmin.Contracts">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+                       
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="← Indietro" Command="{Binding BackCommand}"
+                    Style="{StaticResource {x:Type Button}}" Margin="0,0,12,0"
+                    ToolTip="Torna all'elenco delle caselle postali"/>
+
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding DisplayName, FallbackValue='Dettagli casella postale'}"
+                               FontSize="20" FontWeight="SemiBold"/>
+
+                    <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding HasPendingMailboxChanges, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="⚠ Modifiche mailbox da applicare"
+                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Content="Salva" Command="{Binding SaveMailboxChangesCommand}"
+                                    Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                                    ToolTip="Applica tutte le modifiche in sospeso"/>
+                            <Button Content="Annulla" Command="{Binding DiscardMailboxChangesCommand}"
+                                    ToolTip="Annulla le modifiche e ripristina i valori originali"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
+                                    Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding PendingActionsCount, StringFormat='{}⚠ {0} modifiche autorizzazioni'}"
+                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Content="Salva" Command="{Binding SavePermissionsCommand}"
+                                    Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                                    ToolTip="Applica tutte le modifiche delle autorizzazioni su Exchange"/>
+                            <Button Content="Annulla" Command="{Binding DiscardPermissionsCommand}"
+                                    ToolTip="Annulla le modifiche e ripristina lo stato attuale"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Text="{Binding PrimarySmtpAddress}"
+                           Foreground="{StaticResource SecondaryTextBrush}" FontSize="12"/>
+            </StackPanel>
+
+            <Button Grid.Column="2" Content="Aggiorna" Command="{Binding RefreshCommand}"
+                    Style="{StaticResource PrimaryButton}"
+                    ToolTip="Ricarica i dettagli e le autorizzazioni della casella postale"/>
+        </Grid>
+
+                                               
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBool}}">
+            <StackPanel>
+                                      
+                <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
+                        BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,16"
+                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Errore" FontWeight="SemiBold" Foreground="{StaticResource ErrorBrush}"/>
+                        <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                                          
+                <StackPanel HorizontalAlignment="Center" Margin="0,32,0,16"
+                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                    <TextBlock Text="Caricamento dettagli in corso..." HorizontalAlignment="Center" Margin="0,8,0,0"
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                </StackPanel>
+
+                                        
+                <StackPanel Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
+
+                                              
+                    <GroupBox Header="Informazioni di base" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome visualizzato:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}" TextWrapping="Wrap"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Email principale:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PrimarySmtpAddress}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Tipo:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RecipientTypeDetails}" Margin="0,8,0,0"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Alias:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Details.Alias}" Margin="0,8,0,0"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Tutti gli indirizzi:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Details.EmailAddresses}" Margin="0,8,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </GroupBox>
+
+                                    
+                    <GroupBox Header="Azioni" Margin="0,0,0,12"
+                              Visibility="{Binding HasConversionActions, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <Button Content="Converti in cassetta postale condivisa"
+                                    Command="{Binding ConvertToSharedMailboxCommand}"
+                                    Style="{StaticResource DangerButton}"
+                                    ToolTip="Converte la mailbox dell'utente in una cassetta condivisa"
+                                    Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="Questa azione è irreversibile senza assistenza amministrativa."
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                                       Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <Button Content="Ripristina mailbox utente"
+                                    Command="{Binding ConvertToRegularMailboxCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,12,0,0"
+                                    ToolTip="Converte la cassetta condivisa in mailbox utente"
+                                    Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="Il ripristino può richiedere alcuni minuti."
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                                       Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Ripristino mailbox" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Ripristina mailbox soft-deleted, hard-deleted oppure copia dati su una mailbox target."
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Mailbox sorgente (UPN/GUID):" FontWeight="SemiBold"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                         Text="{Binding RestoreSourceIdentity, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Inserisci UPN o GUID della mailbox da ripristinare"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Mailbox destinazione:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                         Text="{Binding RestoreTargetMailbox, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Necessaria per hard-deleted o ripristino su altra mailbox"/>
+
+                                <CheckBox Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                                          Content="Consenti mismatch LegacyDN"
+                                          IsChecked="{Binding RestoreAllowLegacyDnMismatch}"
+                                          ToolTip="Se attivo, consente il ripristino anche con LegacyDN diverso"/>
+                            </Grid>
+
+                            <Button Content="Avvia ripristino"
+                                    Command="{Binding RestoreMailboxCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,12,0,0"
+                                    IsEnabled="{Binding IsRestoringMailbox, Converter={StaticResource InverseBool}}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                        Visibility="{Binding IsRestoringMailbox, Converter={StaticResource BoolToVisibility}}">
+                                <ProgressBar IsIndeterminate="True" Width="120" Height="4"/>
+                                <TextBlock Text="Ripristino in corso..." Margin="8,0,0,0"
+                                           Foreground="{StaticResource SecondaryTextBrush}" FontSize="11"/>
+                            </StackPanel>
+
+                            <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
+                                    BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,8,0,0"
+                                    Visibility="{Binding HasRestoreError, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="Errore ripristino" Foreground="{StaticResource ErrorBrush}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding RestoreErrorMessage}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Margin="0,12,0,0"
+                                        Visibility="{Binding HasRestoreMailboxResponse, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Stato ripristino" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Scenario:" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding RestoreScenarioText}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Azione:" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RestoreActionText}" Margin="0,6,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Stato:" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RestoreStatusText}" Margin="0,6,0,0"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Dettagli stato:" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding RestoreStatusDetail}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Request GUID:" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding RestoreRequestGuid}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Codice errore:" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding RestoreErrorCodeText}" Margin="0,6,0,0"/>
+                                </Grid>
+
+                                <StackPanel Margin="0,8,0,0">
+                                    <TextBlock Text="Avanzamento" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <ProgressBar Height="6"
+                                                 IsIndeterminate="{Binding IsRestoreProgressIndeterminate}"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Value="{Binding RestoreProgressValue, Mode=OneWay}"/>
+                                    <TextBlock Text="{Binding RestoreProgressText}"
+                                               Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                                <!-- Licenze utente -->
+                    <GroupBox Header="Licenze" Margin="0,0,0,12">
+                        <StackPanel>
+                            <!-- License error -->
+                            <Border Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
+                                    BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8"
+                                    Visibility="{Binding HasLicenseError, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding LicenseErrorMessage}" TextWrapping="Wrap"
+                                           Foreground="{StaticResource ErrorBrush}" FontSize="11"/>
+                            </Border>
+
+                            <!-- Loading indicator -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8"
+                                        Visibility="{Binding IsLicenseLoading, Converter={StaticResource BoolToVisibility}}">
+                                <ProgressBar IsIndeterminate="True" Width="100" Height="4"/>
+                                <TextBlock Text="Caricamento licenze..." Margin="8,0,0,0"
+                                           Foreground="{StaticResource SecondaryTextBrush}" FontSize="11"/>
+                            </StackPanel>
+
+                            <!-- Assigned licenses list -->
+                            <TextBlock Text="Licenze assegnate" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBlock Text="Nessuna licenza assegnata"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"
+                                       Visibility="{Binding HasAssignedLicenses, Converter={StaticResource InverseBoolToVisibility}}"/>
+                            <ItemsControl ItemsSource="{Binding AssignedLicenses}" Margin="0,0,0,8">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource SecondaryBackgroundBrush}"
+                                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                                CornerRadius="4" Padding="8,6" Margin="0,0,0,4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" Orientation="Vertical">
+                                                    <TextBlock Text="{Binding SkuPartNumber}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               Foreground="{StaticResource SecondaryTextBrush}" FontSize="11"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="Rimuovi"
+                                                        Command="{Binding DataContext.RemoveLicenseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource DangerButton}"
+                                                        Padding="8,4" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Add license -->
+                            <TextBlock Text="Aggiungi licenza" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" ItemsSource="{Binding AvailableLicenses}"
+                                          SelectedItem="{Binding SelectedLicenseToAdd}"
+                                          Margin="0,0,8,0"
+                                          ToolTip="Seleziona una licenza da assegnare">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <Run Text="{Binding SkuPartNumber, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                                <Run Text="{Binding Available, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
+                                                <Run Text=" disponibili)" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button Grid.Column="1" Content="Assegna"
+                                        Command="{Binding AddLicenseCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,4,0"
+                                        ToolTip="Assegna la licenza selezionata all'utente"/>
+                                <Button Grid.Column="2" Content="Aggiorna"
+                                        Command="{Binding RefreshLicensesCommand}"
+                                        ToolTip="Ricarica le licenze"/>
+                            </Grid>
+
+                            <!-- Saving indicator -->
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                        Visibility="{Binding IsLicenseSaving, Converter={StaticResource BoolToVisibility}}">
+                                <ProgressBar IsIndeterminate="True" Width="100" Height="4"/>
+                                <TextBlock Text="Operazione licenza in corso..." Margin="8,0,0,0"
+                                           Foreground="{StaticResource SecondaryTextBrush}" FontSize="11"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Inoltro e limiti messaggio -->
+                    <GroupBox Header="Inoltro e limiti messaggio" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Inoltro (indirizzo):" FontWeight="SemiBold"/>
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding ForwardingAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Destinatario interno per l'inoltro (es. alias o UPN)"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Inoltro (SMTP):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding ForwardingSmtpAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Indirizzo SMTP esterno per l'inoltro (es. utente@dominio.com)"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Recapita anche alla mailbox:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                      IsChecked="{Binding DeliverToMailboxAndForward}"
+                                      Content="Abilitato"
+                                      ToolTip="Se attivo, i messaggi vengono consegnati anche alla mailbox originale"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Limite invio (MaxSend):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding MaxSendSize, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Formato supportato: 25 MB, 1 GB, Unlimited"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Limite ricezione (MaxReceive):" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"
+                                     Text="{Binding MaxReceiveSize, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Formato supportato: 25 MB, 1 GB, Unlimited"/>
+
+                            <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Margin="0,6,0,0"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Text="Suggerimento: usa formati come 25 MB, 1 GB oppure Unlimited."/>
+                        </Grid>
+                    </GroupBox>
+
+                                    
+                    <GroupBox Header="Archivio" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Archivio abilitato"
+                                      IsChecked="{Binding ArchiveEnabled}"
+                                      ToolTip="Attiva o disattiva l'archivio della mailbox"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Features.ArchiveName}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Stato archivio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ArchiveStatus}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="GUID archivio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ArchiveGuid}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </Grid>
+                    </GroupBox>
+
+                                     
+                    <GroupBox Header="Funzionalità" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Blocco conservazione legale"
+                                      IsChecked="{Binding LitigationHoldEnabled}"
+                                      ToolTip="Conserva tutti i contenuti per finalità legali"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                <TextBlock Text="{Binding Features.LitigationHoldDate, StringFormat='{}Attivo dal: {0:yyyy-MM-dd}'}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Visibility="{Binding LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                                <TextBlock Text="{Binding Features.LitigationHoldOwner, StringFormat='{}Responsabile: {0}'}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Visibility="{Binding LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+
+                            <CheckBox Grid.Row="1" Grid.Column="0" Content="Audit abilitato"
+                                      IsChecked="{Binding AuditEnabled}"
+                                      Margin="0,8,0,0"
+                                      ToolTip="Registra le attività di accesso e modifica della mailbox"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding Features.AuditLogAgeLimit, StringFormat='{}Conservazione log: {0}'}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"/>
+
+                            <CheckBox Grid.Row="2" Grid.Column="0" Content="Recupero elementi singoli"
+                                      IsChecked="{Binding SingleItemRecoveryEnabled}"
+                                      Margin="0,8,0,0"
+                                      ToolTip="Consente il recupero elementi eliminati oltre il periodo di retention"/>
+
+                            <CheckBox Grid.Row="3" Grid.Column="0" Content="Sospensione retention"
+                                      IsChecked="{Binding RetentionHoldEnabled}"
+                                      Margin="0,8,0,0"
+                                      ToolTip="Sospende l'elaborazione delle policy di retention"/>
+                        </Grid>
+                    </GroupBox>
+
+                                             
+                    <GroupBox Header="Retention Policy" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Policy assegnata:" FontWeight="SemiBold"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                <ComboBox ItemsSource="{Binding AvailableRetentionPolicies}"
+                                          SelectedValuePath="Name"
+                                          SelectedValue="{Binding SelectedRetentionPolicy, UpdateSourceTrigger=PropertyChanged}"
+                                          MinWidth="240">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding Name}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Name}" Value="">
+                                                                <Setter Property="Text" Value="Nessuna"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button Content="Aggiorna"
+                                        Command="{Binding RefreshRetentionPoliciesCommand}"
+                                        Margin="8,0,0,0"
+                                        ToolTip="Ricarica l'elenco delle retention policy"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding SelectedRetentionPolicyDescription}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding SelectedRetentionPolicyDescription, Converter={StaticResource NullToVisibility}}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="L’archivio non è obbligatorio per assegnare una retention policy, ma è necessario per applicare tag con azione ‘MoveToArchive’."
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0"/>
+
+                            <Border Grid.Row="3" Grid.Column="1" Background="#3D2200"
+                                    BorderBrush="{StaticResource WarningBrush}"
+                                    BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,8,0,0"
+                                    Visibility="{Binding ShowArchiveRequiredWarning, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Foreground="{StaticResource WarningBrush}" TextWrapping="Wrap"
+                                           Text="⚠ La mailbox non ha un archivio abilitato: alcuni tag di questa policy richiedono l’Archive Mailbox."/>
+                            </Border>
+                        </Grid>
+                    </GroupBox>
+
+                                   
+                    <GroupBox Header="Quote mailbox" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Avviso quota:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Features.IssueWarningQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Blocco invio:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ProhibitSendQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Blocco invio/ricezione:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding Features.ProhibitSendReceiveQuota}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Spazio utilizzato:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
+                                       Text="{Binding QuotaUsageSummary}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </Grid>
+                    </GroupBox>
+
+                                       
+                    <GroupBox Header="Statistiche" Margin="0,0,0,12"
+                              Visibility="{Binding Statistics, Converter={StaticResource NullToVisibility}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Dimensione totale:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Statistics.TotalItemSize}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Numero elementi:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Statistics.ItemCount}" Margin="0,8,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Elementi eliminati:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
+                                <TextBlock Text="{Binding Statistics.DeletedItemCount, StringFormat='{}{0} elementi'}"/>
+                                <TextBlock Text="{Binding Statistics.TotalDeletedItemSize}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Ultimo accesso:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1"
+                                       Text="{Binding Statistics.LastLogonTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                                       Margin="0,8,0,0"/>
+                        </Grid>
+                    </GroupBox>
+
+                                        
+                    <GroupBox Header="Regole posta in arrivo" Margin="0,0,0,12"
+                              Visibility="{Binding InboxRules, Converter={StaticResource NullToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="Nessuna regola configurata"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Margin="0,8"
+                                       Visibility="{Binding InboxRules.Count, Converter={StaticResource ZeroToVisibility}}"/>
+                            <ItemsControl ItemsSource="{Binding InboxRules}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text=" (Attiva)" Foreground="{StaticResource SuccessBrush}" Margin="8,0,0,0"
+                                                               Visibility="{Binding Enabled, Converter={StaticResource BoolToVisibility}}"/>
+                                                    <TextBlock Text=" (Disattiva)" Foreground="{StaticResource SecondaryTextBrush}" Margin="8,0,0,0"
+                                                               Visibility="{Binding Enabled, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
+                                                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+
+                                                                           
+                                                <StackPanel>
+                                                    <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
+                                                            BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,0"
+                                                            Visibility="{Binding ForwardTo, Converter={StaticResource NullToVisibility}}">
+                                                        <StackPanel>
+                                                            <TextBlock Text="⚠ Regola di inoltro rilevata" FontWeight="SemiBold"
+                                                                       Foreground="{StaticResource WarningBrush}"/>
+                                                            <ItemsControl ItemsSource="{Binding ForwardTo}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Foreground="{StaticResource WarningBrush}" Margin="0,2">
+                                                                            <Run Text="Inoltra a: "/><Run Text="{Binding}"/>
+                                                                        </TextBlock>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </Border>
+                                                    <Border Background="#3D2200" BorderBrush="{StaticResource WarningBrush}"
+                                                            BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,0"
+                                                            Visibility="{Binding RedirectTo, Converter={StaticResource NullToVisibility}}">
+                                                        <StackPanel>
+                                                            <TextBlock Text="⚠ Regola di reindirizzamento rilevata" FontWeight="SemiBold"
+                                                                       Foreground="{StaticResource WarningBrush}"/>
+                                                            <ItemsControl ItemsSource="{Binding RedirectTo}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Foreground="{StaticResource WarningBrush}" Margin="0,2">
+                                                                            <Run Text="Reindirizza a: "/><Run Text="{Binding}"/>
+                                                                        </TextBlock>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </GroupBox>
+
+                                       
+                    <GroupBox Header="Risposta automatica" Margin="0,0,0,12"
+                              Visibility="{Binding AutoReply, Converter={StaticResource NullToVisibility}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Stato:" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding AutoReplyStateLabel}" Margin="8,0,0,0"/>
+                            </StackPanel>
+
+                            <CheckBox Content="Abilita risposta automatica"
+                                      IsChecked="{Binding AutoReplyEnabled}"
+                                      Margin="0,8,0,0"
+                                      ToolTip="Attiva o disattiva le risposte automatiche per questa mailbox"/>
+
+                            <CheckBox Content="Programma un intervallo"
+                                      IsChecked="{Binding AutoReplyScheduled}"
+                                      IsEnabled="{Binding AutoReplyEnabled}"
+                                      Margin="0,4,0,0"
+                                      ToolTip="Imposta un periodo di attivazione programmato"/>
+
+                            <Grid Margin="0,8,0,0"
+                                  Visibility="{Binding AutoReplyScheduled, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Inizio:" FontWeight="SemiBold"/>
+                                <DatePicker Grid.Row="0" Grid.Column="1"
+                                            SelectedDate="{Binding AutoReplyStartDate}"
+                                            Margin="0,0,8,0"/>
+                                <TextBox Grid.Row="0" Grid.Column="2"
+                                         Text="{Binding AutoReplyStartTime, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Formato ora: HH:mm"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Fine:" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,8,8,0"
+                                            SelectedDate="{Binding AutoReplyEndDate}"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" Margin="0,8,0,0"
+                                         Text="{Binding AutoReplyEndTime, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Formato ora: HH:mm"/>
+                            </Grid>
+
+                            <TextBlock Text="Messaggio interno:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBox Text="{Binding AutoReplyInternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     IsEnabled="{Binding AutoReplyEnabled}"/>
+
+                            <TextBlock Text="Messaggio esterno:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBox Text="{Binding AutoReplyExternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     IsEnabled="{Binding AutoReplyEnabled}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="Destinatari esterni:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <ComboBox Margin="8,0,0,0" Width="160"
+                                          SelectedValue="{Binding AutoReplyExternalAudience}"
+                                          SelectedValuePath="Tag"
+                                          IsEnabled="{Binding AutoReplyEnabled}">
+                                    <ComboBoxItem Content="Solo contatti" Tag="Known"/>
+                                    <ComboBoxItem Content="Tutti" Tag="All"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                                                
+                    <GroupBox Header="Gestione autorizzazioni" Margin="0,0,0,12">
+                        <StackPanel>
+                                                            
+                                                       
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                    CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                                       
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Utente (email o nome):" FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Tipo autorizzazione:" FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="AutoMap:" FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,8,4"/>
+
+                                                               
+                                    <TextBox Grid.Row="1" Grid.Column="0"
+                                             Text="{Binding NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,8,0"
+                                             ToolTip="Inserisci email o nome visualizzato dell'utente"/>
+
+                                    <ComboBox Grid.Row="1" Grid.Column="1"
+                                              SelectedValue="{Binding NewPermissionType}"
+                                              SelectedValuePath="Tag"
+                                              Margin="0,0,8,0"
+                                              ToolTip="Seleziona il tipo di autorizzazione da concedere">
+                                        <ComboBoxItem Content="Accesso completo" Tag="{x:Static contracts:PermissionType.FullAccess}"/>
+                                        <ComboBoxItem Content="Invia come" Tag="{x:Static contracts:PermissionType.SendAs}"/>
+                                        <ComboBoxItem Content="Invia per conto di" Tag="{x:Static contracts:PermissionType.SendOnBehalf}"/>
+                                    </ComboBox>
+
+                                    <ComboBox Grid.Row="1" Grid.Column="2"
+                                              SelectedValue="{Binding NewPermissionAutoMapping}"
+                                              SelectedValuePath="Tag"
+                                              Margin="0,0,8,0"
+                                              Width="80"
+                                              ToolTip="AutoMapping: aggiunge automaticamente la mailbox a Outlook (solo FullAccess)">
+                                        <ComboBoxItem Content="True" Tag="True"/>
+                                        <ComboBoxItem Content="False" Tag="False"/>
+                                    </ComboBox>
+
+                                    <Button Grid.Row="1" Grid.Column="3" Content="Aggiungi"
+                                            Command="{Binding AddPermissionCommand}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            ToolTip="Aggiungi l'autorizzazione alle modifiche in sospeso"/>
+                                </Grid>
+                            </Border>
+
+                                                           
+                            <TextBlock Text="Autorizzazioni accesso completo" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <DataGrid ItemsSource="{Binding FullAccessPermissions}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="{StaticResource SecondaryBackgroundBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}"
+                                      MaxHeight="200" Margin="0,0,0,12">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
+                                    <DataGridTemplateColumn Header="AutoMap" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox SelectedValue="{Binding AutoMapping, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          SelectedValuePath="Tag"
+                                                          Width="75"
+                                                          ToolTip="AutoMapping: aggiunge automaticamente la mailbox a Outlook">
+                                                    <ComboBoxItem Content="True" Tag="True"/>
+                                                    <ComboBoxItem Content="False" Tag="False"/>
+                                                </ComboBox>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Ereditato" Binding="{Binding IsInherited}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <Button Content="Applica"
+                                                            Command="{Binding DataContext.ModifyAutoMappingCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource PrimaryButton}"
+                                                            Padding="6,4"
+                                                            Margin="0,0,4,0"
+                                                            ToolTip="Applica la modifica AutoMapping"
+                                                            Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                                    <Button Content="Rimuovi"
+                                                            Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource DangerButton}"
+                                                            Padding="6,4"
+                                                            ToolTip="Rimuovi questa autorizzazione"
+                                                            Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                                                       
+                            <TextBlock Text="Autorizzazioni Invia come" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <DataGrid ItemsSource="{Binding SendAsPermissions}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="{StaticResource SecondaryBackgroundBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}"
+                                      MaxHeight="200" Margin="0,0,0,12">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
+                                    <DataGridTextColumn Header="Ereditato" Binding="{Binding IsInherited}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Rimuovi"
+                                                        Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource DangerButton}"
+                                                        Padding="6,4"
+                                                        ToolTip="Rimuovi questa autorizzazione"
+                                                        Visibility="{Binding IsInherited, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                                                             
+                            <TextBlock Text="Autorizzazioni Invia per conto di" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <DataGrid ItemsSource="{Binding SendOnBehalfPermissions}"
+                                      AutoGenerateColumns="False" IsReadOnly="True"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="{StaticResource SecondaryBackgroundBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}"
+                                      MaxHeight="200" Margin="0,0,0,12">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Utente" Binding="{Binding User}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Azioni" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Rimuovi"
+                                                        Command="{Binding DataContext.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource DangerButton}"
+                                                        Padding="6,4"
+                                                        ToolTip="Rimuovi questa autorizzazione"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </GroupBox>
+
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+                                
+        <Border Grid.Row="0" Grid.RowSpan="2" Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="Caricamento dettagli..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+
+                               
+        <Border Grid.Row="0" Grid.RowSpan="2" Background="#CC000000"
+                Visibility="{Binding IsSaving, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="Salvataggio modifiche..." HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

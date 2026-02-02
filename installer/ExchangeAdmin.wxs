@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?ifndef ProductName ?>
+    <?define ProductName="ExchangeAdmin" ?>
+  <?endif ?>
+  <?ifndef Manufacturer ?>
+    <?define Manufacturer="OnlyExo365" ?>
+  <?endif ?>
+  <?ifndef ProductVersion ?>
+    <?define ProductVersion="1.0.0" ?>
+  <?endif ?>
+  <?ifndef ProductCode ?>
+    <?define ProductCode="7B52C9F5-7F1D-44C9-8B8E-76A4C9E6E5E4" ?>
+  <?endif ?>
+
+  <Product
+    Id="$(var.ProductCode)"
+    Name="$(var.ProductName)"
+    Manufacturer="$(var.Manufacturer)"
+    Language="1033"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="A8C31B9E-49D2-4A23-9F57-7A39B3E5BCA2">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Platform="x64" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+    <Icon Id="AppExeIcon" SourceFile="$(var.PublishDir)\ExchangeAdmin.Presentation.exe" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLDIR" Name="$(var.ProductName)" />
+      </Directory>
+      <Directory Id="CommonProgramsFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
+      </Directory>
+      <Directory Id="CommonDesktopFolder" />
+    </Directory>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="AppShortcuts" Guid="9E5C9467-5F92-478F-B27F-88B5B7BF9C3A">
+        <Shortcut
+          Id="StartMenuShortcut"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR"
+          Icon="AppExeIcon"
+          IconIndex="0" />
+        <RemoveFolder Id="RemoveProgramsFolder" On="uninstall" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+          Name="Installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="CommonDesktopFolder">
+      <Component Id="DesktopShortcutComponent" Guid="D0BEF028-4D55-4E0F-93DA-6D2B4E1695B2">
+        <Shortcut
+          Id="DesktopShortcut"
+          Name="$(var.ProductName)"
+          Description="ExchangeAdmin"
+          Target="[INSTALLDIR]ExchangeAdmin.Presentation.exe"
+          WorkingDirectory="INSTALLDIR"
+          Icon="AppExeIcon"
+          IconIndex="0" />
+        <RemoveFolder Id="RemoveDesktopFolder" On="uninstall" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+          Name="DesktopShortcut"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentGroupRef Id="PublishFiles" />
+      <ComponentRef Id="AppShortcuts" />
+      <ComponentRef Id="DesktopShortcutComponent" />
+    </Feature>
+  </Product>
+</Wix>

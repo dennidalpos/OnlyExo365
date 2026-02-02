@@ -13,13 +13,13 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
 {
     private readonly ShellViewModel _shellViewModel;
     private readonly object _filterLock = new();
+    private readonly DebounceHelper _refreshDebounce = new();
 
     private LogLevel _filterLevel = LogLevel.Verbose;
     private string? _searchFilter;
     private bool _autoScroll = true;
     private bool _userHasScrolled;
     private bool _isRefreshing;
-    private int _pendingUpdateCount;
 
                                                      
     private List<LogEntry>? _cachedFilteredLogs;
@@ -239,7 +239,6 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
 
     private void OnLogEntriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        _pendingUpdateCount++;
         InvalidateFilterCache();
 
                                                                               
@@ -247,13 +246,25 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
         if (now - _lastRefreshTime >= MinRefreshInterval)
         {
             _lastRefreshTime = now;
-            _pendingUpdateCount = 0;
 
             RunOnUiThread(() =>
             {
                 NotifyFilteredLogsChanged();
                 NotifyCountsChanged();
             });
+        }
+        else
+        {
+            var delayMs = (int)Math.Max(1, (MinRefreshInterval - (now - _lastRefreshTime)).TotalMilliseconds);
+            _refreshDebounce.Debounce(() =>
+            {
+                _lastRefreshTime = DateTime.UtcNow;
+                RunOnUiThread(() =>
+                {
+                    NotifyFilteredLogsChanged();
+                    NotifyCountsChanged();
+                });
+            }, delayMs);
         }
     }
 
@@ -382,5 +393,6 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _shellViewModel.LogEntries.CollectionChanged -= OnLogEntriesChanged;
+        _refreshDebounce.Dispose();
     }
 }

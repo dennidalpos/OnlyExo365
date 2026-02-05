@@ -468,8 +468,11 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
 function Get-BytesFromSize($size) {{
     if ($null -eq $size) {{ return $null }}
     $text = $size.ToString()
-    if ($text -match '\(([\d,]+) bytes\)') {{
-        return [long]($Matches[1] -replace ',', '')
+    if ($text -match '\(([^)]+)\s+byte[s]?\)') {{
+        $numeric = ($Matches[1] -replace '[^\d]', '')
+        if (-not [string]::IsNullOrWhiteSpace($numeric)) {{
+            return [long]$numeric
+        }}
     }}
     return $null
 }}
@@ -742,8 +745,11 @@ $policies = Get-RetentionPolicy
 function Get-BytesFromSize($size) {{
     if ($null -eq $size) {{ return $null }}
     $text = $size.ToString()
-    if ($text -match '\(([\d,]+) bytes\)') {{
-        return [long]($Matches[1] -replace ',', '')
+    if ($text -match '\(([^)]+)\s+byte[s]?\)') {{
+        $numeric = ($Matches[1] -replace '[^\d]', '')
+        if (-not [string]::IsNullOrWhiteSpace($numeric)) {{
+            return [long]$numeric
+        }}
     }}
     return $null
 }}
@@ -1378,8 +1384,11 @@ $ErrorActionPreference = 'SilentlyContinue'
 function Get-BytesFromSize($size) {
     if ($null -eq $size) { return $null }
     $text = $size.ToString()
-    if ($text -match '\(([\d,]+) bytes\)') {
-        return [long]($Matches[1] -replace ',', '')
+    if ($text -match '\(([^)]+)\s+byte[s]?\)') {
+        $numeric = ($Matches[1] -replace '[^\d]', '')
+        if (-not [string]::IsNullOrWhiteSpace($numeric)) {
+            return [long]$numeric
+        }
     }
     return $null
 }

@@ -1536,9 +1536,31 @@ try {{
         Where-Object {{ $_.Trustee -notlike 'NT AUTHORITY\*' -and $_.Trustee -notlike 'S-1-5-*' }}
 
     @($perms | ForEach-Object {{
+        $trustee = $_.Trustee.ToString()
+        $displayName = $trustee
+        $trusteeIdentity = $trustee
+        try {{
+            $recipient = Get-Recipient -Identity $trustee -ErrorAction Stop
+            if ($recipient.DisplayName) {{
+                $displayName = $recipient.DisplayName
+            }}
+            if ($recipient.PrimarySmtpAddress) {{
+                $trusteeIdentity = $recipient.PrimarySmtpAddress.ToString()
+            }}
+            elseif ($recipient.ExternalDirectoryObjectId) {{
+                $trusteeIdentity = $recipient.ExternalDirectoryObjectId.ToString()
+            }}
+            elseif ($recipient.Identity) {{
+                $trusteeIdentity = $recipient.Identity.ToString()
+            }}
+        }}
+        catch {{
+        }}
         @{{
             Identity = $_.Identity.ToString()
-            Trustee = $_.Trustee.ToString()
+            Trustee = $trustee
+            ResolvedTrustee = $trusteeIdentity
+            DisplayName = $displayName
             AccessControlType = $_.AccessControlType.ToString()
             AccessRights = @($_.AccessRights | ForEach-Object {{ $_.ToString() }})
             IsInherited = $_.IsInherited
@@ -1564,6 +1586,8 @@ catch {{
                     {
                         Identity = hash["Identity"]?.ToString() ?? "",
                         Trustee = hash["Trustee"]?.ToString() ?? "",
+                        ResolvedTrustee = hash["ResolvedTrustee"]?.ToString() ?? "",
+                        DisplayName = hash["DisplayName"]?.ToString() ?? "",
                         AccessControlType = hash["AccessControlType"]?.ToString() ?? "",
                         AccessRights = ConvertToStringList(hash["AccessRights"]),
                         IsInherited = hash["IsInherited"] as bool? ?? false

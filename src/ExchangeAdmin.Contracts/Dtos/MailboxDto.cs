@@ -328,6 +328,12 @@ public class RecipientPermissionEntryDto
     [JsonPropertyName("trustee")]
     public string Trustee { get; set; } = string.Empty;
 
+    [JsonPropertyName("resolvedTrustee")]
+    public string ResolvedTrustee { get; set; } = string.Empty;
+
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
     [JsonPropertyName("accessControlType")]
     public string AccessControlType { get; set; } = string.Empty;
 

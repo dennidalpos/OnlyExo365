@@ -53,6 +53,7 @@ dotnet run --project src/ExchangeAdmin.Worker/ExchangeAdmin.Worker.csproj
 
 - **UI + Worker pairing**: if you run the UI project, ensure the worker project builds successfully so the post-build copy target can place the worker binaries alongside the UI output.
 - **Project references**: application, domain, infrastructure, and contracts are shared; changes in these layers affect both the UI and worker.
+- **Mailbox permissions and quotas**: SendAs entries are displayed with friendly names while removal actions rely on resolved trustee identities; mailbox quota bytes are parsed from localized PowerShell size strings in the worker.
 
 ## Troubleshooting
 
@@ -60,4 +61,3 @@ dotnet run --project src/ExchangeAdmin.Worker/ExchangeAdmin.Worker.csproj
 | --- | --- | --- |
 | WPF project fails to build | Non-Windows OS or missing Windows SDK | Build on Windows with .NET 8 SDK installed |
 | Worker fails at runtime | Missing PowerShell runtime | Install PowerShell 7.x and ensure it is available on PATH |
-

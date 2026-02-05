@@ -169,6 +169,16 @@ function Invoke-DotNet {
     }
 }
 
+function Test-DotNetAvailable {
+    try {
+        $null = & dotnet --version 2>&1
+        return $LASTEXITCODE -eq 0
+    }
+    catch {
+        return $false
+    }
+}
+
         
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -192,10 +202,10 @@ if (-not (Test-Path $SolutionFile)) {
 Write-Step "Checking prerequisites"
 
 try {
-    $dotnetVersion = & dotnet --version 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    if (-not (Test-DotNetAvailable)) {
         throw "dotnet not found"
     }
+    $dotnetVersion = & dotnet --version 2>&1
     Write-Success ".NET SDK version: $dotnetVersion"
 
                          

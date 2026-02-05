@@ -16,6 +16,16 @@ $SrcDir = Join-Path $SolutionDir "src"
 $script:DeletedCount = 0
 $script:DeletedSize = 0
 
+function Test-DotNetAvailable {
+    try {
+        $null = & dotnet --version 2>&1
+        return $LASTEXITCODE -eq 0
+    }
+    catch {
+        return $false
+    }
+}
+
 function Write-Step {
     param([string]$Message)
     Write-Host ""
@@ -224,9 +234,13 @@ if ($All) {
     }
 
     if (-not $DryRun) {
-        Write-Host "   Clearing NuGet HTTP cache..." -ForegroundColor Gray
-        & dotnet nuget locals http-cache --clear 2>&1 | Out-Null
-        Write-Success "NuGet HTTP cache cleared"
+        if (Test-DotNetAvailable) {
+            Write-Host "   Clearing NuGet HTTP cache..." -ForegroundColor Gray
+            & dotnet nuget locals http-cache --clear 2>&1 | Out-Null
+            Write-Success "NuGet HTTP cache cleared"
+        } else {
+            Write-Skipped "dotnet SDK not available; skipped NuGet cache clean"
+        }
     } else {
         Write-Host "   [DRY-RUN] Would clear NuGet HTTP cache" -ForegroundColor Yellow
     }
@@ -237,12 +251,16 @@ $solutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
 
 if (Test-Path $solutionFile) {
     if (-not $DryRun) {
-        & dotnet clean $solutionFile --verbosity minimal 2>&1 | ForEach-Object {
-            if ($_ -match 'error') {
-                Write-Host "   $_" -ForegroundColor Red
+        if (Test-DotNetAvailable) {
+            & dotnet clean $solutionFile --verbosity minimal 2>&1 | ForEach-Object {
+                if ($_ -match 'error') {
+                    Write-Host "   $_" -ForegroundColor Red
+                }
             }
+            Write-Success "dotnet clean completed"
+        } else {
+            Write-Skipped "dotnet SDK not available; skipped dotnet clean"
         }
-        Write-Success "dotnet clean completed"
     } else {
         Write-Host "   [DRY-RUN] Would run: dotnet clean $solutionFile" -ForegroundColor Yellow
     }

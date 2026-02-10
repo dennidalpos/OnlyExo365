@@ -37,7 +37,7 @@ public class ToolsViewModel : ViewModelBase
         CheckPrerequisitesCommand = new AsyncRelayCommand(CheckPrerequisitesAsync, () => !IsChecking && !IsInstalling);
         InstallPowerShellCommand = new AsyncRelayCommand(InstallPowerShellAsync, () => !IsInstalling && !IsPowerShell7);
         InstallExchangeModuleCommand = new AsyncRelayCommand(() => InstallModuleAsync("ExchangeOnlineManagement"), () => !IsInstalling);
-        InstallGraphModuleCommand = new AsyncRelayCommand(() => InstallModuleAsync("Microsoft.Graph"), () => !IsInstalling);
+        InstallGraphModuleCommand = new AsyncRelayCommand(() => InstallModuleAsync("Microsoft.Graph.Authentication"), () => !IsInstalling);
         OpenPowerShellGitHubCommand = new RelayCommand(OpenPowerShellGitHub);
     }
 
@@ -199,7 +199,7 @@ public class ToolsViewModel : ViewModelBase
                 var suggestions = new List<string>();
                 if (!status.IsPowerShell7) suggestions.Add("Installare PowerShell 7 per compatibilità ottimale.");
                 if (!status.ExchangeModuleInstalled) suggestions.Add("Installare/aggiornare ExchangeOnlineManagement.");
-                if (!status.GraphModuleInstalled) suggestions.Add("Installare/aggiornare Microsoft.Graph.");
+                if (!status.GraphModuleInstalled) suggestions.Add("Installare/aggiornare Microsoft.Graph.Authentication.");
                 SuggestedActions = suggestions.Count == 0 ? "Prerequisiti completi. Nessuna azione richiesta." : string.Join(" ", suggestions);
             }
             else if (!result.WasCancelled)

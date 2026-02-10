@@ -251,7 +251,7 @@
                                 </Ellipse.Style>
                             </Ellipse>
                             <TextBlock Grid.Column="1" VerticalAlignment="Center">
-                                <Run Text="Microsoft.Graph "/>
+                                <Run Text="Microsoft.Graph.Authentication "/>
                                 <Run Text="{Binding Tools.GraphModuleVersion, Mode=OneWay, FallbackValue=''}"
                                      Foreground="{StaticResource SecondaryTextBrush}"/>
                             </TextBlock>

@@ -2452,20 +2452,33 @@ $graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | 
 
     public async Task<InstallModuleResponse> InstallModuleAsync(string moduleName, CancellationToken cancellationToken = default)
     {
-        var safeModuleName = EscapePs(moduleName);
+        var normalizedModuleName = string.Equals(moduleName, "Microsoft.Graph", StringComparison.OrdinalIgnoreCase)
+            ? "Microsoft.Graph.Authentication"
+            : moduleName;
+
+        var safeModuleName = EscapePs(normalizedModuleName);
         var script = $@"
 try {{
     Write-Output 'Installing {safeModuleName}...'
-    $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-    if (-not $nuget) {{
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ErrorAction Stop
+
+    $repo = Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue
+    if (-not $repo) {{
+        Register-PSRepository -Default -ErrorAction SilentlyContinue
     }}
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
-    Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
-    $installed = Get-Module -ListAvailable -Name '{safeModuleName}' | Select-Object -First 1
+
+    $alreadyInstalled = Get-Module -ListAvailable -Name '{safeModuleName}' | Select-Object -First 1
+
+    if ($alreadyInstalled) {{
+        Update-Module -Name '{safeModuleName}' -Force -ErrorAction SilentlyContinue
+    }} else {{
+        Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
+    }}
+
+    $installed = Get-Module -ListAvailable -Name '{safeModuleName}' | Sort-Object Version -Descending | Select-Object -First 1
     [PSCustomObject]@{{
-        Success = $true
-        Message = '{safeModuleName} installed successfully'
+        Success = ($null -ne $installed)
+        Message = if ($installed) {{ '{safeModuleName} ready' }} else {{ 'Module install/update completed but module not found in PSModulePath' }}
         InstalledVersion = if ($installed) {{ $installed.Version.ToString() }} else {{ $null }}
     }}
 }} catch {{

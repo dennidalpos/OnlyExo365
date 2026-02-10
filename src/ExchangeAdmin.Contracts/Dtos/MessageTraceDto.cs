@@ -41,6 +41,42 @@ public class GetMessageTraceResponse
     public int PageSize { get; set; }
 }
 
+public class GetMessageTraceDetailsRequest
+{
+    [JsonPropertyName("messageTraceId")]
+    public string MessageTraceId { get; set; } = string.Empty;
+
+    [JsonPropertyName("recipientAddress")]
+    public string RecipientAddress { get; set; } = string.Empty;
+}
+
+public class GetMessageTraceDetailsResponse
+{
+    [JsonPropertyName("messageTraceId")]
+    public string MessageTraceId { get; set; } = string.Empty;
+
+    [JsonPropertyName("events")]
+    public List<MessageTraceDetailEventDto> Events { get; set; } = new();
+}
+
+public class MessageTraceDetailEventDto
+{
+    [JsonPropertyName("date")]
+    public DateTime? Date { get; set; }
+
+    [JsonPropertyName("event")]
+    public string Event { get; set; } = string.Empty;
+
+    [JsonPropertyName("action")]
+    public string Action { get; set; } = string.Empty;
+
+    [JsonPropertyName("detail")]
+    public string Detail { get; set; } = string.Empty;
+
+    [JsonPropertyName("data")]
+    public string Data { get; set; } = string.Empty;
+}
+
 public class MessageTraceItemDto
 {
     [JsonPropertyName("messageId")]

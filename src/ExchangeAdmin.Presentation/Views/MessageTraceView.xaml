@@ -8,7 +8,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="180"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -37,29 +39,27 @@
                 <DatePicker Grid.Column="3" SelectedDate="{Binding MessageTrace.EndDate}" Margin="0,0,12,0"/>
 
                 <TextBlock Grid.Column="4" Text="Mittente" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox Grid.Column="5" Text="{Binding MessageTrace.SenderAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                            <Setter Property="Tag" Value="sender@domain.com"/>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
+                <TextBox Grid.Column="5" Text="{Binding MessageTrace.SenderAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
 
                 <TextBlock Grid.Column="6" Text="Destinatario" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox Grid.Column="7" Text="{Binding MessageTrace.RecipientAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                            <Setter Property="Tag" Value="recipient@domain.com"/>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
+                <TextBox Grid.Column="7" Text="{Binding MessageTrace.RecipientAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
 
                 <Button Grid.Column="8" Content="Cerca" Command="{Binding MessageTrace.SearchCommand}"
                         Style="{StaticResource PrimaryButton}"/>
             </Grid>
         </Border>
 
-        <Grid Grid.Row="2" Margin="0,0,0,8"
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Filtri rapidi status:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <Button Content="All" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="All" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+            <Button Content="Delivered" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Delivered" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+            <Button Content="Failed" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Failed" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+            <Button Content="Pending" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Pending" Style="{StaticResource PrimaryButton}" Margin="0,0,12,0"/>
+            <Button Content="Export CSV" Command="{Binding MessageTrace.ExportCsvCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+            <Button Content="Dettaglio messaggio" Command="{Binding MessageTrace.LoadDetailsCommand}" Style="{StaticResource PrimaryButton}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="3" Margin="0,0,0,8"
               Visibility="{Binding MessageTrace.IsLoading, Converter={StaticResource BoolToVisibility}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -73,7 +73,7 @@
                        Foreground="{StaticResource SecondaryTextBrush}"/>
         </Grid>
 
-        <Border Grid.Row="3" Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
+        <Border Grid.Row="4" Background="#3D0000" BorderBrush="{StaticResource ErrorBrush}"
                 BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,8"
                 Visibility="{Binding MessageTrace.HasError, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
@@ -82,26 +82,14 @@
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="4"
+        <DataGrid Grid.Row="5"
                   ItemsSource="{Binding MessageTrace.Messages}"
+                  SelectedItem="{Binding MessageTrace.SelectedMessage, Mode=TwoWay}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   SelectionMode="Single"
                   CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column"
-                  Background="{StaticResource SecondaryBackgroundBrush}"
-                  BorderBrush="{StaticResource BorderBrush}"
-                  RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                  AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}"
-                  VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling"
-                  EnableRowVirtualization="True"
-                  EnableColumnVirtualization="True"
-                  ScrollViewer.IsDeferredScrollingEnabled="True">
+                  CanUserDeleteRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Received" Binding="{Binding Received, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="140"/>
                 <DataGridTextColumn Header="Sender" Binding="{Binding SenderAddress}" Width="*"/>
@@ -110,33 +98,25 @@
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
                 <DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="80"/>
             </DataGrid.Columns>
-
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource TertiaryBackgroundBrush}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="{StaticResource TertiaryBackgroundBrush}"/>
-                    <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
-                    <Setter Property="Padding" Value="8,6"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
         </DataGrid>
 
-        <Grid Grid.Row="5" Margin="0,12,0,0">
+        <DataGrid Grid.Row="6"
+                  ItemsSource="{Binding MessageTrace.SelectedMessageEvents}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  Margin="0,8,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}" Width="150"/>
+                <DataGridTextColumn Header="Event" Binding="{Binding Event}" Width="130"/>
+                <DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="120"/>
+                <DataGridTextColumn Header="Detail" Binding="{Binding Detail}" Width="*"/>
+                <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="1.4*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="7" Margin="0,12,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

@@ -53,6 +53,7 @@ public partial class App : System.Windows.Application
         var logsViewModel = new LogsViewModel(_shellViewModel);
         var toolsViewModel = new ToolsViewModel(_workerService, _shellViewModel);
         var messageTraceViewModel = new MessageTraceViewModel(_workerService, _shellViewModel);
+        var mailFlowViewModel = new MailFlowViewModel(_workerService, _shellViewModel);
 
 
         sharedMailboxListViewModel.RecipientTypeFilter = "SharedMailbox";
@@ -69,6 +70,7 @@ public partial class App : System.Windows.Application
         _shellViewModel.Logs = logsViewModel;
         _shellViewModel.Tools = toolsViewModel;
         _shellViewModel.MessageTrace = messageTraceViewModel;
+        _shellViewModel.MailFlow = mailFlowViewModel;
         _shellViewModel.RegisterNavigationStateSource(dashboardViewModel);
         _shellViewModel.RegisterNavigationStateSource(mailboxListViewModel);
         _shellViewModel.RegisterNavigationStateSource(deletedMailboxViewModel);
@@ -113,6 +115,9 @@ public partial class App : System.Windows.Application
                 case NavigationPage.MessageTrace:
                     await messageTraceViewModel.LoadAsync();
                     break;
+                case NavigationPage.MailFlow:
+                    await mailFlowViewModel.LoadAsync();
+                    break;
                 case NavigationPage.Logs:
                     logsViewModel.Refresh();
                     break;
@@ -145,6 +150,9 @@ public partial class App : System.Windows.Application
                         break;
                     case NavigationPage.MessageTrace:
                         await messageTraceViewModel.LoadAsync();
+                        break;
+                    case NavigationPage.MailFlow:
+                        await mailFlowViewModel.LoadAsync();
                         break;
                 }
             }

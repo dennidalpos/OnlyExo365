@@ -264,6 +264,56 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result<GetMessageTraceDetailsResponse>> GetMessageTraceDetailsAsync(
+        GetMessageTraceDetailsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    #endregion
+
+
+    #region Mail Flow
+
+    Task<Result<GetTransportRulesResponse>> GetTransportRulesAsync(
+        GetTransportRulesRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> SetTransportRuleStateAsync(
+        SetTransportRuleStateRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> UpsertTransportRuleAsync(
+        UpsertTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
+        TestTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
+        GetConnectorsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<GetAcceptedDomainsResponse>> GetAcceptedDomainsAsync(
+        GetAcceptedDomainsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> UpsertConnectorAsync(
+        UpsertConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> UpsertAcceptedDomainAsync(
+        UpsertAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     #endregion
 
     #region Licenses

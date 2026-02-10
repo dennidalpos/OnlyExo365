@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
 using ExchangeAdmin.Presentation.Services;
+using Microsoft.Win32;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
@@ -27,6 +30,9 @@ public class MessageTraceViewModel : ViewModelBase
     private int _totalCount;
     private double _loadingProgress;
     private string? _loadingStatus;
+    private string _statusFilter = "All";
+    private MessageTraceItemDto? _selectedMessage;
+    private bool _isLoadingDetails;
 
     public MessageTraceViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
@@ -36,6 +42,9 @@ public class MessageTraceViewModel : ViewModelBase
         SearchCommand = new AsyncRelayCommand(SearchAsync, () => CanSearch);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasMore && !IsLoading);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => CurrentPage > 1 && !IsLoading);
+        ExportCsvCommand = new RelayCommand(ExportCsv, () => Messages.Count > 0 && !IsLoading);
+        LoadDetailsCommand = new AsyncRelayCommand(LoadDetailsAsync, () => SelectedMessage != null && !IsLoading && !IsLoadingDetails);
+        SetStatusFilterCommand = new RelayCommand<string?>(SetStatusFilter);
     }
 
     public bool IsLoading
@@ -46,6 +55,18 @@ public class MessageTraceViewModel : ViewModelBase
             if (SetProperty(ref _isLoading, value))
             {
                 OnPropertyChanged(nameof(CanSearch));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool IsLoadingDetails
+    {
+        get => _isLoadingDetails;
+        private set
+        {
+            if (SetProperty(ref _isLoadingDetails, value))
+            {
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -131,17 +152,45 @@ public class MessageTraceViewModel : ViewModelBase
         private set => SetProperty(ref _loadingStatus, value);
     }
 
+    public string StatusFilter
+    {
+        get => _statusFilter;
+        set
+        {
+            if (SetProperty(ref _statusFilter, value))
+            {
+                ApplyStatusFilter();
+            }
+        }
+    }
+
+    public MessageTraceItemDto? SelectedMessage
+    {
+        get => _selectedMessage;
+        set
+        {
+            if (SetProperty(ref _selectedMessage, value))
+            {
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
     public bool CanSearch => !IsLoading && _shellViewModel.IsExchangeConnected;
 
     public ObservableCollection<MessageTraceItemDto> Messages { get; } = new();
+    public ObservableCollection<MessageTraceItemDto> AllMessages { get; } = new();
+    public ObservableCollection<MessageTraceDetailEventDto> SelectedMessageEvents { get; } = new();
 
     public ICommand SearchCommand { get; }
     public ICommand NextPageCommand { get; }
     public ICommand PreviousPageCommand { get; }
+    public ICommand ExportCsvCommand { get; }
+    public ICommand LoadDetailsCommand { get; }
+    public ICommand SetStatusFilterCommand { get; }
 
     public async Task LoadAsync()
     {
-        // Ensure commands re-evaluate CanExecute based on current connection state
         OnPropertyChanged(nameof(CanSearch));
         CommandManager.InvalidateRequerySuggested();
 
@@ -226,20 +275,21 @@ public class MessageTraceViewModel : ViewModelBase
             {
                 RunOnUiThread(() =>
                 {
-                    Messages.Clear();
+                    AllMessages.Clear();
                     foreach (var msg in result.Value.Messages)
                     {
-                        Messages.Add(msg);
+                        AllMessages.Add(msg);
                     }
+
+                    ApplyStatusFilter();
                     TotalCount = result.Value.TotalCount;
                     HasMore = result.Value.HasMore;
+                    SelectedMessage = null;
+                    SelectedMessageEvents.Clear();
                 });
                 _shellViewModel.AddLog(LogLevel.Information, $"Message trace: {result.Value.Messages.Count} risultati trovati");
             }
-            else if (result.WasCancelled)
-            {
-            }
-            else
+            else if (!result.WasCancelled)
             {
                 ErrorMessage = result.Error?.Message ?? "Impossibile recuperare la traccia messaggi";
                 _shellViewModel.AddLog(LogLevel.Error, $"Message trace failed: {ErrorMessage}");
@@ -262,6 +312,116 @@ public class MessageTraceViewModel : ViewModelBase
             LoadingProgress = 0;
             LoadingStatus = null;
         }
+    }
+
+    private async Task LoadDetailsAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedMessage == null)
+        {
+            return;
+        }
+
+        IsLoadingDetails = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var request = new GetMessageTraceDetailsRequest
+            {
+                MessageTraceId = SelectedMessage.MessageTraceId,
+                RecipientAddress = SelectedMessage.RecipientAddress
+            };
+
+            var result = await _workerService.GetMessageTraceDetailsAsync(request, cancellationToken: cancellationToken);
+            if (result.IsSuccess && result.Value != null)
+            {
+                SelectedMessageEvents.Clear();
+                foreach (var item in result.Value.Events.OrderBy(e => e.Date))
+                {
+                    SelectedMessageEvents.Add(item);
+                }
+            }
+            else if (!result.WasCancelled)
+            {
+                ErrorMessage = result.Error?.Message ?? "Impossibile recuperare il dettaglio messaggio";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoadingDetails = false;
+        }
+    }
+
+    private void SetStatusFilter(string? status)
+    {
+        StatusFilter = string.IsNullOrWhiteSpace(status) ? "All" : status;
+    }
+
+    private void ApplyStatusFilter()
+    {
+        IEnumerable<MessageTraceItemDto> filtered = AllMessages;
+        if (!string.Equals(StatusFilter, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            filtered = filtered.Where(m => string.Equals(m.Status, StatusFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        Messages.Clear();
+        foreach (var item in filtered)
+        {
+            Messages.Add(item);
+        }
+    }
+
+    private void ExportCsv()
+    {
+        if (Messages.Count == 0)
+        {
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            Filter = "CSV files (*.csv)|*.csv",
+            FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.csv"
+        };
+
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Received,Sender,Recipient,Subject,Status,Size,MessageId,MessageTraceId");
+
+        foreach (var message in Messages)
+        {
+            sb.AppendLine(string.Join(",",
+                Csv(message.Received?.ToString("o") ?? string.Empty),
+                Csv(message.SenderAddress),
+                Csv(message.RecipientAddress),
+                Csv(message.Subject),
+                Csv(message.Status),
+                Csv(message.Size?.ToString() ?? string.Empty),
+                Csv(message.MessageId),
+                Csv(message.MessageTraceId)));
+        }
+
+        File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
+        _shellViewModel.AddLog(LogLevel.Information, $"Message trace export salvato: {dialog.FileName}");
+    }
+
+    private static string Csv(string value)
+    {
+        if (value.Contains('"') || value.Contains(',') || value.Contains('\n'))
+        {
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        }
+
+        return value;
     }
 
     public void Cancel()

@@ -284,6 +284,16 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> UpsertTransportRuleAsync(
+        UpsertTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
+        TestTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
         GetConnectorsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -291,6 +301,16 @@ public interface IWorkerService
 
     Task<Result<GetAcceptedDomainsResponse>> GetAcceptedDomainsAsync(
         GetAcceptedDomainsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> UpsertConnectorAsync(
+        UpsertConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> UpsertAcceptedDomainAsync(
+        UpsertAcceptedDomainRequest request,
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 

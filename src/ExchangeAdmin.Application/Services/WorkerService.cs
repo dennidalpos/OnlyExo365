@@ -239,6 +239,18 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.SetTransportRuleStateAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> UpsertTransportRuleAsync(
+        UpsertTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.UpsertTransportRuleAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
+        TestTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.TestTransportRuleAsync(request, eventHandler, cancellationToken);
+
     public Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
         GetConnectorsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -250,6 +262,18 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default)
         => _client.GetAcceptedDomainsAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> UpsertConnectorAsync(
+        UpsertConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.UpsertConnectorAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> UpsertAcceptedDomainAsync(
+        UpsertAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.UpsertAcceptedDomainAsync(request, eventHandler, cancellationToken);
 
     #endregion
 

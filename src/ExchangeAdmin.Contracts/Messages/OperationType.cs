@@ -40,8 +40,12 @@ public enum OperationType
 
     GetTransportRules,
     SetTransportRuleState,
+    UpsertTransportRule,
+    TestTransportRule,
     GetConnectors,
+    UpsertConnector,
     GetAcceptedDomains,
+    UpsertAcceptedDomain,
 
     GetUserLicenses,
     SetUserLicense,

@@ -65,8 +65,12 @@ public class OperationDispatcher
                 OperationType.GetMessageTraceDetails => await HandleGetMessageTraceDetailsAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetTransportRules => await HandleGetTransportRulesAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.SetTransportRuleState => await HandleSetTransportRuleStateAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.UpsertTransportRule => await HandleUpsertTransportRuleAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.TestTransportRule => await HandleTestTransportRuleAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetConnectors => await HandleGetConnectorsAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.UpsertConnector => await HandleUpsertConnectorAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetAcceptedDomains => await HandleGetAcceptedDomainsAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.UpsertAcceptedDomain => await HandleUpsertAcceptedDomainAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetUserLicenses => await HandleGetUserLicensesAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.SetUserLicense => await HandleSetUserLicenseAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetAvailableLicenses => await HandleGetAvailableLicensesAsync(request, request.CorrelationId, cancellationToken),
@@ -854,6 +858,54 @@ public class OperationDispatcher
         await SendLogAsync(correlationId, LogLevel.Information, "Fetching accepted domains...");
         var response = await _exoCommands.GetAcceptedDomainsAsync(cancellationToken);
         return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleUpsertTransportRuleAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var upsertRequest = JsonMessageSerializer.ExtractPayload<UpsertTransportRuleRequest>(request.Payload);
+        if (upsertRequest == null || string.IsNullOrWhiteSpace(upsertRequest.Name))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name is required");
+        }
+
+        await _exoCommands.UpsertTransportRuleAsync(upsertRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleTestTransportRuleAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var testRequest = JsonMessageSerializer.ExtractPayload<TestTransportRuleRequest>(request.Payload);
+        if (testRequest == null || string.IsNullOrWhiteSpace(testRequest.Sender) || string.IsNullOrWhiteSpace(testRequest.Recipient))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Sender and Recipient are required");
+        }
+
+        var response = await _exoCommands.TestTransportRuleAsync(testRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleUpsertConnectorAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var upsertRequest = JsonMessageSerializer.ExtractPayload<UpsertConnectorRequest>(request.Payload);
+        if (upsertRequest == null || string.IsNullOrWhiteSpace(upsertRequest.Name))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name is required");
+        }
+
+        await _exoCommands.UpsertConnectorAsync(upsertRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleUpsertAcceptedDomainAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var upsertRequest = JsonMessageSerializer.ExtractPayload<UpsertAcceptedDomainRequest>(request.Payload);
+        if (upsertRequest == null || string.IsNullOrWhiteSpace(upsertRequest.Name) || string.IsNullOrWhiteSpace(upsertRequest.DomainName))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name and DomainName are required");
+        }
+
+        await _exoCommands.UpsertAcceptedDomainAsync(upsertRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
     }
 
     private async Task<ResponseEnvelope> HandleGetUserLicensesAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)

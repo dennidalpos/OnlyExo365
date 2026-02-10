@@ -2036,6 +2036,10 @@ foreach ($r in $rules) {
         State = if ($r.State) { $r.State.ToString() } else { if ($r.Enabled) { 'Enabled' } else { 'Disabled' } }
         Mode = if ($r.Mode) { $r.Mode.ToString() } else { '' }
         Description = if ($r.Description) { $r.Description } else { '' }
+        From = @($r.From)
+        SentTo = @($r.SentTo)
+        SubjectContainsWords = @($r.SubjectContainsWords)
+        PrependSubject = if ($r.PrependSubject) { $r.PrependSubject } else { '' }
     }
 }";
         var results = await RunScriptAsync(script, cancellationToken);
@@ -2049,7 +2053,11 @@ foreach ($r in $rules) {
                 Priority = obj.Properties["Priority"]?.Value == null ? null : Convert.ToInt32(obj.Properties["Priority"]?.Value),
                 State = GetString(obj, "State"),
                 Mode = GetString(obj, "Mode"),
-                Description = GetString(obj, "Description")
+                Description = GetString(obj, "Description"),
+                From = ConvertToStringList(obj.Properties["From"]?.Value),
+                SentTo = ConvertToStringList(obj.Properties["SentTo"]?.Value),
+                SubjectContainsWords = ConvertToStringList(obj.Properties["SubjectContainsWords"]?.Value),
+                PrependSubject = GetString(obj, "PrependSubject")
             });
         }
 
@@ -2071,18 +2079,24 @@ Write-Output 'OK'";
         var script = @"
 $inbound = Get-InboundConnector -ErrorAction SilentlyContinue | ForEach-Object {
     [PSCustomObject]@{
+        Identity = $_.Identity.ToString()
         Name = $_.Name
         Type = 'Inbound'
         Enabled = [bool]$_.Enabled
         Comment = if ($_.Comment) { $_.Comment } else { '' }
+        SenderDomains = @($_.SenderDomains)
+        RecipientDomains = @($_.RecipientDomains)
     }
 }
 $outbound = Get-OutboundConnector -ErrorAction SilentlyContinue | ForEach-Object {
     [PSCustomObject]@{
+        Identity = $_.Identity.ToString()
         Name = $_.Name
         Type = 'Outbound'
         Enabled = [bool]$_.Enabled
         Comment = if ($_.Comment) { $_.Comment } else { '' }
+        SenderDomains = @($_.SenderDomains)
+        RecipientDomains = @($_.RecipientDomains)
     }
 }
 @($inbound + $outbound)";
@@ -2092,10 +2106,13 @@ $outbound = Get-OutboundConnector -ErrorAction SilentlyContinue | ForEach-Object
         {
             connectors.Add(new ConnectorDto
             {
+                Identity = GetString(obj, "Identity"),
                 Name = GetString(obj, "Name"),
                 Type = GetString(obj, "Type"),
                 Enabled = GetBool(obj, "Enabled"),
-                Comment = GetString(obj, "Comment")
+                Comment = GetString(obj, "Comment"),
+                SenderDomains = ConvertToStringList(obj.Properties["SenderDomains"]?.Value),
+                RecipientDomains = ConvertToStringList(obj.Properties["RecipientDomains"]?.Value)
             });
         }
 
@@ -2107,6 +2124,7 @@ $outbound = Get-OutboundConnector -ErrorAction SilentlyContinue | ForEach-Object
         var script = @"
 Get-AcceptedDomain -ErrorAction Stop | ForEach-Object {
     [PSCustomObject]@{
+        Identity = $_.Identity.ToString()
         Name = $_.Name
         DomainName = $_.DomainName.ToString()
         DomainType = $_.DomainType.ToString()
@@ -2119,6 +2137,7 @@ Get-AcceptedDomain -ErrorAction Stop | ForEach-Object {
         {
             domains.Add(new AcceptedDomainDto
             {
+                Identity = GetString(obj, "Identity"),
                 Name = GetString(obj, "Name"),
                 DomainName = GetString(obj, "DomainName"),
                 DomainType = GetString(obj, "DomainType"),
@@ -2127,6 +2146,130 @@ Get-AcceptedDomain -ErrorAction Stop | ForEach-Object {
         }
 
         return new GetAcceptedDomainsResponse { Domains = domains.OrderBy(d => d.DomainName).ToList() };
+    }
+
+
+    public async Task UpsertTransportRuleAsync(UpsertTransportRuleRequest request, CancellationToken cancellationToken = default)
+    {
+        var escapedIdentity = (request.Identity ?? string.Empty).Replace("'", "''");
+        var escapedName = request.Name.Replace("'", "''");
+        var from = string.Join(",", request.From.Select(v => $"'{v.Replace("'", "''")}'"));
+        var sentTo = string.Join(",", request.SentTo.Select(v => $"'{v.Replace("'", "''")}'"));
+        var subjectContains = string.Join(",", request.SubjectContainsWords.Select(v => $"'{v.Replace("'", "''")}'"));
+        var prepend = (request.PrependSubject ?? string.Empty).Replace("'", "''");
+        var mode = (request.Mode ?? "Enforce").Replace("'", "''");
+
+        var script = $@"
+$from = @({from})
+$sentTo = @({sentTo})
+$subjectContains = @({subjectContains})
+$params = @{{
+    Name = '{escapedName}'
+    Mode = '{mode}'
+    Enabled = {(request.Enabled ? "$true" : "$false")}
+}}
+if ($from.Count -gt 0) {{ $params['From'] = $from }}
+if ($sentTo.Count -gt 0) {{ $params['SentTo'] = $sentTo }}
+if ($subjectContains.Count -gt 0) {{ $params['SubjectContainsWords'] = $subjectContains }}
+if ('{prepend}' -ne '') {{ $params['PrependSubject'] = '{prepend}' }}
+
+if ('{escapedIdentity}' -ne '') {{
+    Set-TransportRule -Identity '{escapedIdentity}' @params -ErrorAction Stop
+}} else {{
+    New-TransportRule @params -ErrorAction Stop
+}}";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
+    public async Task<TestTransportRuleResponse> TestTransportRuleAsync(TestTransportRuleRequest request, CancellationToken cancellationToken = default)
+    {
+        var sender = request.Sender.Replace("'", "''");
+        var recipient = request.Recipient.Replace("'", "''");
+        var subject = request.Subject.Replace("'", "''");
+        var script = $@"
+$sender = '{sender}'
+$recipient = '{recipient}'
+$subject = '{subject}'
+$rules = Get-TransportRule -ErrorAction Stop
+foreach ($r in $rules) {{
+    $matches = $true
+
+    if ($r.From -and $r.From.Count -gt 0) {{
+        $matches = $matches -and ($r.From -contains $sender)
+    }}
+
+    if ($r.SentTo -and $r.SentTo.Count -gt 0) {{
+        $matches = $matches -and ($r.SentTo -contains $recipient)
+    }}
+
+    if ($r.SubjectContainsWords -and $r.SubjectContainsWords.Count -gt 0) {{
+        $sw = @($r.SubjectContainsWords)
+        $matches = $matches -and ($sw | Where-Object {{ $subject -like "*$_*" }} | Measure-Object).Count -gt 0
+    }}
+
+    if ($matches) {{
+        [PSCustomObject]@{{ Name = $r.Name }}
+    }}
+}}";
+        var results = await RunScriptAllowErrorsAsync(script, cancellationToken);
+        var names = results.Select(r => GetString(r, "Name")).Where(v => !string.IsNullOrWhiteSpace(v)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        return new TestTransportRuleResponse { MatchedRuleNames = names };
+    }
+
+    public async Task UpsertConnectorAsync(UpsertConnectorRequest request, CancellationToken cancellationToken = default)
+    {
+        var identity = (request.Identity ?? string.Empty).Replace("'", "''");
+        var name = request.Name.Replace("'", "''");
+        var comment = (request.Comment ?? string.Empty).Replace("'", "''");
+        var senderDomains = string.Join(",", request.SenderDomains.Select(v => $"'{v.Replace("'", "''")}'"));
+        var recipientDomains = string.Join(",", request.RecipientDomains.Select(v => $"'{v.Replace("'", "''")}'"));
+        var isInbound = request.Type.Equals("Inbound", StringComparison.OrdinalIgnoreCase);
+
+        var script = $@"
+$senderDomains = @({senderDomains})
+$recipientDomains = @({recipientDomains})
+$params = @{{
+    Name = '{name}'
+    Enabled = {(request.Enabled ? "$true" : "$false")}
+    ConnectorType = 'OnPremises'
+}}
+if ('{comment}' -ne '') {{ $params['Comment'] = '{comment}' }}
+if ($senderDomains.Count -gt 0) {{ $params['SenderDomains'] = $senderDomains }}
+if ($recipientDomains.Count -gt 0) {{ $params['RecipientDomains'] = $recipientDomains }}
+
+if {(isInbound ? "$true" : "$false")} {{
+    if ('{identity}' -ne '') {{
+        Set-InboundConnector -Identity '{identity}' -Enabled {(request.Enabled ? "$true" : "$false")} -Comment '{comment}' -ErrorAction Stop
+    }} else {{
+        New-InboundConnector @params -ErrorAction Stop
+    }}
+}} else {{
+    if ('{identity}' -ne '') {{
+        Set-OutboundConnector -Identity '{identity}' -Enabled {(request.Enabled ? "$true" : "$false")} -Comment '{comment}' -ErrorAction Stop
+    }} else {{
+        New-OutboundConnector @params -ErrorAction Stop
+    }}
+}}";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
+    public async Task UpsertAcceptedDomainAsync(UpsertAcceptedDomainRequest request, CancellationToken cancellationToken = default)
+    {
+        var identity = (request.Identity ?? string.Empty).Replace("'", "''");
+        var name = request.Name.Replace("'", "''");
+        var domainName = request.DomainName.Replace("'", "''");
+        var domainType = request.DomainType.Replace("'", "''");
+
+        var script = $@"
+if ('{identity}' -ne '') {{
+    Set-AcceptedDomain -Identity '{identity}' -DomainType '{domainType}' -ErrorAction Stop
+}} else {{
+    New-AcceptedDomain -Name '{name}' -DomainName '{domainName}' -DomainType '{domainType}' -ErrorAction Stop
+}}
+if {(request.MakeDefault ? "$true" : "$false")} {{
+    Set-AcceptedDomain -Identity '{domainName}' -MakeDefault -ErrorAction Stop
+}}";
+        await RunScriptAsync(script, cancellationToken);
     }
 
     public async Task<GetUserLicensesResponse> GetUserLicensesAsync(string userPrincipalName, CancellationToken cancellationToken = default)

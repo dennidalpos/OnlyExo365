@@ -20,54 +20,131 @@
         </Border>
 
         <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1.4*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.2*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
 
-            <GroupBox Header="Transport Rules" Grid.Row="0" Margin="0,0,0,8">
-                <DockPanel>
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
-                        <Button Content="Enable" Command="{Binding MailFlow.EnableRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
-                        <Button Content="Disable" Command="{Binding MailFlow.DisableRuleCommand}" Style="{StaticResource PrimaryButton}"/>
-                    </StackPanel>
-                    <DataGrid ItemsSource="{Binding MailFlow.TransportRules}"
-                              SelectedItem="{Binding MailFlow.SelectedRule, Mode=TwoWay}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True">
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1.2*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <GroupBox Header="Transport Rules" Grid.Row="0" Margin="0,0,0,8">
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <Button Content="Enable" Command="{Binding MailFlow.EnableRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                            <Button Content="Disable" Command="{Binding MailFlow.DisableRuleCommand}" Style="{StaticResource PrimaryButton}"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding MailFlow.TransportRules}" SelectedItem="{Binding MailFlow.SelectedRule, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="90"/>
+                                <DataGridTextColumn Header="State" Binding="{Binding State}" Width="120"/>
+                                <DataGridTextColumn Header="Mode" Binding="{Binding Mode}" Width="120"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </GroupBox>
+
+                <GroupBox Header="Connectors" Grid.Row="1" Margin="0,0,0,8">
+                    <DataGrid ItemsSource="{Binding MailFlow.Connectors}" SelectedItem="{Binding MailFlow.SelectedConnector, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                            <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="90"/>
-                            <DataGridTextColumn Header="State" Binding="{Binding State}" Width="120"/>
-                            <DataGridTextColumn Header="Mode" Binding="{Binding Mode}" Width="120"/>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="1.5*"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120"/>
+                            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="90"/>
+                            <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="1.4*"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                </DockPanel>
-            </GroupBox>
+                </GroupBox>
 
-            <GroupBox Header="Connectors" Grid.Row="1" Margin="0,0,0,8">
-                <DataGrid ItemsSource="{Binding MailFlow.Connectors}" AutoGenerateColumns="False" IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120"/>
-                        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="90"/>
-                        <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="1.4*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+                <GroupBox Header="Accepted Domains" Grid.Row="2">
+                    <DataGrid ItemsSource="{Binding MailFlow.AcceptedDomains}" SelectedItem="{Binding MailFlow.SelectedDomain, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Domain" Binding="{Binding DomainName}" Width="*"/>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.1*"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding DomainType}" Width="140"/>
+                            <DataGridCheckBoxColumn Header="Default" Binding="{Binding Default}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+            </Grid>
 
-            <GroupBox Header="Accepted Domains" Grid.Row="2">
-                <DataGrid ItemsSource="{Binding MailFlow.AcceptedDomains}" AutoGenerateColumns="False" IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Domain" Binding="{Binding DomainName}" Width="*"/>
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.1*"/>
-                        <DataGridTextColumn Header="Type" Binding="{Binding DomainType}" Width="140"/>
-                        <DataGridCheckBoxColumn Header="Default" Binding="{Binding Default}" Width="90"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <GroupBox Header="Create / Edit Transport Rule" Margin="0,0,0,8">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Identity (edit only)"/>
+                            <TextBox Text="{Binding MailFlow.RuleIdentity}"/>
+                            <TextBlock Text="Name" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RuleName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="From (csv)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RuleFrom}"/>
+                            <TextBlock Text="SentTo (csv)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RuleSentTo}"/>
+                            <TextBlock Text="SubjectContainsWords (csv)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RuleSubjectContains}"/>
+                            <TextBlock Text="PrependSubject" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RulePrependSubject}"/>
+                            <TextBlock Text="Mode (Enforce/Audit)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.RuleMode}"/>
+                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.RuleEnabled}" Margin="0,6,0,0"/>
+                            <Button Content="Save Rule" Command="{Binding MailFlow.SaveRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Test Transport Rules" Margin="0,0,0,8">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Sender"/>
+                            <TextBox Text="{Binding MailFlow.TestSender, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Recipient" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.TestRecipient, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Subject" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.TestSubject}"/>
+                            <Button Content="Test" Command="{Binding MailFlow.TestRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"/>
+                            <TextBlock Text="Result" Margin="0,8,0,0" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding MailFlow.TestResult}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Create / Edit Connector" Margin="0,0,0,8">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Identity (edit only)"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorIdentity}"/>
+                            <TextBlock Text="Type (Inbound/Outbound)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorType}"/>
+                            <TextBlock Text="Name" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Comment" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorComment}"/>
+                            <TextBlock Text="SenderDomains (csv)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorSenderDomains}"/>
+                            <TextBlock Text="RecipientDomains (csv)" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorRecipientDomains}"/>
+                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.ConnectorEnabled}" Margin="0,6,0,0"/>
+                            <Button Content="Save Connector" Command="{Binding MailFlow.SaveConnectorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Create / Edit Accepted Domain">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Identity (edit only)"/>
+                            <TextBox Text="{Binding MailFlow.DomainIdentity}"/>
+                            <TextBlock Text="Name" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.DomainName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Domain FQDN" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.DomainFqdn, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Domain Type" Margin="0,6,0,0"/>
+                            <TextBox Text="{Binding MailFlow.DomainType}"/>
+                            <CheckBox Content="Make Default" IsChecked="{Binding MailFlow.DomainMakeDefault}" Margin="0,6,0,0"/>
+                            <Button Content="Save Domain" Command="{Binding MailFlow.SaveDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

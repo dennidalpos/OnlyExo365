@@ -599,6 +599,34 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
+    public async Task<Result> UpsertTransportRuleAsync(
+        UpsertTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.UpsertTransportRule,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
+    }
+
+    public async Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
+        TestTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<TestTransportRuleResponse>(
+            OperationType.TestTransportRule,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
     public async Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
         GetConnectorsRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -621,6 +649,36 @@ public class WorkerClient : IAsyncDisposable
             request,
             eventHandler,
             cancellationToken);
+    }
+
+    public async Task<Result> UpsertConnectorAsync(
+        UpsertConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.UpsertConnector,
+            request,
+            eventHandler,
+            cancellationToken);
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
+    }
+
+    public async Task<Result> UpsertAcceptedDomainAsync(
+        UpsertAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.UpsertAcceptedDomain,
+            request,
+            eventHandler,
+            cancellationToken);
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
     }
 
     #endregion

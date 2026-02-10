@@ -2151,13 +2151,13 @@ Get-AcceptedDomain -ErrorAction Stop | ForEach-Object {
 
     public async Task UpsertTransportRuleAsync(UpsertTransportRuleRequest request, CancellationToken cancellationToken = default)
     {
-        var escapedIdentity = (request.Identity ?? string.Empty).Replace("'", "''");
-        var escapedName = request.Name.Replace("'", "''");
-        var from = string.Join(",", request.From.Select(v => $"'{v.Replace("'", "''")}'"));
-        var sentTo = string.Join(",", request.SentTo.Select(v => $"'{v.Replace("'", "''")}'"));
-        var subjectContains = string.Join(",", request.SubjectContainsWords.Select(v => $"'{v.Replace("'", "''")}'"));
-        var prepend = (request.PrependSubject ?? string.Empty).Replace("'", "''");
-        var mode = (request.Mode ?? "Enforce").Replace("'", "''");
+        var escapedIdentity = EscapePs(request.Identity);
+        var escapedName = EscapePs(request.Name);
+        var escapedPrepend = EscapePs(request.PrependSubject);
+        var escapedMode = EscapePs(string.IsNullOrWhiteSpace(request.Mode) ? "Enforce" : request.Mode);
+        var from = FormatPsArray(request.From);
+        var sentTo = FormatPsArray(request.SentTo);
+        var subjectContains = FormatPsArray(request.SubjectContainsWords);
 
         var script = $@"
 $from = @({from})
@@ -2165,13 +2165,13 @@ $sentTo = @({sentTo})
 $subjectContains = @({subjectContains})
 $params = @{{
     Name = '{escapedName}'
-    Mode = '{mode}'
+    Mode = '{escapedMode}'
     Enabled = {(request.Enabled ? "$true" : "$false")}
 }}
 if ($from.Count -gt 0) {{ $params['From'] = $from }}
 if ($sentTo.Count -gt 0) {{ $params['SentTo'] = $sentTo }}
 if ($subjectContains.Count -gt 0) {{ $params['SubjectContainsWords'] = $subjectContains }}
-if ('{prepend}' -ne '') {{ $params['PrependSubject'] = '{prepend}' }}
+if ('{escapedPrepend}' -ne '') {{ $params['PrependSubject'] = '{escapedPrepend}' }}
 
 if ('{escapedIdentity}' -ne '') {{
     Set-TransportRule -Identity '{escapedIdentity}' @params -ErrorAction Stop
@@ -2181,12 +2181,24 @@ if ('{escapedIdentity}' -ne '') {{
         await RunScriptAsync(script, cancellationToken);
     }
 
+    public async Task RemoveTransportRuleAsync(RemoveTransportRuleRequest request, CancellationToken cancellationToken = default)
+    {
+        var identity = EscapePs(request.Identity);
+        var script = $@"
+Remove-TransportRule -Identity '{identity}' -Confirm:$false -ErrorAction Stop
+Write-Output 'OK'";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
     public async Task<TestTransportRuleResponse> TestTransportRuleAsync(TestTransportRuleRequest request, CancellationToken cancellationToken = default)
     {
-        var sender = request.Sender.Replace("'", "''");
-        var recipient = request.Recipient.Replace("'", "''");
-        var subject = request.Subject.Replace("'", "''");
+        var sender = EscapePs(request.Sender);
+        var recipient = EscapePs(request.Recipient);
+        var subject = EscapePs(request.Subject);
+
         var script = $@"
+# NOTE: Exchange Online does not provide a fully reliable generic simulation cmdlet for all predicates.
+# This is a best-effort matcher for common predicates; advanced predicates/actions are intentionally out of scope.
 $sender = '{sender}'
 $recipient = '{recipient}'
 $subject = '{subject}'
@@ -2195,16 +2207,32 @@ foreach ($r in $rules) {{
     $matches = $true
 
     if ($r.From -and $r.From.Count -gt 0) {{
-        $matches = $matches -and ($r.From -contains $sender)
+        $matches = $matches -and (@($r.From) -contains $sender)
     }}
 
     if ($r.SentTo -and $r.SentTo.Count -gt 0) {{
-        $matches = $matches -and ($r.SentTo -contains $recipient)
+        $matches = $matches -and (@($r.SentTo) -contains $recipient)
     }}
 
     if ($r.SubjectContainsWords -and $r.SubjectContainsWords.Count -gt 0) {{
-        $sw = @($r.SubjectContainsWords)
-        $matches = $matches -and ($sw | Where-Object {{ $subject -like ""*$_*"" }} | Measure-Object).Count -gt 0
+        $subjectWords = @($r.SubjectContainsWords)
+        $subjectMatch = ($subjectWords | Where-Object {{ $subject -like ""*$_*"" }} | Measure-Object).Count -gt 0
+        $matches = $matches -and $subjectMatch
+    }}
+
+    if ($r.ExceptIfFrom -and $r.ExceptIfFrom.Count -gt 0) {{
+        if (@($r.ExceptIfFrom) -contains $sender) {{ $matches = $false }}
+    }}
+
+    if ($r.ExceptIfSentTo -and $r.ExceptIfSentTo.Count -gt 0) {{
+        if (@($r.ExceptIfSentTo) -contains $recipient) {{ $matches = $false }}
+    }}
+
+    if ($r.ExceptIfSubjectContainsWords -and $r.ExceptIfSubjectContainsWords.Count -gt 0) {{
+        $exceptWords = @($r.ExceptIfSubjectContainsWords)
+        if (($exceptWords | Where-Object {{ $subject -like ""*$_*"" }} | Measure-Object).Count -gt 0) {{
+            $matches = $false
+        }}
     }}
 
     if ($matches) {{
@@ -2218,11 +2246,11 @@ foreach ($r in $rules) {{
 
     public async Task UpsertConnectorAsync(UpsertConnectorRequest request, CancellationToken cancellationToken = default)
     {
-        var identity = (request.Identity ?? string.Empty).Replace("'", "''");
-        var name = request.Name.Replace("'", "''");
-        var comment = (request.Comment ?? string.Empty).Replace("'", "''");
-        var senderDomains = string.Join(",", request.SenderDomains.Select(v => $"'{v.Replace("'", "''")}'"));
-        var recipientDomains = string.Join(",", request.RecipientDomains.Select(v => $"'{v.Replace("'", "''")}'"));
+        var identity = EscapePs(request.Identity);
+        var name = EscapePs(request.Name);
+        var comment = EscapePs(request.Comment);
+        var senderDomains = FormatPsArray(request.SenderDomains);
+        var recipientDomains = FormatPsArray(request.RecipientDomains);
         var isInbound = request.Type.Equals("Inbound", StringComparison.OrdinalIgnoreCase);
 
         var script = $@"
@@ -2239,26 +2267,41 @@ if ($recipientDomains.Count -gt 0) {{ $params['RecipientDomains'] = $recipientDo
 
 if {(isInbound ? "$true" : "$false")} {{
     if ('{identity}' -ne '') {{
-        Set-InboundConnector -Identity '{identity}' -Enabled {(request.Enabled ? "$true" : "$false")} -Comment '{comment}' -ErrorAction Stop
+        Set-InboundConnector -Identity '{identity}' @params -ErrorAction Stop
     }} else {{
         New-InboundConnector @params -ErrorAction Stop
     }}
 }} else {{
+    $params.Remove('SenderDomains') | Out-Null
     if ('{identity}' -ne '') {{
-        Set-OutboundConnector -Identity '{identity}' -Enabled {(request.Enabled ? "$true" : "$false")} -Comment '{comment}' -ErrorAction Stop
+        Set-OutboundConnector -Identity '{identity}' @params -RecipientDomains $recipientDomains -ErrorAction Stop
     }} else {{
-        New-OutboundConnector @params -ErrorAction Stop
+        New-OutboundConnector @params -RecipientDomains $recipientDomains -ErrorAction Stop
     }}
 }}";
         await RunScriptAsync(script, cancellationToken);
     }
 
+    public async Task RemoveConnectorAsync(RemoveConnectorRequest request, CancellationToken cancellationToken = default)
+    {
+        var identity = EscapePs(request.Identity);
+        var isInbound = request.Type.Equals("Inbound", StringComparison.OrdinalIgnoreCase);
+        var script = $@"
+if {(isInbound ? "$true" : "$false")} {{
+    Remove-InboundConnector -Identity '{identity}' -Confirm:$false -ErrorAction Stop
+}} else {{
+    Remove-OutboundConnector -Identity '{identity}' -Confirm:$false -ErrorAction Stop
+}}
+Write-Output 'OK'";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
     public async Task UpsertAcceptedDomainAsync(UpsertAcceptedDomainRequest request, CancellationToken cancellationToken = default)
     {
-        var identity = (request.Identity ?? string.Empty).Replace("'", "''");
-        var name = request.Name.Replace("'", "''");
-        var domainName = request.DomainName.Replace("'", "''");
-        var domainType = request.DomainType.Replace("'", "''");
+        var identity = EscapePs(request.Identity);
+        var name = EscapePs(request.Name);
+        var domainName = EscapePs(request.DomainName);
+        var domainType = EscapePs(request.DomainType);
 
         var script = $@"
 if ('{identity}' -ne '') {{
@@ -2272,11 +2315,20 @@ if {(request.MakeDefault ? "$true" : "$false")} {{
         await RunScriptAsync(script, cancellationToken);
     }
 
+    public async Task RemoveAcceptedDomainAsync(RemoveAcceptedDomainRequest request, CancellationToken cancellationToken = default)
+    {
+        var identity = EscapePs(request.Identity);
+        var script = $@"
+Remove-AcceptedDomain -Identity '{identity}' -Confirm:$false -ErrorAction Stop
+Write-Output 'OK'";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
     public async Task<GetUserLicensesResponse> GetUserLicensesAsync(string userPrincipalName, CancellationToken cancellationToken = default)
     {
         var script = $@"
 try {{
-    $licenses = Get-MgUserLicenseDetail -UserId '{userPrincipalName}' -ErrorAction Stop
+    $licenses = Get-MgUserLicenseDetail -UserId '{EscapePs(userPrincipalName)}' -ErrorAction Stop
     foreach ($lic in $licenses) {{
         [PSCustomObject]@{{
             SkuId = $lic.SkuId
@@ -2302,12 +2354,12 @@ try {{
 
     public async Task SetUserLicenseAsync(SetUserLicenseRequest request, CancellationToken cancellationToken = default)
     {
-        var addSkus = string.Join(",", request.AddLicenseSkuIds.Select(s => $"@{{SkuId='{s}'}}"));
-        var removeSkus = string.Join(",", request.RemoveLicenseSkuIds.Select(s => $"'{s}'"));
+        var addSkus = string.Join(",", request.AddLicenseSkuIds.Select(s => $"@{{SkuId='{EscapePs(s)}'}}"));
+        var removeSkus = string.Join(",", request.RemoveLicenseSkuIds.Select(s => $"'{EscapePs(s)}'"));
         var script = $@"
 $addLicenses = @({addSkus})
 $removeLicenses = @({removeSkus})
-Set-MgUserLicense -UserId '{request.UserPrincipalName}' -AddLicenses $addLicenses -RemoveLicenses $removeLicenses -ErrorAction Stop
+Set-MgUserLicense -UserId '{EscapePs(request.UserPrincipalName)}' -AddLicenses $addLicenses -RemoveLicenses $removeLicenses -ErrorAction Stop
 Write-Output 'License updated successfully'";
         await RunScriptAsync(script, cancellationToken);
     }
@@ -2381,25 +2433,26 @@ $graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | 
 
     public async Task<InstallModuleResponse> InstallModuleAsync(string moduleName, CancellationToken cancellationToken = default)
     {
+        var safeModuleName = EscapePs(moduleName);
         var script = $@"
 try {{
-    Write-Output 'Installing {moduleName}...'
+    Write-Output 'Installing {safeModuleName}...'
     $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
     if (-not $nuget) {{
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ErrorAction Stop
     }}
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
-    Install-Module -Name '{moduleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
-    $installed = Get-Module -ListAvailable -Name '{moduleName}' | Select-Object -First 1
+    Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
+    $installed = Get-Module -ListAvailable -Name '{safeModuleName}' | Select-Object -First 1
     [PSCustomObject]@{{
         Success = $true
-        Message = '{moduleName} installed successfully'
+        Message = '{safeModuleName} installed successfully'
         InstalledVersion = if ($installed) {{ $installed.Version.ToString() }} else {{ $null }}
     }}
 }} catch {{
     [PSCustomObject]@{{
         Success = $false
-        Message = ""Failed to install {moduleName}: $($_.Exception.Message)""
+        Message = ""Failed to install {safeModuleName}: $($_.Exception.Message)""
         InstalledVersion = $null
     }}
 }}";
@@ -2525,6 +2578,23 @@ try {{
 
         var single = obj.ToString();
         return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single };
+    }
+
+    private static string EscapePs(string? value)
+    {
+        return (value ?? string.Empty).Replace("'", "''");
+    }
+
+    private static string FormatPsArray(IEnumerable<string>? values)
+    {
+        if (values == null)
+        {
+            return string.Empty;
+        }
+
+        return string.Join(",", values
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Select(v => $"'{EscapePs(v.Trim())}'"));
     }
 
     private static string FormatNullableString(string? value)

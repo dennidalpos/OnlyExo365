@@ -245,6 +245,12 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.UpsertTransportRuleAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> RemoveTransportRuleAsync(
+        RemoveTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.RemoveTransportRuleAsync(request, eventHandler, cancellationToken);
+
     public Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
         TestTransportRuleRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -269,11 +275,23 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.UpsertConnectorAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> RemoveConnectorAsync(
+        RemoveConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.RemoveConnectorAsync(request, eventHandler, cancellationToken);
+
     public Task<Result> UpsertAcceptedDomainAsync(
         UpsertAcceptedDomainRequest request,
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default)
         => _client.UpsertAcceptedDomainAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> RemoveAcceptedDomainAsync(
+        RemoveAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.RemoveAcceptedDomainAsync(request, eventHandler, cancellationToken);
 
     #endregion
 

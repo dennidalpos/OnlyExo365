@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
-using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
 using ExchangeAdmin.Presentation.Services;
 
@@ -10,6 +10,9 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MailFlowViewModel : ViewModelBase
 {
+    private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex DomainRegex = new(@"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
 
@@ -25,15 +28,21 @@ public class MailFlowViewModel : ViewModelBase
         _shellViewModel = shellViewModel;
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
-
         EnableRuleCommand = new AsyncRelayCommand(() => SetRuleStateAsync(true), () => SelectedRule != null && !IsLoading);
         DisableRuleCommand = new AsyncRelayCommand(() => SetRuleStateAsync(false), () => SelectedRule != null && !IsLoading);
-        SaveRuleCommand = new AsyncRelayCommand(SaveRuleAsync, () => !IsLoading && !string.IsNullOrWhiteSpace(RuleName));
-        TestRuleCommand = new AsyncRelayCommand(TestRuleAsync, () => !IsLoading && !string.IsNullOrWhiteSpace(TestSender) && !string.IsNullOrWhiteSpace(TestRecipient));
+        SaveRuleCommand = new AsyncRelayCommand(SaveRuleAsync, () => !IsLoading && IsRuleInputValid);
+        RemoveRuleCommand = new AsyncRelayCommand(RemoveRuleAsync, () => !IsLoading && SelectedRule != null);
+        TestRuleCommand = new AsyncRelayCommand(TestRuleAsync, () => !IsLoading && IsRuleTestInputValid);
 
-        SaveConnectorCommand = new AsyncRelayCommand(SaveConnectorAsync, () => !IsLoading && !string.IsNullOrWhiteSpace(ConnectorName));
-        SaveDomainCommand = new AsyncRelayCommand(SaveDomainAsync, () => !IsLoading && !string.IsNullOrWhiteSpace(DomainName) && !string.IsNullOrWhiteSpace(DomainFqdn));
+        SaveConnectorCommand = new AsyncRelayCommand(SaveConnectorAsync, () => !IsLoading && IsConnectorInputValid);
+        RemoveConnectorCommand = new AsyncRelayCommand(RemoveConnectorAsync, () => !IsLoading && SelectedConnector != null);
+        SaveDomainCommand = new AsyncRelayCommand(SaveDomainAsync, () => !IsLoading && IsDomainInputValid);
+        RemoveDomainCommand = new AsyncRelayCommand(RemoveDomainAsync, () => !IsLoading && SelectedDomain != null);
     }
+
+    public IReadOnlyList<string> RuleModes { get; } = new[] { "Enforce", "Audit" };
+    public IReadOnlyList<string> ConnectorTypes { get; } = new[] { "Inbound", "Outbound" };
+    public IReadOnlyList<string> DomainTypes { get; } = new[] { "Authoritative", "InternalRelay", "ExternalRelay" };
 
     public bool IsLoading
     {
@@ -62,6 +71,15 @@ public class MailFlowViewModel : ViewModelBase
 
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
+    public bool IsRuleInputValid => !string.IsNullOrWhiteSpace(RuleName) && RuleModes.Contains(RuleMode);
+    public bool IsRuleTestInputValid => IsValidEmail(TestSender) && IsValidEmail(TestRecipient);
+    public bool IsConnectorInputValid => !string.IsNullOrWhiteSpace(ConnectorName) && ConnectorTypes.Contains(ConnectorType) && AreValidDomains(SplitCsv(ConnectorSenderDomains)) && AreValidDomains(SplitCsv(ConnectorRecipientDomains));
+    public bool IsDomainInputValid => !string.IsNullOrWhiteSpace(DomainName) && IsValidDomain(DomainFqdn) && DomainTypes.Contains(DomainType);
+
+    public string RuleValidationMessage => IsRuleInputValid ? string.Empty : "Rule: Name obbligatorio e Mode valido (Enforce/Audit).";
+    public string TestValidationMessage => IsRuleTestInputValid ? string.Empty : "Test: Sender e Recipient devono essere email valide.";
+    public string ConnectorValidationMessage => IsConnectorInputValid ? string.Empty : "Connector: Name obbligatorio, Type valido e domini in formato corretto.";
+    public string DomainValidationMessage => IsDomainInputValid ? string.Empty : "Domain: Name obbligatorio, FQDN valido e DomainType supportato.";
 
     public TransportRuleDto? SelectedRule
     {
@@ -148,30 +166,31 @@ public class MailFlowViewModel : ViewModelBase
     private bool _domainMakeDefault;
 
     public string? RuleIdentity { get => _ruleIdentity; set => SetProperty(ref _ruleIdentity, value); }
-    public string RuleName { get => _ruleName; set => SetProperty(ref _ruleName, value); }
+    public string RuleName { get => _ruleName; set { if (SetProperty(ref _ruleName, value)) RaiseValidationChanged(); } }
     public string RuleFrom { get => _ruleFrom; set => SetProperty(ref _ruleFrom, value); }
     public string RuleSentTo { get => _ruleSentTo; set => SetProperty(ref _ruleSentTo, value); }
     public string RuleSubjectContains { get => _ruleSubjectContains; set => SetProperty(ref _ruleSubjectContains, value); }
     public string RulePrependSubject { get => _rulePrependSubject; set => SetProperty(ref _rulePrependSubject, value); }
-    public string RuleMode { get => _ruleMode; set => SetProperty(ref _ruleMode, value); }
+    public string RuleMode { get => _ruleMode; set { if (SetProperty(ref _ruleMode, value)) RaiseValidationChanged(); } }
     public bool RuleEnabled { get => _ruleEnabled; set => SetProperty(ref _ruleEnabled, value); }
-    public string TestSender { get => _testSender; set => SetProperty(ref _testSender, value); }
-    public string TestRecipient { get => _testRecipient; set => SetProperty(ref _testRecipient, value); }
+
+    public string TestSender { get => _testSender; set { if (SetProperty(ref _testSender, value)) RaiseValidationChanged(); } }
+    public string TestRecipient { get => _testRecipient; set { if (SetProperty(ref _testRecipient, value)) RaiseValidationChanged(); } }
     public string TestSubject { get => _testSubject; set => SetProperty(ref _testSubject, value); }
     public string TestResult { get => _testResult; set => SetProperty(ref _testResult, value); }
 
     public string? ConnectorIdentity { get => _connectorIdentity; set => SetProperty(ref _connectorIdentity, value); }
-    public string ConnectorType { get => _connectorType; set => SetProperty(ref _connectorType, value); }
-    public string ConnectorName { get => _connectorName; set => SetProperty(ref _connectorName, value); }
+    public string ConnectorType { get => _connectorType; set { if (SetProperty(ref _connectorType, value)) RaiseValidationChanged(); } }
+    public string ConnectorName { get => _connectorName; set { if (SetProperty(ref _connectorName, value)) RaiseValidationChanged(); } }
     public string ConnectorComment { get => _connectorComment; set => SetProperty(ref _connectorComment, value); }
     public bool ConnectorEnabled { get => _connectorEnabled; set => SetProperty(ref _connectorEnabled, value); }
-    public string ConnectorSenderDomains { get => _connectorSenderDomains; set => SetProperty(ref _connectorSenderDomains, value); }
-    public string ConnectorRecipientDomains { get => _connectorRecipientDomains; set => SetProperty(ref _connectorRecipientDomains, value); }
+    public string ConnectorSenderDomains { get => _connectorSenderDomains; set { if (SetProperty(ref _connectorSenderDomains, value)) RaiseValidationChanged(); } }
+    public string ConnectorRecipientDomains { get => _connectorRecipientDomains; set { if (SetProperty(ref _connectorRecipientDomains, value)) RaiseValidationChanged(); } }
 
     public string? DomainIdentity { get => _domainIdentity; set => SetProperty(ref _domainIdentity, value); }
-    public string DomainName { get => _domainName; set => SetProperty(ref _domainName, value); }
-    public string DomainFqdn { get => _domainFqdn; set => SetProperty(ref _domainFqdn, value); }
-    public string DomainType { get => _domainType; set => SetProperty(ref _domainType, value); }
+    public string DomainName { get => _domainName; set { if (SetProperty(ref _domainName, value)) RaiseValidationChanged(); } }
+    public string DomainFqdn { get => _domainFqdn; set { if (SetProperty(ref _domainFqdn, value)) RaiseValidationChanged(); } }
+    public string DomainType { get => _domainType; set { if (SetProperty(ref _domainType, value)) RaiseValidationChanged(); } }
     public bool DomainMakeDefault { get => _domainMakeDefault; set => SetProperty(ref _domainMakeDefault, value); }
 
     public ObservableCollection<TransportRuleDto> TransportRules { get; } = new();
@@ -182,9 +201,12 @@ public class MailFlowViewModel : ViewModelBase
     public ICommand EnableRuleCommand { get; }
     public ICommand DisableRuleCommand { get; }
     public ICommand SaveRuleCommand { get; }
+    public ICommand RemoveRuleCommand { get; }
     public ICommand TestRuleCommand { get; }
     public ICommand SaveConnectorCommand { get; }
+    public ICommand RemoveConnectorCommand { get; }
     public ICommand SaveDomainCommand { get; }
+    public ICommand RemoveDomainCommand { get; }
 
     public async Task LoadAsync()
     {
@@ -242,12 +264,26 @@ public class MailFlowViewModel : ViewModelBase
     private async Task SetRuleStateAsync(bool enabled)
     {
         if (SelectedRule == null) return;
+
+        if (!enabled)
+        {
+            var confirmed = ErrorDialogService.ShowConfirmation("Conferma disabilitazione", $"Disabilitare la regola '{SelectedRule.Name}'?");
+            if (!confirmed)
+            {
+                return;
+            }
+        }
+
         IsLoading = true;
         ErrorMessage = null;
         try
         {
             var result = await _workerService.SetTransportRuleStateAsync(new SetTransportRuleStateRequest { Identity = SelectedRule.Identity, Enabled = enabled });
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore stato rule"; return; }
+            if (!result.IsSuccess)
+            {
+                ErrorMessage = result.Error?.Message ?? "Errore stato rule";
+                return;
+            }
             await RefreshAsync(CancellationToken.None);
         }
         finally { IsLoading = false; }
@@ -255,6 +291,8 @@ public class MailFlowViewModel : ViewModelBase
 
     private async Task SaveRuleAsync(CancellationToken cancellationToken)
     {
+        if (!IsRuleInputValid) return;
+
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -278,8 +316,28 @@ public class MailFlowViewModel : ViewModelBase
         finally { IsLoading = false; }
     }
 
+    private async Task RemoveRuleAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedRule == null) return;
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare la regola '{SelectedRule.Name}'?");
+        if (!confirmed) return;
+
+        IsLoading = true;
+        ErrorMessage = null;
+        try
+        {
+            var result = await _workerService.RemoveTransportRuleAsync(new RemoveTransportRuleRequest { Identity = SelectedRule.Identity }, cancellationToken: cancellationToken);
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione rule"; return; }
+            await RefreshAsync(cancellationToken);
+        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
+    }
+
     private async Task TestRuleAsync(CancellationToken cancellationToken)
     {
+        if (!IsRuleTestInputValid) return;
+
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -302,6 +360,8 @@ public class MailFlowViewModel : ViewModelBase
 
     private async Task SaveConnectorAsync(CancellationToken cancellationToken)
     {
+        if (!IsConnectorInputValid) return;
+
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -324,8 +384,33 @@ public class MailFlowViewModel : ViewModelBase
         finally { IsLoading = false; }
     }
 
+    private async Task RemoveConnectorAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedConnector == null) return;
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare il connector '{SelectedConnector.Name}'?");
+        if (!confirmed) return;
+
+        IsLoading = true;
+        ErrorMessage = null;
+        try
+        {
+            var result = await _workerService.RemoveConnectorAsync(new RemoveConnectorRequest
+            {
+                Identity = SelectedConnector.Identity,
+                Type = SelectedConnector.Type
+            }, cancellationToken: cancellationToken);
+
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione connector"; return; }
+            await RefreshAsync(cancellationToken);
+        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
+    }
+
     private async Task SaveDomainAsync(CancellationToken cancellationToken)
     {
+        if (!IsDomainInputValid) return;
+
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -346,9 +431,46 @@ public class MailFlowViewModel : ViewModelBase
         finally { IsLoading = false; }
     }
 
+    private async Task RemoveDomainAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedDomain == null) return;
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare il dominio '{SelectedDomain.DomainName}'?");
+        if (!confirmed) return;
+
+        IsLoading = true;
+        ErrorMessage = null;
+        try
+        {
+            var result = await _workerService.RemoveAcceptedDomainAsync(new RemoveAcceptedDomainRequest { Identity = SelectedDomain.Identity }, cancellationToken: cancellationToken);
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione dominio"; return; }
+            await RefreshAsync(cancellationToken);
+        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
+    }
+
+    private void RaiseValidationChanged()
+    {
+        OnPropertyChanged(nameof(IsRuleInputValid));
+        OnPropertyChanged(nameof(IsRuleTestInputValid));
+        OnPropertyChanged(nameof(IsConnectorInputValid));
+        OnPropertyChanged(nameof(IsDomainInputValid));
+        OnPropertyChanged(nameof(RuleValidationMessage));
+        OnPropertyChanged(nameof(TestValidationMessage));
+        OnPropertyChanged(nameof(ConnectorValidationMessage));
+        OnPropertyChanged(nameof(DomainValidationMessage));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
     private static List<string> SplitCsv(string value) => value
         .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .Where(v => !string.IsNullOrWhiteSpace(v))
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .ToList();
+
+    private static bool IsValidEmail(string value) => !string.IsNullOrWhiteSpace(value) && EmailRegex.IsMatch(value.Trim());
+
+    private static bool IsValidDomain(string value) => !string.IsNullOrWhiteSpace(value) && DomainRegex.IsMatch(value.Trim());
+
+    private static bool AreValidDomains(IEnumerable<string> domains) => domains.All(IsValidDomain);
 }

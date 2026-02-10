@@ -66,11 +66,14 @@ public class OperationDispatcher
                 OperationType.GetTransportRules => await HandleGetTransportRulesAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.SetTransportRuleState => await HandleSetTransportRuleStateAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.UpsertTransportRule => await HandleUpsertTransportRuleAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.RemoveTransportRule => await HandleRemoveTransportRuleAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.TestTransportRule => await HandleTestTransportRuleAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetConnectors => await HandleGetConnectorsAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.UpsertConnector => await HandleUpsertConnectorAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.RemoveConnector => await HandleRemoveConnectorAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetAcceptedDomains => await HandleGetAcceptedDomainsAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.UpsertAcceptedDomain => await HandleUpsertAcceptedDomainAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.RemoveAcceptedDomain => await HandleRemoveAcceptedDomainAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetUserLicenses => await HandleGetUserLicensesAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.SetUserLicense => await HandleSetUserLicenseAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetAvailableLicenses => await HandleGetAvailableLicensesAsync(request, request.CorrelationId, cancellationToken),
@@ -872,6 +875,18 @@ public class OperationDispatcher
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
 
+    private async Task<ResponseEnvelope> HandleRemoveTransportRuleAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var removeRequest = JsonMessageSerializer.ExtractPayload<RemoveTransportRuleRequest>(request.Payload);
+        if (removeRequest == null || string.IsNullOrWhiteSpace(removeRequest.Identity))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.RemoveTransportRuleAsync(removeRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
     private async Task<ResponseEnvelope> HandleTestTransportRuleAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
     {
         var testRequest = JsonMessageSerializer.ExtractPayload<TestTransportRuleRequest>(request.Payload);
@@ -896,6 +911,18 @@ public class OperationDispatcher
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
 
+    private async Task<ResponseEnvelope> HandleRemoveConnectorAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var removeRequest = JsonMessageSerializer.ExtractPayload<RemoveConnectorRequest>(request.Payload);
+        if (removeRequest == null || string.IsNullOrWhiteSpace(removeRequest.Identity) || string.IsNullOrWhiteSpace(removeRequest.Type))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity and Type are required");
+        }
+
+        await _exoCommands.RemoveConnectorAsync(removeRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
     private async Task<ResponseEnvelope> HandleUpsertAcceptedDomainAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
     {
         var upsertRequest = JsonMessageSerializer.ExtractPayload<UpsertAcceptedDomainRequest>(request.Payload);
@@ -905,6 +932,18 @@ public class OperationDispatcher
         }
 
         await _exoCommands.UpsertAcceptedDomainAsync(upsertRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleRemoveAcceptedDomainAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var removeRequest = JsonMessageSerializer.ExtractPayload<RemoveAcceptedDomainRequest>(request.Payload);
+        if (removeRequest == null || string.IsNullOrWhiteSpace(removeRequest.Identity))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.RemoveAcceptedDomainAsync(removeRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
 

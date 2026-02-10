@@ -2204,7 +2204,7 @@ foreach ($r in $rules) {{
 
     if ($r.SubjectContainsWords -and $r.SubjectContainsWords.Count -gt 0) {{
         $sw = @($r.SubjectContainsWords)
-        $matches = $matches -and ($sw | Where-Object {{ $subject -like "*$_*" }} | Measure-Object).Count -gt 0
+        $matches = $matches -and ($sw | Where-Object {{ $subject -like ""*$_*"" }} | Measure-Object).Count -gt 0
     }}
 
     if ($matches) {{

@@ -1138,11 +1138,12 @@ public class MailboxDetailsViewModel : ViewModelBase
         foreach (var perm in Permissions.SendAsPermissions)
         {
             var displayName = string.IsNullOrWhiteSpace(perm.DisplayName) ? perm.Trustee : perm.DisplayName;
-            var resolvedTrustee = string.IsNullOrWhiteSpace(perm.ResolvedTrustee) ? perm.Trustee : perm.ResolvedTrustee;
             SendAsPermissions.Add(new PermissionDisplayItem
             {
                 User = displayName,
-                Identity = resolvedTrustee,
+                // Use the original trustee value for removal operations; resolved identities
+                // (SMTP/ExternalDirectoryObjectId) are useful for display but can fail as -Trustee.
+                Identity = perm.Trustee,
                 PermissionType = PermissionType.SendAs,
                 IsInherited = perm.IsInherited
             });
@@ -1295,9 +1296,13 @@ public class MailboxDetailsViewModel : ViewModelBase
 
         try
         {
+            var targetIdentity = string.IsNullOrWhiteSpace(PrimarySmtpAddress) ? Identity : PrimarySmtpAddress;
+
             var request = new ApplyPermissionsDeltaPlanRequest
             {
-                Identity = Identity,
+                // Prefer SMTP address because DisplayName-based identities can be ambiguous
+                // (e.g. shared mailbox names that match multiple recipients).
+                Identity = targetIdentity!,
                 Actions = new List<PermissionDeltaActionDto>(_pendingActions)
             };
 

@@ -465,6 +465,8 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
         var escapedIdentity = request.Identity.Replace("'", "''");
 
         var script = $@"
+$ErrorActionPreference = 'SilentlyContinue'
+
 function Get-BytesFromSize($size) {{
     if ($null -eq $size) {{ return $null }}
     $text = $size.ToString()
@@ -742,6 +744,8 @@ $policies = Get-RetentionPolicy
         var escapedIdentity = identity.Replace("'", "''");
 
         var script = $@"
+$ErrorActionPreference = 'SilentlyContinue'
+
 function Get-BytesFromSize($size) {{
     if ($null -eq $size) {{ return $null }}
     $text = $size.ToString()
@@ -755,7 +759,10 @@ function Get-BytesFromSize($size) {{
 }}
 
 try {{
-    $stats = Get-MailboxStatistics -Identity '{escapedIdentity}' -ErrorAction Stop
+    $stats = Get-MailboxStatistics -Identity '{escapedIdentity}' -ErrorAction SilentlyContinue
+    if ($null -eq $stats) {{
+        return $null
+    }}
     @{{
         TotalItemSize = $stats.TotalItemSize.ToString()
         TotalItemSizeBytes = Get-BytesFromSize $stats.TotalItemSize
@@ -801,8 +808,14 @@ catch {{
         var escapedIdentity = identity.Replace("'", "''");
 
         var script = $@"
+$ErrorActionPreference = 'SilentlyContinue'
+
 try {{
-    $rules = Get-InboxRule -Mailbox '{escapedIdentity}' -ErrorAction Stop
+    $rules = Get-InboxRule -Mailbox '{escapedIdentity}' -ErrorAction SilentlyContinue
+    if ($null -eq $rules) {{
+        @()
+        return
+    }}
     @($rules | ForEach-Object {{
         @{{
             Name = $_.Name
@@ -865,8 +878,13 @@ catch {{
         var escapedIdentity = identity.Replace("'", "''");
 
         var script = $@"
+$ErrorActionPreference = 'SilentlyContinue'
+
 try {{
-    $config = Get-MailboxAutoReplyConfiguration -Identity '{escapedIdentity}' -ErrorAction Stop
+    $config = Get-MailboxAutoReplyConfiguration -Identity '{escapedIdentity}' -ErrorAction SilentlyContinue
+    if ($null -eq $config) {{
+        return $null
+    }}
     @{{
         AutoReplyState = $config.AutoReplyState.ToString()
         StartTime = $config.StartTime

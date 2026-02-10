@@ -1296,9 +1296,13 @@ public class MailboxDetailsViewModel : ViewModelBase
 
         try
         {
+            var targetIdentity = string.IsNullOrWhiteSpace(PrimarySmtpAddress) ? Identity : PrimarySmtpAddress;
+
             var request = new ApplyPermissionsDeltaPlanRequest
             {
-                Identity = Identity,
+                // Prefer SMTP address because DisplayName-based identities can be ambiguous
+                // (e.g. shared mailbox names that match multiple recipients).
+                Identity = targetIdentity!,
                 Actions = new List<PermissionDeltaActionDto>(_pendingActions)
             };
 

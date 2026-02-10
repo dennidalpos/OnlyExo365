@@ -49,11 +49,38 @@ dotnet run --project src/ExchangeAdmin.Presentation/ExchangeAdmin.Presentation.c
 dotnet run --project src/ExchangeAdmin.Worker/ExchangeAdmin.Worker.csproj
 ```
 
+
+## Build & clean scripts
+
+Repository scripts live in `build/`:
+
+- `build/clean.ps1`: removes artifacts, `bin/obj`, temporary files, test/coverage outputs, and optionally cache-related data.
+- `build/build.ps1`: validates prerequisites, restores/builds the solution, publishes binaries, and can optionally produce an MSI.
+
+Quick examples:
+
+```powershell
+# Dry-run cleanup
+pwsh ./build/clean.ps1 -DryRun
+
+# Full cleanup including cache-related items
+pwsh ./build/clean.ps1 -All
+
+# Build release + publish self-contained for a specific RID
+pwsh ./build/build.ps1 -Configuration Release -Publish -SelfContained -RuntimeIdentifier win-x64
+```
+
+## UI checkbox/filter behavior analysis
+
+A detailed analysis of each user-facing checkbox/filter (trigger behavior, backend mapping, and side-effects) is available in:
+
+- `docs/checkbox-filter-logic.md`
+
 ## Development tips
 
 - **UI + Worker pairing**: if you run the UI project, ensure the worker project builds successfully so the post-build copy target can place the worker binaries alongside the UI output.
 - **Project references**: application, domain, infrastructure, and contracts are shared; changes in these layers affect both the UI and worker.
-- **Mailbox permissions and quotas**: SendAs entries are displayed with friendly names while removal actions rely on resolved trustee identities; mailbox quota bytes are parsed from localized PowerShell size strings in the worker.
+- **Mailbox permissions and quotas**: SendAs entries are displayed with friendly names while removal actions use the original trustee identity for compatibility with `Remove-RecipientPermission`; mailbox quota bytes are parsed from localized PowerShell size strings in the worker.
 
 ## Troubleshooting
 

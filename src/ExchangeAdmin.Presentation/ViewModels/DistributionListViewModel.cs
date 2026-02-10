@@ -148,7 +148,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             if (SetProperty(ref _includeDynamic, value))
             {
-                _ = RefreshAsync(CancellationToken.None);
+                SafeRefreshAsync();
             }
         }
     }
@@ -381,6 +381,19 @@ public class DistributionListViewModel : ViewModelBase
                 SelectedDetails = null;
                 Members.Clear();
             }
+        }
+    }
+
+
+    private async void SafeRefreshAsync()
+    {
+        try
+        {
+            await RefreshAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Error, $"Distribution list refresh failed: {ex.Message}");
         }
     }
 

@@ -13,6 +13,9 @@ public class MailboxListItemDto
     [JsonPropertyName("displayName")]
     public string DisplayName { get; set; } = string.Empty;
 
+    [JsonPropertyName("userPrincipalName")]
+    public string? UserPrincipalName { get; set; }
+
     [JsonPropertyName("primarySmtpAddress")]
     public string PrimarySmtpAddress { get; set; } = string.Empty;
 
@@ -31,9 +34,6 @@ public class MailboxListItemDto
 
 public class MailboxDto : MailboxListItemDto
 {
-    [JsonPropertyName("userPrincipalName")]
-    public string? UserPrincipalName { get; set; }
-
     [JsonPropertyName("samAccountName")]
     public string? SamAccountName { get; set; }
 

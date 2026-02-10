@@ -56,7 +56,7 @@
                         <Button Content="Delete Selected" DockPanel.Dock="Top" Margin="0,0,0,8" Command="{Binding MailFlow.RemoveConnectorCommand}" Style="{StaticResource PrimaryButton}"/>
                         <DataGrid ItemsSource="{Binding MailFlow.Connectors}" SelectedItem="{Binding MailFlow.SelectedConnector, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Name" Binding="{Binding DisplayLabel}" Width="*"/>
                                 <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120"/>
                                 <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="90"/>
                                 <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="1.4*"/>
@@ -98,7 +98,7 @@
                             <TextBox Text="{Binding MailFlow.RulePrependSubject}"/>
                             <TextBlock Text="Mode" Margin="0,6,0,0"/>
                             <ComboBox ItemsSource="{Binding MailFlow.RuleModes}" SelectedItem="{Binding MailFlow.RuleMode}"/>
-                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.RuleEnabled}" Margin="0,6,0,0"/>
+                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.RuleEnabled}" Margin="0,6,0,0" IsEnabled="{Binding MailFlow.CanEditSelectedRule}"/>
                             <TextBlock Text="{Binding MailFlow.RuleValidationMessage}" Foreground="Orange" TextWrapping="Wrap" Margin="0,6,0,0"
                                        Visibility="{Binding MailFlow.IsRuleInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
                             <Button Content="Save Rule" Command="{Binding MailFlow.SaveRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
@@ -126,7 +126,7 @@
                     <GroupBox Header="Create / Edit Connector" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="Identity (edit only)"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorIdentity}" IsReadOnly="True"/>
+                            <TextBox Text="{Binding MailFlow.ConnectorIdentityDisplay}" IsReadOnly="True"/>
                             <TextBlock Text="Type" Margin="0,6,0,0"/>
                             <ComboBox ItemsSource="{Binding MailFlow.ConnectorTypes}" SelectedItem="{Binding MailFlow.ConnectorType}"/>
                             <TextBlock Text="Name" Margin="0,6,0,0"/>
@@ -137,7 +137,7 @@
                             <TextBox Text="{Binding MailFlow.ConnectorSenderDomains, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="RecipientDomains (csv)" Margin="0,6,0,0"/>
                             <TextBox Text="{Binding MailFlow.ConnectorRecipientDomains, UpdateSourceTrigger=PropertyChanged}"/>
-                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.ConnectorEnabled}" Margin="0,6,0,0"/>
+                            <CheckBox Content="Enabled" IsChecked="{Binding MailFlow.ConnectorEnabled}" Margin="0,6,0,0" IsEnabled="{Binding MailFlow.CanEditSelectedConnector}"/>
                             <TextBlock Text="{Binding MailFlow.ConnectorValidationMessage}" Foreground="Orange" TextWrapping="Wrap" Margin="0,6,0,0"
                                        Visibility="{Binding MailFlow.IsConnectorInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
                             <Button Content="Save Connector" Command="{Binding MailFlow.SaveConnectorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
@@ -155,7 +155,7 @@
                             <TextBox Text="{Binding MailFlow.DomainFqdn, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="Domain Type" Margin="0,6,0,0"/>
                             <ComboBox ItemsSource="{Binding MailFlow.DomainTypes}" SelectedItem="{Binding MailFlow.DomainType}"/>
-                            <CheckBox Content="Make Default" IsChecked="{Binding MailFlow.DomainMakeDefault}" Margin="0,6,0,0"/>
+                            <CheckBox Content="Make Default" IsChecked="{Binding MailFlow.DomainMakeDefault}" Margin="0,6,0,0" IsEnabled="{Binding MailFlow.CanEditSelectedDomain}"/>
                             <TextBlock Text="{Binding MailFlow.DomainValidationMessage}" Foreground="Orange" TextWrapping="Wrap" Margin="0,6,0,0"
                                        Visibility="{Binding MailFlow.IsDomainInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
                             <Button Content="Save Domain" Command="{Binding MailFlow.SaveDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"

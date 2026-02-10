@@ -164,6 +164,14 @@
                         <Button Content="Verifica Prerequisiti" Command="{Binding Tools.CheckPrerequisitesCommand}"
                                 Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12"/>
 
+                        <Border Background="{StaticResource SecondaryBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8"
+                                Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Tools.PrerequisiteSummary}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Tools.SuggestedActions}" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </Border>
+
                         <!-- PowerShell 7 -->
                         <Grid Margin="0,0,0,8" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
                             <Grid.ColumnDefinitions>
@@ -243,7 +251,7 @@
                                 </Ellipse.Style>
                             </Ellipse>
                             <TextBlock Grid.Column="1" VerticalAlignment="Center">
-                                <Run Text="Microsoft.Graph "/>
+                                <Run Text="Microsoft.Graph.Authentication "/>
                                 <Run Text="{Binding Tools.GraphModuleVersion, Mode=OneWay, FallbackValue=''}"
                                      Foreground="{StaticResource SecondaryTextBrush}"/>
                             </TextBlock>

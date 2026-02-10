@@ -79,7 +79,7 @@ internal class Program
     private static async Task<int> Main(string[] args)
     {
         const string source = "Worker";
-        ConsoleLogger.Info(source, "Starting ExchangeAdmin.Worker v1.0.0");
+        ConsoleLogger.Info(source, "Starting ExchangeAdmin.Worker v1.0.1");
         ConsoleLogger.Debug(source, $"Process ID: {Environment.ProcessId}");
 
         try

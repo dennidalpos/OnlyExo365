@@ -4,7 +4,8 @@
 param(
     [switch]$All,
     [switch]$DryRun,
-    [switch]$SkipDotNetClean
+    [switch]$SkipDotNetClean,
+    [switch]$IncludeExports
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,6 +14,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SolutionDir = Split-Path -Parent $ScriptDir
 $ArtifactsDir = Join-Path $SolutionDir "artifacts"
 $SrcDir = Join-Path $SolutionDir "src"
+$ExportsDir = Join-Path $ArtifactsDir "exports"
 
 $script:DeletedCount = 0
 $script:DeletedSize = 0
@@ -124,6 +126,18 @@ if (Remove-DirectoryIfExists -Path $ArtifactsDir -Description "Artifacts") {
     Write-Success "Artifacts directory cleaned"
 } else {
     Write-Skipped "Artifacts directory not found"
+}
+
+
+Write-Step "Cleaning generated export files"
+if ($IncludeExports) {
+    if (Remove-DirectoryIfExists -Path $ExportsDir -Description "Generated exports") {
+        Write-Success "Generated exports cleaned"
+    } else {
+        Write-Skipped "Generated exports directory not found"
+    }
+} else {
+    Write-Skipped "Generated exports clean skipped (use -IncludeExports)"
 }
 
 Write-Step "Cleaning bin/obj directories"

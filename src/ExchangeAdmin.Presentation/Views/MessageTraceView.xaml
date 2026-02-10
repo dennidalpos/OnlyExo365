@@ -55,7 +55,7 @@
             <Button Content="Delivered" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Delivered" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
             <Button Content="Failed" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Failed" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
             <Button Content="Pending" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Pending" Style="{StaticResource PrimaryButton}" Margin="0,0,12,0"/>
-            <Button Content="Export CSV" Command="{Binding MessageTrace.ExportCsvCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
+            <Button Content="Export Excel" Command="{Binding MessageTrace.ExportExcelCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0"/>
             <Button Content="Dettaglio messaggio" Command="{Binding MessageTrace.LoadDetailsCommand}" Style="{StaticResource PrimaryButton}"/>
         </StackPanel>
 

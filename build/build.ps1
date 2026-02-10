@@ -82,6 +82,7 @@ $SolutionDir = Split-Path -Parent $ScriptDir
 $SolutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
 $OutputDir = Join-Path $SolutionDir "artifacts"
 $PublishDir = Join-Path $OutputDir "publish"
+$ExportDir = Join-Path $OutputDir "exports"
 $InstallerDir = Join-Path $OutputDir "installer"
 $InstallerSourceDir = Join-Path $SolutionDir "installer"
 $WixBin = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
@@ -191,6 +192,7 @@ Write-Host ""
 Write-Host "Configuration : $Configuration"
 Write-Host "Solution      : $SolutionFile"
 Write-Host "Output        : $OutputDir"
+Write-Host "Exports       : $ExportDir"
 Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $($SelfContained.IsPresent)"
 Write-Host "Runtime       : $RuntimeIdentifier"
@@ -285,6 +287,11 @@ if ($Publish) {
     if (-not (Test-Path $PublishDir)) {
         New-Item -Path $PublishDir -ItemType Directory -Force | Out-Null
         Write-Info "Created: $PublishDir"
+    }
+
+    if (-not (Test-Path $ExportDir)) {
+        New-Item -Path $ExportDir -ItemType Directory -Force | Out-Null
+        Write-Info "Created: $ExportDir"
     }
 
     $publishArgs = @(

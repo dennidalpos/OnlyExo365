@@ -1,83 +1,89 @@
 # Checkbox & Filter Logic Analysis
 
-This document maps each user-facing checkbox/filter to its ViewModel logic and backend request fields.
+Questo documento aggiorna la mappatura **end-to-end** di checkbox e filtri UI:
+**View → ViewModel → Request DTO → Worker/PowerShell → refresh UI**.
 
 ## 1) Mailboxes / Shared Mailboxes
 
-### Search box (`SearchQuery`)
-- **UI**: `MailboxListView` / `SharedMailboxListView` text input.
-- **Behavior**: updates `SearchQuery` with `UpdateSourceTrigger=PropertyChanged`.
-- **Logic**: debounced refresh (`DebounceHelper`, 300ms).
-- **Backend mapping**: `GetMailboxesRequest.SearchQuery`.
+### Search (`SearchQuery`)
+- **UI**: textbox ricerca.
+- **ViewModel**: debounce + refresh pagina.
+- **DTO**: `GetMailboxesRequest.SearchQuery`.
+- **Worker**: filtro su `DisplayName`, `PrimarySmtpAddress`, `Alias`.
 
-### Recipient type filter (`RecipientTypeFilter`)
-- **UI**: combo box (Mailbox/Shared/Room/Equipment depending on view).
-- **Behavior**: immediate refresh when selection changes.
-- **Backend mapping**: `GetMailboxesRequest.RecipientTypeDetails`.
+### Recipient Type (`RecipientTypeFilter`)
+- **UI**: combo tipo mailbox.
+- **ViewModel**: refresh immediato alla modifica.
+- **DTO**: `GetMailboxesRequest.RecipientTypeDetails`.
+- **Worker**: filtro PowerShell su `RecipientTypeDetails`.
 
 ## 2) Deleted Mailboxes
 
-### UPN query filter (`UpnQuery`)
-- **UI**: dedicated search box.
-- **Behavior**: explicit search action populates `_activeSearchQuery`.
-- **Backend mapping**: `GetDeletedMailboxesRequest.SearchQuery`.
+### UPN query (`UpnQuery`)
+- **UI**: campo verifica UPN.
+- **ViewModel**: valorizza `_activeSearchQuery` e lancia refresh.
+- **DTO**: `GetDeletedMailboxesRequest.SearchQuery`.
+- **Worker**: filtro su `DisplayName`, `PrimarySmtpAddress`, `UserPrincipalName`, `Alias`.
 
 ## 3) Distribution Lists
 
-### Search box (`SearchQuery`)
-- **UI**: text input.
-- **Behavior**: debounced refresh (300ms via `DispatcherTimer`).
-- **Backend mapping**: `GetDistributionListsRequest.SearchQuery`.
+### Include Dynamic (`IncludeDynamic`)
+- **UI**: checkbox “Includi dinamiche”.
+- **ViewModel**: toggle → refresh elenco.
+- **DTO**: `GetDistributionListsRequest.IncludeDynamic`.
 
-### Checkbox: Include dynamic groups (`IncludeDynamic`)
-- **UI**: checkbox "Includi dinamiche".
-- **Behavior**: refresh is triggered when toggled.
-- **Implementation note**: refresh now uses a safe async wrapper that logs exceptions.
-- **Backend mapping**: `GetDistributionListsRequest.IncludeDynamic`.
+### Allow External Senders (`AllowExternalSenders`)
+- **UI**: checkbox in dettaglio DL.
+- **ViewModel**: modifica staged fino a Save.
+- **DTO**: mapping verso `RequireSenderAuthenticationEnabled` invertito.
 
-### Checkbox: Allow external senders (`AllowExternalSenders`)
-- **UI**: checkbox in group details.
-- **Behavior**: marks pending settings changes; does not auto-save.
-- **Backend mapping**: converted to inverse `RequireSenderAuthenticationEnabled` when saving.
+## 4) Mail Flow (stato aggiornato)
 
-### Sender allow/deny filters
-- **UI**: add/remove lists for:
-  - `AcceptMessagesOnlyFrom`
-  - `RejectMessagesFrom`
-- **Behavior**: in-memory edits tracked against normalized original values.
-- **Backend mapping**: `SetDistributionListSettingsRequest.AcceptMessagesOnlyFrom` / `RejectMessagesFrom`.
+### Rule Enabled (`RuleEnabled`)
+- **UI**: checkbox “Enabled” sezione Rule.
+- **Abilitazione edit**: `CanEditSelectedRule` (`SelectedRule != null && !IsLoading`).
+- **DTO**: `UpsertTransportRuleRequest.Enabled`.
+- **Persistenza**: Save Rule → worker `UpsertTransportRule` → refresh liste.
 
-## 4) Message Trace
+### Connector Enabled (`ConnectorEnabled`)
+- **UI**: checkbox “Enabled” sezione Connector.
+- **Abilitazione edit**: `CanEditSelectedConnector`.
+- **DTO**: `UpsertConnectorRequest.Enabled`.
+- **Persistenza**: Save Connector → worker `UpsertConnector` → refresh liste.
+- **Conferma rischio**: se passa da Enabled→Disabled su connector selezionato, richiesta conferma tenant-wide.
 
-### Sender/Recipient filters
-- **UI**: text inputs.
-- **Behavior**: applied on search.
-- **Backend mapping**: `GetMessageTraceRequest.SenderAddress` / `RecipientAddress`.
+### Domain Make Default (`DomainMakeDefault`)
+- **UI**: checkbox “Make Default”.
+- **Abilitazione edit**: `CanEditSelectedDomain`.
+- **DTO**: `UpsertAcceptedDomainRequest.MakeDefault`.
+- **Persistenza**: Save Domain → worker `UpsertAcceptedDomain` → refresh liste.
 
-### Date range filters (`StartDate`, `EndDate`)
-- **UI**: date selectors.
-- **Behavior**: applied on search; `EndDate` is expanded to end-of-day (`23:59:59`).
-- **Backend mapping**: `GetMessageTraceRequest.StartDate` / `EndDate`.
+### Filtri test rule
+- **UI**: `TestSender`, `TestRecipient`, `TestSubject`.
+- **Validazione**: sender/recipient email valide.
+- **DTO**: `TestTransportRuleRequest`.
 
-### Page size filter (`PageSize`)
-- **UI**: numeric/selection control.
-- **Behavior**: affects per-page retrieval and `HasMore` paging logic.
-- **Backend mapping**: `GetMessageTraceRequest.PageSize`.
+## 5) Message Trace
 
-## 5) Logs
+### Sender/Recipient/Date filters
+- **DTO**: `GetMessageTraceRequest`.
+- **Status filter** (`All/Delivered/Failed/Pending`): client-side su `AllMessages`.
+- **Dettagli**: `GetMessageTraceDetailsRequest` su elemento selezionato.
 
-### Search filter (`SearchFilter`)
-- **UI**: text input.
-- **Behavior**: triggers cache invalidation + re-filtering.
-- **Filter rule**: case-insensitive match on source/message text.
+### Export
+- Export aggiornato da CSV a **Excel `.xlsx` formattato**.
+- L’export applica intestazione formattata e righe dati filtrate correnti.
+
+## 6) Logs
+
+### Text filter (`SearchFilter`)
+- case-insensitive su source + message.
 
 ### Level filter (`FilterLevel`)
-- **UI**: combo (All, Debug+, Info+, Warning+, Error).
-- **Behavior**: minimum-severity threshold.
-- **Filter rule**: keep entries where `entry.Level >= FilterLevel`.
+- soglia minima severità (`entry.Level >= FilterLevel`).
 
-## Operational Notes
+## Regole operative trasversali
 
-- Most filters are **client-driven inputs** that map directly to request DTO fields.
-- Most checkboxes in details pages represent **staged changes** and are only persisted when user clicks **Save**.
-- List-page filters favor responsiveness (debounce + incremental paging).
+- Le checkbox di dettaglio sono modifiche **staged** fino a Save.
+- La disabilitazione avviene solo quando esplicitamente consentita da stato pagina (`!IsLoading` + selezione valida).
+- Errori di persistenza mostrano messaggio user-friendly e vengono loggati con riferimento diagnostico.

@@ -66,6 +66,9 @@ pwsh ./build/clean.ps1 -DryRun
 # Full cleanup including cache-related items
 pwsh ./build/clean.ps1 -All
 
+# Cleanup including generated exports
+pwsh ./build/clean.ps1 -IncludeExports
+
 # Build release + publish self-contained for a specific RID
 pwsh ./build/build.ps1 -Configuration Release -Publish -SelfContained -RuntimeIdentifier win-x64
 ```
@@ -75,6 +78,14 @@ pwsh ./build/build.ps1 -Configuration Release -Publish -SelfContained -RuntimeId
 A detailed analysis of each user-facing checkbox/filter (trigger behavior, backend mapping, and side-effects) is available in:
 
 - `docs/checkbox-filter-logic.md`
+- `docs/import-export-process.md`
+
+
+## Import / Export
+
+- Message Trace export è disponibile in formato **Excel (.xlsx)** dalla UI (non CSV).
+- Dettagli processi import/export e prerequisiti modulo sono documentati in:
+  - `docs/import-export-process.md`
 
 ## Development tips
 

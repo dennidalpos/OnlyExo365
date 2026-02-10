@@ -845,6 +845,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Information, $"Setting transport rule state: {stateRequest.Identity} => {(stateRequest.Enabled ? "Enabled" : "Disabled")}");
         await _exoCommands.SetTransportRuleStateAsync(stateRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -871,6 +872,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name is required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Information, $"Saving transport rule: {upsertRequest.Name}");
         await _exoCommands.UpsertTransportRuleAsync(upsertRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -883,6 +885,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Warning, $"Removing transport rule: {removeRequest.Identity}");
         await _exoCommands.RemoveTransportRuleAsync(removeRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -907,6 +910,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name is required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Information, $"Saving connector: {upsertRequest.Name} ({upsertRequest.Type})");
         await _exoCommands.UpsertConnectorAsync(upsertRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -919,6 +923,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity and Type are required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Warning, $"Removing connector: {removeRequest.Identity} ({removeRequest.Type})");
         await _exoCommands.RemoveConnectorAsync(removeRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -931,6 +936,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Name and DomainName are required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Information, $"Saving accepted domain: {upsertRequest.DomainName}");
         await _exoCommands.UpsertAcceptedDomainAsync(upsertRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -943,6 +949,7 @@ public class OperationDispatcher
             return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
         }
 
+        await SendLogAsync(correlationId, LogLevel.Warning, $"Removing accepted domain: {removeRequest.Identity}");
         await _exoCommands.RemoveAcceptedDomainAsync(removeRequest, cancellationToken);
         return CreateSuccessResponse(correlationId, new { Success = true });
     }
@@ -1011,6 +1018,7 @@ public class OperationDispatcher
         await SendLogAsync(correlationId, LogLevel.Information, "Checking prerequisites...");
         await SendProgressAsync(correlationId, 0, "Checking system prerequisites...");
 
+        await SendLogAsync(correlationId, LogLevel.Information, "[Prerequisites] Running PowerShell/module checks");
         var status = await _exoCommands.CheckPrerequisitesAsync(cancellationToken);
 
         await SendProgressAsync(correlationId, 100, "Prerequisite check complete");
@@ -1030,6 +1038,7 @@ public class OperationDispatcher
         await SendLogAsync(correlationId, LogLevel.Information, $"Installing module {installRequest.ModuleName}...");
         await SendProgressAsync(correlationId, 0, $"Installing {installRequest.ModuleName}...");
 
+        await SendLogAsync(correlationId, LogLevel.Information, $"[ModuleInstall] Starting install: {installRequest.ModuleName}");
         var response = await _exoCommands.InstallModuleAsync(
             installRequest.ModuleName,
             cancellationToken);

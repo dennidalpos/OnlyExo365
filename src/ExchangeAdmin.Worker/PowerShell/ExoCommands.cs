@@ -2467,7 +2467,7 @@ try {{
         Select-Object -First 1
 
     if (-not $nuget -or $nuget.Version -lt [Version]'2.8.5.201') {{
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -Confirm:$false -ErrorAction Stop
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -ForceBootstrap -Force -Scope CurrentUser -Confirm:$false -ErrorAction Stop
     }}
 
     $repo = Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue
@@ -2481,15 +2481,23 @@ try {{
         Select-Object -First 1
 
     if ($alreadyInstalled) {{
-        Update-Module -Name '{safeModuleName}' -Force -Confirm:$false -ErrorAction SilentlyContinue
-    }} else {{
-        Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
+        [PSCustomObject]@{{
+            Success = $true
+            Message = '{safeModuleName} already installed'
+            InstalledVersion = $alreadyInstalled.Version.ToString()
+        }}
+        return
     }}
+
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -ForceBootstrap -Force -Scope CurrentUser -Confirm:$false -ErrorAction Stop | Out-Null
+    Import-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue | Out-Null
+
+    Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
 
     $installed = Get-Module -ListAvailable -Name '{safeModuleName}' | Sort-Object Version -Descending | Select-Object -First 1
     [PSCustomObject]@{{
         Success = ($null -ne $installed)
-        Message = if ($installed) {{ '{safeModuleName} ready' }} else {{ 'Module install/update completed but module not found in PSModulePath' }}
+        Message = if ($installed) {{ '{safeModuleName} installed successfully' }} else {{ 'Module install completed but module not found in PSModulePath' }}
         InstalledVersion = if ($installed) {{ $installed.Version.ToString() }} else {{ $null }}
     }}
 }} catch {{

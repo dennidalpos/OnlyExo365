@@ -329,7 +329,7 @@
 
                 <TextBlock Grid.Column="2" VerticalAlignment="Center"
                            Foreground="{StaticResource SecondaryTextBrush}"
-                           Text="v1.0.0"/>
+                           Text="v1.0.1"/>
             </Grid>
         </Border>
     </Grid>

@@ -16,7 +16,7 @@ public class HandshakeResponse : IpcMessage
     public string ContractsVersion { get; set; } = ContractVersion.Version;
 
     [JsonPropertyName("workerVersion")]
-    public string WorkerVersion { get; set; } = "1.0.0";
+    public string WorkerVersion { get; set; } = "1.0.1";
 
     [JsonPropertyName("success")]
     public bool Success { get; set; }

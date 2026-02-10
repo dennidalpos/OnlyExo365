@@ -7,7 +7,7 @@
     <?define Manufacturer="OnlyExo365" ?>
   <?endif ?>
   <?ifndef ProductVersion ?>
-    <?define ProductVersion="1.0.0" ?>
+    <?define ProductVersion="1.0.1" ?>
   <?endif ?>
   <?ifndef ProductCode ?>
     <?define ProductCode="7B52C9F5-7F1D-44C9-8B8E-76A4C9E6E5E4" ?>

@@ -2608,15 +2608,18 @@ try {{
         }
 
         var trimmed = name.Trim();
-        if (!trimmed.Contains(" from ", StringComparison.OrdinalIgnoreCase))
+        foreach (var separator in new[] { " from ", " to " })
         {
-            return trimmed;
-        }
+            if (!trimmed.Contains(separator, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
 
-        var parts = trimmed.Split(" from ", 2, StringSplitOptions.TrimEntries);
-        if (parts.Length == 2 && Guid.TryParse(parts[1], out _))
-        {
-            return $"{parts[0]} connector ({type})";
+            var parts = trimmed.Split(separator, 2, StringSplitOptions.TrimEntries);
+            if (parts.Length == 2 && Guid.TryParse(parts[1], out _))
+            {
+                return $"{parts[0]} connector ({type})";
+            }
         }
 
         return trimmed;

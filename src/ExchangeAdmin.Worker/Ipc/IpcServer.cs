@@ -240,7 +240,7 @@ public sealed class IpcServer : IDisposable
         {
             Success = isCompatible,
             ContractsVersion = ContractVersion.Version,
-            WorkerVersion = "1.0.0",
+            WorkerVersion = "1.0.1",
             IsModuleAvailable = _psEngine.IsModuleAvailable,
             PowerShellVersion = _psEngine.PowerShellVersion,
             ErrorMessage = isCompatible ? null : $"Incompatible contracts version. Worker: {ContractVersion.Version}, Client: {request.ContractsVersion}"

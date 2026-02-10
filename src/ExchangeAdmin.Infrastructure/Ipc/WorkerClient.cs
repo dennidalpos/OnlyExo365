@@ -615,6 +615,21 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
+    public async Task<Result> RemoveTransportRuleAsync(
+        RemoveTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.RemoveTransportRule,
+            request,
+            eventHandler,
+            cancellationToken);
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
+    }
+
     public async Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
         TestTransportRuleRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -666,6 +681,21 @@ public class WorkerClient : IAsyncDisposable
         return Result.Success();
     }
 
+    public async Task<Result> RemoveConnectorAsync(
+        RemoveConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.RemoveConnector,
+            request,
+            eventHandler,
+            cancellationToken);
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
+    }
+
     public async Task<Result> UpsertAcceptedDomainAsync(
         UpsertAcceptedDomainRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -673,6 +703,21 @@ public class WorkerClient : IAsyncDisposable
     {
         var response = await SendRequestInternalAsync(
             OperationType.UpsertAcceptedDomain,
+            request,
+            eventHandler,
+            cancellationToken);
+        if (response.WasCancelled) return Result.Cancelled();
+        if (!response.Success) return Result.Failure(NormalizedError.FromDto(response.Error!));
+        return Result.Success();
+    }
+
+    public async Task<Result> RemoveAcceptedDomainAsync(
+        RemoveAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.RemoveAcceptedDomain,
             request,
             eventHandler,
             cancellationToken);

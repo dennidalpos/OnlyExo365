@@ -289,6 +289,11 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> RemoveTransportRuleAsync(
+        RemoveTransportRuleRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     Task<Result<TestTransportRuleResponse>> TestTransportRuleAsync(
         TestTransportRuleRequest request,
         Action<EventEnvelope>? eventHandler = null,
@@ -309,8 +314,18 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> RemoveConnectorAsync(
+        RemoveConnectorRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     Task<Result> UpsertAcceptedDomainAsync(
         UpsertAcceptedDomainRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> RemoveAcceptedDomainAsync(
+        RemoveAcceptedDomainRequest request,
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 

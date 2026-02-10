@@ -2,7 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace ExchangeAdmin.Contracts.Dtos;
 
-public class GetTransportRulesRequest;
+public class GetTransportRulesRequest
+{
+}
 
 public class GetTransportRulesResponse
 {
@@ -52,6 +54,12 @@ public class SetTransportRuleStateRequest
     public bool Enabled { get; set; }
 }
 
+public class RemoveTransportRuleRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+}
+
 public class UpsertTransportRuleRequest
 {
     [JsonPropertyName("identity")]
@@ -97,7 +105,9 @@ public class TestTransportRuleResponse
     public List<string> MatchedRuleNames { get; set; } = new();
 }
 
-public class GetConnectorsRequest;
+public class GetConnectorsRequest
+{
+}
 
 public class GetConnectorsResponse
 {
@@ -153,7 +163,18 @@ public class UpsertConnectorRequest
     public List<string> RecipientDomains { get; set; } = new();
 }
 
-public class GetAcceptedDomainsRequest;
+public class RemoveConnectorRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
+
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = string.Empty;
+}
+
+public class GetAcceptedDomainsRequest
+{
+}
 
 public class GetAcceptedDomainsResponse
 {
@@ -195,4 +216,10 @@ public class UpsertAcceptedDomainRequest
 
     [JsonPropertyName("makeDefault")]
     public bool MakeDefault { get; set; }
+}
+
+public class RemoveAcceptedDomainRequest
+{
+    [JsonPropertyName("identity")]
+    public string Identity { get; set; } = string.Empty;
 }

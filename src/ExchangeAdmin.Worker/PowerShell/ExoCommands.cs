@@ -2460,6 +2460,15 @@ $graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | 
         var script = $@"
 try {{
     Write-Output 'Installing {safeModuleName}...'
+    $ConfirmPreference = 'None'
+
+    $nuget = Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue |
+        Sort-Object Version -Descending |
+        Select-Object -First 1
+
+    if (-not $nuget -or $nuget.Version -lt [Version]'2.8.5.201') {{
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -Confirm:$false -ErrorAction Stop
+    }}
 
     $repo = Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue
     if (-not $repo) {{
@@ -2467,10 +2476,12 @@ try {{
     }}
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
 
-    $alreadyInstalled = Get-Module -ListAvailable -Name '{safeModuleName}' | Select-Object -First 1
+    $alreadyInstalled = Get-Module -ListAvailable -Name '{safeModuleName}' |
+        Sort-Object Version -Descending |
+        Select-Object -First 1
 
     if ($alreadyInstalled) {{
-        Update-Module -Name '{safeModuleName}' -Force -ErrorAction SilentlyContinue
+        Update-Module -Name '{safeModuleName}' -Force -Confirm:$false -ErrorAction SilentlyContinue
     }} else {{
         Install-Module -Name '{safeModuleName}' -Force -AllowClobber -Scope CurrentUser -Confirm:$false -ErrorAction Stop
     }}

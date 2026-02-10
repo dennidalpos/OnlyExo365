@@ -399,11 +399,10 @@ public class MailFlowViewModel : ViewModelBase
         {
             var disableConfirmed = ErrorDialogService.ShowConfirmation(
                 "Conferma disabilitazione tenant-wide",
-                $"Operazione: Disabilitazione connector {SelectedConnector.Type}
-Target: {SelectedConnector.Name}
-Impatto: può interrompere il flusso posta tenant-wide.
-
-Confermare?");
+                $"Operazione: Disabilitazione connector {SelectedConnector.Type}\n" +
+                $"Target: {SelectedConnector.Name}\n" +
+                "Impatto: può interrompere il flusso posta tenant-wide.\n\n" +
+                "Confermare?");
             if (!disableConfirmed)
             {
                 return;

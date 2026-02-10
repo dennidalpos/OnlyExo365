@@ -551,6 +551,78 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
+    public async Task<Result<GetMessageTraceDetailsResponse>> GetMessageTraceDetailsAsync(
+        GetMessageTraceDetailsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetMessageTraceDetailsResponse>(
+            OperationType.GetMessageTraceDetails,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
+    #endregion
+
+    #region Mail Flow
+
+    public async Task<Result<GetTransportRulesResponse>> GetTransportRulesAsync(
+        GetTransportRulesRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetTransportRulesResponse>(
+            OperationType.GetTransportRules,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
+    public async Task<Result> SetTransportRuleStateAsync(
+        SetTransportRuleStateRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.SetTransportRuleState,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    public async Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
+        GetConnectorsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetConnectorsResponse>(
+            OperationType.GetConnectors,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
+    public async Task<Result<GetAcceptedDomainsResponse>> GetAcceptedDomainsAsync(
+        GetAcceptedDomainsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await ExecuteOperationAsync<GetAcceptedDomainsResponse>(
+            OperationType.GetAcceptedDomains,
+            request,
+            eventHandler,
+            cancellationToken);
+    }
+
     #endregion
 
     #region Licenses

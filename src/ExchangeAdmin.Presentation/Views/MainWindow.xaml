@@ -225,6 +225,18 @@
                             </Style>
                         </Button.Resources>
                     </Button>
+                    <Button Content="Mail Flow" Command="{Binding NavigateToMailFlowCommand}"
+                            Style="{StaticResource NavButton}">
+                        <Button.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMailFlowPage}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
 
                     <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
 
@@ -277,6 +289,10 @@
 
                 <views:MessageTraceView x:Name="MessageTraceView"
                                          Visibility="{Binding IsMessageTracePage, Converter={StaticResource BoolToVisibility}}"/>
+
+                
+                <views:MailFlowView x:Name="MailFlowView"
+                                     Visibility="{Binding IsMailFlowPage, Converter={StaticResource BoolToVisibility}}"/>
 
                 <views:ToolsView x:Name="ToolsView"
                                   Visibility="{Binding IsToolsPage, Converter={StaticResource BoolToVisibility}}"/>

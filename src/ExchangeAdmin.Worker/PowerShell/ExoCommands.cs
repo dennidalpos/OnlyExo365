@@ -1973,6 +1973,162 @@ foreach ($t in $traces) {{
         };
     }
 
+
+    public async Task<GetMessageTraceDetailsResponse> GetMessageTraceDetailsAsync(GetMessageTraceDetailsRequest request, CancellationToken cancellationToken = default)
+    {
+        var escapedMessageTraceId = request.MessageTraceId.Replace("'", "''");
+        var escapedRecipient = request.RecipientAddress.Replace("'", "''");
+
+        var script = $@"
+$WarningPreference = 'SilentlyContinue'
+$messageTraceId = '{escapedMessageTraceId}'
+$recipientAddress = '{escapedRecipient}'
+
+if (Get-Command Get-MessageTraceDetailV2 -ErrorAction SilentlyContinue) {{
+    $details = Get-MessageTraceDetailV2 -MessageTraceId $messageTraceId -RecipientAddress $recipientAddress -ErrorAction Stop
+}} elseif (Get-Command Get-MessageTraceDetail -ErrorAction SilentlyContinue) {{
+    $details = Get-MessageTraceDetail -MessageTraceId $messageTraceId -RecipientAddress $recipientAddress -ErrorAction Stop
+}} else {{
+    throw 'Neither Get-MessageTraceDetailV2 nor Get-MessageTraceDetail is available.'
+}}
+
+foreach ($d in $details) {{
+    [PSCustomObject]@{{
+        Date = if ($d.Date) {{ $d.Date.ToString('o') }} else {{ $null }}
+        Event = $d.Event
+        Action = $d.Action
+        Detail = $d.Detail
+        Data = $d.Data
+    }}
+}}";
+
+        var results = await RunScriptAsync(script, cancellationToken);
+        var events = new List<MessageTraceDetailEventDto>();
+
+        foreach (var obj in results)
+        {
+            events.Add(new MessageTraceDetailEventDto
+            {
+                Date = GetNullableDateTime(obj, "Date"),
+                Event = GetString(obj, "Event"),
+                Action = GetString(obj, "Action"),
+                Detail = GetString(obj, "Detail"),
+                Data = GetString(obj, "Data")
+            });
+        }
+
+        return new GetMessageTraceDetailsResponse
+        {
+            MessageTraceId = request.MessageTraceId,
+            Events = events
+        };
+    }
+
+    public async Task<GetTransportRulesResponse> GetTransportRulesAsync(CancellationToken cancellationToken = default)
+    {
+        var script = @"
+$rules = Get-TransportRule -ErrorAction Stop | Sort-Object Priority
+foreach ($r in $rules) {
+    [PSCustomObject]@{
+        Identity = $r.Identity.ToString()
+        Name = $r.Name
+        Priority = $r.Priority
+        State = if ($r.State) { $r.State.ToString() } else { if ($r.Enabled) { 'Enabled' } else { 'Disabled' } }
+        Mode = if ($r.Mode) { $r.Mode.ToString() } else { '' }
+        Description = if ($r.Description) { $r.Description } else { '' }
+    }
+}";
+        var results = await RunScriptAsync(script, cancellationToken);
+        var rules = new List<TransportRuleDto>();
+        foreach (var obj in results)
+        {
+            rules.Add(new TransportRuleDto
+            {
+                Identity = GetString(obj, "Identity"),
+                Name = GetString(obj, "Name"),
+                Priority = obj.Properties["Priority"]?.Value == null ? null : Convert.ToInt32(obj.Properties["Priority"]?.Value),
+                State = GetString(obj, "State"),
+                Mode = GetString(obj, "Mode"),
+                Description = GetString(obj, "Description")
+            });
+        }
+
+        return new GetTransportRulesResponse { Rules = rules };
+    }
+
+    public async Task SetTransportRuleStateAsync(SetTransportRuleStateRequest request, CancellationToken cancellationToken = default)
+    {
+        var escapedIdentity = request.Identity.Replace("'", "''");
+        var cmd = request.Enabled ? "Enable-TransportRule" : "Disable-TransportRule";
+        var script = $@"
+{cmd} -Identity '{escapedIdentity}' -Confirm:$false -ErrorAction Stop
+Write-Output 'OK'";
+        await RunScriptAsync(script, cancellationToken);
+    }
+
+    public async Task<GetConnectorsResponse> GetConnectorsAsync(CancellationToken cancellationToken = default)
+    {
+        var script = @"
+$inbound = Get-InboundConnector -ErrorAction SilentlyContinue | ForEach-Object {
+    [PSCustomObject]@{
+        Name = $_.Name
+        Type = 'Inbound'
+        Enabled = [bool]$_.Enabled
+        Comment = if ($_.Comment) { $_.Comment } else { '' }
+    }
+}
+$outbound = Get-OutboundConnector -ErrorAction SilentlyContinue | ForEach-Object {
+    [PSCustomObject]@{
+        Name = $_.Name
+        Type = 'Outbound'
+        Enabled = [bool]$_.Enabled
+        Comment = if ($_.Comment) { $_.Comment } else { '' }
+    }
+}
+@($inbound + $outbound)";
+        var results = await RunScriptAllowErrorsAsync(script, cancellationToken);
+        var connectors = new List<ConnectorDto>();
+        foreach (var obj in results)
+        {
+            connectors.Add(new ConnectorDto
+            {
+                Name = GetString(obj, "Name"),
+                Type = GetString(obj, "Type"),
+                Enabled = GetBool(obj, "Enabled"),
+                Comment = GetString(obj, "Comment")
+            });
+        }
+
+        return new GetConnectorsResponse { Connectors = connectors.OrderBy(c => c.Type).ThenBy(c => c.Name).ToList() };
+    }
+
+    public async Task<GetAcceptedDomainsResponse> GetAcceptedDomainsAsync(CancellationToken cancellationToken = default)
+    {
+        var script = @"
+Get-AcceptedDomain -ErrorAction Stop | ForEach-Object {
+    [PSCustomObject]@{
+        Name = $_.Name
+        DomainName = $_.DomainName.ToString()
+        DomainType = $_.DomainType.ToString()
+        Default = [bool]$_.Default
+    }
+}";
+        var results = await RunScriptAsync(script, cancellationToken);
+        var domains = new List<AcceptedDomainDto>();
+        foreach (var obj in results)
+        {
+            domains.Add(new AcceptedDomainDto
+            {
+                Name = GetString(obj, "Name"),
+                DomainName = GetString(obj, "DomainName"),
+                DomainType = GetString(obj, "DomainType"),
+                Default = GetBool(obj, "Default")
+            });
+        }
+
+        return new GetAcceptedDomainsResponse { Domains = domains.OrderBy(d => d.DomainName).ToList() };
+    }
+
     public async Task<GetUserLicensesResponse> GetUserLicensesAsync(string userPrincipalName, CancellationToken cancellationToken = default)
     {
         var script = $@"

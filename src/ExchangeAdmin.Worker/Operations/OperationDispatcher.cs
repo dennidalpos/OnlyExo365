@@ -62,6 +62,11 @@ public class OperationDispatcher
                 OperationType.SetDistributionListSettings => await HandleSetDistributionListSettingsAsync(request, cancellationToken),
 
                 OperationType.GetMessageTrace => await HandleGetMessageTraceAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.GetMessageTraceDetails => await HandleGetMessageTraceDetailsAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.GetTransportRules => await HandleGetTransportRulesAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.SetTransportRuleState => await HandleSetTransportRuleStateAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.GetConnectors => await HandleGetConnectorsAsync(request, request.CorrelationId, cancellationToken),
+                OperationType.GetAcceptedDomains => await HandleGetAcceptedDomainsAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetUserLicenses => await HandleGetUserLicensesAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.SetUserLicense => await HandleSetUserLicenseAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetAvailableLicenses => await HandleGetAvailableLicensesAsync(request, request.CorrelationId, cancellationToken),
@@ -794,6 +799,60 @@ public class OperationDispatcher
 
         await SendProgressAsync(correlationId, 100, "Message trace complete");
 
+        return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleGetMessageTraceDetailsAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var detailsRequest = JsonMessageSerializer.ExtractPayload<GetMessageTraceDetailsRequest>(request.Payload);
+
+        if (detailsRequest == null || string.IsNullOrWhiteSpace(detailsRequest.MessageTraceId) || string.IsNullOrWhiteSpace(detailsRequest.RecipientAddress))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "MessageTraceId and RecipientAddress are required");
+        }
+
+        await SendLogAsync(correlationId, LogLevel.Information, "Fetching message trace details...");
+        await SendProgressAsync(correlationId, 0, "Starting details query...");
+
+        var response = await _exoCommands.GetMessageTraceDetailsAsync(
+            detailsRequest,
+            cancellationToken);
+
+        await SendProgressAsync(correlationId, 100, "Message trace details complete");
+
+        return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleGetTransportRulesAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        await SendLogAsync(correlationId, LogLevel.Information, "Fetching transport rules...");
+        var response = await _exoCommands.GetTransportRulesAsync(cancellationToken);
+        return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleSetTransportRuleStateAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        var stateRequest = JsonMessageSerializer.ExtractPayload<SetTransportRuleStateRequest>(request.Payload);
+        if (stateRequest == null || string.IsNullOrWhiteSpace(stateRequest.Identity))
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, "Identity is required");
+        }
+
+        await _exoCommands.SetTransportRuleStateAsync(stateRequest, cancellationToken);
+        return CreateSuccessResponse(correlationId, new { Success = true });
+    }
+
+    private async Task<ResponseEnvelope> HandleGetConnectorsAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        await SendLogAsync(correlationId, LogLevel.Information, "Fetching connectors...");
+        var response = await _exoCommands.GetConnectorsAsync(cancellationToken);
+        return CreateSuccessResponse(correlationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleGetAcceptedDomainsAsync(RequestEnvelope request, string correlationId, CancellationToken cancellationToken)
+    {
+        await SendLogAsync(correlationId, LogLevel.Information, "Fetching accepted domains...");
+        var response = await _exoCommands.GetAcceptedDomainsAsync(cancellationToken);
         return CreateSuccessResponse(correlationId, response);
     }
 

@@ -51,6 +51,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public MailboxSpaceViewModel? MailboxSpace { get; set; }
     public DistributionListViewModel? DistributionLists { get; set; }
     public MessageTraceViewModel? MessageTrace { get; set; }
+    public MailFlowViewModel? MailFlow { get; set; }
     public ToolsViewModel? Tools { get; set; }
     public LogsViewModel? Logs { get; set; }
 
@@ -82,6 +83,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         NavigateToMailboxSpaceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailboxSpace));
         NavigateToDistributionListsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.DistributionLists));
         NavigateToMessageTraceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MessageTrace));
+        NavigateToMailFlowCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailFlow));
         NavigateToToolsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Tools));
         NavigateToLogsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Logs));
 
@@ -225,6 +227,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public bool IsMailboxSpacePage => CurrentPage == NavigationPage.MailboxSpace;
     public bool IsDistributionListsPage => CurrentPage == NavigationPage.DistributionLists;
     public bool IsMessageTracePage => CurrentPage == NavigationPage.MessageTrace;
+    public bool IsMailFlowPage => CurrentPage == NavigationPage.MailFlow;
     public bool IsToolsPage => CurrentPage == NavigationPage.Tools;
     public bool IsLogsPage => CurrentPage == NavigationPage.Logs;
 
@@ -237,6 +240,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         NavigationPage.MailboxSpace => "Spazio mailbox",
         NavigationPage.DistributionLists => "Distribution Lists",
         NavigationPage.MessageTrace => "Traccia Messaggi",
+        NavigationPage.MailFlow => "Mail Flow",
         NavigationPage.Tools => "Tools",
         NavigationPage.Logs => "Logs",
         _ => "Exchange Admin"
@@ -352,6 +356,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public ICommand NavigateToMailboxSpaceCommand { get; }
     public ICommand NavigateToDistributionListsCommand { get; }
     public ICommand NavigateToMessageTraceCommand { get; }
+    public ICommand NavigateToMailFlowCommand { get; }
     public ICommand NavigateToToolsCommand { get; }
     public ICommand NavigateToLogsCommand { get; }
 
@@ -624,6 +629,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         nameof(IsMailboxSpacePage),
         nameof(IsDistributionListsPage),
         nameof(IsMessageTracePage),
+        nameof(IsMailFlowPage),
         nameof(IsToolsPage),
         nameof(IsLogsPage),
         nameof(CurrentPageTitle)

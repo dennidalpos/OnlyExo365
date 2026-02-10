@@ -217,6 +217,40 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.GetMessageTraceAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result<GetMessageTraceDetailsResponse>> GetMessageTraceDetailsAsync(
+        GetMessageTraceDetailsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetMessageTraceDetailsAsync(request, eventHandler, cancellationToken);
+
+    #endregion
+
+    #region Mail Flow
+
+    public Task<Result<GetTransportRulesResponse>> GetTransportRulesAsync(
+        GetTransportRulesRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetTransportRulesAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> SetTransportRuleStateAsync(
+        SetTransportRuleStateRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.SetTransportRuleStateAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result<GetConnectorsResponse>> GetConnectorsAsync(
+        GetConnectorsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetConnectorsAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result<GetAcceptedDomainsResponse>> GetAcceptedDomainsAsync(
+        GetAcceptedDomainsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.GetAcceptedDomainsAsync(request, eventHandler, cancellationToken);
+
     #endregion
 
     #region Licenses

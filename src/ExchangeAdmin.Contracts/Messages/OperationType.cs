@@ -36,6 +36,12 @@ public enum OperationType
     SetDistributionListSettings,
 
     GetMessageTrace,
+    GetMessageTraceDetails,
+
+    GetTransportRules,
+    SetTransportRuleState,
+    GetConnectors,
+    GetAcceptedDomains,
 
     GetUserLicenses,
     SetUserLicense,

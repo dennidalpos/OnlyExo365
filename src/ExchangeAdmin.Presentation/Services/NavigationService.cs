@@ -9,6 +9,7 @@ public enum NavigationPage
     MailboxSpace,
     DistributionLists,
     MessageTrace,
+    MailFlow,
     Tools,
     Logs
 }

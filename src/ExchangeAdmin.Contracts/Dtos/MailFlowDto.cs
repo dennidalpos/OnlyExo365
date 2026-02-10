@@ -123,6 +123,9 @@ public class ConnectorDto
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
+    [JsonPropertyName("displayLabel")]
+    public string DisplayLabel { get; set; } = string.Empty;
+
     [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
@@ -25,6 +26,8 @@ public class ToolsViewModel : ViewModelBase
     private bool _graphModuleInstalled;
     private string? _graphModuleVersion;
     private bool _hasChecked;
+    private string _prerequisiteSummary = string.Empty;
+    private string _suggestedActions = string.Empty;
 
     public ToolsViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
@@ -142,6 +145,18 @@ public class ToolsViewModel : ViewModelBase
     public ICommand InstallGraphModuleCommand { get; }
     public ICommand OpenPowerShellGitHubCommand { get; }
 
+    public string PrerequisiteSummary
+    {
+        get => _prerequisiteSummary;
+        private set => SetProperty(ref _prerequisiteSummary, value);
+    }
+
+    public string SuggestedActions
+    {
+        get => _suggestedActions;
+        private set => SetProperty(ref _suggestedActions, value);
+    }
+
     public async Task LoadAsync()
     {
         if (!HasChecked && _shellViewModel.IsWorkerRunning)
@@ -177,11 +192,20 @@ public class ToolsViewModel : ViewModelBase
                 HasChecked = true;
 
                 _shellViewModel.AddLog(LogLevel.Information,
-                    $"Prerequisiti: PS {status.PowerShellVersion}, EXO={status.ExchangeModuleInstalled}, Graph={status.GraphModuleInstalled}");
+                    $"[Prerequisites] PS={status.PowerShellVersion} (pwsh7={status.IsPowerShell7}), EXO={status.ExchangeModuleInstalled}, Graph={status.GraphModuleInstalled}");
+
+                PrerequisiteSummary = $"PowerShell: {status.PowerShellVersion} | Exchange module: {(status.ExchangeModuleInstalled ? "OK" : "Missing")} | Graph module: {(status.GraphModuleInstalled ? "OK" : "Missing")}";
+
+                var suggestions = new List<string>();
+                if (!status.IsPowerShell7) suggestions.Add("Installare PowerShell 7 per compatibilità ottimale.");
+                if (!status.ExchangeModuleInstalled) suggestions.Add("Installare/aggiornare ExchangeOnlineManagement.");
+                if (!status.GraphModuleInstalled) suggestions.Add("Installare/aggiornare Microsoft.Graph.");
+                SuggestedActions = suggestions.Count == 0 ? "Prerequisiti completi. Nessuna azione richiesta." : string.Join(" ", suggestions);
             }
             else if (!result.WasCancelled)
             {
                 ErrorMessage = result.Error?.Message ?? "Impossibile verificare i prerequisiti";
+                _shellViewModel.AddLog(LogLevel.Error, $"[Prerequisites] Check failed: {ErrorMessage}");
             }
 
             InstallProgress = 100;
@@ -221,7 +245,7 @@ public class ToolsViewModel : ViewModelBase
             {
                 if (result.Value.Success)
                 {
-                    _shellViewModel.AddLog(LogLevel.Information, "PowerShell 7 installato tramite winget");
+                    _shellViewModel.AddLog(LogLevel.Information, "[ModuleInstall] PowerShell 7 installato tramite winget");
                     InstallStatus = "PowerShell 7 installato. Riavviare l'applicazione.";
                 }
                 else
@@ -230,7 +254,7 @@ public class ToolsViewModel : ViewModelBase
                                    "Installare manualmente PowerShell 7:\n" +
                                    "1. Scaricare da https://github.com/PowerShell/PowerShell/releases\n" +
                                    "2. Oppure eseguire: winget install Microsoft.PowerShell";
-                    _shellViewModel.AddLog(LogLevel.Warning, $"PowerShell 7 install failed: {result.Value.Message}");
+                    _shellViewModel.AddLog(LogLevel.Warning, $"[ModuleInstall] PowerShell 7 install failed: {result.Value.Message}");
                 }
             }
             else if (!result.WasCancelled)
@@ -274,7 +298,7 @@ public class ToolsViewModel : ViewModelBase
             {
                 if (result.Value.Success)
                 {
-                    _shellViewModel.AddLog(LogLevel.Information, $"{moduleName} installato con successo");
+                    _shellViewModel.AddLog(LogLevel.Information, $"[ModuleInstall] {moduleName} installato con successo");
                     InstallStatus = $"{moduleName} installato.";
                     await CheckPrerequisitesAsync(CancellationToken.None);
                 }
@@ -283,7 +307,7 @@ public class ToolsViewModel : ViewModelBase
                     ErrorMessage = $"Installazione {moduleName} fallita: {result.Value.Message}\n\n" +
                                    $"Provare manualmente in PowerShell:\n" +
                                    $"Install-Module {moduleName} -Force -AllowClobber -Scope CurrentUser";
-                    _shellViewModel.AddLog(LogLevel.Error, $"Module install failed: {result.Value.Message}");
+                    _shellViewModel.AddLog(LogLevel.Error, $"[ModuleInstall] {moduleName} install failed: {result.Value.Message}");
                 }
             }
             else if (!result.WasCancelled)

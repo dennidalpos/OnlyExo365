@@ -262,6 +262,7 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
             Guid = $_.ExchangeGuid.ToString()
             DisplayName = $_.DisplayName
             PrimarySmtpAddress = $_.PrimarySmtpAddress.ToString()
+            UserPrincipalName = if ($_.UserPrincipalName) { $_.UserPrincipalName.ToString() } else { '' }
             RecipientType = $_.RecipientType.ToString()
             RecipientTypeDetails = $_.RecipientTypeDetails.ToString()
             Alias = $_.Alias
@@ -301,6 +302,7 @@ $pagedMailboxes = $allMailboxes | Select-Object -Skip {request.Skip} -First {req
                                 Guid = mbxHash["Guid"]?.ToString(),
                                 DisplayName = mbxHash["DisplayName"]?.ToString() ?? "",
                                 PrimarySmtpAddress = mbxHash["PrimarySmtpAddress"]?.ToString() ?? "",
+                                UserPrincipalName = mbxHash["UserPrincipalName"]?.ToString(),
                                 RecipientType = mbxHash["RecipientType"]?.ToString() ?? "",
                                 RecipientTypeDetails = mbxHash["RecipientTypeDetails"]?.ToString() ?? "",
                                 Alias = mbxHash["Alias"]?.ToString(),
@@ -2066,7 +2068,7 @@ foreach ($r in $rules) {
 
     public async Task SetTransportRuleStateAsync(SetTransportRuleStateRequest request, CancellationToken cancellationToken = default)
     {
-        var escapedIdentity = request.Identity.Replace("'", "''");
+        var escapedIdentity = EscapePs(request.Identity);
         var cmd = request.Enabled ? "Enable-TransportRule" : "Disable-TransportRule";
         var script = $@"
 {cmd} -Identity '{escapedIdentity}' -Confirm:$false -ErrorAction Stop
@@ -2108,6 +2110,7 @@ $outbound = Get-OutboundConnector -ErrorAction SilentlyContinue | ForEach-Object
             {
                 Identity = GetString(obj, "Identity"),
                 Name = GetString(obj, "Name"),
+                DisplayLabel = NormalizeConnectorDisplayLabel(GetString(obj, "Name"), GetString(obj, "Type")),
                 Type = GetString(obj, "Type"),
                 Enabled = GetBool(obj, "Enabled"),
                 Comment = GetString(obj, "Comment"),
@@ -2248,7 +2251,6 @@ foreach ($r in $rules) {{
     {
         var identity = EscapePs(request.Identity);
         var name = EscapePs(request.Name);
-        var comment = EscapePs(request.Comment);
         var senderDomains = FormatPsArray(request.SenderDomains);
         var recipientDomains = FormatPsArray(request.RecipientDomains);
         var isInbound = request.Type.Equals("Inbound", StringComparison.OrdinalIgnoreCase);
@@ -2256,23 +2258,40 @@ foreach ($r in $rules) {{
         var script = $@"
 $senderDomains = @({senderDomains})
 $recipientDomains = @({recipientDomains})
-$params = @{{
-    Name = '{name}'
-    Enabled = {(request.Enabled ? "$true" : "$false")}
-    ConnectorType = 'OnPremises'
-}}
-if ('{comment}' -ne '') {{ $params['Comment'] = '{comment}' }}
-if ($senderDomains.Count -gt 0) {{ $params['SenderDomains'] = $senderDomains }}
-if ($recipientDomains.Count -gt 0) {{ $params['RecipientDomains'] = $recipientDomains }}
+$enabled = {(request.Enabled ? "$true" : "$false")}
+$comment = {FormatNullableString(request.Comment)}
 
 if {(isInbound ? "$true" : "$false")} {{
+    $params = @{{
+        Name = '{name}'
+        Enabled = $enabled
+        ConnectorType = 'OnPremises'
+    }}
+
+    if ($comment -ne $null) {{ $params['Comment'] = $comment }}
+    if ($senderDomains.Count -gt 0) {{ $params['SenderDomains'] = $senderDomains }}
+    if ($recipientDomains.Count -gt 0) {{
+        Write-Warning 'RecipientDomains not applicable to Inbound connector and will be ignored.'
+    }}
+
     if ('{identity}' -ne '') {{
         Set-InboundConnector -Identity '{identity}' @params -ErrorAction Stop
     }} else {{
         New-InboundConnector @params -ErrorAction Stop
     }}
 }} else {{
-    $params.Remove('SenderDomains') | Out-Null
+    $params = @{{
+        Name = '{name}'
+        Enabled = $enabled
+        ConnectorType = 'OnPremises'
+    }}
+
+    if ($comment -ne $null) {{ $params['Comment'] = $comment }}
+
+    if ($senderDomains.Count -gt 0) {{
+        Write-Warning 'SenderDomains not applicable to Outbound connector and will be ignored.'
+    }}
+
     if ('{identity}' -ne '') {{
         Set-OutboundConnector -Identity '{identity}' @params -RecipientDomains $recipientDomains -ErrorAction Stop
     }} else {{
@@ -2580,6 +2599,29 @@ try {{
         return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single };
     }
 
+
+    private static string NormalizeConnectorDisplayLabel(string name, string type)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = name.Trim();
+        if (!trimmed.Contains(" from ", StringComparison.OrdinalIgnoreCase))
+        {
+            return trimmed;
+        }
+
+        var parts = trimmed.Split(" from ", 2, StringSplitOptions.TrimEntries);
+        if (parts.Length == 2 && Guid.TryParse(parts[1], out _))
+        {
+            return $"{parts[0]} connector ({type})";
+        }
+
+        return trimmed;
+    }
+
     private static string EscapePs(string? value)
     {
         return (value ?? string.Empty).Replace("'", "''");
@@ -2604,7 +2646,7 @@ try {{
             return "$null";
         }
 
-        return $"'{value.Replace("'", "''")}'";
+        return $"'{EscapePs(value)}'";
     }
 
     private static string FormatNullableMessage(string? value)

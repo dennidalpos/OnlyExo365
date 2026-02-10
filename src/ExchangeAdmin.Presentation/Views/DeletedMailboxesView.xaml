@@ -71,8 +71,8 @@
                       EnableColumnVirtualization="True"
                       ScrollViewer.IsDeferredScrollingEnabled="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*"/>
-                    <DataGridTextColumn Header="UPN" Binding="{Binding UserPrincipalName}" Width="*"/>
+                    <DataGridTextColumn Header="Friendly Name" Binding="{Binding DisplayName}" Width="*"/>
+                    <DataGridTextColumn Header="UPN" Binding="{Binding UserPrincipalName, TargetNullValue=—, FallbackValue=—}" Width="*"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding PrimarySmtpAddress}" Width="*"/>
                     <DataGridTextColumn Header="Type" Binding="{Binding RecipientTypeDetails}" Width="120"/>
                     <DataGridTextColumn Header="Stato" Binding="{Binding DeletionType}" Width="120"/>

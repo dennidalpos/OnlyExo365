@@ -5,6 +5,7 @@ using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Presentation.Helpers;
 using ExchangeAdmin.Presentation.Services;
+using ExchangeAdmin.Contracts.Messages;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
@@ -52,6 +53,9 @@ public class MailFlowViewModel : ViewModelBase
             if (SetProperty(ref _isLoading, value))
             {
                 OnPropertyChanged(nameof(CanRefresh));
+                OnPropertyChanged(nameof(CanEditSelectedRule));
+                OnPropertyChanged(nameof(CanEditSelectedConnector));
+                OnPropertyChanged(nameof(CanEditSelectedDomain));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -71,6 +75,10 @@ public class MailFlowViewModel : ViewModelBase
 
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
+    public bool CanEditSelectedRule => SelectedRule != null && !IsLoading;
+    public bool CanEditSelectedConnector => SelectedConnector != null && !IsLoading;
+    public bool CanEditSelectedDomain => SelectedDomain != null && !IsLoading;
+
     public bool IsRuleInputValid => !string.IsNullOrWhiteSpace(RuleName) && RuleModes.Contains(RuleMode);
     public bool IsRuleTestInputValid => IsValidEmail(TestSender) && IsValidEmail(TestRecipient);
     public bool IsConnectorInputValid => !string.IsNullOrWhiteSpace(ConnectorName) && ConnectorTypes.Contains(ConnectorType) && AreValidDomains(SplitCsv(ConnectorSenderDomains)) && AreValidDomains(SplitCsv(ConnectorRecipientDomains));
@@ -99,6 +107,7 @@ public class MailFlowViewModel : ViewModelBase
                     RuleMode = string.IsNullOrWhiteSpace(value.Mode) ? "Enforce" : value.Mode;
                     RuleEnabled = !string.Equals(value.State, "Disabled", StringComparison.OrdinalIgnoreCase);
                 }
+                OnPropertyChanged(nameof(CanEditSelectedRule));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -109,15 +118,27 @@ public class MailFlowViewModel : ViewModelBase
         get => _selectedConnector;
         set
         {
-            if (SetProperty(ref _selectedConnector, value) && value != null)
+            if (SetProperty(ref _selectedConnector, value))
             {
-                ConnectorIdentity = value.Identity;
-                ConnectorType = string.IsNullOrWhiteSpace(value.Type) ? "Inbound" : value.Type;
-                ConnectorName = value.Name;
-                ConnectorComment = value.Comment;
-                ConnectorEnabled = value.Enabled;
-                ConnectorSenderDomains = string.Join(",", value.SenderDomains);
-                ConnectorRecipientDomains = string.Join(",", value.RecipientDomains);
+                if (value != null)
+                {
+                    ConnectorIdentity = value.Identity;
+                    ConnectorIdentityDisplay = string.IsNullOrWhiteSpace(value.DisplayLabel) ? value.Name : value.DisplayLabel;
+                    ConnectorType = string.IsNullOrWhiteSpace(value.Type) ? "Inbound" : value.Type;
+                    ConnectorName = value.Name;
+                    ConnectorComment = value.Comment;
+                    ConnectorEnabled = value.Enabled;
+                    ConnectorSenderDomains = string.Join(",", value.SenderDomains);
+                    ConnectorRecipientDomains = string.Join(",", value.RecipientDomains);
+                }
+                else
+                {
+                    ConnectorIdentity = null;
+                    ConnectorIdentityDisplay = null;
+                }
+
+                OnPropertyChanged(nameof(CanEditSelectedConnector));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
     }
@@ -127,13 +148,19 @@ public class MailFlowViewModel : ViewModelBase
         get => _selectedDomain;
         set
         {
-            if (SetProperty(ref _selectedDomain, value) && value != null)
+            if (SetProperty(ref _selectedDomain, value))
             {
-                DomainIdentity = value.Identity;
-                DomainName = value.Name;
-                DomainFqdn = value.DomainName;
-                DomainType = value.DomainType;
-                DomainMakeDefault = value.Default;
+                if (value != null)
+                {
+                    DomainIdentity = value.Identity;
+                    DomainName = value.Name;
+                    DomainFqdn = value.DomainName;
+                    DomainType = value.DomainType;
+                    DomainMakeDefault = value.Default;
+                }
+
+                OnPropertyChanged(nameof(CanEditSelectedDomain));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
     }
@@ -152,6 +179,7 @@ public class MailFlowViewModel : ViewModelBase
     private string _testResult = string.Empty;
 
     private string? _connectorIdentity;
+    private string? _connectorIdentityDisplay;
     private string _connectorType = "Inbound";
     private string _connectorName = string.Empty;
     private string _connectorComment = string.Empty;
@@ -180,6 +208,7 @@ public class MailFlowViewModel : ViewModelBase
     public string TestResult { get => _testResult; set => SetProperty(ref _testResult, value); }
 
     public string? ConnectorIdentity { get => _connectorIdentity; set => SetProperty(ref _connectorIdentity, value); }
+    public string? ConnectorIdentityDisplay { get => _connectorIdentityDisplay; set => SetProperty(ref _connectorIdentityDisplay, value); }
     public string ConnectorType { get => _connectorType; set { if (SetProperty(ref _connectorType, value)) RaiseValidationChanged(); } }
     public string ConnectorName { get => _connectorName; set { if (SetProperty(ref _connectorName, value)) RaiseValidationChanged(); } }
     public string ConnectorComment { get => _connectorComment; set => SetProperty(ref _connectorComment, value); }
@@ -241,6 +270,7 @@ public class MailFlowViewModel : ViewModelBase
             if (!rules.IsSuccess || !connectors.IsSuccess || !domains.IsSuccess)
             {
                 ErrorMessage = rules.Error?.Message ?? connectors.Error?.Message ?? domains.Error?.Message ?? "Errore caricamento mail flow";
+                _shellViewModel.AddLog(LogLevel.Error, $"MailFlow refresh failed: {ErrorMessage}", "MailFlow");
                 return;
             }
 
@@ -250,10 +280,12 @@ public class MailFlowViewModel : ViewModelBase
             foreach (var item in connectors.Value?.Connectors ?? new List<ConnectorDto>()) Connectors.Add(item);
             AcceptedDomains.Clear();
             foreach (var item in domains.Value?.Domains ?? new List<AcceptedDomainDto>()) AcceptedDomains.Add(item);
+            _shellViewModel.AddLog(LogLevel.Information, $"MailFlow refresh complete: rules={TransportRules.Count}, connectors={Connectors.Count}, domains={AcceptedDomains.Count}", "MailFlow");
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"MailFlow refresh exception: {ex.Message}", "MailFlow");
         }
         finally
         {
@@ -267,7 +299,7 @@ public class MailFlowViewModel : ViewModelBase
 
         if (!enabled)
         {
-            var confirmed = ErrorDialogService.ShowConfirmation("Conferma disabilitazione", $"Disabilitare la regola '{SelectedRule.Name}'?");
+            var confirmed = ErrorDialogService.ShowConfirmation("Conferma disabilitazione tenant-wide", $"Operazione: Disabilitazione regola di transport\nTarget: {SelectedRule.Name}\nImpatto: può fermare controlli/compliance tenant-wide.\n\nConfermare?");
             if (!confirmed)
             {
                 return;
@@ -282,6 +314,7 @@ public class MailFlowViewModel : ViewModelBase
             if (!result.IsSuccess)
             {
                 ErrorMessage = result.Error?.Message ?? "Errore stato rule";
+                _shellViewModel.AddLog(LogLevel.Error, $"Set rule state failed (rule={SelectedRule.Name}): {ErrorMessage}", "MailFlow");
                 return;
             }
             await RefreshAsync(CancellationToken.None);
@@ -309,7 +342,7 @@ public class MailFlowViewModel : ViewModelBase
                 Enabled = RuleEnabled
             }, cancellationToken: cancellationToken);
 
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore salvataggio rule"; return; }
+            if (!result.IsSuccess) { var correlationId = Guid.NewGuid().ToString("N"); ErrorMessage = $"Salvataggio regola non riuscito. Riprova o controlla i log (ref: {correlationId})."; _shellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save rule failed (name={RuleName}): {result.Error?.Message}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
         catch (Exception ex) { ErrorMessage = ex.Message; }
@@ -319,7 +352,7 @@ public class MailFlowViewModel : ViewModelBase
     private async Task RemoveRuleAsync(CancellationToken cancellationToken)
     {
         if (SelectedRule == null) return;
-        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare la regola '{SelectedRule.Name}'?");
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione tenant-wide", $"Operazione: Eliminazione regola di transport\nTarget: {SelectedRule.Name}\nImpatto: rimozione permanente con impatto potenziale tenant-wide.\n\nConfermare?");
         if (!confirmed) return;
 
         IsLoading = true;
@@ -327,7 +360,7 @@ public class MailFlowViewModel : ViewModelBase
         try
         {
             var result = await _workerService.RemoveTransportRuleAsync(new RemoveTransportRuleRequest { Identity = SelectedRule.Identity }, cancellationToken: cancellationToken);
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione rule"; return; }
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione rule"; _shellViewModel.AddLog(LogLevel.Error, $"Remove rule failed (rule={SelectedRule.Name}): {ErrorMessage}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
         catch (Exception ex) { ErrorMessage = ex.Message; }
@@ -362,6 +395,21 @@ public class MailFlowViewModel : ViewModelBase
     {
         if (!IsConnectorInputValid) return;
 
+        if (SelectedConnector != null && SelectedConnector.Enabled && !ConnectorEnabled)
+        {
+            var disableConfirmed = ErrorDialogService.ShowConfirmation(
+                "Conferma disabilitazione tenant-wide",
+                $"Operazione: Disabilitazione connector {SelectedConnector.Type}
+Target: {SelectedConnector.Name}
+Impatto: può interrompere il flusso posta tenant-wide.
+
+Confermare?");
+            if (!disableConfirmed)
+            {
+                return;
+            }
+        }
+
         IsLoading = true;
         ErrorMessage = null;
         try
@@ -377,17 +425,17 @@ public class MailFlowViewModel : ViewModelBase
                 RecipientDomains = SplitCsv(ConnectorRecipientDomains)
             }, cancellationToken: cancellationToken);
 
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore salvataggio connector"; return; }
+            if (!result.IsSuccess) { var correlationId = Guid.NewGuid().ToString("N"); ErrorMessage = $"Salvataggio connector non riuscito. Verificare i campi e riprovare (ref: {correlationId})."; _shellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save connector failed (name={ConnectorName}, type={ConnectorType}): {result.Error?.Message}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
-        catch (Exception ex) { ErrorMessage = ex.Message; }
+        catch (Exception ex) { var correlationId = Guid.NewGuid().ToString("N"); ErrorMessage = $"Errore durante il salvataggio connector (ref: {correlationId})."; _shellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save connector exception: {ex.Message}", "MailFlow"); }
         finally { IsLoading = false; }
     }
 
     private async Task RemoveConnectorAsync(CancellationToken cancellationToken)
     {
         if (SelectedConnector == null) return;
-        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare il connector '{SelectedConnector.Name}'?");
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione tenant-wide", $"Operazione: Eliminazione connector {SelectedConnector.Type}\nTarget: {SelectedConnector.Name}\nImpatto: modifica routing posta tenant-wide.\n\nConfermare?");
         if (!confirmed) return;
 
         IsLoading = true;
@@ -400,7 +448,7 @@ public class MailFlowViewModel : ViewModelBase
                 Type = SelectedConnector.Type
             }, cancellationToken: cancellationToken);
 
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione connector"; return; }
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione connector"; _shellViewModel.AddLog(LogLevel.Error, $"Remove connector failed (connector={SelectedConnector.Name}): {ErrorMessage}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
         catch (Exception ex) { ErrorMessage = ex.Message; }
@@ -424,17 +472,17 @@ public class MailFlowViewModel : ViewModelBase
                 MakeDefault = DomainMakeDefault
             }, cancellationToken: cancellationToken);
 
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore salvataggio dominio"; return; }
+            if (!result.IsSuccess) { var correlationId = Guid.NewGuid().ToString("N"); ErrorMessage = $"Salvataggio dominio non riuscito (ref: {correlationId})."; _shellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save domain failed (domain={DomainFqdn}): {result.Error?.Message}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
-        catch (Exception ex) { ErrorMessage = ex.Message; }
+        catch (Exception ex) { var correlationId = Guid.NewGuid().ToString("N"); ErrorMessage = $"Errore durante il salvataggio dominio (ref: {correlationId})."; _shellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save domain exception: {ex.Message}", "MailFlow"); }
         finally { IsLoading = false; }
     }
 
     private async Task RemoveDomainAsync(CancellationToken cancellationToken)
     {
         if (SelectedDomain == null) return;
-        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione", $"Eliminare il dominio '{SelectedDomain.DomainName}'?");
+        var confirmed = ErrorDialogService.ShowConfirmation("Conferma eliminazione tenant-wide", $"Operazione: Eliminazione accepted domain\nTarget: {SelectedDomain.DomainName}\nImpatto: può interrompere recapito/routing tenant-wide.\n\nConfermare?");
         if (!confirmed) return;
 
         IsLoading = true;
@@ -442,7 +490,7 @@ public class MailFlowViewModel : ViewModelBase
         try
         {
             var result = await _workerService.RemoveAcceptedDomainAsync(new RemoveAcceptedDomainRequest { Identity = SelectedDomain.Identity }, cancellationToken: cancellationToken);
-            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione dominio"; return; }
+            if (!result.IsSuccess) { ErrorMessage = result.Error?.Message ?? "Errore eliminazione dominio"; _shellViewModel.AddLog(LogLevel.Error, $"Remove domain failed (domain={SelectedDomain.DomainName}): {ErrorMessage}", "MailFlow"); return; }
             await RefreshAsync(cancellationToken);
         }
         catch (Exception ex) { ErrorMessage = ex.Message; }

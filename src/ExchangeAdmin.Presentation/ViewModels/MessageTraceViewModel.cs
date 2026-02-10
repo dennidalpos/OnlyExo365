@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Text;
+using System.Globalization;
 using System.Windows.Input;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
@@ -42,7 +44,7 @@ public class MessageTraceViewModel : ViewModelBase
         SearchCommand = new AsyncRelayCommand(SearchAsync, () => CanSearch);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasMore && !IsLoading);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => CurrentPage > 1 && !IsLoading);
-        ExportCsvCommand = new RelayCommand(ExportCsv, () => Messages.Count > 0 && !IsLoading);
+        ExportExcelCommand = new RelayCommand(ExportExcel, () => Messages.Count > 0 && !IsLoading);
         LoadDetailsCommand = new AsyncRelayCommand(LoadDetailsAsync, () => SelectedMessage != null && !IsLoading && !IsLoadingDetails);
         SetStatusFilterCommand = new RelayCommand<string?>(SetStatusFilter);
     }
@@ -185,7 +187,7 @@ public class MessageTraceViewModel : ViewModelBase
     public ICommand SearchCommand { get; }
     public ICommand NextPageCommand { get; }
     public ICommand PreviousPageCommand { get; }
-    public ICommand ExportCsvCommand { get; }
+    public ICommand ExportExcelCommand { get; }
     public ICommand LoadDetailsCommand { get; }
     public ICommand SetStatusFilterCommand { get; }
 
@@ -376,7 +378,7 @@ public class MessageTraceViewModel : ViewModelBase
         }
     }
 
-    private void ExportCsv()
+    private void ExportExcel()
     {
         if (Messages.Count == 0)
         {
@@ -385,8 +387,8 @@ public class MessageTraceViewModel : ViewModelBase
 
         var dialog = new SaveFileDialog
         {
-            Filter = "CSV files (*.csv)|*.csv",
-            FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.csv"
+            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+            FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
         };
 
         if (dialog.ShowDialog() != true)
@@ -394,34 +396,89 @@ public class MessageTraceViewModel : ViewModelBase
             return;
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("Received,Sender,Recipient,Subject,Status,Size,MessageId,MessageTraceId");
+        using var spreadsheet = SpreadsheetDocument.Create(dialog.FileName, SpreadsheetDocumentType.Workbook);
+        var workbookPart = spreadsheet.AddWorkbookPart();
+        workbookPart.Workbook = new Workbook();
+
+        var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+        var sheetData = new SheetData();
+        worksheetPart.Worksheet = new Worksheet(new SheetViews(new SheetView { WorkbookViewId = 0U }), sheetData);
+
+        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+        stylesPart.Stylesheet = CreateStylesheet();
+        stylesPart.Stylesheet.Save();
+
+        var sheets = spreadsheet.WorkbookPart?.Workbook.AppendChild(new Sheets());
+        var sheet = new Sheet
+        {
+            Id = spreadsheet.WorkbookPart?.GetIdOfPart(worksheetPart),
+            SheetId = 1,
+            Name = "MessageTrace"
+        };
+        sheets?.Append(sheet);
+
+        var header = new Row();
+        foreach (var title in new[] { "Received", "Sender", "Recipient", "Subject", "Status", "Size", "MessageId", "MessageTraceId" })
+        {
+            header.Append(CreateTextCell(title, 1U));
+        }
+        sheetData.Append(header);
 
         foreach (var message in Messages)
         {
-            sb.AppendLine(string.Join(",",
-                Csv(message.Received?.ToString("o") ?? string.Empty),
-                Csv(message.SenderAddress),
-                Csv(message.RecipientAddress),
-                Csv(message.Subject),
-                Csv(message.Status),
-                Csv(message.Size?.ToString() ?? string.Empty),
-                Csv(message.MessageId),
-                Csv(message.MessageTraceId)));
+            var row = new Row();
+            row.Append(CreateTextCell(message.Received?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? string.Empty));
+            row.Append(CreateTextCell(message.SenderAddress));
+            row.Append(CreateTextCell(message.RecipientAddress));
+            row.Append(CreateTextCell(message.Subject));
+            row.Append(CreateTextCell(message.Status));
+            row.Append(CreateTextCell(message.Size?.ToString(CultureInfo.InvariantCulture) ?? string.Empty));
+            row.Append(CreateTextCell(message.MessageId));
+            row.Append(CreateTextCell(message.MessageTraceId));
+            sheetData.Append(row);
         }
 
-        File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
-        _shellViewModel.AddLog(LogLevel.Information, $"Message trace export salvato: {dialog.FileName}");
+        worksheetPart.Worksheet.Save();
+        workbookPart.Workbook.Save();
+
+        _shellViewModel.AddLog(LogLevel.Information, $"Message trace export Excel salvato: {dialog.FileName}");
     }
 
-    private static string Csv(string value)
+    private static Stylesheet CreateStylesheet()
     {
-        if (value.Contains('"') || value.Contains(',') || value.Contains('\n'))
-        {
-            return $"\"{value.Replace("\"", "\"\"")}\"";
-        }
+        var fonts = new Fonts(
+            new Font(),
+            new Font(new Bold()));
 
-        return value;
+        var fills = new Fills(
+            new Fill(new PatternFill { PatternType = PatternValues.None }),
+            new Fill(new PatternFill { PatternType = PatternValues.Gray125 }),
+            new Fill(new PatternFill(new ForegroundColor { Rgb = HexBinaryValue.FromString("FFDDEBF7") }) { PatternType = PatternValues.Solid }));
+
+        var borders = new Borders(new Border());
+
+        var cellFormats = new CellFormats(
+            new CellFormat(),
+            new CellFormat
+            {
+                FontId = 1,
+                FillId = 2,
+                BorderId = 0,
+                ApplyFont = true,
+                ApplyFill = true
+            });
+
+        return new Stylesheet(fonts, fills, borders, cellFormats);
+    }
+
+    private static Cell CreateTextCell(string? value, uint styleIndex = 0)
+    {
+        return new Cell
+        {
+            DataType = CellValues.InlineString,
+            StyleIndex = styleIndex,
+            InlineString = new InlineString(new Text(value ?? string.Empty))
+        };
     }
 
     public void Cancel()

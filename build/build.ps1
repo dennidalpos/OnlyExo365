@@ -66,6 +66,9 @@ param(
 
     [switch]$SelfContained = $true,
 
+    [ValidateNotNullOrEmpty()]
+    [string]$RuntimeIdentifier = 'win-x64',
+
     [switch]$Msi = $false
 )
 
@@ -190,6 +193,7 @@ Write-Host "Solution      : $SolutionFile"
 Write-Host "Output        : $OutputDir"
 Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $($SelfContained.IsPresent)"
+Write-Host "Runtime       : $RuntimeIdentifier"
 Write-Host "MSI           : $($Msi.IsPresent)"
 Write-Host "Started at    : $($BuildStartTime.ToString('HH:mm:ss'))"
 
@@ -247,8 +251,8 @@ $restoreArgs = @($SolutionFile, "--verbosity", "minimal")
 
                                                           
 if ($SelfContained) {
-    $restoreArgs += "-r", "win-x64"
-    Write-Info "Restoring for runtime: win-x64"
+    $restoreArgs += '-r', $RuntimeIdentifier
+    Write-Info "Restoring for runtime: $RuntimeIdentifier"
 }
 
 Invoke-DotNet -Command "restore" -Arguments $restoreArgs `
@@ -290,10 +294,10 @@ if ($Publish) {
 
     if ($SelfContained) {
                                                                               
-        $publishArgs += "--self-contained", "true"
-        $publishArgs += "-r", "win-x64"
-        $publishArgs += "-p:PublishSingleFile=false"
-        Write-Info "Mode: Self-contained (win-x64)"
+        $publishArgs += '--self-contained', 'true'
+        $publishArgs += '-r', $RuntimeIdentifier
+        $publishArgs += '-p:PublishSingleFile=false'
+        Write-Info "Mode: Self-contained ($RuntimeIdentifier)"
     }
     else {
                                                               

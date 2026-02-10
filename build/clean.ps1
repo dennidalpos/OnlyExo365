@@ -3,7 +3,8 @@
 [CmdletBinding()]
 param(
     [switch]$All,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$SkipDotNetClean
 )
 
 $ErrorActionPreference = "Stop"
@@ -89,6 +90,11 @@ function Remove-FilesByPattern {
     foreach ($pattern in $Patterns) {
         $files = Get-ChildItem -Path $Path -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
         foreach ($file in $files) {
+            # Never touch Git internals.
+            if ($file.FullName -like '*\.git\*' -or $file.FullName -like '*/.git/*') {
+                continue
+            }
+
             Write-Deleted -Path $file.FullName -Size $file.Length
             $found = $true
 
@@ -121,6 +127,16 @@ if (Remove-DirectoryIfExists -Path $ArtifactsDir -Description "Artifacts") {
 }
 
 Write-Step "Cleaning bin/obj directories"
+
+# Clean top-level bin/obj folders if present (for uncommon solution-level outputs).
+$rootBinObj = @(
+    (Join-Path $SolutionDir 'bin'),
+    (Join-Path $SolutionDir 'obj')
+)
+foreach ($dir in $rootBinObj) {
+    [void](Remove-DirectoryIfExists -Path $dir -Description 'Solution-level build output')
+}
+
 $projects = Get-ChildItem -Path $SrcDir -Directory -ErrorAction SilentlyContinue
 $cleanedProjects = 0
 
@@ -194,8 +210,7 @@ if ($testCleaned) {
 Write-Step "Cleaning IDE temporary files"
 $ideDirs = @(
     (Join-Path $SolutionDir ".vs"),
-    (Join-Path $SolutionDir ".idea"),
-    (Join-Path $SolutionDir "*.DotSettings.user")
+    (Join-Path $SolutionDir '.idea')
 )
 
 $ideCleaned = $false
@@ -249,7 +264,10 @@ if ($All) {
 Write-Step "Running dotnet clean"
 $solutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
 
-if (Test-Path $solutionFile) {
+if ($SkipDotNetClean) {
+    Write-Skipped 'dotnet clean skipped by -SkipDotNetClean'
+}
+elseif (Test-Path $solutionFile) {
     if (-not $DryRun) {
         if (Test-DotNetAvailable) {
             & dotnet clean $solutionFile --verbosity minimal 2>&1 | ForEach-Object {

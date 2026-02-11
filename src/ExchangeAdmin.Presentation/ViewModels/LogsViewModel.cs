@@ -293,7 +293,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
                                  
             if (!string.IsNullOrEmpty(searchLower))
             {
-                var messageContains = log.Message.ToLowerInvariant().Contains(searchLower);
+                var messageContains = (log.Message ?? string.Empty).ToLowerInvariant().Contains(searchLower);
                 var sourceContains = log.Source?.ToLowerInvariant().Contains(searchLower) ?? false;
 
                 if (!messageContains && !sourceContains)

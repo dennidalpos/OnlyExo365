@@ -61,6 +61,7 @@ public class PowerShellResult
 public sealed class PowerShellEngine : IDisposable
 {
     private const string ExchangeEnvironmentVariable = "EXCHANGEADMIN_EXO_ENV";
+    private const string ExchangeOnlineModuleName = "ExchangeOnlineManagement";
     private static readonly HashSet<string> SupportedExchangeEnvironments = new(StringComparer.OrdinalIgnoreCase)
     {
         "O365Default",
@@ -127,7 +128,7 @@ public sealed class PowerShellEngine : IDisposable
 
                                                                       
             ps.Commands.Clear();
-            ps.AddScript("Get-Module -ListAvailable -Name ExchangeOnlineManagement | Select-Object -First 1");
+            ps.AddScript($"Get-Module -ListAvailable -Name {ExchangeOnlineModuleName} | Select-Object -First 1");
 
             var moduleResult = await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
             _isModuleAvailable = moduleResult.Any();
@@ -137,18 +138,10 @@ public sealed class PowerShellEngine : IDisposable
             if (_isModuleAvailable)
             {
                                     
-                ps.Commands.Clear();
-                ps.AddScript("Import-Module ExchangeOnlineManagement -ErrorAction Stop");
-                await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
-
-                if (ps.HadErrors)
+                var imported = await ImportModuleAsync(ExchangeOnlineModuleName, stopOnError: true).ConfigureAwait(false);
+                if (!imported)
                 {
-                    var errors = string.Join("; ", ps.Streams.Error.Select(e => e.ToString()));
-                    Debug.WriteLine($"[PowerShellEngine] Warning: Module import had errors: {errors}");
-                }
-                else
-                {
-                    Debug.WriteLine("[PowerShellEngine] Module imported successfully");
+                    Debug.WriteLine($"[PowerShellEngine] Warning: {ExchangeOnlineModuleName} import reported warnings/errors");
                 }
             }
 
@@ -472,6 +465,35 @@ public sealed class PowerShellEngine : IDisposable
                  
                                                               
                   
+
+    private async Task<bool> ImportModuleAsync(string moduleName, bool stopOnError)
+    {
+        if (_runspace == null || string.IsNullOrWhiteSpace(moduleName))
+        {
+            return false;
+        }
+
+        using var ps = System.Management.Automation.PowerShell.Create();
+        ps.Runspace = _runspace;
+
+        var safeModuleName = moduleName.Replace("'", "''", StringComparison.Ordinal);
+        var errorAction = stopOnError ? "Stop" : "SilentlyContinue";
+        ps.AddScript($"Import-Module '{safeModuleName}' -ErrorAction {errorAction}");
+
+        await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
+
+        if (ps.HadErrors)
+        {
+            var errors = string.Join("; ", ps.Streams.Error.Select(e => e.ToString()));
+            Debug.WriteLine($"[PowerShellEngine] Module import warning for '{moduleName}': {errors}");
+            ps.Streams.Error.Clear();
+            return false;
+        }
+
+        Debug.WriteLine($"[PowerShellEngine] Module imported: {moduleName}");
+        return true;
+    }
+
     private async Task<bool> TryRecoverRunspaceAsync()
     {
         Debug.WriteLine("[PowerShellEngine] Attempting runspace recovery...");
@@ -501,10 +523,7 @@ public sealed class PowerShellEngine : IDisposable
                                                    
             if (_isModuleAvailable)
             {
-                using var ps = System.Management.Automation.PowerShell.Create();
-                ps.Runspace = _runspace;
-                ps.AddScript("Import-Module ExchangeOnlineManagement -ErrorAction SilentlyContinue");
-                await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
+                _ = await ImportModuleAsync(ExchangeOnlineModuleName, stopOnError: false).ConfigureAwait(false);
             }
 
             _consecutiveFailures = 0;

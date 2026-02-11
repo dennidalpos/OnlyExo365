@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Windows.Input;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -35,6 +36,7 @@ public class MessageTraceViewModel : ViewModelBase
     private string _statusFilter = "All";
     private MessageTraceItemDto? _selectedMessage;
     private bool _isLoadingDetails;
+    private readonly string _defaultExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OnlyExo365", "exports");
 
     public MessageTraceViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
@@ -360,15 +362,17 @@ public class MessageTraceViewModel : ViewModelBase
 
     private void SetStatusFilter(string? status)
     {
-        StatusFilter = string.IsNullOrWhiteSpace(status) ? "All" : status;
+        StatusFilter = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
     }
 
     private void ApplyStatusFilter()
     {
+        var normalizedFilter = string.IsNullOrWhiteSpace(StatusFilter) ? "All" : StatusFilter.Trim();
+
         IEnumerable<MessageTraceItemDto> filtered = AllMessages;
-        if (!string.Equals(StatusFilter, "All", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(normalizedFilter, "All", StringComparison.OrdinalIgnoreCase))
         {
-            filtered = filtered.Where(m => string.Equals(m.Status, StatusFilter, StringComparison.OrdinalIgnoreCase));
+            filtered = filtered.Where(m => string.Equals(m.Status?.Trim(), normalizedFilter, StringComparison.OrdinalIgnoreCase));
         }
 
         Messages.Clear();
@@ -376,6 +380,8 @@ public class MessageTraceViewModel : ViewModelBase
         {
             Messages.Add(item);
         }
+
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private void ExportExcel()
@@ -385,9 +391,12 @@ public class MessageTraceViewModel : ViewModelBase
             return;
         }
 
+        Directory.CreateDirectory(_defaultExportDirectory);
+
         var dialog = new SaveFileDialog
         {
             Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+            InitialDirectory = _defaultExportDirectory,
             FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
         };
 

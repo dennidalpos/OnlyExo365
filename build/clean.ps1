@@ -121,6 +121,11 @@ if ($All) {
     Write-Host "Scope: ALL (including caches)" -ForegroundColor Yellow
 }
 
+
+if ($All -and -not $IncludeExports) {
+    $IncludeExports = $true
+}
+
 Write-Step "Cleaning artifacts directory"
 if (Remove-DirectoryIfExists -Path $ArtifactsDir -Description "Artifacts") {
     Write-Success "Artifacts directory cleaned"
@@ -137,7 +142,7 @@ if ($IncludeExports) {
         Write-Skipped "Generated exports directory not found"
     }
 } else {
-    Write-Skipped "Generated exports clean skipped (use -IncludeExports)"
+    Write-Skipped "Generated exports clean skipped (use -IncludeExports or -All)"
 }
 
 Write-Step "Cleaning bin/obj directories"

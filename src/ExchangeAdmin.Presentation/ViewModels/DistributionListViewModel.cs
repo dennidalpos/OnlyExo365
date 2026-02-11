@@ -148,7 +148,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             if (SetProperty(ref _includeDynamic, value))
             {
-                SafeRefreshAsync();
+                _ = SafeRefreshAsync();
             }
         }
     }
@@ -385,7 +385,7 @@ public class DistributionListViewModel : ViewModelBase
     }
 
 
-    private async void SafeRefreshAsync()
+    private async Task SafeRefreshAsync()
     {
         try
         {
@@ -531,7 +531,7 @@ public class DistributionListViewModel : ViewModelBase
     private void OnSearchDebounceElapsed(object? sender, EventArgs e)
     {
         _searchDebounceTimer.Stop();
-        _ = RefreshAsync(CancellationToken.None);
+        _ = SafeRefreshAsync();
     }
 
     private void ViewDetails(DistributionListItemDto? item)

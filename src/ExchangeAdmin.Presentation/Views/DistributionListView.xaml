@@ -65,11 +65,13 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome visualizzato" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Alias" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="SMTP primario" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Local-part email" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
 
                     <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding DistributionLists.NewDistributionListDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
                         <TextBox.Style>
@@ -85,14 +87,23 @@
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding DistributionLists.NewDistributionListPrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding DistributionLists.NewDistributionListLocalPart, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                <Setter Property="Tag" Value="es. vendite.italia@contoso.com"/>
+                                <Setter Property="Tag" Value="es. vendite.italia"/>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
                     <Button Grid.Row="1" Grid.Column="3" Content="Crea" Command="{Binding DistributionLists.CreateDistributionListCommand}" Style="{StaticResource PrimaryButton}"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Dominio email (da accepted domains)" Margin="0,8,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <ComboBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                              ItemsSource="{Binding DistributionLists.AvailableMailDomains}"
+                              SelectedItem="{Binding DistributionLists.SelectedDistributionListDomain}"
+                              Margin="0,0,8,0"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"
+                               Text="Formato: local-part@dominio"/>
                 </Grid>
             </GroupBox>
 

@@ -49,7 +49,8 @@ public class DistributionListViewModel : ViewModelBase
 
     private string? _newDistributionListDisplayName;
     private string? _newDistributionListAlias;
-    private string? _newDistributionListPrimarySmtpAddress;
+    private string? _newDistributionListLocalPart;
+    private string? _selectedDistributionListDomain;
     private bool _isCreatingDistributionList;
 
                
@@ -105,6 +106,7 @@ public class DistributionListViewModel : ViewModelBase
     public ObservableCollection<GroupMemberDto> Members { get; } = new();
     public ObservableCollection<string> AcceptMessagesOnlyFrom { get; } = new();
     public ObservableCollection<string> RejectMessagesFrom { get; } = new();
+    public ObservableCollection<string> AvailableMailDomains { get; } = new();
 
     public bool IsLoading
     {
@@ -357,12 +359,25 @@ public class DistributionListViewModel : ViewModelBase
         }
     }
 
-    public string? NewDistributionListPrimarySmtpAddress
+    public string? NewDistributionListLocalPart
     {
-        get => _newDistributionListPrimarySmtpAddress;
+        get => _newDistributionListLocalPart;
         set
         {
-            if (SetProperty(ref _newDistributionListPrimarySmtpAddress, value))
+            if (SetProperty(ref _newDistributionListLocalPart, value))
+            {
+                OnPropertyChanged(nameof(CanCreateDistributionList));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? SelectedDistributionListDomain
+    {
+        get => _selectedDistributionListDomain;
+        set
+        {
+            if (SetProperty(ref _selectedDistributionListDomain, value))
             {
                 OnPropertyChanged(nameof(CanCreateDistributionList));
                 CommandManager.InvalidateRequerySuggested();
@@ -387,7 +402,8 @@ public class DistributionListViewModel : ViewModelBase
         !IsLoading && !IsCreatingDistributionList && _shellViewModel.IsExchangeConnected &&
         !string.IsNullOrWhiteSpace(NewDistributionListDisplayName) &&
         !string.IsNullOrWhiteSpace(NewDistributionListAlias) &&
-        !string.IsNullOrWhiteSpace(NewDistributionListPrimarySmtpAddress);
+        !string.IsNullOrWhiteSpace(NewDistributionListLocalPart) &&
+        !string.IsNullOrWhiteSpace(SelectedDistributionListDomain);
 
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
@@ -431,6 +447,7 @@ public class DistributionListViewModel : ViewModelBase
             return;
         }
 
+        await LoadAcceptedDomainsAsync(CancellationToken.None);
         await RefreshAsync(CancellationToken.None);
     }
 
@@ -670,6 +687,48 @@ public class DistributionListViewModel : ViewModelBase
     }
 
 
+    private string BuildDistributionListPrimarySmtpAddress()
+    {
+        var localPart = NewDistributionListLocalPart?.Trim() ?? string.Empty;
+        var domain = SelectedDistributionListDomain?.Trim() ?? string.Empty;
+        return $"{localPart}@{domain}";
+    }
+
+    private async Task LoadAcceptedDomainsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _workerService.GetAcceptedDomainsAsync(new GetAcceptedDomainsRequest(), cancellationToken: cancellationToken);
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return;
+            }
+
+            var domains = result.Value.Domains
+                .Select(d => d.DomainName?.Trim())
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            AvailableMailDomains.Clear();
+            foreach (var domain in domains)
+            {
+                AvailableMailDomains.Add(domain!);
+            }
+
+            if (string.IsNullOrWhiteSpace(SelectedDistributionListDomain))
+            {
+                SelectedDistributionListDomain = result.Value.Domains.FirstOrDefault(d => d.Default)?.DomainName
+                    ?? AvailableMailDomains.FirstOrDefault();
+            }
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Warning, $"Impossibile caricare i domini accettati: {ex.Message}");
+        }
+    }
+
     private async Task CreateDistributionListAsync(CancellationToken cancellationToken)
     {
         if (!CanCreateDistributionList)
@@ -686,7 +745,7 @@ public class DistributionListViewModel : ViewModelBase
             {
                 DisplayName = NewDistributionListDisplayName!.Trim(),
                 Alias = NewDistributionListAlias!.Trim(),
-                PrimarySmtpAddress = NewDistributionListPrimarySmtpAddress!.Trim()
+                PrimarySmtpAddress = BuildDistributionListPrimarySmtpAddress()
             };
 
             _shellViewModel.AddLog(LogLevel.Information, $"Creazione lista {request.PrimarySmtpAddress}...");
@@ -697,7 +756,7 @@ public class DistributionListViewModel : ViewModelBase
                 _shellViewModel.AddLog(LogLevel.Information, "Lista di distribuzione creata con successo");
                 NewDistributionListDisplayName = string.Empty;
                 NewDistributionListAlias = string.Empty;
-                NewDistributionListPrimarySmtpAddress = string.Empty;
+                NewDistributionListLocalPart = string.Empty;
                 await RefreshAsync(cancellationToken);
             }
             else if (!result.WasCancelled)

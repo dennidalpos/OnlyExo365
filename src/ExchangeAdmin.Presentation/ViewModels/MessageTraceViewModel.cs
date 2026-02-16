@@ -193,7 +193,7 @@ public class MessageTraceViewModel : ViewModelBase
     public ICommand LoadDetailsCommand { get; }
     public ICommand SetStatusFilterCommand { get; }
 
-    public async Task LoadAsync()
+    public Task LoadAsync()
     {
         OnPropertyChanged(nameof(CanSearch));
         CommandManager.InvalidateRequerySuggested();
@@ -201,10 +201,11 @@ public class MessageTraceViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             ErrorMessage = "Non connesso a Exchange Online";
-            return;
+            return Task.CompletedTask;
         }
 
         ErrorMessage = null;
+        return Task.CompletedTask;
     }
 
     private async Task SearchAsync(CancellationToken cancellationToken)

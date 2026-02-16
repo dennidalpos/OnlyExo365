@@ -492,8 +492,6 @@ public class DistributionListViewModel : ViewModelBase
 
         try
         {
-            Console.WriteLine("[DistributionListViewModel] Requesting distribution lists...");
-
             var request = new GetDistributionListsRequest
             {
                 SearchQuery = _searchQuery,
@@ -507,12 +505,8 @@ public class DistributionListViewModel : ViewModelBase
                 eventHandler: null,
                 cancellationToken: _loadCts.Token);
 
-            Console.WriteLine($"[DistributionListViewModel] Response received - IsSuccess: {result.IsSuccess}, HasValue: {result.Value != null}");
-
             if (result.IsSuccess && result.Value != null)
             {
-                Console.WriteLine($"[DistributionListViewModel] Groups loaded - Count: {result.Value.DistributionLists.Count}, TotalCount: {result.Value.TotalCount}, HasMore: {result.Value.HasMore}");
-
                 foreach (var item in result.Value.DistributionLists)
                 {
                     DistributionLists.Add(item);
@@ -523,20 +517,11 @@ public class DistributionListViewModel : ViewModelBase
                 _currentSkip = result.Value.DistributionLists.Count;
 
                 OnPropertyChanged(nameof(StatusText));
-                Console.WriteLine($"[DistributionListViewModel] Successfully loaded {DistributionLists.Count} groups. ErrorMessage = '{ErrorMessage}', HasError = {HasError}");
             }
-            else if (result.WasCancelled)
+            else if (!result.WasCancelled)
             {
-                Console.WriteLine("[DistributionListViewModel] Request was cancelled");
-            }
-            else
-            {
-                var errorDetails = result.Error != null
-                    ? $"{result.Error.Code}: {result.Error.Message}"
-                    : "Failed to load distribution lists (no error details)";
-                ErrorMessage = errorDetails;
-                _shellViewModel.AddLog(LogLevel.Error, $"Distribution list load failed: {errorDetails}");
-                Console.WriteLine($"[DistributionListViewModel] Error: {errorDetails}");
+                ErrorMessage = result.Error?.Message ?? "Impossibile caricare le liste di distribuzione";
+                _shellViewModel.AddLog(LogLevel.Error, $"Distribution list load failed: {ErrorMessage}");
             }
         }
         catch (OperationCanceledException)
@@ -545,9 +530,8 @@ public class DistributionListViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
-            _shellViewModel.AddLog(LogLevel.Error, $"Distribution list exception: {ex.GetType().Name} - {ex.Message}");
-            Console.WriteLine($"[DistributionListViewModel] Exception: {ex}");
+            ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"Distribution list exception: {ex.Message}");
         }
         finally
         {
@@ -620,7 +604,6 @@ public class DistributionListViewModel : ViewModelBase
     private void ViewDetails(DistributionListItemDto? item)
     {
         if (item == null) return;
-        SelectedItem = item;
         _navigationService.NavigateToDetails(NavigationPage.DistributionLists, item.Identity, item);
     }
 

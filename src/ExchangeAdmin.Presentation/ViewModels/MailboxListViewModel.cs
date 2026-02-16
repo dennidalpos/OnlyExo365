@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
@@ -29,6 +30,13 @@ public class MailboxListViewModel : ViewModelBase
 
     private MailboxListItemDto? _selectedMailbox;
 
+    private string? _newMailboxDisplayName;
+    private string? _newMailboxAlias;
+    private string? _newMailboxLocalPart;
+    private string? _selectedMailboxDomain;
+    private string? _newMailboxPassword;
+    private bool _isCreatingMailbox;
+
     public MailboxListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
     {
         _workerService = workerService;
@@ -39,11 +47,13 @@ public class MailboxListViewModel : ViewModelBase
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
         CancelCommand = new RelayCommand(Cancel, () => IsLoading);
         ViewDetailsCommand = new RelayCommand<MailboxListItemDto>(ViewDetails, m => m != null);
+        CreateMailboxCommand = new AsyncRelayCommand(CreateMailboxAsync, () => CanCreateMailbox);
     }
 
     #region Properties
 
     public ObservableCollection<MailboxListItemDto> Mailboxes { get; } = new();
+    public ObservableCollection<string> AvailableMailDomains { get; } = new();
 
     public bool IsLoading
     {
@@ -94,6 +104,10 @@ public class MailboxListViewModel : ViewModelBase
             if (SetProperty(ref _recipientTypeFilter, value))
             {
                 SafeRefreshAsync();
+                OnPropertyChanged(nameof(CreateMailboxSectionTitle));
+                OnPropertyChanged(nameof(IsSharedMailboxCreation));
+                OnPropertyChanged(nameof(IsUserMailboxCreation));
+                OnPropertyChanged(nameof(CanCreateMailbox));
             }
         }
     }
@@ -129,10 +143,102 @@ public class MailboxListViewModel : ViewModelBase
         }
     }
 
+
+    public string? NewMailboxDisplayName
+    {
+        get => _newMailboxDisplayName;
+        set
+        {
+            if (SetProperty(ref _newMailboxDisplayName, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewMailboxAlias
+    {
+        get => _newMailboxAlias;
+        set
+        {
+            if (SetProperty(ref _newMailboxAlias, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewMailboxLocalPart
+    {
+        get => _newMailboxLocalPart;
+        set
+        {
+            if (SetProperty(ref _newMailboxLocalPart, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? SelectedMailboxDomain
+    {
+        get => _selectedMailboxDomain;
+        set
+        {
+            if (SetProperty(ref _selectedMailboxDomain, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewMailboxPassword
+    {
+        get => _newMailboxPassword;
+        set
+        {
+            if (SetProperty(ref _newMailboxPassword, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool IsCreatingMailbox
+    {
+        get => _isCreatingMailbox;
+        private set
+        {
+            if (SetProperty(ref _isCreatingMailbox, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool IsSharedMailboxCreation => string.Equals(RecipientTypeFilter, "SharedMailbox", StringComparison.OrdinalIgnoreCase);
+    public bool IsUserMailboxCreation => !IsSharedMailboxCreation;
+
+    public bool CanCreateMailbox =>
+        !IsLoading && !IsCreatingMailbox && _shellViewModel.IsExchangeConnected &&
+        !string.IsNullOrWhiteSpace(NewMailboxDisplayName) &&
+        !string.IsNullOrWhiteSpace(NewMailboxAlias) &&
+        !string.IsNullOrWhiteSpace(NewMailboxLocalPart) &&
+        !string.IsNullOrWhiteSpace(SelectedMailboxDomain) &&
+        (IsSharedMailboxCreation || !string.IsNullOrWhiteSpace(NewMailboxPassword));
+
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
 
     public string StatusText => $"{Mailboxes.Count} of {TotalCount} mailboxes";
+
+    public string CreateMailboxSectionTitle => IsSharedMailboxCreation ? "New Shared Mailbox" : "New Mailbox";
 
     #endregion
 
@@ -142,6 +248,7 @@ public class MailboxListViewModel : ViewModelBase
     public ICommand LoadMoreCommand { get; }
     public ICommand CancelCommand { get; }
     public ICommand ViewDetailsCommand { get; }
+    public ICommand CreateMailboxCommand { get; }
 
     #endregion
 
@@ -168,6 +275,7 @@ public class MailboxListViewModel : ViewModelBase
             return;
         }
 
+        await LoadAcceptedDomainsAsync(CancellationToken.None);
         await RefreshAsync(CancellationToken.None);
     }
 
@@ -307,6 +415,105 @@ public class MailboxListViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+
+    private async Task CreateMailboxAsync(CancellationToken cancellationToken)
+    {
+        if (!CanCreateMailbox)
+        {
+            return;
+        }
+
+        IsCreatingMailbox = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var request = new CreateMailboxRequest
+            {
+                DisplayName = NewMailboxDisplayName!.Trim(),
+                Alias = NewMailboxAlias!.Trim(),
+                PrimarySmtpAddress = BuildPrimarySmtpAddress(),
+                MailboxType = IsSharedMailboxCreation ? "Shared" : "User",
+                Password = IsSharedMailboxCreation ? null : NewMailboxPassword?.Trim()
+            };
+
+            _shellViewModel.AddLog(LogLevel.Information, $"Creating mailbox {request.PrimarySmtpAddress}...");
+
+            var result = await _workerService.CreateMailboxAsync(request, cancellationToken: cancellationToken);
+            if (result.IsSuccess)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, "Mailbox created successfully");
+                NewMailboxDisplayName = string.Empty;
+                NewMailboxAlias = string.Empty;
+                NewMailboxLocalPart = string.Empty;
+                NewMailboxPassword = string.Empty;
+                await RefreshAsync(cancellationToken);
+            }
+            else if (!result.WasCancelled)
+            {
+                ErrorMessage = result.Error?.Message ?? "Failed to create mailbox";
+                _shellViewModel.AddLog(LogLevel.Error, $"Mailbox creation failed: {ErrorMessage}");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"Mailbox creation error: {ex.Message}");
+        }
+        finally
+        {
+            IsCreatingMailbox = false;
+        }
+    }
+
+    private string BuildPrimarySmtpAddress()
+    {
+        var localPart = NewMailboxLocalPart?.Trim() ?? string.Empty;
+        var domain = SelectedMailboxDomain?.Trim() ?? string.Empty;
+        return $"{localPart}@{domain}";
+    }
+
+    private async Task LoadAcceptedDomainsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _workerService.GetAcceptedDomainsAsync(new GetAcceptedDomainsRequest(), cancellationToken: cancellationToken);
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return;
+            }
+
+            var domains = result.Value.Domains
+                .Select(d => d.DomainName?.Trim())
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            await RunOnUiThreadAsync(() =>
+            {
+                AvailableMailDomains.Clear();
+                foreach (var domain in domains)
+                {
+                    AvailableMailDomains.Add(domain!);
+                }
+            });
+
+            if (string.IsNullOrWhiteSpace(SelectedMailboxDomain))
+            {
+                SelectedMailboxDomain = result.Value.Domains.FirstOrDefault(d => d.Default)?.DomainName
+                    ?? AvailableMailDomains.FirstOrDefault();
+            }
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Warning, $"Unable to load accepted domains: {ex.Message}");
         }
     }
 

@@ -425,6 +425,26 @@ public class WorkerClient : IAsyncDisposable
             cancellationToken);
     }
 
+    public async Task<Result> CreateMailboxAsync(
+        CreateMailboxRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.CreateMailbox,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
     #endregion
 
     #region Distribution Lists
@@ -507,6 +527,26 @@ public class WorkerClient : IAsyncDisposable
     {
         var response = await SendRequestInternalAsync(
             OperationType.SetDistributionListSettings,
+            request,
+            eventHandler,
+            cancellationToken);
+
+        if (response.WasCancelled)
+            return Result.Cancelled();
+
+        if (!response.Success)
+            return Result.Failure(NormalizedError.FromDto(response.Error!));
+
+        return Result.Success();
+    }
+
+    public async Task<Result> CreateDistributionListAsync(
+        CreateDistributionListRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendRequestInternalAsync(
+            OperationType.CreateDistributionList,
             request,
             eventHandler,
             cancellationToken);

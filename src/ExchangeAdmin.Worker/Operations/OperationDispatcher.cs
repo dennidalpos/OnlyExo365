@@ -53,6 +53,7 @@ public class OperationDispatcher
                 OperationType.ConvertMailboxToRegular => await HandleConvertMailboxToRegularAsync(request, cancellationToken),
                 OperationType.RestoreMailbox => await HandleRestoreMailboxAsync(request, cancellationToken),
                 OperationType.GetMailboxSpaceReport => await HandleGetMailboxSpaceReportAsync(request, cancellationToken),
+                OperationType.CreateMailbox => await HandleCreateMailboxAsync(request, cancellationToken),
 
                 OperationType.GetDistributionLists => await HandleGetDistributionListsAsync(request, cancellationToken),
                 OperationType.GetDistributionListDetails => await HandleGetDistributionListDetailsAsync(request, cancellationToken),
@@ -60,6 +61,7 @@ public class OperationDispatcher
                 OperationType.ModifyGroupMember => await HandleModifyGroupMemberAsync(request, cancellationToken),
                 OperationType.PreviewDynamicGroupMembers => await HandlePreviewDynamicGroupMembersAsync(request, cancellationToken),
                 OperationType.SetDistributionListSettings => await HandleSetDistributionListSettingsAsync(request, cancellationToken),
+                OperationType.CreateDistributionList => await HandleCreateDistributionListAsync(request, cancellationToken),
 
                 OperationType.GetMessageTrace => await HandleGetMessageTraceAsync(request, request.CorrelationId, cancellationToken),
                 OperationType.GetMessageTraceDetails => await HandleGetMessageTraceDetailsAsync(request, request.CorrelationId, cancellationToken),
@@ -550,6 +552,26 @@ public class OperationDispatcher
         return CreateSuccessResponse(request.CorrelationId, new { Success = true });
     }
 
+    private async Task<ResponseEnvelope> HandleCreateMailboxAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var createRequest = JsonMessageSerializer.ExtractPayload<CreateMailboxRequest>(request.Payload);
+        if (createRequest == null)
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Missing create mailbox request payload", false, null);
+        }
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, $"Creating mailbox {createRequest.PrimarySmtpAddress}...");
+
+        await _exoCommands.CreateMailboxAsync(
+            createRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, LogLevel.Verbose, msg),
+            cancellationToken: cancellationToken);
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, "Mailbox created successfully");
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
+    }
+
     private async Task<ResponseEnvelope> HandleConvertMailboxToSharedAsync(RequestEnvelope request, CancellationToken cancellationToken)
     {
         var convertRequest = JsonMessageSerializer.ExtractPayload<ConvertMailboxToSharedRequest>(request.Payload);
@@ -769,6 +791,26 @@ public class OperationDispatcher
         await SendProgressAsync(request.CorrelationId, 100, "Dynamic group preview complete");
 
         return CreateSuccessResponse(request.CorrelationId, response);
+    }
+
+    private async Task<ResponseEnvelope> HandleCreateDistributionListAsync(RequestEnvelope request, CancellationToken cancellationToken)
+    {
+        var createRequest = JsonMessageSerializer.ExtractPayload<CreateDistributionListRequest>(request.Payload);
+        if (createRequest == null)
+        {
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Missing create distribution list request payload", false, null);
+        }
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, $"Creating distribution list {createRequest.PrimarySmtpAddress}...");
+
+        await _exoGroupCommands.CreateDistributionListAsync(
+            createRequest,
+            onLog: async (level, msg) => await SendLogAsync(request.CorrelationId, LogLevel.Verbose, msg),
+            cancellationToken: cancellationToken);
+
+        await SendLogAsync(request.CorrelationId, LogLevel.Information, "Distribution list created successfully");
+
+        return CreateSuccessResponse(request.CorrelationId, new { Success = true });
     }
 
     private async Task<ResponseEnvelope> HandleSetDistributionListSettingsAsync(RequestEnvelope request, CancellationToken cancellationToken)

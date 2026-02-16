@@ -206,6 +206,11 @@ public interface IWorkerService
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 
+    Task<Result> CreateMailboxAsync(
+        CreateMailboxRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
     #endregion
 
     #region Distribution Lists
@@ -244,6 +249,11 @@ public interface IWorkerService
 
     Task<Result> SetDistributionListSettingsAsync(
         SetDistributionListSettingsRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> CreateDistributionListAsync(
+        CreateDistributionListRequest request,
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default);
 

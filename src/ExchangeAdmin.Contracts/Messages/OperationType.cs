@@ -27,6 +27,7 @@ public enum OperationType
     ConvertMailboxToRegular,
     RestoreMailbox,
     GetMailboxSpaceReport,
+    CreateMailbox,
 
     GetDistributionLists,
     GetDistributionListDetails,
@@ -34,6 +35,7 @@ public enum OperationType
     ModifyGroupMember,
     PreviewDynamicGroupMembers,
     SetDistributionListSettings,
+    CreateDistributionList,
 
     GetMessageTrace,
     GetMessageTraceDetails,

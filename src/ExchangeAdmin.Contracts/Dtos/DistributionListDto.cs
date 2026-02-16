@@ -410,6 +410,18 @@ public class SetDistributionListSettingsRequest
     public List<string>? RejectMessagesFrom { get; set; }
 }
 
+public class CreateDistributionListRequest
+{
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("alias")]
+    public string Alias { get; set; } = string.Empty;
+
+    [JsonPropertyName("primarySmtpAddress")]
+    public string PrimarySmtpAddress { get; set; } = string.Empty;
+}
+
              
                         
               

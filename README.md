@@ -1,89 +1,116 @@
 # OnlyExo365 / ExchangeAdmin
 
-Applicazione desktop WPF per amministrazione operativa Exchange Online con worker PowerShell separato, IPC locale e organizzazione a layer (`Contracts`, `Domain`, `Application`, `Infrastructure`, `Presentation`, `Worker`).
+Applicazione desktop **WPF** per amministrazione operativa di **Exchange Online**, organizzata a layer e con worker PowerShell separato.
 
-## Obiettivo del progetto
+## Scopo
 
-L'app fornisce un pannello unico per attività amministrative ricorrenti:
+L’applicazione concentra in una sola interfaccia le attività amministrative quotidiane:
 
-- Connessione a Exchange Online (e Microsoft Graph quando disponibile).
-- Gestione mailbox, shared mailbox, mail flow, distribution list.
-- Query su message trace con export Excel.
-- Visualizzazione centralizzata dei log applicativi.
+- connessione a Exchange Online;
+- analisi mailbox (utente, shared, cancellate);
+- gestione distribution list (statiche e dinamiche);
+- consultazione message trace;
+- visibilità centralizzata dei log operativi.
 
-L'architettura separa interfaccia e operazioni PowerShell per migliorare isolamento degli errori, resilienza e tracciabilità.
+L’obiettivo principale è separare chiaramente UI e logica di esecuzione PowerShell, così da ridurre i blocchi in interfaccia e migliorare la resilienza in caso di errori runtime.
 
-## Architettura
+## Architettura del repository
 
-- **ExchangeAdmin.Presentation (WPF)**: UI, ViewModels, filtri, validazioni input, comandi utente.
-- **ExchangeAdmin.Application**: use case e service contracts verso il worker.
-- **ExchangeAdmin.Infrastructure**: trasporto IPC e supervisione processo worker.
-- **ExchangeAdmin.Worker**: esecuzione PowerShell (runspace), integrazione cmdlet EXO/Graph.
-- **ExchangeAdmin.Contracts**: DTO e messaggi IPC condivisi.
-- **ExchangeAdmin.Domain**: tipologie dominio, error taxonomy, retry/circuit-breaker.
+- `src/ExchangeAdmin.Presentation`
+  UI WPF, ViewModel, validazioni input, comandi utente e logiche di filtro lato client.
+- `src/ExchangeAdmin.Application`
+  Use case applicativi e orchestrazione verso i servizi worker.
+- `src/ExchangeAdmin.Infrastructure`
+  IPC client/server locale e supervisione ciclo vita worker.
+- `src/ExchangeAdmin.Worker`
+  Esecuzione PowerShell (runspace), import moduli, cmdlet EXO/Graph.
+- `src/ExchangeAdmin.Contracts`
+  DTO e messaggi IPC condivisi tra Presentation e Worker.
+- `src/ExchangeAdmin.Domain`
+  Tipologie dominio, gestione errori normalizzati, resilienza.
+- `build/`
+  Script di build e pulizia.
+- `installer/`
+  Sorgenti WiX per MSI.
 
-## Flussi principali
+## Flusso operativo principale
 
-### 1) Connessione
+1. La UI invia una richiesta tipizzata al layer Application.
+2. Infrastructure inoltra la richiesta al worker via IPC locale.
+3. Il worker esegue i cmdlet nel runspace PowerShell.
+4. I risultati vengono normalizzati (payload/errori/progress) e ritornati alla UI.
+5. La UI aggiorna stato, liste, dettagli e log.
 
-1. Lato UI viene richiesto il collegamento.
-2. Il worker inizializza runspace PowerShell.
-3. Se disponibile, viene importato `ExchangeOnlineManagement`.
-4. Viene eseguito `Connect-ExchangeOnline` (opzionalmente con ambiente EXO specifico via variabile `EXCHANGEADMIN_EXO_ENV`).
-5. In parallelo, viene tentata connessione Microsoft Graph per funzionalità licensing/amministrative avanzate.
+## Processi di import/export
 
-### 2) Operazioni amministrative
+### Import moduli PowerShell (worker)
 
-- La UI invia una richiesta tipizzata (DTO/Message).
-- Il worker esegue lo script/cmdlet e normalizza output/errori.
-- Le risposte tornano via IPC con eventi progresso/log.
+- Il worker importa `ExchangeOnlineManagement` nel runspace dedicato.
+- Prima dell’import, viene verificata la disponibilità del modulo in `PSModulePath`.
+- In caso di modulo assente o import fallito, l’errore viene normalizzato e propagato ai layer superiori.
+- L’import può essere rieseguito durante recovery del runspace.
 
-### 3) Export Message Trace
+### Export message trace (UI)
 
-- La pagina Message Trace applica filtri locali sul set ricevuto.
-- L'export Excel usa formato `.xlsx` OpenXML.
-- La directory predefinita di export è `%LOCALAPPDATA%\OnlyExo365\exports`.
+- Il comando export agisce sulla collezione filtrata corrente (`Messages`).
+- Formato output: `.xlsx` (OpenXML).
+- Header esportati: `Received`, `Sender`, `Recipient`, `Subject`, `Status`, `Size`, `MessageId`, `MessageTraceId`.
+- Directory di export:
+  - priorità alla variabile ambiente `EXCHANGEADMIN_EXPORT_DIR`;
+  - fallback: `%LOCALAPPDATA%\OnlyExo365\exports`.
+- Il processo gestisce eccezioni con messaggio utente (`ErrorMessage`) e log applicativo.
 
-## Logica filtri e checkbox
+### Cartelle artefatti import/export (script)
+
+- Lo script `build/build.ps1` prepara sia cartella `exports` che `imports` (personalizzabili via parametro).
+- Lo script `build/clean.ps1` può pulire in modo selettivo `exports` e `imports`, oltre a `artifacts`, `bin/obj`, file temporanei e cache opzionali.
+
+## Logica checkbox e filtri
 
 ### Distribution Lists
 
-- **`IncludeDynamic`**: determina se includere gruppi dinamici nelle ricerche.
-- La ricerca testuale usa debounce (300 ms) per ridurre chiamate ridondanti.
-- Ogni cambio filtro avvia refresh sicuro con gestione eccezioni e cancellazione operazioni precedenti.
-- Le checkbox impostazioni lista (es. mittenti esterni consentiti) aggiornano lo stato `HasPendingSettingsChanges` in base al diff con valori originali.
+- **Checkbox `IncludeDynamic`**: include/esclude i gruppi dinamici dalle query lista.
+- **Ricerca testuale**: applicata con debounce, invio query normalizzata (trim/null).
+- **Checkbox impostazioni lista**:
+  - `AllowExternalSenders` aggiorna `RequireSenderAuthenticationEnabled` in modo inverso;
+  - variazioni su mittenti ammessi/bloccati attivano `HasPendingSettingsChanges` tramite confronto normalizzato (trim, distinct case-insensitive, ordinamento).
+- **Comandi di salvataggio/scarto**: abilitati/disabilitati in base allo stato di modifica pendente.
 
 ### Message Trace
 
-- **Filtro stato** (`All`, `Delivered`, `Failed`, `Pending`) applicato localmente sulla collezione completa (`AllMessages`).
-- Normalizzazione filtro con trim e confronto case-insensitive.
-- Aggiornamento stato comandi dopo ogni applicazione filtro (utile per abilitazione/disabilitazione export).
+- **Filtro stato (`StatusFilter`)**: ammessi solo `All`, `Delivered`, `Failed`, `Pending`.
+- Valori non previsti vengono normalizzati ad `All`.
+- Il filtro viene applicato localmente su `AllMessages` per aggiornare `Messages` senza roundtrip al worker.
+- L’abilitazione dei comandi viene ricalcolata ad ogni applicazione filtro.
+
+### Mailbox List
+
+- **Filtro `RecipientTypeFilter`**: normalizzato a `UserMailbox`/`SharedMailbox`.
+- **Ricerca testuale**: debounce lato UI e invio query trim/null.
+- **Paginazione**: `LoadMore` basato su `HasMore` + `Skip` corrente.
 
 ### Logs
 
-- Filtro per livello minimo (`FilterLevel`) + ricerca testuale (`SearchFilter`).
-- Cache interna dei risultati filtrati invalidata ad ogni modifica rilevante.
-- Refresh con debounce e soglia minima di intervallo per evitare aggiornamenti UI eccessivi.
+- **Filtro livello minimo (`FilterLevel`)**.
+- **Filtro testo (`SearchFilter`)** con normalizzazione trim/case-insensitive.
+- Cache locale dei risultati filtrati, invalidata su cambi filtro o su nuovi log.
+- Refresh dei risultati con debounce/throttling per ridurre aggiornamenti UI eccessivi.
 
 ## Prerequisiti
 
-- **Windows** (WPF).
-- **PowerShell 7+** (`pwsh`).
-- **.NET SDK 8+** per build locale.
-- Modulo **ExchangeOnlineManagement** installato nel profilo PowerShell.
-- Per alcune funzioni, modulo **Microsoft.Graph.Authentication**.
+- Windows (WPF).
+- PowerShell 7+ (`pwsh`).
+- .NET SDK 8+.
+- Modulo `ExchangeOnlineManagement` disponibile nel profilo PowerShell.
+- Moduli Microsoft Graph per funzionalità opzionali avanzate.
 
-## Build e clean
-
-Sono presenti script PowerShell in `build/`.
-
-### Build
+## Build
 
 ```powershell
 pwsh ./build/build.ps1
 ```
 
-Opzioni principali:
+Parametri principali:
 
 - `-Configuration Debug|Release`
 - `-Clean`
@@ -91,31 +118,28 @@ Opzioni principali:
 - `-SelfContained`
 - `-RuntimeIdentifier win-x64`
 - `-Msi`
-- `-ExportDirPath <path>` per impostare la directory export artefatti
+- `-ExportDirPath <path>`
+- `-ImportDirPath <path>`
 
-### Clean
+## Clean
 
 ```powershell
 pwsh ./build/clean.ps1
 ```
 
-Opzioni principali:
+Parametri principali:
 
-- `-DryRun` (simulazione)
-- `-All` (include cache aggiuntive e anche export)
-- `-IncludeExports` (pulizia esplicita export)
+- `-DryRun`
+- `-All`
 - `-SkipDotNetClean`
+- `-IncludeExports`
+- `-IncludeImports`
+- `-ExportDirPath <path>`
+- `-ImportDirPath <path>`
 
-## Esecuzione applicazione
+## Esecuzione
 
-1. Build/publish del progetto.
+1. Build/publish.
 2. Avvio `ExchangeAdmin.Presentation.exe`.
-3. Connessione a Exchange Online dalla UI.
-4. Navigazione delle sezioni operative (Mailbox, Mail Flow, Distribution Lists, Message Trace, Logs).
-
-## Struttura repository
-
-- `src/`: codice sorgente per tutti i layer.
-- `build/`: script automazione build/clean.
-- `installer/`: sorgenti WiX per MSI.
-- `ExchangeAdmin.sln`: solution principale.
+3. Connessione Exchange Online dalla dashboard.
+4. Navigazione sezioni operative e gestione attività.

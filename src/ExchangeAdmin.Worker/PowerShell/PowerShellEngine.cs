@@ -478,7 +478,16 @@ public sealed class PowerShellEngine : IDisposable
 
         var safeModuleName = moduleName.Replace("'", "''", StringComparison.Ordinal);
         var errorAction = stopOnError ? "Stop" : "SilentlyContinue";
-        ps.AddScript($"Import-Module '{safeModuleName}' -ErrorAction {errorAction}");
+        ps.AddScript($@"
+$moduleName = '{safeModuleName}'
+$available = Get-Module -ListAvailable -Name $moduleName | Select-Object -First 1
+if (-not $available) {{
+    Write-Error ""Module '$moduleName' is not installed or not available in PSModulePath.""
+}}
+else {{
+    Import-Module -Name $moduleName -Global -ErrorAction {errorAction} | Out-Null
+}}
+");
 
         await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
 

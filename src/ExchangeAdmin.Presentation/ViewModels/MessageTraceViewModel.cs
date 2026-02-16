@@ -36,7 +36,15 @@ public class MessageTraceViewModel : ViewModelBase
     private string _statusFilter = "All";
     private MessageTraceItemDto? _selectedMessage;
     private bool _isLoadingDetails;
-    private readonly string _defaultExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OnlyExo365", "exports");
+    private static readonly HashSet<string> AllowedStatusFilters = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "All",
+        "Delivered",
+        "Failed",
+        "Pending"
+    };
+
+    private readonly string _defaultExportDirectory = ResolveExportDirectory();
 
     public MessageTraceViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
@@ -193,7 +201,7 @@ public class MessageTraceViewModel : ViewModelBase
     public ICommand LoadDetailsCommand { get; }
     public ICommand SetStatusFilterCommand { get; }
 
-    public async Task LoadAsync()
+    public Task LoadAsync()
     {
         OnPropertyChanged(nameof(CanSearch));
         CommandManager.InvalidateRequerySuggested();
@@ -201,10 +209,11 @@ public class MessageTraceViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             ErrorMessage = "Non connesso a Exchange Online";
-            return;
+            return Task.CompletedTask;
         }
 
         ErrorMessage = null;
+        return Task.CompletedTask;
     }
 
     private async Task SearchAsync(CancellationToken cancellationToken)
@@ -362,12 +371,22 @@ public class MessageTraceViewModel : ViewModelBase
 
     private void SetStatusFilter(string? status)
     {
-        StatusFilter = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+        var normalized = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+        StatusFilter = AllowedStatusFilters.Contains(normalized) ? normalized : "All";
     }
 
     private void ApplyStatusFilter()
     {
         var normalizedFilter = string.IsNullOrWhiteSpace(StatusFilter) ? "All" : StatusFilter.Trim();
+        if (!AllowedStatusFilters.Contains(normalizedFilter))
+        {
+            normalizedFilter = "All";
+            if (!string.Equals(StatusFilter, normalizedFilter, StringComparison.Ordinal))
+            {
+                _statusFilter = normalizedFilter;
+                OnPropertyChanged(nameof(StatusFilter));
+            }
+        }
 
         IEnumerable<MessageTraceItemDto> filtered = AllMessages;
         if (!string.Equals(normalizedFilter, "All", StringComparison.OrdinalIgnoreCase))
@@ -391,21 +410,23 @@ public class MessageTraceViewModel : ViewModelBase
             return;
         }
 
-        Directory.CreateDirectory(_defaultExportDirectory);
-
-        var dialog = new SaveFileDialog
+        try
         {
-            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-            InitialDirectory = _defaultExportDirectory,
-            FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
-        };
+            Directory.CreateDirectory(_defaultExportDirectory);
 
-        if (dialog.ShowDialog() != true)
-        {
-            return;
-        }
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                InitialDirectory = _defaultExportDirectory,
+                FileName = $"message-trace-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
+            };
 
-        using var spreadsheet = SpreadsheetDocument.Create(dialog.FileName, SpreadsheetDocumentType.Workbook);
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            using var spreadsheet = SpreadsheetDocument.Create(dialog.FileName, SpreadsheetDocumentType.Workbook);
         var workbookPart = spreadsheet.AddWorkbookPart();
         workbookPart.Workbook = new Workbook();
 
@@ -447,10 +468,27 @@ public class MessageTraceViewModel : ViewModelBase
             sheetData.Append(row);
         }
 
-        worksheetPart.Worksheet.Save();
-        workbookPart.Workbook.Save();
+            worksheetPart.Worksheet.Save();
+            workbookPart.Workbook.Save();
 
-        _shellViewModel.AddLog(LogLevel.Information, $"Message trace export Excel salvato: {dialog.FileName}");
+            _shellViewModel.AddLog(LogLevel.Information, $"Message trace export Excel salvato: {dialog.FileName}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Esportazione non riuscita: {ex.Message}";
+            _shellViewModel.AddLog(LogLevel.Error, $"Message trace export failed: {ex.Message}");
+        }
+    }
+
+    private static string ResolveExportDirectory()
+    {
+        var fromEnv = Environment.GetEnvironmentVariable("EXCHANGEADMIN_EXPORT_DIR");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return fromEnv.Trim();
+        }
+
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OnlyExo365", "exports");
     }
 
     private static Stylesheet CreateStylesheet()

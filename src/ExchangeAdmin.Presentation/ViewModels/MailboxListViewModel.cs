@@ -90,8 +90,7 @@ public class MailboxListViewModel : ViewModelBase
         {
             if (SetProperty(ref _searchQuery, value))
             {
-                // Use DebounceHelper for more efficient debouncing
-                _searchDebounce.Debounce(SafeRefreshAsync, 300);
+                _searchDebounce.Debounce(TriggerRefreshFromUi, 300);
             }
         }
     }
@@ -103,7 +102,7 @@ public class MailboxListViewModel : ViewModelBase
         {
             if (SetProperty(ref _recipientTypeFilter, value))
             {
-                SafeRefreshAsync();
+                TriggerRefreshFromUi();
                 OnPropertyChanged(nameof(CreateMailboxSectionTitle));
                 OnPropertyChanged(nameof(IsSharedMailboxCreation));
                 OnPropertyChanged(nameof(IsUserMailboxCreation));
@@ -254,7 +253,12 @@ public class MailboxListViewModel : ViewModelBase
 
     #region Methods
 
-    private async void SafeRefreshAsync()
+    private void TriggerRefreshFromUi()
+    {
+        _ = SafeRefreshAsync();
+    }
+
+    private async Task SafeRefreshAsync()
     {
         try
         {
@@ -304,8 +308,8 @@ public class MailboxListViewModel : ViewModelBase
         {
             var request = new GetMailboxesRequest
             {
-                RecipientTypeDetails = _recipientTypeFilter,
-                SearchQuery = _searchQuery,
+                RecipientTypeDetails = NormalizeRecipientTypeFilter(_recipientTypeFilter),
+                SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
                 PageSize = PageSize,
                 Skip = 0
             };
@@ -374,8 +378,8 @@ public class MailboxListViewModel : ViewModelBase
         {
             var request = new GetMailboxesRequest
             {
-                RecipientTypeDetails = _recipientTypeFilter,
-                SearchQuery = _searchQuery,
+                RecipientTypeDetails = NormalizeRecipientTypeFilter(_recipientTypeFilter),
+                SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
                 PageSize = PageSize,
                 Skip = _currentSkip
             };
@@ -515,6 +519,17 @@ public class MailboxListViewModel : ViewModelBase
         {
             _shellViewModel.AddLog(LogLevel.Warning, $"Unable to load accepted domains: {ex.Message}");
         }
+    }
+
+
+    private static string NormalizeRecipientTypeFilter(string? value)
+    {
+        if (string.Equals(value, "SharedMailbox", StringComparison.OrdinalIgnoreCase))
+        {
+            return "SharedMailbox";
+        }
+
+        return "UserMailbox";
     }
 
     private void ViewDetails(MailboxListItemDto? mailbox)

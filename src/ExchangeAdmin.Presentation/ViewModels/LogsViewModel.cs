@@ -69,7 +69,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
             if (SetProperty(ref _filterLevel, value))
             {
                 InvalidateFilterCache();
-                NotifyFilteredLogsChanged();
+                RequestFilterRefresh(immediate: true);
             }
         }
     }
@@ -85,7 +85,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
             if (SetProperty(ref _searchFilter, value))
             {
                 InvalidateFilterCache();
-                NotifyFilteredLogsChanged();
+                RequestFilterRefresh(immediate: false);
             }
         }
     }
@@ -249,7 +249,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
 
             RunOnUiThread(() =>
             {
-                NotifyFilteredLogsChanged();
+                RequestFilterRefresh(immediate: true);
                 NotifyCountsChanged();
             });
         }
@@ -261,11 +261,23 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
                 _lastRefreshTime = DateTime.UtcNow;
                 RunOnUiThread(() =>
                 {
-                    NotifyFilteredLogsChanged();
+                    RequestFilterRefresh(immediate: true);
                     NotifyCountsChanged();
                 });
             }, delayMs);
         }
+    }
+
+
+    private void RequestFilterRefresh(bool immediate)
+    {
+        if (immediate)
+        {
+            NotifyFilteredLogsChanged();
+            return;
+        }
+
+        _refreshDebounce.Debounce(() => RunOnUiThread(NotifyFilteredLogsChanged), 200);
     }
 
     private void InvalidateFilterCache()
@@ -280,7 +292,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
     {
                            
         _cachedFilteredLogs = new List<LogEntry>();
-        var searchLower = _searchFilter?.ToLowerInvariant();
+        var searchLower = string.IsNullOrWhiteSpace(_searchFilter) ? null : _searchFilter.Trim().ToLowerInvariant();
 
         foreach (var log in LogEntries)
         {

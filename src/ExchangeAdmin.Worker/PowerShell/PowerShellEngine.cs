@@ -482,7 +482,7 @@ public sealed class PowerShellEngine : IDisposable
 $moduleName = '{safeModuleName}'
 $available = Get-Module -ListAvailable -Name $moduleName | Select-Object -First 1
 if (-not $available) {{
-    Write-Error "Module '$moduleName' is not installed or not available in PSModulePath."
+    Write-Error ""Module '$moduleName' is not installed or not available in PSModulePath.""
 }}
 else {{
     Import-Module -Name $moduleName -Global -ErrorAction {errorAction} | Out-Null

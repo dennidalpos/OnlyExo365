@@ -156,7 +156,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             if (SetProperty(ref _includeDynamic, value))
             {
-                _ = SafeRefreshAsync();
+                TriggerRefreshFromUi();
             }
         }
     }
@@ -468,6 +468,11 @@ public class DistributionListViewModel : ViewModelBase
     }
 
 
+    private void TriggerRefreshFromUi()
+    {
+        _ = SafeRefreshAsync();
+    }
+
     private async Task SafeRefreshAsync()
     {
         try
@@ -494,7 +499,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             var request = new GetDistributionListsRequest
             {
-                SearchQuery = _searchQuery,
+                SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
                 IncludeDynamic = _includeDynamic,
                 PageSize = PageSize,
                 Skip = 0
@@ -553,7 +558,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             var request = new GetDistributionListsRequest
             {
-                SearchQuery = _searchQuery,
+                SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
                 IncludeDynamic = _includeDynamic,
                 PageSize = PageSize,
                 Skip = _currentSkip

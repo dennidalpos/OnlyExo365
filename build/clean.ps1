@@ -5,7 +5,10 @@ param(
     [switch]$All,
     [switch]$DryRun,
     [switch]$SkipDotNetClean,
-    [switch]$IncludeExports
+    [switch]$IncludeExports,
+    [switch]$IncludeImports,
+    [string]$ExportDirPath,
+    [string]$ImportDirPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,7 +17,8 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SolutionDir = Split-Path -Parent $ScriptDir
 $ArtifactsDir = Join-Path $SolutionDir "artifacts"
 $SrcDir = Join-Path $SolutionDir "src"
-$ExportsDir = Join-Path $ArtifactsDir "exports"
+$ExportsDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $ArtifactsDir "exports" } else { $ExportDirPath }
+$ImportsDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $ArtifactsDir "imports" } else { $ImportDirPath }
 
 $script:DeletedCount = 0
 $script:DeletedSize = 0
@@ -125,6 +129,9 @@ if ($All) {
 if ($All -and -not $IncludeExports) {
     $IncludeExports = $true
 }
+if ($All -and -not $IncludeImports) {
+    $IncludeImports = $true
+}
 
 Write-Step "Cleaning artifacts directory"
 if (Remove-DirectoryIfExists -Path $ArtifactsDir -Description "Artifacts") {
@@ -143,6 +150,18 @@ if ($IncludeExports) {
     }
 } else {
     Write-Skipped "Generated exports clean skipped (use -IncludeExports or -All)"
+}
+
+
+Write-Step "Cleaning generated import files"
+if ($IncludeImports) {
+    if (Remove-DirectoryIfExists -Path $ImportsDir -Description "Generated imports") {
+        Write-Success "Generated imports cleaned"
+    } else {
+        Write-Skipped "Generated imports directory not found"
+    }
+} else {
+    Write-Skipped "Generated imports clean skipped (use -IncludeImports or -All)"
 }
 
 Write-Step "Cleaning bin/obj directories"

@@ -71,7 +71,9 @@ param(
 
     [switch]$Msi = $false,
 
-    [string]$ExportDirPath
+    [string]$ExportDirPath,
+
+    [string]$ImportDirPath
 )
 
                                    
@@ -85,6 +87,7 @@ $SolutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
 $OutputDir = Join-Path $SolutionDir "artifacts"
 $PublishDir = Join-Path $OutputDir "publish"
 $ExportDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $OutputDir "exports" } else { $ExportDirPath }
+$ImportDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $OutputDir "imports" } else { $ImportDirPath }
 $InstallerDir = Join-Path $OutputDir "installer"
 $InstallerSourceDir = Join-Path $SolutionDir "installer"
 $WixBin = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
@@ -199,6 +202,11 @@ if (-not [System.IO.Path]::IsPathRooted($ExportDir)) {
     $ExportDir = Join-Path $SolutionDir $ExportDir
     Write-Info "Resolved export path to absolute: $ExportDir"
 }
+Write-Host "Imports       : $ImportDir"
+if (-not [System.IO.Path]::IsPathRooted($ImportDir)) {
+    $ImportDir = Join-Path $SolutionDir $ImportDir
+    Write-Info "Resolved import path to absolute: $ImportDir"
+}
 Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $($SelfContained.IsPresent)"
 Write-Host "Runtime       : $RuntimeIdentifier"
@@ -295,9 +303,11 @@ if ($Publish) {
         Write-Info "Created: $PublishDir"
     }
 
-    if (-not (Test-Path $ExportDir)) {
-        New-Item -Path $ExportDir -ItemType Directory -Force | Out-Null
-        Write-Info "Created exports directory: $ExportDir"
+    foreach ($pathInfo in @(@{ Path = $ExportDir; Label = "exports" }, @{ Path = $ImportDir; Label = "imports" })) {
+        if (-not (Test-Path $pathInfo.Path)) {
+            New-Item -Path $pathInfo.Path -ItemType Directory -Force | Out-Null
+            Write-Info "Created $($pathInfo.Label) directory: $($pathInfo.Path)"
+        }
     }
 
     $publishArgs = @(

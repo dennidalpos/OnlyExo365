@@ -557,7 +557,7 @@ public class OperationDispatcher
         var createRequest = JsonMessageSerializer.ExtractPayload<CreateMailboxRequest>(request.Payload);
         if (createRequest == null)
         {
-            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidRequest, "Missing create mailbox request payload", false, null);
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Missing create mailbox request payload", false, null);
         }
 
         await SendLogAsync(request.CorrelationId, LogLevel.Information, $"Creating mailbox {createRequest.PrimarySmtpAddress}...");
@@ -798,7 +798,7 @@ public class OperationDispatcher
         var createRequest = JsonMessageSerializer.ExtractPayload<CreateDistributionListRequest>(request.Payload);
         if (createRequest == null)
         {
-            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidRequest, "Missing create distribution list request payload", false, null);
+            return CreateErrorResponse(request.CorrelationId, ErrorCode.InvalidParameter, "Missing create distribution list request payload", false, null);
         }
 
         await SendLogAsync(request.CorrelationId, LogLevel.Information, $"Creating distribution list {createRequest.PrimarySmtpAddress}...");

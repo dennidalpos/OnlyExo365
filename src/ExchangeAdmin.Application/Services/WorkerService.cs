@@ -167,6 +167,12 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         CancellationToken cancellationToken = default)
         => _client.GetMailboxSpaceReportAsync(request, eventHandler, cancellationToken);
 
+    public Task<Result> CreateMailboxAsync(
+        CreateMailboxRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.CreateMailboxAsync(request, eventHandler, cancellationToken);
+
     #endregion
 
     #region Distribution Lists
@@ -200,6 +206,12 @@ public class WorkerService : IWorkerService, IAsyncDisposable
         Action<EventEnvelope>? eventHandler = null,
         CancellationToken cancellationToken = default)
         => _client.SetDistributionListSettingsAsync(request, eventHandler, cancellationToken);
+
+    public Task<Result> CreateDistributionListAsync(
+        CreateDistributionListRequest request,
+        Action<EventEnvelope>? eventHandler = null,
+        CancellationToken cancellationToken = default)
+        => _client.CreateDistributionListAsync(request, eventHandler, cancellationToken);
 
     public Task<Result<PreviewDynamicGroupMembersResponse>> PreviewDynamicGroupMembersAsync(
         PreviewDynamicGroupMembersRequest request,

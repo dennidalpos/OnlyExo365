@@ -14,6 +14,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -52,7 +53,24 @@
             </Grid>
 
                                
-            <DataGrid Grid.Row="2" ItemsSource="{Binding DistributionLists.DistributionLists}"
+            
+            <GroupBox Grid.Row="2" Header="Nuova lista di distribuzione" Margin="0,0,0,12">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" Text="{Binding DistributionLists.NewDistributionListDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="1" Text="{Binding DistributionLists.NewDistributionListAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding DistributionLists.NewDistributionListPrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                    <Button Grid.Column="3" Content="Crea" Command="{Binding DistributionLists.CreateDistributionListCommand}" Style="{StaticResource PrimaryButton}"/>
+                </Grid>
+            </GroupBox>
+
+            <DataGrid Grid.Row="3" ItemsSource="{Binding DistributionLists.DistributionLists}"
                       SelectedItem="{Binding DistributionLists.SelectedItem}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -103,7 +121,7 @@
             </DataGrid>
 
                               
-            <Button Grid.Row="3" Content="Carica altri" Command="{Binding DistributionLists.LoadMoreCommand}"
+            <Button Grid.Row="4" Content="Carica altri" Command="{Binding DistributionLists.LoadMoreCommand}"
                     HorizontalAlignment="Center" Margin="0,12,0,0"
                     Style="{StaticResource PrimaryButton}"
                     Visibility="{Binding DistributionLists.HasMore, Converter={StaticResource BoolToVisibility}}"/>

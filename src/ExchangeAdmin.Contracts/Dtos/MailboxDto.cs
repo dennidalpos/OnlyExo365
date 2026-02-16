@@ -675,6 +675,24 @@ public class ConvertMailboxToSharedRequest
     public string Identity { get; set; } = string.Empty;
 }
 
+public class CreateMailboxRequest
+{
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("alias")]
+    public string Alias { get; set; } = string.Empty;
+
+    [JsonPropertyName("primarySmtpAddress")]
+    public string PrimarySmtpAddress { get; set; } = string.Empty;
+
+    [JsonPropertyName("mailboxType")]
+    public string MailboxType { get; set; } = "Shared";
+
+    [JsonPropertyName("password")]
+    public string? Password { get; set; }
+}
+
 public class ConvertMailboxToRegularRequest
 {
     [JsonPropertyName("identity")]

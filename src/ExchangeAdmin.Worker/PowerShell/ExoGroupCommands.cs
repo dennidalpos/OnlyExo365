@@ -518,6 +518,41 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
                  
                                                     
                   
+    public async Task CreateDistributionListAsync(
+        CreateDistributionListRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.DisplayName) ||
+            string.IsNullOrWhiteSpace(request.Alias) ||
+            string.IsNullOrWhiteSpace(request.PrimarySmtpAddress))
+        {
+            throw new InvalidOperationException("DisplayName, Alias and PrimarySmtpAddress are required to create a distribution list.");
+        }
+
+        var escapedDisplayName = request.DisplayName.Replace("'", "''");
+        var escapedAlias = request.Alias.Replace("'", "''");
+        var escapedPrimarySmtpAddress = request.PrimarySmtpAddress.Replace("'", "''");
+
+        var script = $"New-DistributionGroup -Name '{escapedDisplayName}' -DisplayName '{escapedDisplayName}' -Alias '{escapedAlias}' -PrimarySmtpAddress '{escapedPrimarySmtpAddress}'";
+
+        onLog?.Invoke("Information", $"Creating distribution list {request.PrimarySmtpAddress}...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to create distribution list: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Distribution list created successfully");
+    }
+
     public async Task<PreviewDynamicGroupMembersResponse> PreviewDynamicGroupMembersAsync(
         PreviewDynamicGroupMembersRequest request,
         Action<string, string>? onLog,

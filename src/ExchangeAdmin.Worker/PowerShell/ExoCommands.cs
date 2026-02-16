@@ -1098,6 +1098,62 @@ catch {{
         onLog?.Invoke("Information", "Auto-reply configuration updated successfully");
     }
 
+    public async Task CreateMailboxAsync(
+        CreateMailboxRequest request,
+        Action<string, string>? onLog,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.DisplayName) ||
+            string.IsNullOrWhiteSpace(request.Alias) ||
+            string.IsNullOrWhiteSpace(request.PrimarySmtpAddress))
+        {
+            throw new InvalidOperationException("DisplayName, Alias and PrimarySmtpAddress are required to create a mailbox.");
+        }
+
+        var escapedDisplayName = request.DisplayName.Replace("'", "''");
+        var escapedAlias = request.Alias.Replace("'", "''");
+        var escapedPrimarySmtpAddress = request.PrimarySmtpAddress.Replace("'", "''");
+        var mailboxType = request.MailboxType?.Trim();
+
+        string script;
+
+        if (string.Equals(mailboxType, "User", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(mailboxType, "Regular", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(mailboxType, "UserMailbox", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new InvalidOperationException("Password is required to create a user mailbox.");
+            }
+
+            var escapedPassword = request.Password.Replace("'", "''");
+            script = $@"
+$securePassword = ConvertTo-SecureString '{escapedPassword}' -AsPlainText -Force
+New-Mailbox -Name '{escapedDisplayName}' -DisplayName '{escapedDisplayName}' -Alias '{escapedAlias}' -MicrosoftOnlineServicesID '{escapedPrimarySmtpAddress}' -UserPrincipalName '{escapedPrimarySmtpAddress}' -PrimarySmtpAddress '{escapedPrimarySmtpAddress}' -Password $securePassword
+";
+        }
+        else
+        {
+            script = $"New-Mailbox -Shared -Name '{escapedDisplayName}' -DisplayName '{escapedDisplayName}' -Alias '{escapedAlias}' -PrimarySmtpAddress '{escapedPrimarySmtpAddress}'";
+        }
+
+        onLog?.Invoke("Information", $"Creating mailbox {request.PrimarySmtpAddress}...");
+
+        var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
+
+        if (result.WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"Failed to create mailbox: {result.ErrorMessage}");
+        }
+
+        onLog?.Invoke("Information", "Mailbox created successfully");
+    }
+
     public async Task ConvertMailboxToSharedAsync(
         ConvertMailboxToSharedRequest request,
         Action<string, string>? onLog,

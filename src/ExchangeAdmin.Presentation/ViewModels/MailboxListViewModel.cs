@@ -29,6 +29,11 @@ public class MailboxListViewModel : ViewModelBase
 
     private MailboxListItemDto? _selectedMailbox;
 
+    private string? _newMailboxDisplayName;
+    private string? _newMailboxAlias;
+    private string? _newMailboxPrimarySmtpAddress;
+    private bool _isCreatingMailbox;
+
     public MailboxListViewModel(IWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
     {
         _workerService = workerService;
@@ -39,6 +44,7 @@ public class MailboxListViewModel : ViewModelBase
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
         CancelCommand = new RelayCommand(Cancel, () => IsLoading);
         ViewDetailsCommand = new RelayCommand<MailboxListItemDto>(ViewDetails, m => m != null);
+        CreateMailboxCommand = new AsyncRelayCommand(CreateMailboxAsync, () => CanCreateMailbox);
     }
 
     #region Properties
@@ -129,6 +135,65 @@ public class MailboxListViewModel : ViewModelBase
         }
     }
 
+
+    public string? NewMailboxDisplayName
+    {
+        get => _newMailboxDisplayName;
+        set
+        {
+            if (SetProperty(ref _newMailboxDisplayName, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewMailboxAlias
+    {
+        get => _newMailboxAlias;
+        set
+        {
+            if (SetProperty(ref _newMailboxAlias, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public string? NewMailboxPrimarySmtpAddress
+    {
+        get => _newMailboxPrimarySmtpAddress;
+        set
+        {
+            if (SetProperty(ref _newMailboxPrimarySmtpAddress, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool IsCreatingMailbox
+    {
+        get => _isCreatingMailbox;
+        private set
+        {
+            if (SetProperty(ref _isCreatingMailbox, value))
+            {
+                OnPropertyChanged(nameof(CanCreateMailbox));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+    }
+
+    public bool CanCreateMailbox =>
+        !IsLoading && !IsCreatingMailbox && _shellViewModel.IsExchangeConnected &&
+        !string.IsNullOrWhiteSpace(NewMailboxDisplayName) &&
+        !string.IsNullOrWhiteSpace(NewMailboxAlias) &&
+        !string.IsNullOrWhiteSpace(NewMailboxPrimarySmtpAddress);
+
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
 
@@ -142,6 +207,7 @@ public class MailboxListViewModel : ViewModelBase
     public ICommand LoadMoreCommand { get; }
     public ICommand CancelCommand { get; }
     public ICommand ViewDetailsCommand { get; }
+    public ICommand CreateMailboxCommand { get; }
 
     #endregion
 
@@ -307,6 +373,58 @@ public class MailboxListViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+
+    private async Task CreateMailboxAsync(CancellationToken cancellationToken)
+    {
+        if (!CanCreateMailbox)
+        {
+            return;
+        }
+
+        IsCreatingMailbox = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var request = new CreateMailboxRequest
+            {
+                DisplayName = NewMailboxDisplayName!.Trim(),
+                Alias = NewMailboxAlias!.Trim(),
+                PrimarySmtpAddress = NewMailboxPrimarySmtpAddress!.Trim(),
+                MailboxType = "Shared"
+            };
+
+            _shellViewModel.AddLog(LogLevel.Information, $"Creating mailbox {request.PrimarySmtpAddress}...");
+
+            var result = await _workerService.CreateMailboxAsync(request, cancellationToken: cancellationToken);
+            if (result.IsSuccess)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, "Mailbox created successfully");
+                NewMailboxDisplayName = string.Empty;
+                NewMailboxAlias = string.Empty;
+                NewMailboxPrimarySmtpAddress = string.Empty;
+                await RefreshAsync(cancellationToken);
+            }
+            else if (!result.WasCancelled)
+            {
+                ErrorMessage = result.Error?.Message ?? "Failed to create mailbox";
+                _shellViewModel.AddLog(LogLevel.Error, $"Mailbox creation failed: {ErrorMessage}");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            _shellViewModel.AddLog(LogLevel.Error, $"Mailbox creation error: {ex.Message}");
+        }
+        finally
+        {
+            IsCreatingMailbox = false;
         }
     }
 

@@ -100,6 +100,7 @@ public class MailboxListViewModel : ViewModelBase
             if (SetProperty(ref _recipientTypeFilter, value))
             {
                 SafeRefreshAsync();
+                OnPropertyChanged(nameof(CreateMailboxSectionTitle));
             }
         }
     }
@@ -198,6 +199,11 @@ public class MailboxListViewModel : ViewModelBase
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
 
     public string StatusText => $"{Mailboxes.Count} of {TotalCount} mailboxes";
+
+    public string CreateMailboxSectionTitle =>
+        string.Equals(RecipientTypeFilter, "SharedMailbox", StringComparison.OrdinalIgnoreCase)
+            ? "New Shared Mailbox"
+            : "New Mailbox";
 
     #endregion
 

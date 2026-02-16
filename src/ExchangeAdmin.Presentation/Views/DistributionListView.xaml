@@ -62,29 +62,37 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBox Grid.Column="0" Text="{Binding DistributionLists.NewDistributionListDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome visualizzato" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Alias" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="SMTP primario" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+
+                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding DistributionLists.NewDistributionListDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                <Setter Property="Tag" Value="Nome visualizzato (es. Team Vendite Italia)"/>
+                                <Setter Property="Tag" Value="es. Team Vendite Italia"/>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <TextBox Grid.Column="1" Text="{Binding DistributionLists.NewDistributionListAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DistributionLists.NewDistributionListAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                <Setter Property="Tag" Value="Alias (es. vendite.italia)"/>
+                                <Setter Property="Tag" Value="es. vendite.italia"/>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <TextBox Grid.Column="2" Text="{Binding DistributionLists.NewDistributionListPrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding DistributionLists.NewDistributionListPrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                <Setter Property="Tag" Value="SMTP primario (es. vendite.italia@contoso.com)"/>
+                                <Setter Property="Tag" Value="es. vendite.italia@contoso.com"/>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <Button Grid.Column="3" Content="Crea" Command="{Binding DistributionLists.CreateDistributionListCommand}" Style="{StaticResource PrimaryButton}"/>
+                    <Button Grid.Row="1" Grid.Column="3" Content="Crea" Command="{Binding DistributionLists.CreateDistributionListCommand}" Style="{StaticResource PrimaryButton}"/>
                 </Grid>
             </GroupBox>
 

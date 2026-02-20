@@ -177,7 +177,7 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding SkuPartNumber}" FontSize="11"
+                                        <TextBlock Text="{Binding SkuPartNumber, StringFormat=SKU: {0}}" FontSize="11"
                                                    Foreground="{StaticResource SecondaryTextBrush}"/>
                                     </StackPanel>
                                     <TextBlock Grid.Column="1" HorizontalAlignment="Right"

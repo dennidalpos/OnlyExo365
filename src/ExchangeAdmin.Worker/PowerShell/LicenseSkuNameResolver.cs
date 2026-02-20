@@ -11,11 +11,12 @@ internal static class LicenseSkuNameResolver
         ["SPB"] = "Microsoft 365 Business Premium",
         ["SMB_BUSINESS"] = "Microsoft 365 Apps for business",
         ["OFFICESUBSCRIPTION"] = "Microsoft 365 Apps for enterprise",
+        ["BUSINESS_VOICE_MED2"] = "Microsoft Teams Phone with Calling Plan",
 
-        ["ENTERPRISEPACK"] = "Office 365 E3",
-        ["DEVELOPERPACK"] = "Office 365 E3 Developer",
-        ["ENTERPRISEPREMIUM"] = "Office 365 E5",
-        ["STANDARDPACK"] = "Office 365 E1",
+        ["ENTERPRISEPACK"] = "Microsoft 365 E3 (Office 365 E3)",
+        ["DEVELOPERPACK"] = "Microsoft 365 E3 Developer",
+        ["ENTERPRISEPREMIUM"] = "Microsoft 365 E5 (Office 365 E5)",
+        ["STANDARDPACK"] = "Microsoft 365 E1 (Office 365 E1)",
 
         ["SPE_E3"] = "Microsoft 365 E3",
         ["SPE_E5"] = "Microsoft 365 E5",
@@ -28,8 +29,8 @@ internal static class LicenseSkuNameResolver
         ["M365EDU_A5_FACULTY"] = "Microsoft 365 A5 for faculty",
         ["M365EDU_A5_STUDENT"] = "Microsoft 365 A5 for students",
 
-        ["DESKLESSPACK"] = "Office 365 F3",
-        ["DESKLESSWOFFPACK"] = "Office 365 F1",
+        ["DESKLESSPACK"] = "Microsoft 365 F3 (Office 365 F3)",
+        ["DESKLESSWOFFPACK"] = "Microsoft 365 F1 (Office 365 F1)",
 
         ["EMS"] = "Enterprise Mobility + Security E3",
         ["EMSPREMIUM"] = "Enterprise Mobility + Security E5",
@@ -65,6 +66,9 @@ internal static class LicenseSkuNameResolver
         ["WINDOWS_STORE"] = "Windows Store for Business",
         ["WIN10_PRO_ENT_SUB"] = "Windows 10/11 Enterprise E3",
         ["WIN10_VDA_E5"] = "Windows 10/11 Enterprise E5",
+        ["M365_F1"] = "Microsoft 365 F1",
+        ["MICROSOFT_365_COPILOT"] = "Microsoft 365 Copilot",
+        ["EXCHANGE_S_FOUNDATION"] = "Exchange Online (Plan Foundation)",
     };
 
     public static string Resolve(string skuPartNumber)
@@ -82,7 +86,7 @@ internal static class LicenseSkuNameResolver
     private static string HumanizeFallbackName(string skuPartNumber)
     {
         var normalized = skuPartNumber.Trim().Replace('_', ' ');
-        normalized = normalized.Replace("O365", "Office 365", StringComparison.OrdinalIgnoreCase);
+        normalized = normalized.Replace("O365", "Microsoft 365", StringComparison.OrdinalIgnoreCase);
         normalized = normalized.Replace("M365", "Microsoft 365", StringComparison.OrdinalIgnoreCase);
 
         return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(normalized.ToLowerInvariant());

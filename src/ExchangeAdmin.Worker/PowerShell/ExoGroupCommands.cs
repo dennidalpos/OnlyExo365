@@ -577,6 +577,18 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
         Action<string, string>? onLog,
         CancellationToken cancellationToken)
     {
+        var capabilities = await _capabilityDetector.DetectCapabilitiesAsync(cancellationToken: cancellationToken);
+        if (!capabilities.Features.CanGetDynamicDistributionGroup)
+        {
+            throw new InvalidOperationException("Anteprima membri dinamici non disponibile: Get-DynamicDistributionGroup non supportato.");
+        }
+
+        var canGetRecipient = capabilities.Cmdlets.TryGetValue("Get-Recipient", out var getRecipientCapability) && getRecipientCapability.IsAvailable;
+        if (!canGetRecipient)
+        {
+            throw new InvalidOperationException("Anteprima membri dinamici non disponibile: Get-Recipient non supportato.");
+        }
+
         var escapedIdentity = request.Identity.Replace("'", "''");
 
         var script = $@"

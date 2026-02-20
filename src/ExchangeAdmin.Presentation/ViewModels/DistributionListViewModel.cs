@@ -227,7 +227,7 @@ public class DistributionListViewModel : ViewModelBase
     public bool IsDynamicGroup => SelectedDetails?.GroupType == "Dynamic";
     public bool CanModifyMembers => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanAddDistributionGroupMember);
     public bool CanIncludeDynamicFilter => _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroup);
-    public bool CanPreviewDynamicMembers => HasDetails && IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroupMember);
+    public bool CanPreviewDynamicMembers => HasDetails && IsDynamicGroup && !IsLoadingMembers && _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroup);
 
     public bool IsLoadingDetails
     {
@@ -254,6 +254,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             if (SetProperty(ref _isLoadingMembers, value))
             {
+                OnPropertyChanged(nameof(CanPreviewDynamicMembers));
                 CommandManager.InvalidateRequerySuggested();
             }
         }

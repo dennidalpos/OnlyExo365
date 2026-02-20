@@ -49,6 +49,8 @@
                          Margin="0,0,12,0"/>
 
                 <CheckBox Grid.Column="1" Content="Includi dinamiche" IsChecked="{Binding DistributionLists.IncludeDynamic}"
+                          IsEnabled="{Binding DistributionLists.CanIncludeDynamicFilter}"
+                          ToolTip="Disponibile solo se il tenant supporta Get-DynamicDistributionGroup"
                           VerticalAlignment="Center"/>
             </Grid>
 
@@ -279,7 +281,7 @@
                                 <StackPanel>
                                     <CheckBox Content="Consenti mittenti esterni"
                                               IsChecked="{Binding DistributionLists.AllowExternalSenders}"
-                                              IsEnabled="{Binding DistributionLists.CanEditSettings}"
+                                              IsEnabled="{Binding DistributionLists.CanEditExternalSenders}"
                                               ToolTip="Se disattivato, solo mittenti interni possono inviare al gruppo"/>
                                     <TextBlock Text="Questa opzione equivale a RequireSenderAuthenticationEnabled."
                                                Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"/>
@@ -303,14 +305,14 @@
                                                             CommandParameter="{Binding}"
                                                             Style="{StaticResource DangerButton}" Padding="6,2"
                                                             Margin="8,0,0,0"
-                                                            IsEnabled="{Binding DataContext.DistributionLists.CanEditSettings, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                            IsEnabled="{Binding DataContext.DistributionLists.CanEditAcceptMessagesOnlyFrom, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
 
                                     <Grid Margin="0,6,0,0"
-                                          IsEnabled="{Binding DistributionLists.CanEditSettings}">
+                                          IsEnabled="{Binding DistributionLists.CanEditAcceptMessagesOnlyFrom}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
@@ -337,14 +339,14 @@
                                                             CommandParameter="{Binding}"
                                                             Style="{StaticResource DangerButton}" Padding="6,2"
                                                             Margin="8,0,0,0"
-                                                            IsEnabled="{Binding DataContext.DistributionLists.CanEditSettings, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                            IsEnabled="{Binding DataContext.DistributionLists.CanEditRejectMessagesFrom, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
 
                                     <Grid Margin="0,6,0,0"
-                                          IsEnabled="{Binding DistributionLists.CanEditSettings}">
+                                          IsEnabled="{Binding DistributionLists.CanEditRejectMessagesFrom}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
@@ -376,6 +378,7 @@
                                         <TextBlock Text="Gruppo dinamico: i membri sono calcolati dal filtro."
                                                    Foreground="{StaticResource WarningBrush}"/>
                                         <Button Content="Anteprima membri" Command="{Binding DistributionLists.PreviewDynamicMembersCommand}"
+                                                IsEnabled="{Binding DistributionLists.CanPreviewDynamicMembers}"
                                                 Margin="12,0,0,0" Padding="8,2"/>
                                     </StackPanel>
                                 </Border>

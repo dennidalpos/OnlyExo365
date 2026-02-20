@@ -79,6 +79,7 @@ public class DistributionListViewModel : ViewModelBase
 
                                        
         _navigationService.SelectedIdentityChanged += OnSelectedIdentityChanged;
+        _shellViewModel.PropertyChanged += OnShellViewModelPropertyChanged;
 
                    
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
@@ -88,15 +89,15 @@ public class DistributionListViewModel : ViewModelBase
         BackCommand = new RelayCommand(GoBack);
 
         LoadMoreMembersCommand = new AsyncRelayCommand(LoadMoreMembersAsync, () => MembersHasMore && !IsLoadingMembers);
-        PreviewDynamicMembersCommand = new AsyncRelayCommand(PreviewDynamicMembersAsync, () => SelectedDetails != null && SelectedDetails.GroupType == "Dynamic");
+        PreviewDynamicMembersCommand = new AsyncRelayCommand(PreviewDynamicMembersAsync, () => CanPreviewDynamicMembers);
         AddMemberCommand = new AsyncRelayCommand(AddMemberAsync, () => CanAddMember);
         RemoveMemberCommand = new AsyncRelayCommand<GroupMemberDto>(RemoveMemberAsync, m => m != null && CanModifyMembers);
         SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync, () => HasPendingSettingsChanges && !IsSavingSettings);
         DiscardSettingsCommand = new RelayCommand(DiscardSettingsChanges, () => HasPendingSettingsChanges);
         AddAcceptSenderCommand = new RelayCommand(AddAcceptSender, () => CanAddAcceptSender);
-        RemoveAcceptSenderCommand = new RelayCommand<string>(RemoveAcceptSender, sender => CanRemoveSender(sender));
+        RemoveAcceptSenderCommand = new RelayCommand<string>(RemoveAcceptSender, sender => CanRemoveAcceptSender(sender));
         AddRejectSenderCommand = new RelayCommand(AddRejectSender, () => CanAddRejectSender);
-        RemoveRejectSenderCommand = new RelayCommand<string>(RemoveRejectSender, sender => CanRemoveSender(sender));
+        RemoveRejectSenderCommand = new RelayCommand<string>(RemoveRejectSender, sender => CanRemoveRejectSender(sender));
         CreateDistributionListCommand = new AsyncRelayCommand(CreateDistributionListAsync, () => CanCreateDistributionList);
     }
 
@@ -154,7 +155,8 @@ public class DistributionListViewModel : ViewModelBase
         get => _includeDynamic;
         set
         {
-            if (SetProperty(ref _includeDynamic, value))
+            var normalized = value && CanIncludeDynamicFilter;
+            if (SetProperty(ref _includeDynamic, normalized))
             {
                 TriggerRefreshFromUi();
             }
@@ -209,8 +211,13 @@ public class DistributionListViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsDynamicGroup));
                 OnPropertyChanged(nameof(CanModifyMembers));
                 OnPropertyChanged(nameof(CanEditSettings));
+                OnPropertyChanged(nameof(CanEditExternalSenders));
+                OnPropertyChanged(nameof(CanEditAcceptMessagesOnlyFrom));
+                OnPropertyChanged(nameof(CanEditRejectMessagesFrom));
+                OnPropertyChanged(nameof(CanEditSenderFilters));
                 OnPropertyChanged(nameof(CanAddAcceptSender));
                 OnPropertyChanged(nameof(CanAddRejectSender));
+                OnPropertyChanged(nameof(CanPreviewDynamicMembers));
                 InitializeSettingsFromDetails();
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -220,6 +227,8 @@ public class DistributionListViewModel : ViewModelBase
     public bool HasDetails => SelectedDetails != null;
     public bool IsDynamicGroup => SelectedDetails?.GroupType == "Dynamic";
     public bool CanModifyMembers => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanAddDistributionGroupMember);
+    public bool CanIncludeDynamicFilter => _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroup);
+    public bool CanPreviewDynamicMembers => HasDetails && IsDynamicGroup && !IsLoadingMembers && _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroup);
 
     public bool IsLoadingDetails
     {
@@ -246,6 +255,7 @@ public class DistributionListViewModel : ViewModelBase
         {
             if (SetProperty(ref _isLoadingMembers, value))
             {
+                OnPropertyChanged(nameof(CanPreviewDynamicMembers));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -277,7 +287,23 @@ public class DistributionListViewModel : ViewModelBase
     }
 
     public bool CanAddMember => !string.IsNullOrWhiteSpace(NewMemberIdentity) && CanModifyMembers;
-    public bool CanEditSettings => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup);
+    public bool CanEditSettings => HasDetails && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroup)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup));
+
+    public bool CanEditExternalSenders => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupRequireSenderAuthentication)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRequireSenderAuthentication));
+
+    public bool CanEditAcceptMessagesOnlyFrom => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupAcceptMessagesOnlyFrom)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupAcceptMessagesOnlyFrom));
+
+    public bool CanEditRejectMessagesFrom => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupRejectMessagesFrom)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRejectMessagesFrom));
+
+    public bool CanEditSenderFilters => CanEditAcceptMessagesOnlyFrom && CanEditRejectMessagesFrom;
 
     public string? NewAcceptedSender
     {
@@ -305,8 +331,8 @@ public class DistributionListViewModel : ViewModelBase
         }
     }
 
-    public bool CanAddAcceptSender => CanEditSettings && !string.IsNullOrWhiteSpace(NewAcceptedSender);
-    public bool CanAddRejectSender => CanEditSettings && !string.IsNullOrWhiteSpace(NewRejectedSender);
+    public bool CanAddAcceptSender => CanEditAcceptMessagesOnlyFrom && !string.IsNullOrWhiteSpace(NewAcceptedSender);
+    public bool CanAddRejectSender => CanEditRejectMessagesFrom && !string.IsNullOrWhiteSpace(NewRejectedSender);
 
     public bool AllowExternalSenders
     {
@@ -448,6 +474,12 @@ public class DistributionListViewModel : ViewModelBase
         }
 
         await LoadAcceptedDomainsAsync(CancellationToken.None);
+
+        if (!CanIncludeDynamicFilter && IncludeDynamic)
+        {
+            IncludeDynamic = false;
+        }
+
         await RefreshAsync(CancellationToken.None);
     }
 
@@ -464,6 +496,36 @@ public class DistributionListViewModel : ViewModelBase
                 SelectedDetails = null;
                 Members.Clear();
             }
+        }
+    }
+
+    private void OnShellViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ShellViewModel.Capabilities)
+            or nameof(ShellViewModel.ExchangeState)
+            or nameof(ShellViewModel.IsExchangeConnected))
+        {
+            OnPropertyChanged(nameof(CanRefresh));
+            OnPropertyChanged(nameof(CanLoadMore));
+            OnPropertyChanged(nameof(CanModifyMembers));
+            OnPropertyChanged(nameof(CanEditSettings));
+            OnPropertyChanged(nameof(CanCreateDistributionList));
+            OnPropertyChanged(nameof(CanEditExternalSenders));
+            OnPropertyChanged(nameof(CanEditAcceptMessagesOnlyFrom));
+            OnPropertyChanged(nameof(CanEditRejectMessagesFrom));
+            OnPropertyChanged(nameof(CanEditSenderFilters));
+            OnPropertyChanged(nameof(CanAddAcceptSender));
+            OnPropertyChanged(nameof(CanAddRejectSender));
+            OnPropertyChanged(nameof(CanIncludeDynamicFilter));
+            OnPropertyChanged(nameof(CanPreviewDynamicMembers));
+
+            if (!CanIncludeDynamicFilter && IncludeDynamic)
+            {
+                IncludeDynamic = false;
+            }
+
+            UpdatePendingSettingsChanges();
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 
@@ -500,7 +562,7 @@ public class DistributionListViewModel : ViewModelBase
             var request = new GetDistributionListsRequest
             {
                 SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
-                IncludeDynamic = _includeDynamic,
+                IncludeDynamic = _includeDynamic && CanIncludeDynamicFilter,
                 PageSize = PageSize,
                 Skip = 0
             };
@@ -559,7 +621,7 @@ public class DistributionListViewModel : ViewModelBase
             var request = new GetDistributionListsRequest
             {
                 SearchQuery = string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery.Trim(),
-                IncludeDynamic = _includeDynamic,
+                IncludeDynamic = _includeDynamic && CanIncludeDynamicFilter,
                 PageSize = PageSize,
                 Skip = _currentSkip
             };
@@ -983,7 +1045,7 @@ public class DistributionListViewModel : ViewModelBase
 
     private void RemoveAcceptSender(string? sender)
     {
-        if (!CanRemoveSender(sender))
+        if (!CanRemoveAcceptSender(sender))
         {
             return;
         }
@@ -1011,7 +1073,7 @@ public class DistributionListViewModel : ViewModelBase
 
     private void RemoveRejectSender(string? sender)
     {
-        if (!CanRemoveSender(sender))
+        if (!CanRemoveRejectSender(sender))
         {
             return;
         }
@@ -1020,7 +1082,9 @@ public class DistributionListViewModel : ViewModelBase
         UpdatePendingSettingsChanges();
     }
 
-    private bool CanRemoveSender(string? sender) => CanEditSettings && !string.IsNullOrWhiteSpace(sender);
+    private bool CanRemoveAcceptSender(string? sender) => CanEditAcceptMessagesOnlyFrom && !string.IsNullOrWhiteSpace(sender);
+
+    private bool CanRemoveRejectSender(string? sender) => CanEditRejectMessagesFrom && !string.IsNullOrWhiteSpace(sender);
 
     private static IEnumerable<string> NormalizeSenderList(IEnumerable<string> list)
     {
@@ -1073,9 +1137,11 @@ public class DistributionListViewModel : ViewModelBase
             return;
         }
 
-        HasPendingSettingsChanges = AllowExternalSenders != _originalAllowExternalSenders
-            || !SenderListEquals(AcceptMessagesOnlyFrom, _originalAcceptMessagesOnlyFrom)
-            || !SenderListEquals(RejectMessagesFrom, _originalRejectMessagesFrom);
+        var externalChanged = CanEditExternalSenders && AllowExternalSenders != _originalAllowExternalSenders;
+        var acceptChanged = CanEditAcceptMessagesOnlyFrom && !SenderListEquals(AcceptMessagesOnlyFrom, _originalAcceptMessagesOnlyFrom);
+        var rejectChanged = CanEditRejectMessagesFrom && !SenderListEquals(RejectMessagesFrom, _originalRejectMessagesFrom);
+
+        HasPendingSettingsChanges = externalChanged || acceptChanged || rejectChanged;
     }
 
     private async Task SaveSettingsAsync(CancellationToken cancellationToken)
@@ -1096,9 +1162,10 @@ public class DistributionListViewModel : ViewModelBase
             var request = new SetDistributionListSettingsRequest
             {
                 Identity = SelectedDetails.Identity,
-                RequireSenderAuthenticationEnabled = !AllowExternalSenders,
-                AcceptMessagesOnlyFrom = acceptChanged ? NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
-                RejectMessagesFrom = rejectChanged ? NormalizeSenderList(RejectMessagesFrom).ToList() : null
+                GroupType = IsDynamicGroup ? "DynamicDistributionGroup" : "DistributionGroup",
+                RequireSenderAuthenticationEnabled = CanEditExternalSenders ? !AllowExternalSenders : null,
+                AcceptMessagesOnlyFrom = (CanEditAcceptMessagesOnlyFrom && acceptChanged) ? NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
+                RejectMessagesFrom = (CanEditRejectMessagesFrom && rejectChanged) ? NormalizeSenderList(RejectMessagesFrom).ToList() : null
             };
 
             _shellViewModel.AddLog(LogLevel.Information, $"Aggiornamento impostazioni lista {SelectedDetails.DisplayName}...");
@@ -1107,12 +1174,23 @@ public class DistributionListViewModel : ViewModelBase
 
             if (result.IsSuccess)
             {
-                SelectedDetails.RequireSenderAuthenticationEnabled = !AllowExternalSenders;
-                SelectedDetails.AcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
-                SelectedDetails.RejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
-                _originalAllowExternalSenders = AllowExternalSenders;
-                _originalAcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
-                _originalRejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
+                if (CanEditExternalSenders)
+                {
+                    SelectedDetails.RequireSenderAuthenticationEnabled = !AllowExternalSenders;
+                    _originalAllowExternalSenders = AllowExternalSenders;
+                }
+
+                if (CanEditAcceptMessagesOnlyFrom)
+                {
+                    SelectedDetails.AcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
+                    _originalAcceptMessagesOnlyFrom = NormalizeSenderList(AcceptMessagesOnlyFrom).ToList();
+                }
+
+                if (CanEditRejectMessagesFrom)
+                {
+                    SelectedDetails.RejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
+                    _originalRejectMessagesFrom = NormalizeSenderList(RejectMessagesFrom).ToList();
+                }
                 HasPendingSettingsChanges = false;
                 _shellViewModel.AddLog(LogLevel.Information, "Impostazioni lista aggiornate");
             }

@@ -39,6 +39,7 @@ public class CapabilityDetector
 
                                       
         "Get-DynamicDistributionGroup",
+        "Set-DynamicDistributionGroup",
         "Get-DynamicDistributionGroupMember",
 
                                        
@@ -209,12 +210,21 @@ $results
                                   
             CanGetDistributionGroup = IsAvailable("Get-DistributionGroup"),
             CanSetDistributionGroup = IsAvailable("Set-DistributionGroup"),
+            CanSetDistributionGroupRequireSenderAuthentication = HasParameter("Set-DistributionGroup", "RequireSenderAuthenticationEnabled"),
+            CanSetDistributionGroupAcceptMessagesOnlyFrom = HasParameter("Set-DistributionGroup", "AcceptMessagesOnlyFrom"),
+            CanSetDistributionGroupRejectMessagesFrom = HasParameter("Set-DistributionGroup", "RejectMessagesFrom"),
             CanGetDistributionGroupMember = IsAvailable("Get-DistributionGroupMember"),
             CanAddDistributionGroupMember = IsAvailable("Add-DistributionGroupMember"),
             CanRemoveDistributionGroupMember = IsAvailable("Remove-DistributionGroupMember"),
 
                                           
             CanGetDynamicDistributionGroup = IsAvailable("Get-DynamicDistributionGroup"),
+            CanSetDynamicDistributionGroup = IsAvailable("Set-DynamicDistributionGroup"),
+            CanSetDynamicDistributionGroupRequireSenderAuthentication = HasParameter("Set-DynamicDistributionGroup", "RequireSenderAuthenticationEnabled"),
+            CanSetDynamicDistributionGroupAcceptMessagesOnlyFrom = HasParameter("Set-DynamicDistributionGroup", "AcceptMessagesOnlyFrom")
+                || HasParameter("Set-DynamicDistributionGroup", "AcceptMessagesOnlyFromSendersOrMembers"),
+            CanSetDynamicDistributionGroupRejectMessagesFrom = HasParameter("Set-DynamicDistributionGroup", "RejectMessagesFrom")
+                || HasParameter("Set-DynamicDistributionGroup", "RejectMessagesFromSendersOrMembers"),
             CanGetDynamicDistributionGroupMember = IsAvailable("Get-DynamicDistributionGroupMember"),
 
                                            

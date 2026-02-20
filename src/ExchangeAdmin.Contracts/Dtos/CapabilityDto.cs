@@ -225,6 +225,15 @@ public class FeatureCapabilitiesDto
     [JsonPropertyName("canSetDistributionGroup")]
     public bool CanSetDistributionGroup { get; set; }
 
+    [JsonPropertyName("canSetDistributionGroupRequireSenderAuthentication")]
+    public bool CanSetDistributionGroupRequireSenderAuthentication { get; set; }
+
+    [JsonPropertyName("canSetDistributionGroupAcceptMessagesOnlyFrom")]
+    public bool CanSetDistributionGroupAcceptMessagesOnlyFrom { get; set; }
+
+    [JsonPropertyName("canSetDistributionGroupRejectMessagesFrom")]
+    public bool CanSetDistributionGroupRejectMessagesFrom { get; set; }
+
                  
                                                            
                                                      
@@ -256,6 +265,18 @@ public class FeatureCapabilitiesDto
                   
     [JsonPropertyName("canGetDynamicDistributionGroup")]
     public bool CanGetDynamicDistributionGroup { get; set; }
+
+    [JsonPropertyName("canSetDynamicDistributionGroup")]
+    public bool CanSetDynamicDistributionGroup { get; set; }
+
+    [JsonPropertyName("canSetDynamicDistributionGroupRequireSenderAuthentication")]
+    public bool CanSetDynamicDistributionGroupRequireSenderAuthentication { get; set; }
+
+    [JsonPropertyName("canSetDynamicDistributionGroupAcceptMessagesOnlyFrom")]
+    public bool CanSetDynamicDistributionGroupAcceptMessagesOnlyFrom { get; set; }
+
+    [JsonPropertyName("canSetDynamicDistributionGroupRejectMessagesFrom")]
+    public bool CanSetDynamicDistributionGroupRejectMessagesFrom { get; set; }
 
                  
                                                                   

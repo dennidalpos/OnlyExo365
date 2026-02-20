@@ -625,6 +625,10 @@ return $true
         var exchangeEnvironment = Environment.GetEnvironmentVariable(ExchangeEnvironmentVariable);
         var connectCommand = BuildConnectExchangeCommand(exchangeEnvironment);
 
+        await ExecuteAsync(
+            "Disconnect-MgGraph -ErrorAction SilentlyContinue",
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+
         var result = await ExecuteAsync(
             connectCommand,
             onVerbose: onVerbose,
@@ -672,13 +676,37 @@ try {
         Write-Warning 'Microsoft.Graph.Authentication module not installed'
         return
     }
+
     Import-Module Microsoft.Graph.Authentication -ErrorAction Stop
+    Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+
     # Use interactive authentication (same as Exchange) with required scopes
     # RoleManagement.Read.All is required for directory role membership queries
     # User.ReadWrite.All is required for license assignment/removal
     $scopes = @('Organization.Read.All', 'Directory.Read.All', 'RoleManagement.Read.All', 'User.ReadWrite.All')
-    Connect-MgGraph -Scopes $scopes -NoWelcome -ErrorAction Stop
-    Write-Output 'Connected to Microsoft Graph'
+
+    $tenantId = $null
+    try {
+        $orgConfig = Get-OrganizationConfig -ErrorAction Stop
+        if ($orgConfig -and $orgConfig.ExternalDirectoryOrganizationId) {
+            $tenantId = $orgConfig.ExternalDirectoryOrganizationId.ToString()
+        }
+    } catch {
+        Write-Verbose ""Could not determine tenant from Exchange session: $($_.Exception.Message)""
+    }
+
+    if ($tenantId) {
+        Connect-MgGraph -TenantId $tenantId -Scopes $scopes -ContextScope Process -NoWelcome -ErrorAction Stop
+    } else {
+        Connect-MgGraph -Scopes $scopes -ContextScope Process -NoWelcome -ErrorAction Stop
+    }
+
+    $ctx = Get-MgContext
+    if ($ctx) {
+        Write-Output ""Connected to Microsoft Graph (TenantId=$($ctx.TenantId))""
+    } else {
+        Write-Output 'Connected to Microsoft Graph'
+    }
 } catch {
     Write-Warning ""Connect-MgGraph failed: $($_.Exception.Message)""
 }";

@@ -137,7 +137,12 @@ public sealed class PowerShellEngine : IDisposable
 
             if (_isModuleAvailable)
             {
-                                    
+                var packageManagementReady = await EnsurePackageManagementAvailableAsync().ConfigureAwait(false);
+                if (!packageManagementReady)
+                {
+                    Debug.WriteLine("[PowerShellEngine] PackageManagement module was not explicitly loaded. Continuing with best-effort import.");
+                }
+
                 var imported = await ImportModuleAsync(ExchangeOnlineModuleName, stopOnError: true).ConfigureAwait(false);
                 if (!imported)
                 {
@@ -489,7 +494,15 @@ else {{
 }}
 ");
 
-        await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
+        try
+        {
+            await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
+        }
+        catch (RuntimeException ex)
+        {
+            Debug.WriteLine($"[PowerShellEngine] Module import exception for '{moduleName}': {ex.Message}");
+            return false;
+        }
 
         if (ps.HadErrors)
         {
@@ -501,6 +514,48 @@ else {{
 
         Debug.WriteLine($"[PowerShellEngine] Module imported: {moduleName}");
         return true;
+    }
+
+    private async Task<bool> EnsurePackageManagementAvailableAsync()
+    {
+        if (_runspace == null)
+        {
+            return false;
+        }
+
+        using var ps = System.Management.Automation.PowerShell.Create();
+        ps.Runspace = _runspace;
+
+        ps.AddScript(@"
+$requiredVersion = [Version]'1.4.4'
+$module = Get-Module -ListAvailable -Name PackageManagement |
+    Sort-Object -Property Version -Descending |
+    Select-Object -First 1
+
+if (-not $module) {
+    Write-Verbose 'PackageManagement module was not found.'
+    return $false
+}
+
+if ($module.Version -lt $requiredVersion) {
+    Write-Verbose ""PackageManagement version $($module.Version) is lower than required $requiredVersion.""
+    return $false
+}
+
+Import-Module -Name $module.Path -Global -ErrorAction Stop | Out-Null
+return $true
+");
+
+        try
+        {
+            var result = await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
+            return result.FirstOrDefault()?.BaseObject as bool? ?? false;
+        }
+        catch (RuntimeException ex)
+        {
+            Debug.WriteLine($"[PowerShellEngine] Failed to prepare PackageManagement: {ex.Message}");
+            return false;
+        }
     }
 
     private async Task<bool> TryRecoverRunspaceAsync()

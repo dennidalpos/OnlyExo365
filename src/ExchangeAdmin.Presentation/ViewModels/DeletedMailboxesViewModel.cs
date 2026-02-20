@@ -20,6 +20,8 @@ public class DeletedMailboxesViewModel : ViewModelBase
     private string? _errorMessage;
     private string? _upnQuery;
     private string? _activeSearchQuery;
+    private bool _includeSoftDeleted = true;
+    private bool _includeInactive = true;
     private int _totalCount;
     private int _currentSkip;
     private bool _hasMore;
@@ -78,6 +80,31 @@ public class DeletedMailboxesViewModel : ViewModelBase
         }
     }
 
+
+    public bool IncludeSoftDeleted
+    {
+        get => _includeSoftDeleted;
+        set
+        {
+            if (SetProperty(ref _includeSoftDeleted, value))
+            {
+                _ = RefreshFromFiltersAsync();
+            }
+        }
+    }
+
+    public bool IncludeInactive
+    {
+        get => _includeInactive;
+        set
+        {
+            if (SetProperty(ref _includeInactive, value))
+            {
+                _ = RefreshFromFiltersAsync();
+            }
+        }
+    }
+
     public int TotalCount
     {
         get => _totalCount;
@@ -132,6 +159,19 @@ public class DeletedMailboxesViewModel : ViewModelBase
         await RefreshAsync(cancellationToken);
     }
 
+
+    private async Task RefreshFromFiltersAsync()
+    {
+        try
+        {
+            await RefreshAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _shellViewModel.AddLog(LogLevel.Error, $"Deleted mailbox refresh failed: {ex.Message}");
+        }
+    }
+
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         _loadCts?.Cancel();
@@ -158,8 +198,8 @@ public class DeletedMailboxesViewModel : ViewModelBase
             var request = new GetDeletedMailboxesRequest
             {
                 SearchQuery = _activeSearchQuery,
-                IncludeInactive = true,
-                IncludeSoftDeleted = true,
+                IncludeInactive = _includeInactive,
+                IncludeSoftDeleted = _includeSoftDeleted,
                 PageSize = PageSize,
                 Skip = 0
             };
@@ -225,8 +265,8 @@ public class DeletedMailboxesViewModel : ViewModelBase
             var request = new GetDeletedMailboxesRequest
             {
                 SearchQuery = _activeSearchQuery,
-                IncludeInactive = true,
-                IncludeSoftDeleted = true,
+                IncludeInactive = _includeInactive,
+                IncludeSoftDeleted = _includeSoftDeleted,
                 PageSize = PageSize,
                 Skip = _currentSkip
             };

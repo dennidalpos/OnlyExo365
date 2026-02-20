@@ -175,7 +175,11 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding SkuPartNumber}" FontWeight="SemiBold"/>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding SkuPartNumber}" FontSize="11"
+                                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                    </StackPanel>
                                     <TextBlock Grid.Column="1" HorizontalAlignment="Right"
                                                Foreground="{StaticResource SecondaryTextBrush}">
                                         <Run Text="{Binding Assigned, Mode=OneWay}"/>

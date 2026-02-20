@@ -1914,7 +1914,7 @@ try {
             {
                 SkuId = GetString(obj, "SkuId"),
                 SkuPartNumber = GetString(obj, "SkuPartNumber"),
-                DisplayName = GetString(obj, "SkuPartNumber"),
+                DisplayName = LicenseSkuNameResolver.Resolve(GetString(obj, "SkuPartNumber")),
                 Total = GetInt(obj, "Total"),
                 Assigned = GetInt(obj, "Assigned"),
                 Available = GetInt(obj, "Available")
@@ -2421,7 +2421,7 @@ try {{
             {
                 SkuId = GetString(obj, "SkuId"),
                 SkuPartNumber = GetString(obj, "SkuPartNumber"),
-                DisplayName = GetString(obj, "SkuPartNumber")
+                DisplayName = LicenseSkuNameResolver.Resolve(GetString(obj, "SkuPartNumber"))
             });
         }
         return new GetUserLicensesResponse { Licenses = licenses };
@@ -2463,7 +2463,7 @@ try {
             {
                 SkuId = GetString(obj, "SkuId"),
                 SkuPartNumber = GetString(obj, "SkuPartNumber"),
-                DisplayName = GetString(obj, "SkuPartNumber"),
+                DisplayName = LicenseSkuNameResolver.Resolve(GetString(obj, "SkuPartNumber")),
                 Total = GetInt(obj, "Total"),
                 Assigned = GetInt(obj, "Assigned"),
                 Available = GetInt(obj, "Available")

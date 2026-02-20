@@ -32,12 +32,16 @@
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" Text="{Binding DeletedMailboxes.UpnQuery, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding DeletedMailboxes.UpnQuery, UpdateSourceTrigger=PropertyChanged}"
                      Margin="0,0,12,0">
                 <TextBox.Style>
                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -46,8 +50,15 @@
                 </TextBox.Style>
             </TextBox>
 
-            <Button Grid.Column="1" Content="Verifica UPN" Command="{Binding DeletedMailboxes.CheckUpnCommand}"
+            <Button Grid.Row="0" Grid.Column="1" Content="Verifica UPN" Command="{Binding DeletedMailboxes.CheckUpnCommand}"
                     Style="{StaticResource PrimaryButton}"/>
+
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                <CheckBox Content="Includi soft-deleted"
+                          IsChecked="{Binding DeletedMailboxes.IncludeSoftDeleted}" Margin="0,0,16,0"/>
+                <CheckBox Content="Includi inactive"
+                          IsChecked="{Binding DeletedMailboxes.IncludeInactive}"/>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="2">

@@ -522,14 +522,34 @@ public class MailboxListViewModel : ViewModelBase
     }
 
 
-    private static string NormalizeRecipientTypeFilter(string? value)
+    private static string? NormalizeRecipientTypeFilter(string? value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (string.Equals(value, "UserMailbox", StringComparison.OrdinalIgnoreCase))
+        {
+            return "UserMailbox";
+        }
+
         if (string.Equals(value, "SharedMailbox", StringComparison.OrdinalIgnoreCase))
         {
             return "SharedMailbox";
         }
 
-        return "UserMailbox";
+        if (string.Equals(value, "RoomMailbox", StringComparison.OrdinalIgnoreCase))
+        {
+            return "RoomMailbox";
+        }
+
+        if (string.Equals(value, "EquipmentMailbox", StringComparison.OrdinalIgnoreCase))
+        {
+            return "EquipmentMailbox";
+        }
+
+        return null;
     }
 
     private void ViewDetails(MailboxListItemDto? mailbox)

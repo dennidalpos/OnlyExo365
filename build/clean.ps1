@@ -20,6 +20,13 @@ $SrcDir = Join-Path $SolutionDir "src"
 $ExportsDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $ArtifactsDir "exports" } else { $ExportDirPath }
 $ImportsDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $ArtifactsDir "imports" } else { $ImportDirPath }
 
+if (-not [System.IO.Path]::IsPathRooted($ExportsDir)) {
+    $ExportsDir = Join-Path $SolutionDir $ExportsDir
+}
+if (-not [System.IO.Path]::IsPathRooted($ImportsDir)) {
+    $ImportsDir = Join-Path $SolutionDir $ImportsDir
+}
+
 $script:DeletedCount = 0
 $script:DeletedSize = 0
 
@@ -134,8 +141,30 @@ if ($All -and -not $IncludeImports) {
 }
 
 Write-Step "Cleaning artifacts directory"
-if (Remove-DirectoryIfExists -Path $ArtifactsDir -Description "Artifacts") {
-    Write-Success "Artifacts directory cleaned"
+if (Test-Path $ArtifactsDir) {
+    $artifactEntries = Get-ChildItem -Path $ArtifactsDir -Force -ErrorAction SilentlyContinue
+    $preserve = @('exports', 'imports')
+
+    foreach ($entry in $artifactEntries) {
+        $name = $entry.Name
+        $shouldPreserve = ($name -in $preserve -and -not $All)
+
+        if ($shouldPreserve) {
+            Write-Skipped "Preserving artifacts/$name (use -All to remove it)"
+            continue
+        }
+
+        if ($entry.PSIsContainer) {
+            [void](Remove-DirectoryIfExists -Path $entry.FullName -Description "artifacts/$name")
+        } else {
+            Write-Deleted -Path $entry.FullName -Size $entry.Length
+            if (-not $DryRun) {
+                Remove-Item -Path $entry.FullName -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Write-Success "Artifacts directory cleaned (preserving exports/imports unless -All)"
 } else {
     Write-Skipped "Artifacts directory not found"
 }

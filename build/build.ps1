@@ -92,6 +92,23 @@ $InstallerDir = Join-Path $OutputDir "installer"
 $InstallerSourceDir = Join-Path $SolutionDir "installer"
 $WixBin = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
 
+function Resolve-RepoPath {
+    param([string]$PathValue)
+
+    if ([string]::IsNullOrWhiteSpace($PathValue)) {
+        return $PathValue
+    }
+
+    if ([System.IO.Path]::IsPathRooted($PathValue)) {
+        return $PathValue
+    }
+
+    return Join-Path $SolutionDir $PathValue
+}
+
+$ExportDir = Resolve-RepoPath -PathValue $ExportDir
+$ImportDir = Resolve-RepoPath -PathValue $ImportDir
+
                        
 $BuildStartTime = Get-Date
 
@@ -198,15 +215,7 @@ Write-Host "Configuration : $Configuration"
 Write-Host "Solution      : $SolutionFile"
 Write-Host "Output        : $OutputDir"
 Write-Host "Exports       : $ExportDir"
-if (-not [System.IO.Path]::IsPathRooted($ExportDir)) {
-    $ExportDir = Join-Path $SolutionDir $ExportDir
-    Write-Info "Resolved export path to absolute: $ExportDir"
-}
 Write-Host "Imports       : $ImportDir"
-if (-not [System.IO.Path]::IsPathRooted($ImportDir)) {
-    $ImportDir = Join-Path $SolutionDir $ImportDir
-    Write-Info "Resolved import path to absolute: $ImportDir"
-}
 Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $($SelfContained.IsPresent)"
 Write-Host "Runtime       : $RuntimeIdentifier"

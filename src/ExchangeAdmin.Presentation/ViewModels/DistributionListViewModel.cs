@@ -217,6 +217,7 @@ public class DistributionListViewModel : ViewModelBase
                 OnPropertyChanged(nameof(CanEditSenderFilters));
                 OnPropertyChanged(nameof(CanAddAcceptSender));
                 OnPropertyChanged(nameof(CanAddRejectSender));
+                OnPropertyChanged(nameof(CanPreviewDynamicMembers));
                 InitializeSettingsFromDetails();
                 CommandManager.InvalidateRequerySuggested();
             }

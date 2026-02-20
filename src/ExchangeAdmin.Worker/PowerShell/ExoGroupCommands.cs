@@ -331,6 +331,11 @@ $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
     ConditionalCustomAttribute1 = @($ddg.ConditionalCustomAttribute1)
     ManagedBy = @($ddg.ManagedBy | ForEach-Object {{ $_.ToString() }})
     EmailAddresses = @($ddg.EmailAddresses | ForEach-Object {{ $_.ToString() }})
+    AcceptMessagesOnlyFrom = @($ddg.AcceptMessagesOnlyFrom | ForEach-Object {{ $_.ToString() }})
+    AcceptMessagesOnlyFromSendersOrMembers = @($ddg.AcceptMessagesOnlyFromSendersOrMembers | ForEach-Object {{ $_.ToString() }})
+    RejectMessagesFrom = @($ddg.RejectMessagesFrom | ForEach-Object {{ $_.ToString() }})
+    RejectMessagesFromSendersOrMembers = @($ddg.RejectMessagesFromSendersOrMembers | ForEach-Object {{ $_.ToString() }})
+    RequireSenderAuthenticationEnabled = $ddg.RequireSenderAuthenticationEnabled
     WhenCreated = $ddg.WhenCreated
     WhenChanged = $ddg.WhenChanged
 }}
@@ -364,6 +369,9 @@ $ddg = Get-DynamicDistributionGroup -Identity '{escapedIdentity}'
             RecipientTypeDetails = "DynamicDistributionGroup",
             EmailAddresses = ConvertToStringList(hash["EmailAddresses"]),
             ManagedBy = ConvertToStringList(hash["ManagedBy"]),
+            AcceptMessagesOnlyFrom = MergeSenderLists(hash["AcceptMessagesOnlyFrom"], hash["AcceptMessagesOnlyFromSendersOrMembers"]),
+            RejectMessagesFrom = MergeSenderLists(hash["RejectMessagesFrom"], hash["RejectMessagesFromSendersOrMembers"]),
+            RequireSenderAuthenticationEnabled = hash["RequireSenderAuthenticationEnabled"] as bool? ?? false,
             WhenCreated = hash["WhenCreated"] as DateTime?,
             WhenChanged = hash["WhenChanged"] as DateTime?
         };
@@ -653,11 +661,19 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
         var escapedIdentity = request.Identity.Replace("'", "''");
         var setParams = new List<string>();
 
+        var isDynamicGroup = string.Equals(request.GroupType, "DynamicDistributionGroup", StringComparison.OrdinalIgnoreCase);
+        var cmdletName = isDynamicGroup ? "Set-DynamicDistributionGroup" : "Set-DistributionGroup";
+
         var capabilities = await _capabilityDetector.DetectCapabilitiesAsync(cancellationToken: cancellationToken);
+        var cmdletParameters = capabilities.Cmdlets.TryGetValue(cmdletName, out var cmdletCapability)
+            ? cmdletCapability.Parameters
+            : new List<string>();
+
+        bool SupportsParam(string paramName) => cmdletParameters.Contains(paramName, StringComparer.OrdinalIgnoreCase);
 
         if (request.RequireSenderAuthenticationEnabled.HasValue)
         {
-            if (capabilities.Features.CanSetDistributionGroupRequireSenderAuthentication)
+            if (isDynamicGroup ? capabilities.Features.CanSetDynamicDistributionGroupRequireSenderAuthentication : capabilities.Features.CanSetDistributionGroupRequireSenderAuthentication)
             {
                 setParams.Add($"-RequireSenderAuthenticationEnabled ${request.RequireSenderAuthenticationEnabled.Value.ToString().ToLowerInvariant()}");
             }
@@ -669,9 +685,13 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
 
         if (request.AcceptMessagesOnlyFrom != null)
         {
-            if (capabilities.Features.CanSetDistributionGroupAcceptMessagesOnlyFrom)
+            var acceptParameterName = isDynamicGroup
+                ? (SupportsParam("AcceptMessagesOnlyFrom") ? "AcceptMessagesOnlyFrom" : (SupportsParam("AcceptMessagesOnlyFromSendersOrMembers") ? "AcceptMessagesOnlyFromSendersOrMembers" : null))
+                : (capabilities.Features.CanSetDistributionGroupAcceptMessagesOnlyFrom ? "AcceptMessagesOnlyFrom" : null);
+
+            if (!string.IsNullOrWhiteSpace(acceptParameterName))
             {
-                setParams.Add($"-AcceptMessagesOnlyFrom {FormatStringArrayParameter(request.AcceptMessagesOnlyFrom)}");
+                setParams.Add($"-{acceptParameterName} {FormatStringArrayParameter(request.AcceptMessagesOnlyFrom)}");
             }
             else
             {
@@ -681,9 +701,13 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
 
         if (request.RejectMessagesFrom != null)
         {
-            if (capabilities.Features.CanSetDistributionGroupRejectMessagesFrom)
+            var rejectParameterName = isDynamicGroup
+                ? (SupportsParam("RejectMessagesFrom") ? "RejectMessagesFrom" : (SupportsParam("RejectMessagesFromSendersOrMembers") ? "RejectMessagesFromSendersOrMembers" : null))
+                : (capabilities.Features.CanSetDistributionGroupRejectMessagesFrom ? "RejectMessagesFrom" : null);
+
+            if (!string.IsNullOrWhiteSpace(rejectParameterName))
             {
-                setParams.Add($"-RejectMessagesFrom {FormatStringArrayParameter(request.RejectMessagesFrom)}");
+                setParams.Add($"-{rejectParameterName} {FormatStringArrayParameter(request.RejectMessagesFrom)}");
             }
             else
             {
@@ -696,7 +720,7 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
             return;
         }
 
-        var script = $"Set-DistributionGroup -Identity '{escapedIdentity}' {string.Join(" ", setParams)}";
+        var script = $"{cmdletName} -Identity '{escapedIdentity}' {string.Join(" ", setParams)}";
 
         onLog?.Invoke("Information", $"Updating distribution list settings for {request.Identity}...");
 
@@ -744,6 +768,18 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
 
         var single = obj.ToString();
         return string.IsNullOrEmpty(single) ? new List<string>() : new List<string> { single };
+    }
+
+    private static List<string> MergeSenderLists(params object?[] values)
+    {
+        return values
+            .SelectMany(ConvertToStringList)
+            .Select(v => v?.Trim())
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+            .Cast<string>()
+            .ToList();
     }
 
     private static string FormatStringArrayParameter(IEnumerable<string> values)

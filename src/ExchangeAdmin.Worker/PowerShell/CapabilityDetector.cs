@@ -39,6 +39,7 @@ public class CapabilityDetector
 
                                       
         "Get-DynamicDistributionGroup",
+        "Set-DynamicDistributionGroup",
         "Get-DynamicDistributionGroupMember",
 
                                        
@@ -218,6 +219,12 @@ $results
 
                                           
             CanGetDynamicDistributionGroup = IsAvailable("Get-DynamicDistributionGroup"),
+            CanSetDynamicDistributionGroup = IsAvailable("Set-DynamicDistributionGroup"),
+            CanSetDynamicDistributionGroupRequireSenderAuthentication = HasParameter("Set-DynamicDistributionGroup", "RequireSenderAuthenticationEnabled"),
+            CanSetDynamicDistributionGroupAcceptMessagesOnlyFrom = HasParameter("Set-DynamicDistributionGroup", "AcceptMessagesOnlyFrom")
+                || HasParameter("Set-DynamicDistributionGroup", "AcceptMessagesOnlyFromSendersOrMembers"),
+            CanSetDynamicDistributionGroupRejectMessagesFrom = HasParameter("Set-DynamicDistributionGroup", "RejectMessagesFrom")
+                || HasParameter("Set-DynamicDistributionGroup", "RejectMessagesFromSendersOrMembers"),
             CanGetDynamicDistributionGroupMember = IsAvailable("Get-DynamicDistributionGroupMember"),
 
                                            

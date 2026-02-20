@@ -285,10 +285,22 @@ public class DistributionListViewModel : ViewModelBase
     }
 
     public bool CanAddMember => !string.IsNullOrWhiteSpace(NewMemberIdentity) && CanModifyMembers;
-    public bool CanEditSettings => HasDetails && !IsDynamicGroup && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup);
-    public bool CanEditExternalSenders => CanEditSettings && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRequireSenderAuthentication);
-    public bool CanEditAcceptMessagesOnlyFrom => CanEditSettings && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupAcceptMessagesOnlyFrom);
-    public bool CanEditRejectMessagesFrom => CanEditSettings && _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRejectMessagesFrom);
+    public bool CanEditSettings => HasDetails && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroup)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroup));
+
+    public bool CanEditExternalSenders => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupRequireSenderAuthentication)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRequireSenderAuthentication));
+
+    public bool CanEditAcceptMessagesOnlyFrom => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupAcceptMessagesOnlyFrom)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupAcceptMessagesOnlyFrom));
+
+    public bool CanEditRejectMessagesFrom => CanEditSettings && (IsDynamicGroup
+        ? _shellViewModel.IsFeatureAvailable(f => f.CanSetDynamicDistributionGroupRejectMessagesFrom)
+        : _shellViewModel.IsFeatureAvailable(f => f.CanSetDistributionGroupRejectMessagesFrom));
+
     public bool CanEditSenderFilters => CanEditAcceptMessagesOnlyFrom && CanEditRejectMessagesFrom;
 
     public string? NewAcceptedSender
@@ -1148,6 +1160,7 @@ public class DistributionListViewModel : ViewModelBase
             var request = new SetDistributionListSettingsRequest
             {
                 Identity = SelectedDetails.Identity,
+                GroupType = IsDynamicGroup ? "DynamicDistributionGroup" : "DistributionGroup",
                 RequireSenderAuthenticationEnabled = CanEditExternalSenders ? !AllowExternalSenders : null,
                 AcceptMessagesOnlyFrom = (CanEditAcceptMessagesOnlyFrom && acceptChanged) ? NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
                 RejectMessagesFrom = (CanEditRejectMessagesFrom && rejectChanged) ? NormalizeSenderList(RejectMessagesFrom).ToList() : null

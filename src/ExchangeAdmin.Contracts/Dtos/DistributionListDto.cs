@@ -400,6 +400,9 @@ public class SetDistributionListSettingsRequest
     [JsonPropertyName("identity")]
     public string Identity { get; set; } = string.Empty;
 
+    [JsonPropertyName("groupType")]
+    public string GroupType { get; set; } = "DistributionGroup";
+
     [JsonPropertyName("requireSenderAuthenticationEnabled")]
     public bool? RequireSenderAuthenticationEnabled { get; set; }
 

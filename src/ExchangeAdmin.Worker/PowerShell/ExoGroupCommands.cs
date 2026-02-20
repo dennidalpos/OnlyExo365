@@ -35,6 +35,17 @@ public class ExoGroupCommands
             SearchQuery = request.SearchQuery
         };
 
+        var includeDynamic = request.IncludeDynamic;
+        if (includeDynamic)
+        {
+            var capabilities = await _capabilityDetector.DetectCapabilitiesAsync(cancellationToken: cancellationToken);
+            if (!capabilities.Features.CanGetDynamicDistributionGroup)
+            {
+                includeDynamic = false;
+                onLog?.Invoke("Warning", "Get-DynamicDistributionGroup non disponibile: filtro liste dinamiche ignorato.");
+            }
+        }
+
                        
         var script = @"
 $allGroups = @()
@@ -50,7 +61,7 @@ foreach ($dg in $dgs) {
 ";
 
                                           
-        if (request.IncludeDynamic)
+        if (includeDynamic)
         {
             script += @"
 # Get dynamic distribution groups
@@ -642,19 +653,42 @@ $previewMembers = $allMembers | Select-Object -First {request.MaxResults}
         var escapedIdentity = request.Identity.Replace("'", "''");
         var setParams = new List<string>();
 
+        var capabilities = await _capabilityDetector.DetectCapabilitiesAsync(cancellationToken: cancellationToken);
+
         if (request.RequireSenderAuthenticationEnabled.HasValue)
         {
-            setParams.Add($"-RequireSenderAuthenticationEnabled ${request.RequireSenderAuthenticationEnabled.Value.ToString().ToLowerInvariant()}");
+            if (capabilities.Features.CanSetDistributionGroupRequireSenderAuthentication)
+            {
+                setParams.Add($"-RequireSenderAuthenticationEnabled ${request.RequireSenderAuthenticationEnabled.Value.ToString().ToLowerInvariant()}");
+            }
+            else
+            {
+                onLog?.Invoke("Warning", "Parametro RequireSenderAuthenticationEnabled non supportato: modifica ignorata.");
+            }
         }
 
         if (request.AcceptMessagesOnlyFrom != null)
         {
-            setParams.Add($"-AcceptMessagesOnlyFrom {FormatStringArrayParameter(request.AcceptMessagesOnlyFrom)}");
+            if (capabilities.Features.CanSetDistributionGroupAcceptMessagesOnlyFrom)
+            {
+                setParams.Add($"-AcceptMessagesOnlyFrom {FormatStringArrayParameter(request.AcceptMessagesOnlyFrom)}");
+            }
+            else
+            {
+                onLog?.Invoke("Warning", "Parametro AcceptMessagesOnlyFrom non supportato: modifica ignorata.");
+            }
         }
 
         if (request.RejectMessagesFrom != null)
         {
-            setParams.Add($"-RejectMessagesFrom {FormatStringArrayParameter(request.RejectMessagesFrom)}");
+            if (capabilities.Features.CanSetDistributionGroupRejectMessagesFrom)
+            {
+                setParams.Add($"-RejectMessagesFrom {FormatStringArrayParameter(request.RejectMessagesFrom)}");
+            }
+            else
+            {
+                onLog?.Invoke("Warning", "Parametro RejectMessagesFrom non supportato: modifica ignorata.");
+            }
         }
 
         if (setParams.Count == 0)

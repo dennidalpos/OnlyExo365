@@ -209,6 +209,9 @@ $results
                                   
             CanGetDistributionGroup = IsAvailable("Get-DistributionGroup"),
             CanSetDistributionGroup = IsAvailable("Set-DistributionGroup"),
+            CanSetDistributionGroupRequireSenderAuthentication = HasParameter("Set-DistributionGroup", "RequireSenderAuthenticationEnabled"),
+            CanSetDistributionGroupAcceptMessagesOnlyFrom = HasParameter("Set-DistributionGroup", "AcceptMessagesOnlyFrom"),
+            CanSetDistributionGroupRejectMessagesFrom = HasParameter("Set-DistributionGroup", "RejectMessagesFrom"),
             CanGetDistributionGroupMember = IsAvailable("Get-DistributionGroupMember"),
             CanAddDistributionGroupMember = IsAvailable("Add-DistributionGroupMember"),
             CanRemoveDistributionGroupMember = IsAvailable("Remove-DistributionGroupMember"),

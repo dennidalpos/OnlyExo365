@@ -692,7 +692,7 @@ try {
             $tenantId = $orgConfig.ExternalDirectoryOrganizationId.ToString()
         }
     } catch {
-        Write-Verbose "Could not determine tenant from Exchange session: $($_.Exception.Message)"
+        Write-Verbose ""Could not determine tenant from Exchange session: $($_.Exception.Message)""
     }
 
     if ($tenantId) {
@@ -703,12 +703,12 @@ try {
 
     $ctx = Get-MgContext
     if ($ctx) {
-        Write-Output "Connected to Microsoft Graph (TenantId=$($ctx.TenantId))"
+        Write-Output ""Connected to Microsoft Graph (TenantId=$($ctx.TenantId))""
     } else {
         Write-Output 'Connected to Microsoft Graph'
     }
 } catch {
-    Write-Warning "Connect-MgGraph failed: $($_.Exception.Message)"
+    Write-Warning ""Connect-MgGraph failed: $($_.Exception.Message)""
 }";
 
         var graphResult = await ExecuteAsync(

@@ -1,0 +1,56 @@
+name: release-validation
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test-package:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run shared Windows release baseline
+        uses: ./.github/actions/windows-release-baseline
+
+      - name: Run publish and setup EXE smoke tests
+        shell: pwsh
+        run: ./build/run-smoke-tests.ps1 -PublishPath artifacts/publish -SetupExePath artifacts/packages/OnlyExo365.Setup.exe -ReportPath artifacts/smoke/smoke-report.json
+
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-multi-arch
+          path: artifacts/publish/**
+          if-no-files-found: error
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-multi-arch
+          path: artifacts/packages/**
+          if-no-files-found: error
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: artifacts/security/**
+          if-no-files-found: error
+
+      - name: Upload smoke reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-reports
+          path: artifacts/smoke/**
+          if-no-files-found: error

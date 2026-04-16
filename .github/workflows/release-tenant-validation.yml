@@ -1,0 +1,125 @@
+name: release-tenant-validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_graph:
+        description: Skip Microsoft Graph validation and run Exchange-only probes.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  tenant-validation:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            **/packages.lock.json
+            global.json
+
+      - name: Run canonical doctor
+        shell: pwsh
+        run: ./scripts/doctor.ps1
+
+      - name: Validate tenant-validation secrets
+        shell: pwsh
+        env:
+          EXCHANGEADMIN_APP_ID: ${{ secrets.EXCHANGEADMIN_APP_ID }}
+          EXCHANGEADMIN_EXO_ORGANIZATION: ${{ secrets.EXCHANGEADMIN_EXO_ORGANIZATION }}
+          EXCHANGEADMIN_GRAPH_TENANT_ID: ${{ secrets.EXCHANGEADMIN_GRAPH_TENANT_ID }}
+          EXCHANGEADMIN_CERT_THUMBPRINT: ${{ secrets.EXCHANGEADMIN_CERT_THUMBPRINT }}
+          EXCHANGEADMIN_CERTIFICATE_PFX_BASE64: ${{ secrets.EXCHANGEADMIN_CERTIFICATE_PFX_BASE64 }}
+          EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD: ${{ secrets.EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD }}
+        run: |
+          $required = @(
+            "EXCHANGEADMIN_APP_ID",
+            "EXCHANGEADMIN_EXO_ORGANIZATION",
+            "EXCHANGEADMIN_CERT_THUMBPRINT",
+            "EXCHANGEADMIN_CERTIFICATE_PFX_BASE64",
+            "EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD"
+          )
+
+          foreach ($name in $required) {
+            if ([string]::IsNullOrWhiteSpace((Get-Item "env:$name").Value)) {
+              throw "Missing GitHub secret $name."
+            }
+          }
+
+          if (-not [bool]::Parse('${{ inputs.skip_graph }}') -and [string]::IsNullOrWhiteSpace($env:EXCHANGEADMIN_GRAPH_TENANT_ID)) {
+            throw "Missing GitHub secret EXCHANGEADMIN_GRAPH_TENANT_ID required for Graph validation."
+          }
+
+      - name: Import certificate in CurrentUser store
+        shell: pwsh
+        env:
+          EXCHANGEADMIN_CERTIFICATE_PFX_BASE64: ${{ secrets.EXCHANGEADMIN_CERTIFICATE_PFX_BASE64 }}
+          EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD: ${{ secrets.EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD }}
+          EXCHANGEADMIN_CERT_THUMBPRINT: ${{ secrets.EXCHANGEADMIN_CERT_THUMBPRINT }}
+        run: |
+          $certificatePath = Join-Path $env:RUNNER_TEMP "exchangeadmin-tenant-validation.pfx"
+          [System.IO.File]::WriteAllBytes($certificatePath, [System.Convert]::FromBase64String($env:EXCHANGEADMIN_CERTIFICATE_PFX_BASE64))
+
+          $securePassword = ConvertTo-SecureString $env:EXCHANGEADMIN_CERTIFICATE_PFX_PASSWORD -AsPlainText -Force
+          $certificate = Import-PfxCertificate -FilePath $certificatePath -Password $securePassword -CertStoreLocation Cert:\CurrentUser\My -Exportable
+
+          if ($null -eq $certificate) {
+            throw "Unable to import the tenant validation certificate."
+          }
+
+          if ($certificate.Thumbprint -ne $env:EXCHANGEADMIN_CERT_THUMBPRINT) {
+            throw "Imported certificate thumbprint mismatch. Expected $($env:EXCHANGEADMIN_CERT_THUMBPRINT), actual $($certificate.Thumbprint)."
+          }
+
+      - name: Run Exchange and Graph tenant validation
+        shell: pwsh
+        env:
+          EXCHANGEADMIN_AUTH_MODE: AppCertificate
+          EXCHANGEADMIN_APP_ID: ${{ secrets.EXCHANGEADMIN_APP_ID }}
+          EXCHANGEADMIN_EXO_ORGANIZATION: ${{ secrets.EXCHANGEADMIN_EXO_ORGANIZATION }}
+          EXCHANGEADMIN_GRAPH_TENANT_ID: ${{ secrets.EXCHANGEADMIN_GRAPH_TENANT_ID }}
+          EXCHANGEADMIN_CERT_THUMBPRINT: ${{ secrets.EXCHANGEADMIN_CERT_THUMBPRINT }}
+          EXCHANGEADMIN_ENABLE_GRAPH: 1
+          EXCHANGEADMIN_GRAPH_SCOPES: Organization.Read.All;Directory.Read.All;RoleManagement.Read.Directory;User.Read.All
+        run: |
+          $arguments = @(
+            "-File", "./build/run-tenant-validation.ps1",
+            "-ReportPath", "artifacts/tenant-validation/tenant-validation-report.json"
+          )
+
+          if ([bool]::Parse('${{ inputs.skip_graph }}')) {
+            $arguments += "-SkipGraph"
+          }
+
+          & pwsh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+      - name: Remove certificate from CurrentUser store
+        if: always()
+        shell: pwsh
+        env:
+          EXCHANGEADMIN_CERT_THUMBPRINT: ${{ secrets.EXCHANGEADMIN_CERT_THUMBPRINT }}
+        run: |
+          if (-not [string]::IsNullOrWhiteSpace($env:EXCHANGEADMIN_CERT_THUMBPRINT)) {
+            Get-ChildItem Cert:\CurrentUser\My | Where-Object Thumbprint -eq $env:EXCHANGEADMIN_CERT_THUMBPRINT | Remove-Item -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Upload tenant validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenant-validation-report
+          path: artifacts/tenant-validation/**
+          if-no-files-found: error

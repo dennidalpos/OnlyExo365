@@ -1,0 +1,179 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.MobileDevicesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.35*"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="{loc:Loc Key=Nav.MobileDevices}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding MobileDevices.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Right" Content="{loc:Loc Key=MobileDevices.Refresh}" Command="{Binding MobileDevices.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+            </DockPanel>
+
+            <StackPanel Grid.Row="1">
+                <Border Style="{StaticResource ErrorBannerBorderStyle}" Margin="0,0,0,12"
+                        Visibility="{Binding MobileDevices.HasError, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding MobileDevices.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
+                </Border>
+
+                <Border Style="{StaticResource WarningBannerBorderStyle}" Margin="0,0,0,12"
+                        Visibility="{Binding MobileDevices.HasCapabilityMessage, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding MobileDevices.CapabilityMessage}" Style="{StaticResource WarningBannerTextStyle}"/>
+                </Border>
+            </StackPanel>
+
+            <Grid Grid.Row="2" Margin="0,0,0,12"
+                  IsEnabled="{Binding MobileDevices.IsMobileDevicesFeatureAvailable}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding MobileDevices.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding MobileDevices.AccessStateFilters}"
+                          SelectedItem="{Binding MobileDevices.AccessStateFilter}"/>
+            </Grid>
+
+            <Grid Grid.Row="3">
+                <DataGrid ItemsSource="{Binding MobileDevices.Devices}"
+                          SelectedItem="{Binding MobileDevices.SelectedDevice}"
+                          IsEnabled="{Binding MobileDevices.IsMobileDevicesFeatureAvailable}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="{StaticResource SecondaryBackgroundBrush}"
+                          BorderBrush="{StaticResource BorderBrush}"
+                          RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                          AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.User}" Binding="{Binding UserDisplayName}" Width="Auto" MinWidth="180"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.DeviceID}" Binding="{Binding DeviceId}" Width="Auto" MinWidth="220"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.FriendlyName}" Binding="{Binding FriendlyName}" Width="Auto" MinWidth="180"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.Type}" Binding="{Binding DeviceType}" Width="110"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.Access}" Binding="{Binding DeviceAccessState}" Width="120"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.Mailbox}" Binding="{Binding MailboxDisplayName}" Width="Auto" MinWidth="220"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                        Visibility="{Binding MobileDevices.IsBusy, Converter={StaticResource BoolToVisibility}}">
+                    <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding MobileDevices.LoadingOverlayText}"
+                                       Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                            <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                         Value="{Binding MobileDevices.LoadingProgress, Mode=OneWay}"/>
+                            <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                                <TextBlock Text="{Binding MobileDevices.LoadingPercentText}"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding MobileDevices.LoadingCountText}"
+                                           Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                           Visibility="{Binding MobileDevices.HasLoadingCount, Converter={StaticResource BoolToVisibility}}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Border>
+            </Grid>
+
+            <Button Grid.Row="4" Content="{loc:Loc Key=MobileDevices.LoadMore}" Command="{Binding MobileDevices.LoadMoreCommand}"
+                    HorizontalAlignment="Center" Margin="0,12,0,0"
+                    Style="{StaticResource PrimaryButton}"
+                    Visibility="{Binding MobileDevices.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <ScrollViewer Grid.Column="2"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <GroupBox Header="{loc:Loc Key=MobileDevices.DeviceDetails}">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding MobileDevices.SelectedDeviceSummary}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.UPN}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.Mailbox}" Margin="0,0,8,6"/>
+                        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.UserPrincipalName}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.MailboxIdentity}" IsReadOnly="True"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.ModelOS}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.StatusReason}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.DeviceModel}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.DeviceAccessStateReason}" IsReadOnly="True"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.LastSuccessSync}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.LastPolicyUpdate}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="6" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.LastSuccessSync, StringFormat={}{0:g}}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.LastPolicyUpdateTime, StringFormat={}{0:g}}" IsReadOnly="True"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding MobileDevices.SelectedDevice.DeviceUserAgent}" TextWrapping="Wrap"
+                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="{loc:Loc Key=MobileDevices.MailboxPolicy}" Margin="0,12,0,0">
+                    <StackPanel Margin="8" IsEnabled="{Binding MobileDevices.CanLoadPolicies}">
+                        <TextBlock Text="{loc:Loc Key=MobileDevices.PoliciesAreAppliedToTheMailboxAssociatedWithTheSelectedDevice}" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap"/>
+                        <ComboBox ItemsSource="{Binding MobileDevices.Policies}"
+                                  SelectedValuePath="Identity"
+                                  SelectedValue="{Binding MobileDevices.SelectedMailboxPolicyIdentity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="Name"
+                                  Margin="0,8,0,0"/>
+                        <Button Content="{loc:Loc Key=MobileDevices.AssignPolicy}" Command="{Binding MobileDevices.AssignPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="{loc:Loc Key=MobileDevices.DeviceActions}" Margin="0,12,0,0">
+                    <WrapPanel Margin="8">
+                        <Button Content="{loc:Loc Key=MobileDevices.Allow}" Command="{Binding MobileDevices.AllowDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                        <Button Content="{loc:Loc Key=MobileDevices.Block}" Command="{Binding MobileDevices.BlockDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource DangerButton}" Margin="0,0,8,8"/>
+                        <Button Content="{loc:Loc Key=MobileDevices.Quarantine}" Command="{Binding MobileDevices.QuarantineDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource InlineActionButton}" Margin="0,0,8,8"/>
+                        <Button Content="{loc:Loc Key=MobileDevices.RemoteWipe}" Command="{Binding MobileDevices.RemoteWipeCommand}" IsEnabled="{Binding MobileDevices.CanRemoteWipe}" Style="{StaticResource DangerButton}" Margin="0,0,8,8"/>
+                    </WrapPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

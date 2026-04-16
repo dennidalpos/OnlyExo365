@@ -1,0 +1,10 @@
+{
+  "gitleaks": {
+    "8.30.0": {
+      "windows_x64": {
+        "archiveName": "gitleaks_8.30.0_windows_x64.zip",
+        "sha256": "54fe94f644b832dd08e8c3a5915efb3bfa862386d59fb27ca0792cb687a83573"
+      }
+    }
+  }
+}

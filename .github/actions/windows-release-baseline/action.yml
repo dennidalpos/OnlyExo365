@@ -1,0 +1,107 @@
+name: windows-release-baseline
+description: Run the shared Windows release validation baseline before signing or publication.
+
+inputs:
+  runtime_identifier:
+    description: Runtime identifier used by the canonical repository scripts.
+    required: false
+    default: win-x64
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+        cache: true
+        cache-dependency-path: |
+          **/packages.lock.json
+          global.json
+
+    - name: Install Inno Setup 6
+      shell: pwsh
+      run: choco install innosetup --version=6.7.1 -y --no-progress
+
+    - name: Resolve SignTool prerequisite
+      shell: pwsh
+      run: |
+        $signToolPath = ./build/resolve-signtool.ps1
+        $signToolDirectory = Split-Path -Parent $signToolPath
+        "WINDOWS_SIGNTOOL_DIR=$signToolDirectory" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Host "signtool.exe resolved at: $signToolPath"
+
+    - name: Create security report directory
+      shell: pwsh
+      run: New-Item -Path artifacts/security -ItemType Directory -Force | Out-Null
+
+    - name: Run canonical doctor
+      shell: pwsh
+      run: ./scripts/doctor.ps1 -CheckPackaging
+
+    - name: Bootstrap repository
+      shell: pwsh
+      run: ./scripts/bootstrap.ps1 -RuntimeIdentifier ${{ inputs.runtime_identifier }}
+
+    - name: Run static analysis build gate
+      shell: pwsh
+      run: ./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier ${{ inputs.runtime_identifier }} -NoBootstrap
+
+    - name: Scan NuGet vulnerabilities
+      shell: pwsh
+      run: ./build/assert-no-vulnerable-packages.ps1 -SolutionPath ExchangeAdmin.sln -ReportPath artifacts/security/nuget-vulnerabilities.json
+
+    - name: Scan repository secrets
+      shell: pwsh
+      run: ./build/run-secret-scan.ps1 -SourcePath . -ReportPath artifacts/security/gitleaks.sarif
+
+    - name: Run tests
+      shell: pwsh
+      run: ./scripts/test.ps1 -Configuration Debug -ResultsDirectory artifacts/test-results/unit -NoBootstrap -NoBuild -NoRestore
+
+    - name: Collect core backend coverage
+      shell: pwsh
+      run: >
+        dotnet test tests/ExchangeAdmin.Tests/ExchangeAdmin.Tests.csproj
+        -c Debug
+        --no-build
+        --no-restore
+        --artifacts-path artifacts/build
+        --collect:"XPlat Code Coverage"
+        --results-directory artifacts/test-results
+        --filter "FullyQualifiedName~ExchangeAdmin.Tests.WorkerCommandTests|FullyQualifiedName~ExchangeAdmin.Tests.MailboxReportingCommandTests|FullyQualifiedName~ExchangeAdmin.Tests.IpcContractsTests|FullyQualifiedName~ExchangeAdmin.Tests.IpcSecretHandlingTests|FullyQualifiedName~ExchangeAdmin.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~ExchangeAdmin.Tests.PersistentLogWriterTests|FullyQualifiedName~ExchangeAdmin.Tests.OperationDispatcherInfrastructureTests"
+
+    - name: Enforce core coverage minimum
+      shell: pwsh
+      run: |
+        $coveragePath = Get-ChildItem artifacts/test-results -Recurse -Filter coverage.cobertura.xml |
+          Sort-Object LastWriteTimeUtc |
+          Select-Object -Last 1 -ExpandProperty FullName
+        ./build/assert-code-coverage.ps1 `
+          -CoveragePath $coveragePath `
+          -MinimumLineCoveragePercent 20 `
+          -IncludePackage ExchangeAdmin.Worker,ExchangeAdmin.Contracts,ExchangeAdmin.Infrastructure
+
+    - name: Enforce architecture constraints
+      shell: pwsh
+      run: ./build/assert-architecture-constraints.ps1
+
+    - name: Build, publish and package setup EXE
+      shell: pwsh
+      run: ./scripts/pack.ps1 -Configuration Release -Clean:$false -LockedMode -RuntimeIdentifier ${{ inputs.runtime_identifier }}
+
+    - name: Verify package reproducibility
+      shell: pwsh
+      run: ./build/verify-package-reproducibility.ps1 -Configuration Release
+
+    - name: Upload package reproducibility report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: package-reproducibility-report
+        path: artifacts/reproducibility/**
+        if-no-files-found: error
+
+    - name: Validate artifact signing flow
+      shell: pwsh
+      run: ./build/validate-artifact-signing.ps1 -Path artifacts/publish,artifacts/packages

@@ -1,0 +1,232 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.ResourcesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.2*"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="{loc:Loc Key=Nav.ResourceMailboxes}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding Resources.List.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="{loc:Loc Key=Resources.New}" Command="{Binding Resources.NewResourceCommand}"
+                            Style="{StaticResource InlineActionButton}"/>
+                    <Button Content="{loc:Loc Key=Resources.Refresh}" Command="{Binding Resources.List.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Border Grid.Row="1" Style="{StaticResource ErrorBannerBorderStyle}"
+                    Margin="0,0,0,12"
+                    Visibility="{Binding Resources.HasError, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding Resources.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding Resources.List.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding Resources.List.ResourceTypeFilters}"
+                          SelectedItem="{Binding Resources.List.ResourceTypeFilter}"/>
+            </Grid>
+
+            <DataGrid Grid.Row="3"
+                      ItemsSource="{Binding Resources.List.Resources}"
+                      SelectedItem="{Binding Resources.List.SelectedResource}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      Background="{StaticResource SecondaryBackgroundBrush}"
+                      BorderBrush="{StaticResource BorderBrush}"
+                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:Loc Key=Resources.Name}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="180"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=Resources.Type}" Binding="{Binding ResourceType}" Width="Auto" MinWidth="100"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=Resources.PrimaryEmail}" Binding="{Binding PrimarySmtpAddress}" Width="Auto" MinWidth="220"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=Resources.Alias}" Binding="{Binding Alias}" Width="Auto" MinWidth="120"/>
+                    <DataGridCheckBoxColumn Header="{loc:Loc Key=Resources.HideFromGAL}" Binding="{Binding HiddenFromAddressListsEnabled}" Width="Auto" MinWidth="95"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Button Grid.Row="4" Content="{loc:Loc Key=Resources.LoadMore}" Command="{Binding Resources.List.LoadMoreCommand}"
+                    HorizontalAlignment="Center" Margin="0,12,0,0"
+                    Style="{StaticResource PrimaryButton}"
+                    Visibility="{Binding Resources.List.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+            <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                    Visibility="{Binding Resources.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Resources.List.LoadProgress.Status}"
+                                   Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                        <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                     Value="{Binding Resources.List.LoadProgress.Progress, Mode=OneWay}"/>
+                        <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                            <TextBlock Text="{Binding Resources.List.LoadProgress.PercentText}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding Resources.List.LoadProgress.CountText}"
+                                       Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                       Visibility="{Binding Resources.List.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                </Border>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <GroupBox Header="{loc:Loc Key=Resources.ResourceMailboxDetails}">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.Type}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.DisplayName}" Margin="0,0,8,6"/>
+                        <ComboBox Grid.Row="1" Grid.Column="0"
+                                  ItemsSource="{Binding Resources.Editor.ResourceTypes}"
+                                  SelectedItem="{Binding Resources.Editor.ResourceType}"
+                                  Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Resources.Name}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Resources.Alias}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Resources.Editor.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Resources.Editor.Alias, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.PrimarySMTP}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.AutomateProcessing}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <ComboBox Grid.Row="5" Grid.Column="1"
+                                  ItemsSource="{Binding Resources.Editor.AutomateProcessingModes}"
+                                  SelectedItem="{Binding Resources.Editor.BookingSettings.AutomateProcessing}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Resources.Identity}" Margin="0,8,8,6"/>
+                        <CheckBox Grid.Row="7" Grid.Column="0" Content="{loc:Loc Key=Resources.HideFromAddressLists}"
+                                  IsChecked="{Binding Resources.Editor.HiddenFromAddressListsEnabled}"/>
+                        <StackPanel Grid.Row="7" Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Visibility="{Binding Resources.Editor.IsEditingExistingResource, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{loc:Loc Key=Resources.IdentityPrefix}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding Resources.Editor.ResourceIdentity}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="{loc:Loc Key=Resources.BookingSettings}" Margin="0,12,0,0">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox Grid.Row="0" Grid.Column="0" Content="{loc:Loc Key=Resources.AllowConflicts}" IsChecked="{Binding Resources.Editor.BookingSettings.AllowConflicts}" Margin="0,0,8,8"/>
+                        <CheckBox Grid.Row="0" Grid.Column="1" Content="{loc:Loc Key=Resources.AllBookInPolicy}" IsChecked="{Binding Resources.Editor.BookingSettings.AllBookInPolicy}" Margin="0,0,0,8"/>
+                        <CheckBox Grid.Row="1" Grid.Column="0" Content="{loc:Loc Key=Resources.AllRequestInPolicy}" IsChecked="{Binding Resources.Editor.BookingSettings.AllRequestInPolicy}" Margin="0,0,8,8"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" Content="{loc:Loc Key=Resources.AllRequestOutOfPolicy}" IsChecked="{Binding Resources.Editor.BookingSettings.AllRequestOutOfPolicy}" Margin="0,0,0,8"/>
+                        <CheckBox Grid.Row="2" Grid.Column="0" Content="{loc:Loc Key=Resources.DeleteSubject}" IsChecked="{Binding Resources.Editor.BookingSettings.DeleteSubject}" Margin="0,0,8,8"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" Content="{loc:Loc Key=Resources.AddOrganizerToSubject}" IsChecked="{Binding Resources.Editor.BookingSettings.AddOrganizerToSubject}" Margin="0,0,0,8"/>
+                        <CheckBox Grid.Row="3" Grid.Column="0" Content="{loc:Loc Key=Resources.RemovePrivateProperty}" IsChecked="{Binding Resources.Editor.BookingSettings.RemovePrivateProperty}" Margin="0,0,8,8"/>
+                        <CheckBox Grid.Row="3" Grid.Column="1" Content="{loc:Loc Key=Resources.EnforceSchedulingHorizon}" IsChecked="{Binding Resources.Editor.BookingSettings.EnforceSchedulingHorizon}" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.BookingWindowDays}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.MaximumDurationMinutes}" Margin="0,0,8,6"/>
+                        <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookingWindowInDays, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.MaximumDurationInMinutes, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Resources.BookInPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Resources.RequestInPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookInPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.RequestInPolicy, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Resources.RequestOutOfPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Resources.ResourceDelegatesCSV}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="9" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.RequestOutOfPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.ResourceDelegates, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="{loc:Loc Key=Resources.MailboxDelegation}" Margin="0,12,0,0">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.FullAccessCSV}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.SendAsCSV}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Resources.SendOnBehalfCSV}" Margin="0,0,8,6"/>
+                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Resources.Editor.FullAccessUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.SendAsUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Resources.Editor.SendOnBehalfUsers, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                    </Grid>
+                </GroupBox>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="{loc:Loc Key=Resources.Save}" Command="{Binding Resources.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                    <Button Content="{loc:Loc Key=Resources.New}" Command="{Binding Resources.NewResourceCommand}"
+                            Style="{StaticResource InlineActionButton}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

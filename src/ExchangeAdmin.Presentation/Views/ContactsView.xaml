@@ -1,0 +1,194 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.ContactsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:ExchangeAdmin.Presentation.Helpers"
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.2*"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="{loc:Loc Key=Contact.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding Contacts.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="{loc:Loc Key=Btn.New}" Command="{Binding Contacts.NewContactCommand}"
+                            Style="{StaticResource InlineActionButton}"/>
+                    <Button Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding Contacts.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Border Grid.Row="1" Style="{StaticResource ErrorBannerBorderStyle}"
+                    Margin="0,0,0,12"
+                    Visibility="{Binding Contacts.HasError, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding Contacts.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding Contacts.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding Contacts.ContactKindFilters}"
+                          SelectedItem="{Binding Contacts.ContactKindFilter}"/>
+            </Grid>
+
+            <Grid Grid.Row="3" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid Grid.Row="0"
+                          ItemsSource="{Binding Contacts.Contacts}"
+                          SelectedItem="{Binding Contacts.SelectedContact}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="{StaticResource SecondaryBackgroundBrush}"
+                          BorderBrush="{StaticResource BorderBrush}"
+                          RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                          AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{loc:Loc Key=Contact.ColName}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="180"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=Contact.ColType}" Binding="{Binding ContactKind}" Width="Auto" MinWidth="110"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=Contact.ColPrimaryEmail}" Binding="{Binding PrimarySmtpAddress}" Width="Auto" MinWidth="220"/>
+                        <DataGridTextColumn Header="{loc:Loc Key=Contact.ColExternalEmail}" Binding="{Binding ExternalEmailAddress}" Width="Auto" MinWidth="220"/>
+                        <DataGridCheckBoxColumn Header="{loc:Loc Key=Contact.ColHideFromGal}" Binding="{Binding HiddenFromAddressListsEnabled}" Width="Auto" MinWidth="95"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Button Grid.Row="1" Content="{loc:Loc Key=Btn.LoadMore}" Command="{Binding Contacts.LoadMoreCommand}"
+                        HorizontalAlignment="Center" Margin="0,12,0,0"
+                        Style="{StaticResource PrimaryButton}"
+                        Visibility="{Binding Contacts.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+                <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                        Visibility="{Binding Contacts.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                    <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding Contacts.LoadProgress.Status}"
+                                       Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                            <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                         Value="{Binding Contacts.LoadProgress.Progress, Mode=OneWay}"/>
+                            <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                                <TextBlock Text="{Binding Contacts.LoadProgress.PercentText}"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Contacts.LoadProgress.CountText}"
+                                           Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                           Visibility="{Binding Contacts.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <GroupBox Header="{loc:Loc Key=Contact.DetailsHeading}">
+                    <Grid Margin="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Contact.FieldType}" Margin="0,0,8,6"/>
+                        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding Contacts.ContactKinds}"
+                                  SelectedItem="{Binding Contacts.ContactKind}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Contact.FieldDisplayName}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Contact.FieldName}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Contacts.DisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Contacts.Name, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Contact.FieldAlias}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Contact.FieldPrimarySmtp}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Contacts.Alias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Contacts.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Contact.FieldExternalEmail}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Contact.FieldUpn}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Contacts.ExternalEmailAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="7" Grid.Column="1"
+                                 Text="{Binding Contacts.UserPrincipalName, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding Contacts.IsMailUser}"/>
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Contact.FieldPassword}" Margin="0,8,8,6"/>
+                        <PasswordBox x:Name="MailUserPasswordBox"
+                                     Grid.Row="8"
+                                     Grid.Column="1"
+                                     Margin="0,8,0,0"
+                                     PasswordChanged="MailUserPasswordBox_OnPasswordChanged"
+                                     helpers:PasswordBoxClearHelper.ClearTrigger="{Binding Contacts.MailUserPasswordClearTrigger}">
+                            <PasswordBox.Style>
+                                <Style TargetType="PasswordBox">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Contacts.IsCreateMailUser}" Value="True">
+                                            <Setter Property="IsEnabled" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </PasswordBox.Style>
+                        </PasswordBox>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="{loc:Loc Key=Contact.OptionsGroup}" Margin="0,12,0,0">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="{Binding Contacts.ContactIdentityDisplay}"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Visibility="{Binding Contacts.IsEditingExistingContact, Converter={StaticResource BoolToVisibility}}"/>
+                        <CheckBox Content="{loc:Loc Key=Contact.HideFromAddressLists}"
+                                  IsChecked="{Binding Contacts.HiddenFromAddressListsEnabled}"
+                                  Margin="0,8,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="{loc:Loc Key=Btn.Save}" Command="{Binding Contacts.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                            <Button Content="{loc:Loc Key=Btn.Remove}" Command="{Binding Contacts.RemoveCommand}" Style="{StaticResource DangerButton}" Margin="0,0,8,0"
+                                    Visibility="{Binding Contacts.IsEditingExistingContact, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,100 @@
+<UserControl x:Class="ExchangeAdmin.Presentation.Views.MailboxAccessReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="{loc:Loc Key=MailboxAccess.SummaryHeading}" FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="{loc:Loc Key=MailboxAccess.AnalyzeDescription}"
+                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="{loc:Loc Key=Btn.ExportXlsx}"
+                        Command="{Binding MailboxAccessReport.ExportExcelCommand}"
+                        Style="{StaticResource InlineActionButton}"/>
+                <Button Content="{loc:Loc Key=MailboxAccess.StartAnalysis}"
+                        Command="{Binding MailboxAccessReport.StartScanCommand}"
+                        Style="{StaticResource PrimaryButton}"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource WarningBannerBorderStyle}" Margin="0,0,0,12"
+                Visibility="{Binding MailboxAccessReport.HasWarnings, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="{loc:Loc Key=MailboxAccess.WarningBanner}" Style="{StaticResource WarningBannerTextStyle}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding MailboxAccessReport.WarningsText}" Style="{StaticResource StatusBannerMessageTextStyle}" Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding MailboxAccessReport.DiagnosticReferenceText}"
+                           Style="{StaticResource StatusBannerDetailTextStyle}"
+                           Margin="0,8,0,0"
+                           Visibility="{Binding MailboxAccessReport.HasDiagnosticReference, Converter={StaticResource BoolToVisibility}}"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource ErrorBannerBorderStyle}" Margin="0,0,0,12"
+                Visibility="{Binding MailboxAccessReport.HasError, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="{loc:Loc Key=MailboxAccess.ErrorBanner}" Style="{StaticResource ErrorBannerTextStyle}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding MailboxAccessReport.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}" Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding MailboxAccessReport.DiagnosticReferenceText}"
+                           Style="{StaticResource StatusBannerDetailTextStyle}"
+                           Margin="0,8,0,0"
+                           Visibility="{Binding MailboxAccessReport.HasDiagnosticReference, Converter={StaticResource BoolToVisibility}}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" IsEnabled="{Binding MailboxAccessReport.IsLoading, Converter={StaticResource InverseBool}}">
+            <DataGrid ItemsSource="{Binding MailboxAccessReport.Rows}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      Background="{StaticResource SecondaryBackgroundBrush}"
+                      BorderBrush="{StaticResource BorderBrush}"
+                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColUser}" Binding="{Binding User}" Width="Auto" MinWidth="180"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColMailbox}" Binding="{Binding Mailbox}" Width="Auto" MinWidth="220"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColFullAccess}" Binding="{Binding FullAccess}" Width="120"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColSendAs}" Binding="{Binding SendAs}" Width="120"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColSendOnBehalf}" Binding="{Binding SendOnBehalf}" Width="140"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                    Visibility="{Binding MailboxAccessReport.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding MailboxAccessReport.ProgressStatus, Mode=OneWay, TargetNullValue=Scan in progress...}"
+                                   Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                        <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                     Value="{Binding MailboxAccessReport.ProgressPercent, Mode=OneWay}"/>
+                        <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                            <TextBlock Text="{Binding MailboxAccessReport.ProgressPercentText, Mode=OneWay}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding MailboxAccessReport.ProgressCountText, Mode=OneWay}"
+                                       Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                       Visibility="{Binding MailboxAccessReport.HasProgressCount, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

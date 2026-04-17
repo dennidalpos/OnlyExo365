@@ -9,66 +9,63 @@
       "scope": "core",
       "risk": "HIGH",
       "title": "Run the manual tenant validation workflow against a non-production Microsoft 365 tenant",
-      "description": "Execute `.github/workflows/release-tenant-validation.yml` or `build/run-tenant-validation.ps1` with the required certificate-backed app identity so the repository's read-only Exchange Online and Microsoft Graph validation probes can complete.",
       "files": [
         ".github/workflows/release-tenant-validation.yml",
         "build/run-tenant-validation.ps1",
         "docs/releases/verification.md",
         "tests/ExchangeAdmin.Tests/BuildScriptSecurityTests.cs"
       ],
+      "evidence": [
+        "`.github/workflows/release-tenant-validation.yml` requires `EXCHANGEADMIN_*` GitHub secrets and invokes `build/run-tenant-validation.ps1` to produce `artifacts/tenant-validation/tenant-validation-report.json`.",
+        "`docs/releases/verification.md` documents tenant validation as a separate manual release check that is not locally reproducible without a real tenant and certificate material."
+      ],
+      "impact": "Release readiness for the certificate-backed Exchange Online and Microsoft Graph validation path remains unconfirmed until the manual workflow runs successfully against a non-production tenant.",
+      "recommended_action": "Run `.github/workflows/release-tenant-validation.yml` or `build/run-tenant-validation.ps1` with the required certificate-backed app identity and retain the generated tenant validation report as release evidence.",
       "blocker": "Requires a real non-production tenant plus the certificate and GitHub secrets referenced by the workflow, which are not present in the repository or local context.",
       "acceptance_criteria": [
         "The tenant validation workflow completes successfully and uploads `artifacts/tenant-validation/tenant-validation-report.json`.",
         "The report records zero failed probes for the enabled Exchange Online and Microsoft Graph checks."
       ],
-      "verification_state": "NON_VERIFIABLE",
-      "supported_by": [
-        ".github/workflows/release-tenant-validation.yml",
-        "build/run-tenant-validation.ps1",
-        "docs/releases/verification.md",
-        "tests/ExchangeAdmin.Tests/BuildScriptSecurityTests.cs"
-      ]
+      "verification_state": "NOT_VERIFIED"
     },
     {
       "id": "PKG-DUAL-ARCH-VALIDATION-001",
       "priority": 2,
       "execution_order": 2,
       "status": "blocked",
-      "category": "verification_gap",
+      "category": "edge_case",
       "scope": "core",
       "risk": "HIGH",
       "title": "Run the unified setup EXE on a real 32-bit Windows host or VM",
-      "description": "Execute `artifacts/packages/OnlyExo365.Setup.exe` on a 32-bit Windows machine and confirm that the installer selects the `artifacts/publish/win-x86` payload, preserves a single uninstall entry during reinstall, and uninstalls cleanly.",
       "files": [
         "build/run-smoke-tests.ps1",
         "build/helpers/run-smoke-tests.helpers.ps1",
         "installer/ExchangeAdmin.iss",
         "docs/releases/verification.md"
       ],
+      "evidence": [
+        "`scripts/pack.ps1` and `docs/releases/verification.md` describe a single setup EXE that must select the `artifacts/publish/win-x86` payload on 32-bit Windows.",
+        "`build/run-smoke-tests.ps1` validates reinstall and uninstall behavior locally, but the current repository context only provides a 64-bit Windows host."
+      ],
+      "impact": "The installer path that selects and validates the x86 payload is still unverified on a real 32-bit Windows environment, so release evidence for that architecture is incomplete.",
+      "recommended_action": "Run `artifacts/packages/OnlyExo365.Setup.exe` on a 32-bit Windows host or VM and confirm x86 payload selection, single uninstall entry preservation on reinstall, and clean uninstall behavior.",
       "blocker": "The current local verification context is a 64-bit Windows host only; no 32-bit Windows machine or VM is available in the repository context.",
       "acceptance_criteria": [
         "The setup EXE installs the x86 payload on 32-bit Windows.",
         "Reinstall keeps one Programs and Features entry for the product.",
         "Uninstall removes the payload and uninstall registry entry cleanly on the 32-bit host."
       ],
-      "verification_state": "NON_VERIFIABLE",
-      "supported_by": [
-        "build/run-smoke-tests.ps1",
-        "build/helpers/run-smoke-tests.helpers.ps1",
-        "installer/ExchangeAdmin.iss",
-        "docs/releases/verification.md"
-      ]
+      "verification_state": "NOT_VERIFIED"
     },
     {
       "id": "PKG-UPGRADE-BRANDING-VALIDATION-001",
       "priority": 3,
       "execution_order": 3,
       "status": "blocked",
-      "category": "verification_gap",
+      "category": "behavior_inconsistency",
       "scope": "core",
       "risk": "HIGH",
       "title": "Validate upgrade behavior from an ExchangeAdmin-branded install to the OnlyExo365-branded installer on a real Windows host",
-      "description": "Install a pre-rename ExchangeAdmin build, then upgrade it with `artifacts/packages/OnlyExo365.Setup.exe` and confirm the unchanged AppId, previous install directory reuse, configuration fallback, uninstall entry continuity, and uninstall cleanup behavior on a real Windows machine.",
       "files": [
         "Directory.Build.props",
         "installer/ExchangeAdmin.iss",
@@ -79,23 +76,19 @@
         "docs/operations/operator-setup.md",
         "docs/releases/verification.md"
       ],
+      "evidence": [
+        "`installer/ExchangeAdmin.iss` and `docs/releases/verification.md` document a preserved installer AppId and reuse of the previous ExchangeAdmin install root during upgrade.",
+        "`src/ExchangeAdmin.Presentation/Services/ExchangeConfigurationLoader.cs`, `src/ExchangeAdmin.Contracts/Diagnostics/PersistentLogWriter.cs`, and `src/ExchangeAdmin.Contracts/Security/ProtectedSecretStore.cs` retain compatibility logic for legacy ExchangeAdmin configuration, log, and secret paths."
+      ],
+      "impact": "The in-place upgrade path from an ExchangeAdmin-branded installation to the current OnlyExo365 installer is repository-supported but still unverified on a real machine, so upgrade and uninstall continuity remain release gaps.",
+      "recommended_action": "Install a pre-rename ExchangeAdmin build on a Windows host, upgrade it with `artifacts/packages/OnlyExo365.Setup.exe`, then verify install-root reuse, configuration fallback, single uninstall entry continuity, and uninstall cleanup.",
       "blocker": "The current repository context does not include a provisioned host with a previously installed ExchangeAdmin build to exercise a real in-place upgrade path.",
       "acceptance_criteria": [
         "An ExchangeAdmin-branded installation upgrades in place with the OnlyExo365 setup EXE without creating duplicate uninstall entries.",
         "The upgraded install remains launchable and retains the expected configuration/data paths or documented fallback behavior.",
         "Uninstall after upgrade removes the registered product and the documented default data roots cleanly."
       ],
-      "verification_state": "NON_VERIFIABLE",
-      "supported_by": [
-        "Directory.Build.props",
-        "installer/ExchangeAdmin.iss",
-        "build/run-smoke-tests.ps1",
-        "src/ExchangeAdmin.Presentation/Services/ExchangeConfigurationLoader.cs",
-        "src/ExchangeAdmin.Contracts/Diagnostics/PersistentLogWriter.cs",
-        "src/ExchangeAdmin.Contracts/Security/ProtectedSecretStore.cs",
-        "docs/operations/operator-setup.md",
-        "docs/releases/verification.md"
-      ]
+      "verification_state": "NOT_VERIFIED"
     }
   ]
 }

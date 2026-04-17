@@ -4,6 +4,8 @@
 
 OnlyExo365 is a Windows-first WPF desktop application for Exchange Online administration. The repository contains a desktop operator shell (`ExchangeAdmin.Presentation`) and a separate PowerShell-backed worker process (`ExchangeAdmin.Worker`) connected through shared contracts and named-pipe IPC.
 
+The repository evidence shows a Windows desktop runtime, PowerShell-backed Exchange Online and Microsoft Graph integration, local diagnostics, and an Inno Setup packaging flow for a framework-dependent multi-architecture Windows payload.
+
 ## Verified Feature Set
 
 The current repository evidence shows these operator areas in the shipped shell and worker:
@@ -20,7 +22,7 @@ The current repository evidence shows these operator areas in the shipped shell 
 Minimum verified setup path:
 
 1. Install Windows 10 or Windows 11.
-2. Install PowerShell 7 and the .NET SDK `10.0.202` for repository builds, or the .NET Desktop Runtime 10 for running the framework-dependent app payload.
+2. Install PowerShell 7 and the .NET SDK `10.0.202` for repository builds.
 3. Restore and validate the repository from the root:
 
 ```powershell
@@ -34,9 +36,9 @@ For packaged app installation, setup, runtime configuration, and operator prereq
 
 ## Current Status
 
-- Local verification completed for the Windows toolchain check, locked restore, Debug compile, and automated test suite.
-- The automated test suite passed with 690 tests in this repository context.
-- Packaging, signed release, tenant-backed validation, and real upgrade or 32-bit install validation remain separate release checks and are not implied by the local build/test result.
+- Local verification completed in this repository context for the Windows toolchain check, locked restore, Debug compile, Release packaging, smoke validation, package reproducibility, disposable signing-flow validation, and the automated test suite.
+- The automated test suite passed with 708 tests in this repository context.
+- Signed release publication, tenant-backed validation, real 32-bit install validation, and real upgrade validation from a legacy ExchangeAdmin-branded install remain separate checks.
 - Concrete remaining release-validation gaps are tracked in [PROJECT_STATUS.json](PROJECT_STATUS.json).
 
 ## Technical Documentation

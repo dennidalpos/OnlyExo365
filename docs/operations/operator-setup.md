@@ -23,7 +23,8 @@ The `Tools` page verifies the operator prerequisites implemented by the current 
 Use one of the repository-produced artifacts:
 
 - `artifacts/packages/OnlyExo365.Setup.exe`
-- `artifacts/publish/` with `ExchangeAdmin.Presentation.exe`
+- `artifacts/publish/win-x64/ExchangeAdmin.Presentation.exe` on 64-bit Windows
+- `artifacts/publish/win-x86/ExchangeAdmin.Presentation.exe` on 32-bit Windows
 
 The setup EXE is authored as a per-machine Inno Setup installer:
 
@@ -33,7 +34,7 @@ The setup EXE is authored as a per-machine Inno Setup installer:
 - registers uninstall information
 - removes the installed app directory, logs, IPC secrets, and default export directory during uninstall
 
-For direct publish-folder evaluation, launch `ExchangeAdmin.Presentation.exe` from `artifacts/publish/`.
+For direct publish-folder evaluation, launch `ExchangeAdmin.Presentation.exe` from the runtime-specific publish directory that matches the target host architecture.
 
 ## First Run
 

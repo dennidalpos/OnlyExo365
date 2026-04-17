@@ -111,7 +111,8 @@
                         <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
                             <CheckBox Content="{loc:Loc Key=Tools.WorkerConsoleToggle}"
                                       IsChecked="{Binding IsWorkerConsoleVisible, Mode=OneWay}"
-                                      Click="WorkerConsoleToggle_Click"
+                                      Checked="WorkerConsoleToggle_Changed"
+                                      Unchecked="WorkerConsoleToggle_Changed"
                                       IsEnabled="{Binding CanToggleWorkerConsole}"/>
                             <TextBlock Margin="0,4,0,0"
                                        Text="{Binding WorkerConsoleVisibilityDisplay}"

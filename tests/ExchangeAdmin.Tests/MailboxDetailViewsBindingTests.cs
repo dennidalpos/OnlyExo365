@@ -113,7 +113,8 @@ public sealed class MailboxDetailViewsBindingTests
         Assert.Contains("InstallExchangeModuleCommand", content, StringComparison.Ordinal);
         Assert.Contains("InstallGraphModuleCommand", content, StringComparison.Ordinal);
         Assert.Contains("{loc:Loc Key=Tools.WorkerConsoleToggle}", content, StringComparison.Ordinal);
-        Assert.Contains("WorkerConsoleToggle_Click", content, StringComparison.Ordinal);
+        Assert.Contains("Checked=\"WorkerConsoleToggle_Changed\"", content, StringComparison.Ordinal);
+        Assert.Contains("Unchecked=\"WorkerConsoleToggle_Changed\"", content, StringComparison.Ordinal);
         Assert.Contains("IsWorkerConsoleVisible", content, StringComparison.Ordinal);
         Assert.DoesNotContain("CommandParameter=\"{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}\"", content, StringComparison.Ordinal);
         Assert.Contains("{loc:Loc Key=Tools.ExchangeOnlineConnectionsAreDisabledByPolicyEXCHANGEADMINDISABLE}", content, StringComparison.Ordinal);

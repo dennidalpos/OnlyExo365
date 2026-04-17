@@ -71,8 +71,9 @@
                 <ColumnDefinition Width="1.5*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" IsEnabled="{Binding Mailboxes.IsLoading, Converter={StaticResource InverseBool}}">
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -100,7 +101,18 @@
                     </StackPanel>
                 </Grid>
 
-                <Grid Grid.Row="1" Margin="0,0,0,12">
+                <Border Grid.Row="1"
+                        Style="{StaticResource InsetPanelBorderStyle}"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding IsExchangeConnected, Converter={StaticResource InverseBoolToVisibility}}">
+                    <TextBlock Text="{loc:Loc Key=Mailbox.List.InventoryDisconnectedMessage}"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               TextWrapping="Wrap"/>
+                </Border>
+
+                <Grid Grid.Row="2"
+                      Margin="0,0,0,12"
+                      IsEnabled="{Binding IsExchangeConnected}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -111,6 +123,8 @@
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                 <Setter Property="Tag" Value="{loc:Loc Key=Mailbox.List.SearchPlaceholder}"/>
+                                <Setter Property="AutomationProperties.Name" Value="{loc:Loc Key=Mailbox.List.SearchLabel}"/>
+                                <Setter Property="ToolTip" Value="{loc:Loc Key=Mailbox.List.SearchLabel}"/>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
@@ -125,7 +139,10 @@
                     </ComboBox>
                 </Grid>
 
-                <controls:SectionPanel Grid.Row="2" Header="{Binding Mailboxes.CreateMailboxSectionTitle}" Margin="0,0,0,12">
+                <controls:SectionPanel Grid.Row="3"
+                                       Header="{Binding Mailboxes.CreateMailboxSectionTitle}"
+                                       Margin="0,0,0,12"
+                                       IsEnabled="{Binding IsExchangeConnected}">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -140,25 +157,28 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Mailbox.List.CreateFormDisplayName}" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Mailbox.List.CreateFormAlias}" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Mailbox.List.CreateFormEmailLocalPart}" Margin="0,0,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Mailbox.List.CreateFormDisplayName}" Margin="0,0,8,6" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Mailbox.List.CreateFormAlias}" Margin="0,0,8,6" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Mailbox.List.CreateFormEmailLocalPart}" Margin="0,0,8,6" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"/>
 
-                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Mailboxes.NewMailboxDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Mailboxes.NewMailboxDisplayName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"
+                                 AutomationProperties.Name="{loc:Loc Key=Mailbox.List.CreateFormDisplayName}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Tag" Value="e.g. Milan Helpdesk"/>
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Mailboxes.NewMailboxAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Mailboxes.NewMailboxAlias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"
+                                 AutomationProperties.Name="{loc:Loc Key=Mailbox.List.CreateFormAlias}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Tag" Value="e.g. helpdesk.milan"/>
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
-                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Mailboxes.NewMailboxLocalPart, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0">
+                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Mailboxes.NewMailboxLocalPart, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"
+                                 AutomationProperties.Name="{loc:Loc Key=Mailbox.List.CreateFormEmailLocalPart}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Tag" Value="e.g. helpdesk.milan"/>
@@ -167,27 +187,30 @@
                         </TextBox>
                         <Button Grid.Row="1" Grid.Column="3" Content="{loc:Loc Key=Btn.Create}" Command="{Binding Mailboxes.CreateMailboxCommand}" Style="{StaticResource PrimaryButton}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Mailbox.List.CreateFormEmailDomain}" Margin="0,8,8,6" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Mailbox.List.CreateFormEmailDomain}" Margin="0,8,8,6" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"/>
                         <ComboBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                   ItemsSource="{Binding Mailboxes.AvailableMailDomains}"
                                   SelectedItem="{Binding Mailboxes.SelectedMailboxDomain}"
-                                  Margin="0,0,8,0"/>
+                                  Margin="0,0,8,0"
+                                  AutomationProperties.Name="{loc:Loc Key=Mailbox.List.CreateFormEmailDomain}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{loc:Loc Key=Mailbox.List.CreateFormPassword}" Margin="0,8,8,6" Foreground="{StaticResource PrimaryTextBrush}"
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{loc:Loc Key=Mailbox.List.CreateFormPassword}" Margin="0,8,8,6" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
                                    Visibility="{Binding Mailboxes.IsUserMailboxCreation, Converter={StaticResource BoolToVisibility}}"/>
                         <PasswordBox Grid.Row="3" Grid.Column="2"
                                      Margin="0,0,8,0"
+                                     AutomationProperties.Name="{loc:Loc Key=Mailbox.List.CreateFormPassword}"
                                      ToolTip="{loc:Loc Key=Mailbox.List.CreateFormPasswordTooltip}"
                                      PasswordChanged="NewMailboxPasswordBox_OnPasswordChanged"
                                      helpers:PasswordBoxClearHelper.ClearTrigger="{Binding Mailboxes.NewMailboxPasswordClearTrigger}"
                                      Visibility="{Binding Mailboxes.IsUserMailboxCreation, Converter={StaticResource BoolToVisibility}}"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"
-                                   Text="{loc:Loc Key=Mailbox.List.WillCreateFormat}"/>
+                                   Text="{loc:Loc Key=Mailbox.List.WillCreateFormat}" TextWrapping="Wrap"/>
                     </Grid>
                 </controls:SectionPanel>
 
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="4"
+                      IsEnabled="{Binding IsExchangeConnected}">
                     <DataGrid ItemsSource="{Binding Mailboxes.Mailboxes}"
                               SelectedItem="{Binding Mailboxes.SelectedMailbox}"
                               AutoGenerateColumns="False"
@@ -250,7 +273,7 @@
                     </Border>
                 </Grid>
 
-                <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                     <Button Content="{loc:Loc Key=Btn.LoadMore}" Command="{Binding Mailboxes.LoadMoreCommand}"
                             Style="{StaticResource PrimaryButton}"
                             Visibility="{Binding Mailboxes.HasMore, Converter={StaticResource BoolToVisibility}}"/>
@@ -262,8 +285,20 @@
                           ResizeDirection="Columns"
                           ResizeBehavior="PreviousAndNext"/>
 
-            <views:MailboxDetailsView Grid.Column="2" DataContext="{Binding MailboxDetails}"
-                                       Visibility="{Binding HasDetails, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibility}}"/>
+            <Grid Grid.Column="2">
+                <Border Style="{StaticResource InsetPanelBorderStyle}"
+                        Visibility="{Binding MailboxDetails.HasDetails, Converter={StaticResource InverseBoolToVisibility}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="320">
+                        <TextBlock Text="{loc:Loc Key=Mailbox.List.DetailsEmptyState}"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <views:MailboxDetailsView DataContext="{Binding MailboxDetails}"
+                                          Visibility="{Binding MailboxDetails.HasDetails, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibility}}"/>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1"

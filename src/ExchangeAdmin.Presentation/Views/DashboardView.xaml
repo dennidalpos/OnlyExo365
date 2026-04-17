@@ -46,7 +46,24 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="2">
+        <Border Grid.Row="2"
+                Grid.RowSpan="4"
+                Style="{StaticResource InsetPanelBorderStyle}"
+                Visibility="{Binding IsExchangeConnected, Converter={StaticResource InverseBoolToVisibility}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
+                <TextBlock Text="{loc:Loc Key=Dashboard.DisconnectedTitle}"
+                           Style="{StaticResource SectionHeadingTextStyle}"
+                           TextAlignment="Center"/>
+                <TextBlock Text="{loc:Loc Key=Dashboard.DisconnectedMessage}"
+                           Margin="0,8,0,0"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2"
+              Visibility="{Binding IsExchangeConnected, Converter={StaticResource BoolToVisibility}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -241,7 +258,8 @@
             </DataGrid>
         </StackPanel>
 
-        <Grid Grid.Row="5" Margin="0,16,0,0">
+        <Grid Grid.Row="5" Margin="0,16,0,0"
+              Visibility="{Binding IsExchangeConnected, Converter={StaticResource BoolToVisibility}}">
             <Border Style="{StaticResource ErrorBannerBorderStyle}" Margin="0"
                     HorizontalAlignment="Center" VerticalAlignment="Top"
                     Visibility="{Binding Dashboard.HasError, Converter={StaticResource BoolToVisibility}}">

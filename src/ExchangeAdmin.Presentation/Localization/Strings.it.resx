@@ -433,6 +433,12 @@ Prova a riavviare il worker o l'applicazione.</value>
   <data name="Dashboard.Warnings" xml:space="preserve">
     <value>Avvisi</value>
   </data>
+  <data name="Dashboard.DisconnectedTitle" xml:space="preserve">
+    <value>Connettiti a Exchange per caricare il riepilogo del tenant</value>
+  </data>
+  <data name="Dashboard.DisconnectedMessage" xml:space="preserve">
+    <value>Il dashboard resta vuoto finché non è attiva una sessione Exchange Online. Usa Connetti a Exchange nella barra superiore, poi aggiorna questa pagina.</value>
+  </data>
   <data name="Dashboard.MailboxesGroup" xml:space="preserve">
     <value>Cassette postali</value>
   </data>
@@ -518,6 +524,9 @@ Prova a riavviare il worker o l'applicazione.</value>
   <data name="Mailbox.List.SearchPlaceholder" xml:space="preserve">
     <value>Cerca cassette postali...</value>
   </data>
+  <data name="Mailbox.List.SearchLabel" xml:space="preserve">
+    <value>Cerca cassette postali</value>
+  </data>
   <data name="Mailbox.List.FilterUserMailboxes" xml:space="preserve">
     <value>Cassette postali utente</value>
   </data>
@@ -564,7 +573,7 @@ Prova a riavviare il worker o l'applicazione.</value>
     <value>Dominio email (dai domini accettati)</value>
   </data>
   <data name="Mailbox.List.CreateFormPassword" xml:space="preserve">
-    <value>Password (solo cassette postali utente)</value>
+    <value>Password</value>
   </data>
   <data name="Mailbox.List.CreateFormPasswordTooltip" xml:space="preserve">
     <value>Inserisci la password iniziale</value>
@@ -595,6 +604,12 @@ Prova a riavviare il worker o l'applicazione.</value>
   </data>
   <data name="Mailbox.List.LicensingPanelEmptyState" xml:space="preserve">
     <value>Seleziona un utente membro dall'elenco a sinistra per usare il pannello licenze.</value>
+  </data>
+  <data name="Mailbox.List.InventoryDisconnectedMessage" xml:space="preserve">
+    <value>Connettiti a Exchange prima di cercare, creare o caricare l'inventario delle cassette postali.</value>
+  </data>
+  <data name="Mailbox.List.DetailsEmptyState" xml:space="preserve">
+    <value>Seleziona una cassetta postale dall'inventario per vedere dettagli e azioni disponibili.</value>
   </data>
   <data name="Mailbox.List.MailNotSet" xml:space="preserve">
     <value>Posta non impostata</value>
@@ -2275,7 +2290,7 @@ Prova a riavviare il worker o l'applicazione.</value>
     <value>Salva</value>
   </data>
   <data name="Tools.ExchangeOnlineConnectionsAreDisabledByPolicyEXCHANGEADMINDISABLE" xml:space="preserve">
-    <value>Exchange Online connections are disabled by policy (EXCHANGEADMIN_DISABLE_EXO=1).</value>
+    <value>Le connessioni a Exchange Online sono disabilitate da criterio (EXCHANGEADMIN_DISABLE_EXO=1).</value>
   </data>
   <data name="Tools.ConnectionInformation" xml:space="preserve">
     <value>Informazioni connessione</value>
@@ -2557,7 +2572,7 @@ Prova a riavviare il worker o l'applicazione.</value>
     <value>Identita: </value>
   </data>
   <data name="Mailbox.List.WillCreateFormat" xml:space="preserve">
-    <value>Creera la cassetta postale</value>
+    <value>Crea la cassetta postale</value>
   </data>
   <data name="MailboxRestore.ProgressHeading" xml:space="preserve">
     <value>Avanzamento</value>

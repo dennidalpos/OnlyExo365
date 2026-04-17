@@ -433,6 +433,12 @@ Try restarting the worker or the application.</value>
   <data name="Dashboard.Warnings" xml:space="preserve">
     <value>Warnings</value>
   </data>
+  <data name="Dashboard.DisconnectedTitle" xml:space="preserve">
+    <value>Connect to Exchange to load the tenant summary</value>
+  </data>
+  <data name="Dashboard.DisconnectedMessage" xml:space="preserve">
+    <value>The dashboard stays empty until an Exchange Online session is active. Use Connect Exchange in the header, then refresh this page.</value>
+  </data>
   <data name="Dashboard.MailboxesGroup" xml:space="preserve">
     <value>Mailboxes</value>
   </data>
@@ -518,6 +524,9 @@ Try restarting the worker or the application.</value>
   <data name="Mailbox.List.SearchPlaceholder" xml:space="preserve">
     <value>Search mailboxes...</value>
   </data>
+  <data name="Mailbox.List.SearchLabel" xml:space="preserve">
+    <value>Search mailboxes</value>
+  </data>
   <data name="Mailbox.List.FilterUserMailboxes" xml:space="preserve">
     <value>User Mailboxes</value>
   </data>
@@ -564,7 +573,7 @@ Try restarting the worker or the application.</value>
     <value>Email domain (from accepted domains)</value>
   </data>
   <data name="Mailbox.List.CreateFormPassword" xml:space="preserve">
-    <value>Password (user mailboxes only)</value>
+    <value>Password</value>
   </data>
   <data name="Mailbox.List.CreateFormPasswordTooltip" xml:space="preserve">
     <value>Enter the initial password</value>
@@ -595,6 +604,12 @@ Try restarting the worker or the application.</value>
   </data>
   <data name="Mailbox.List.LicensingPanelEmptyState" xml:space="preserve">
     <value>Select a member user from the list on the left to use the licensing panel.</value>
+  </data>
+  <data name="Mailbox.List.InventoryDisconnectedMessage" xml:space="preserve">
+    <value>Connect to Exchange before searching, creating, or loading mailbox inventory.</value>
+  </data>
+  <data name="Mailbox.List.DetailsEmptyState" xml:space="preserve">
+    <value>Select a mailbox from the inventory to view details and actions.</value>
   </data>
   <data name="Mailbox.List.MailNotSet" xml:space="preserve">
     <value>Mail not set</value>
@@ -2557,7 +2572,7 @@ Try restarting the worker or the application.</value>
     <value>Identity: </value>
   </data>
   <data name="Mailbox.List.WillCreateFormat" xml:space="preserve">
-    <value>Will create mailbox</value>
+    <value>Creates mailbox</value>
   </data>
   <data name="MailboxRestore.ProgressHeading" xml:space="preserve">
     <value>Progress</value>

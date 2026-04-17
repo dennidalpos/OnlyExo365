@@ -22,6 +22,16 @@ public sealed class MailboxListViewBindingTests
         Assert.Contains("DataContext=\"{Binding Mailboxes.Provisioning}\"", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void MailboxListView_ExposesDisconnectedHelperSearchAccessibilityAndDetailsEmptyState()
+    {
+        var content = File.ReadAllText(GetViewPath());
+
+        Assert.Contains("{loc:Loc Key=Mailbox.List.InventoryDisconnectedMessage}", content, StringComparison.Ordinal);
+        Assert.Contains("Property=\"AutomationProperties.Name\" Value=\"{loc:Loc Key=Mailbox.List.SearchLabel}\"", content, StringComparison.Ordinal);
+        Assert.Contains("{loc:Loc Key=Mailbox.List.DetailsEmptyState}", content, StringComparison.Ordinal);
+    }
+
     private static string GetViewPath()
     {
         return TestPathHelper.GetRepositoryPath("src", "ExchangeAdmin.Presentation", "Views", "MailboxListView.xaml");

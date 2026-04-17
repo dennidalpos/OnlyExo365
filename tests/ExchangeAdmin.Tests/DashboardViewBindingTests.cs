@@ -41,6 +41,24 @@ public sealed class DashboardViewBindingTests
                 candidate.Attribute("Command")?.Value?.Contains("NavigateTo", StringComparison.Ordinal) == true);
     }
 
+    [Fact]
+    public void DashboardView_ExposesDisconnectedEmptyState()
+    {
+        var document = LoadView("DashboardView.xaml");
+
+        Assert.Contains(
+            document.Descendants(),
+            candidate =>
+                candidate.Name.LocalName == "Border" &&
+                string.Equals((string?)candidate.Attribute("Visibility"), "{Binding IsExchangeConnected, Converter={StaticResource InverseBoolToVisibility}}", StringComparison.Ordinal));
+
+        Assert.Contains(
+            document.Descendants(),
+            candidate =>
+                candidate.Name.LocalName == "TextBlock" &&
+                string.Equals((string?)candidate.Attribute("Text"), "{loc:Loc Key=Dashboard.DisconnectedTitle}", StringComparison.Ordinal));
+    }
+
     private static XDocument LoadView(string fileName)
         => XDocument.Load(TestPathHelper.GetRepositoryPath("src", "ExchangeAdmin.Presentation", "Views", fileName));
 }

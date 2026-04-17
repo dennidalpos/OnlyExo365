@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.ComplianceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -48,7 +49,7 @@
                     </StackPanel>
                 </Border>
 
-                <GroupBox Header="{loc:Loc Key=Compliance.AuditLogGroup}">
+                <controls:SectionPanel Header="{loc:Loc Key=Compliance.AuditLogGroup}">
                     <StackPanel>
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
@@ -179,9 +180,9 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Compliance.SearchGroup}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Compliance.SearchGroup}" Margin="0,8,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.2*"/>
@@ -293,9 +294,9 @@
                                     Margin="0,8,0,0"/>
                         </StackPanel>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Compliance.CasesActionsGroup}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Compliance.CasesActionsGroup}" Margin="0,8,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="0.7*"/>
@@ -338,7 +339,7 @@
                             </DataGrid>
                         </StackPanel>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
             </StackPanel>
         </ScrollViewer>
 

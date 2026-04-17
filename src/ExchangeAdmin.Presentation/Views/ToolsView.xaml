@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.ToolsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -20,7 +21,7 @@
                 </Border>
 
                 <!-- Connection Information -->
-                <GroupBox Header="{loc:Loc Key=Tools.ConnectionInformation}">
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.ConnectionInformation}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -65,10 +66,10 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <!-- Worker Status -->
-                <GroupBox Header="{loc:Loc Key=Tools.WorkerStatus}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.WorkerStatus}" Margin="0,8,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -119,10 +120,10 @@
                                        Foreground="{StaticResource SecondaryTextBrush}"/>
                         </StackPanel>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <!-- License Catalog -->
-                <GroupBox Header="{loc:Loc Key=Tools.LicenseCatalog}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.LicenseCatalog}" Margin="0,8,0,0">
                     <StackPanel>
                         <!-- Indeterminate progress during update -->
                         <ProgressBar IsIndeterminate="True" Height="3"
@@ -210,9 +211,9 @@
                                       HorizontalAlignment="Left" MinWidth="110" Margin="0,4,0,0"/>
                         </Grid>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Tools.LeastPrivilegeMatrix}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.LeastPrivilegeMatrix}" Margin="0,8,0,0">
                     <StackPanel>
                         <TextBlock Text="{Binding Tools.LeastPrivilegeSummary}"
                                    FontWeight="SemiBold"
@@ -311,10 +312,10 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <!-- Module Management -->
-                <GroupBox Header="{loc:Loc Key=Tools.ModuleManagement}" Margin="0,8,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.ModuleManagement}" Margin="0,8,0,0">
                     <StackPanel>
                         <!-- Progress bar for checking/installing -->
                         <StackPanel Margin="0,0,0,8"
@@ -438,7 +439,7 @@
                                     Style="{StaticResource ActionGroupButton}"/>
                         </Grid>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

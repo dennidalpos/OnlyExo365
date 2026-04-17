@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.MailFlowView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -30,7 +31,7 @@
 
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <GroupBox Header="{loc:Loc Key=MailFlow.TransportRules}" Height="250" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.TransportRules}" Height="250" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewRuleCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -50,9 +51,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.Connectors}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.Connectors}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewConnectorCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -70,9 +71,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.AcceptedDomains}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.AcceptedDomains}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewDomainCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -90,9 +91,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.RemoteDomains}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.RemoteDomains}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewRemoteDomainCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -111,9 +112,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.OrganizationRelationships}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.OrganizationRelationships}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewOrganizationRelationshipCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -132,9 +133,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.AddressLists}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.AddressLists}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewAddressListCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -157,9 +158,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.AddressBookPolicies}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.AddressBookPolicies}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewAddressBookPolicyCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -177,9 +178,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.OfflineAddressBooks}" Height="210" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.OfflineAddressBooks}" Height="210" Margin="0,0,0,8">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewOfflineAddressBookCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -202,9 +203,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.SharingPolicies}" Height="210">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.SharingPolicies}" Height="210">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewSharingPolicyCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
@@ -222,13 +223,13 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
                 </StackPanel>
             </ScrollViewer>
 
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditTransportRule}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditTransportRule}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.RuleIdentity}" IsReadOnly="True"/>
@@ -277,9 +278,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveRule}" Command="{Binding MailFlow.SaveRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsRuleInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.TestTransportRules}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.TestTransportRules}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.Sender}"/>
                             <TextBox Text="{Binding MailFlow.TestSender, UpdateSourceTrigger=PropertyChanged}"/>
@@ -294,9 +295,9 @@
                             <TextBlock Text="{loc:Loc Key=MailFlow.Result}" Margin="0,8,0,0" FontWeight="SemiBold"/>
                             <TextBlock Text="{Binding MailFlow.TestResult}" TextWrapping="Wrap"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditConnector}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditConnector}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.ConnectorIdentityDisplay}" IsReadOnly="True"/>
@@ -316,9 +317,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveConnector}" Command="{Binding MailFlow.SaveConnectorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsConnectorInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditAcceptedDomain}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAcceptedDomain}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.DomainIdentity}" IsReadOnly="True"/>
@@ -334,9 +335,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveDomain}" Command="{Binding MailFlow.SaveDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsDomainInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditRemoteDomain}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditRemoteDomain}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.RemoteDomainIdentity}" IsReadOnly="True"/>
@@ -359,9 +360,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveRemoteDomain}" Command="{Binding MailFlow.SaveRemoteDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsRemoteDomainInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditOrganizationRelationship}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditOrganizationRelationship}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.OrganizationRelationshipIdentity}" IsReadOnly="True"/>
@@ -389,9 +390,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveOrganizationRelationship}" Command="{Binding MailFlow.SaveOrganizationRelationshipCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsOrganizationRelationshipInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditAddressList}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAddressList}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{Binding MailFlow.AddressListSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
@@ -422,9 +423,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveAddressList}" Command="{Binding MailFlow.SaveAddressListCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsAddressListInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditAddressBookPolicy}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAddressBookPolicy}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.AddressBookPolicyIdentity}" IsReadOnly="True"/>
@@ -443,9 +444,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveAddressBookPolicy}" Command="{Binding MailFlow.SaveAddressBookPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsAddressBookPolicyInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditOfflineAddressBook}" Margin="0,0,0,8">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditOfflineAddressBook}" Margin="0,0,0,8">
                         <StackPanel Margin="8">
                             <TextBlock Text="{Binding MailFlow.OfflineAddressBookSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
@@ -465,9 +466,9 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveOfflineAddressBook}" Command="{Binding MailFlow.SaveOfflineAddressBookCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsOfflineAddressBookInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
 
-                    <GroupBox Header="{loc:Loc Key=MailFlow.CreateEditSharingPolicy}">
+                    <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditSharingPolicy}">
                         <StackPanel Margin="8">
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.SharingPolicyIdentity}" IsReadOnly="True"/>
@@ -483,7 +484,7 @@
                             <Button Content="{loc:Loc Key=MailFlow.SaveSharingPolicy}" Command="{Binding MailFlow.SaveSharingPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsSharingPolicyInputValid}"/>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:SectionPanel>
                 </StackPanel>
             </ScrollViewer>
 

@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MailboxAccessReportViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MailboxAccessReport;
     private readonly IMailboxesWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
     private bool _isLoading;
@@ -154,7 +155,8 @@ public class MailboxAccessReportViewModel : ViewModelBase
     {
         if (!_shellViewModel.IsExchangeConnected)
         {
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -163,6 +165,7 @@ public class MailboxAccessReportViewModel : ViewModelBase
         WarningsText = null;
         DiagnosticCorrelationId = null;
         Rows.Clear();
+        _shellViewModel.ClearPageAlert(AlertPage);
         ProgressPercent = 0;
         ProgressStatus = "Starting mailbox access scan...";
         ProgressCurrentItem = null;
@@ -227,13 +230,16 @@ public class MailboxAccessReportViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                ErrorMessage = result.Error?.Message ?? "Unable to load the mailbox access report.";
-                _shellViewModel.AddLog(LogLevel.Error, ErrorMessage, correlationId: DiagnosticCorrelationId);
+                var errorMessage = result.Error?.Message ?? "Unable to load the mailbox access report.";
+                ErrorMessage = null;
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                _shellViewModel.AddLog(LogLevel.Error, errorMessage, correlationId: DiagnosticCorrelationId);
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = null;
+            _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox access report error: {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
         finally

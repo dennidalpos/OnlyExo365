@@ -261,10 +261,13 @@ public partial class MigrationViewModel
 
     private async Task RefreshEndpointsAsync(CancellationToken cancellationToken)
     {
+        var hasWorkspaceData = HasWorkspaceData;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -280,11 +283,20 @@ public partial class MigrationViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load migration endpoint";
+                var errorMessage = result.Error?.Message ?? "Unable to load migration endpoint";
+                if (hasWorkspaceData)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
             Endpoints.ReplaceAll(result.Value.Endpoints);
+            _shellViewModel.ClearPageAlert(AlertPage);
 
             if (!string.IsNullOrWhiteSpace(previousIdentity))
             {
@@ -303,7 +315,14 @@ public partial class MigrationViewModel
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasWorkspaceData)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {

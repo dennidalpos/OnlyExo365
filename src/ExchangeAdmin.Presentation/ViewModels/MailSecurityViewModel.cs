@@ -6,11 +6,13 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Domain.Results;
 using ExchangeAdmin.Presentation.Helpers;
+using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed class MailSecurityViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MailSecurity;
     private readonly IMailSecurityWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
 
@@ -487,6 +489,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
 
     private async Task RefreshWorkspaceAsync(CancellationToken cancellationToken)
     {
+        var hasWorkspaceData = HasWorkspaceData;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
@@ -496,6 +500,7 @@ public sealed class MailSecurityViewModel : ViewModelBase
         IsLoadingWorkspace = true;
         ErrorMessage = null;
         WarningsText = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
 
         var selectedDkimIdentity = SelectedDkimConfig?.Identity;
         var selectedAntiSpamIdentity = SelectedAntiSpamPolicy?.Identity;
@@ -509,7 +514,15 @@ public sealed class MailSecurityViewModel : ViewModelBase
             var result = await _workerService.GetMailSecurityBaselineAsync(cancellationToken: cancellationToken);
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load the Mail Security workspace.";
+                var errorMessage = result.Error?.Message ?? "Unable to load the Mail Security workspace.";
+                if (hasWorkspaceData)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -530,10 +543,18 @@ public sealed class MailSecurityViewModel : ViewModelBase
             SelectedMalwarePolicy = MalwarePolicies.FirstOrDefault(item => string.Equals(item.Identity, selectedMalwareIdentity, StringComparison.OrdinalIgnoreCase)) ?? MalwarePolicies.FirstOrDefault();
             SelectedQuarantinePolicy = QuarantinePolicies.FirstOrDefault(item => string.Equals(item.Identity, selectedQuarantineIdentity, StringComparison.OrdinalIgnoreCase)) ?? QuarantinePolicies.FirstOrDefault();
             SelectedOutboundSpamPolicy = OutboundSpamPolicies.FirstOrDefault(item => string.Equals(item.Identity, selectedOutboundIdentity, StringComparison.OrdinalIgnoreCase)) ?? OutboundSpamPolicies.FirstOrDefault();
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasWorkspaceData)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {
@@ -767,7 +788,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
         SelectedQuarantinePolicy = null;
         SelectedOutboundSpamPolicy = null;
         WarningsText = null;
-        ErrorMessage = "Not connected to Exchange Online";
+        ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
     }
 
     private void RaiseCanExecuteChanged()
@@ -787,4 +809,12 @@ public sealed class MailSecurityViewModel : ViewModelBase
 
     private static string? TrimToNull(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private bool HasWorkspaceData =>
+        DkimConfigs.Count > 0 ||
+        AntiSpamPolicies.Count > 0 ||
+        AntiPhishPolicies.Count > 0 ||
+        MalwarePolicies.Count > 0 ||
+        QuarantinePolicies.Count > 0 ||
+        OutboundSpamPolicies.Count > 0;
 }

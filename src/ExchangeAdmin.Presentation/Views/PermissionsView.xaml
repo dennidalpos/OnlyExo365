@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.PermissionsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.2*"/>
@@ -101,7 +102,7 @@
 
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="{loc:Loc Key=Permissions.RoleGroupDetailsHeading}">
+                <controls:SectionPanel Header="{loc:Loc Key=Permissions.RoleGroupDetailsHeading}">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -156,9 +157,9 @@
                             <TextBlock Text="{loc:Loc Key=Permissions.LoadingDetails}" HorizontalAlignment="Center"/>
                         </Border>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Permissions.MembershipHeading}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Permissions.MembershipHeading}" Margin="0,12,0,0">
                     <Grid Margin="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -191,9 +192,9 @@
                                 Margin="0,8,0,0"
                                 HorizontalAlignment="Left"/>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Permissions.NewGroupHeading}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Permissions.NewGroupHeading}" Margin="0,12,0,0">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -241,7 +242,7 @@
                                     Style="{StaticResource InlineActionButton}"/>
                         </StackPanel>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

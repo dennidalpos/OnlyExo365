@@ -7,11 +7,13 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Paging;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
+using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed class DistributionListListViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.DistributionLists;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IDistributionListsWorkerService _workerService;
@@ -192,7 +194,8 @@ public sealed class DistributionListListViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             DistributionLists.Clear();
-            _setErrorMessage("Not connected to Exchange Online");
+            _setErrorMessage(null);
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -261,6 +264,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading groups...", "groups");
         _setErrorMessage(null);
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(DistributionLists.Count);
         _currentSkip = 0;
 
@@ -278,13 +282,15 @@ public sealed class DistributionListListViewModel : ViewModelBase
                 HasMore = result.Value.HasMore;
                 _currentSkip = DistributionLists.Count;
                 OnPropertyChanged(nameof(StatusText));
+                _shellViewModel.ClearPageAlert(AlertPage);
                 return;
             }
 
             if (!result.WasCancelled)
             {
                 var errorMessage = result.Error?.Message ?? "Unable to load distribution lists.";
-                _setErrorMessage(errorMessage);
+                _setErrorMessage(null);
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, $"Group load failed: {errorMessage}");
             }
         }
@@ -293,7 +299,8 @@ public sealed class DistributionListListViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _setErrorMessage(ex.Message);
+            _setErrorMessage(null);
+            _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Group load error: {ex.Message}");
         }
         finally
@@ -315,6 +322,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading groups...", "groups");
         _setErrorMessage(null);
+        _shellViewModel.ClearPageAlert(AlertPage);
 
         try
         {
@@ -334,12 +342,17 @@ public sealed class DistributionListListViewModel : ViewModelBase
                 HasMore = result.Value.HasMore;
                 _currentSkip = DistributionLists.Count;
                 OnPropertyChanged(nameof(StatusText));
+                _shellViewModel.ClearPageAlert(AlertPage);
                 return;
             }
 
             if (!result.WasCancelled)
             {
-                _setErrorMessage(result.Error?.Message ?? "Unable to load more distribution lists.");
+                _setErrorMessage(null);
+                _shellViewModel.ShowPageLoadFailedAlert(
+                    AlertPage,
+                    result.Error?.Message ?? "Unable to load more distribution lists.",
+                    AppAlertSeverity.Warning);
             }
         }
         catch (OperationCanceledException)
@@ -347,7 +360,8 @@ public sealed class DistributionListListViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _setErrorMessage(ex.Message);
+            _setErrorMessage(null);
+            _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message, AppAlertSeverity.Warning);
         }
         finally
         {

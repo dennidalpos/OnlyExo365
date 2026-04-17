@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class ContactsViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Contacts;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
     private readonly DebounceHelper _searchDebounce = new();
@@ -324,7 +325,8 @@ public class ContactsViewModel : ViewModelBase
         {
             ClearMailUserPassword();
             Contacts.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -353,19 +355,23 @@ public class ContactsViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasExistingContacts = Contacts.Count > 0;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearMailUserPassword();
             Contacts.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
             TotalCount = 0;
             HasMore = false;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
         IsLoading = true;
         LoadProgress.Start("Loading contacts...", "contacts");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Contacts.Count);
         _currentSkip = 0;
 
@@ -384,7 +390,15 @@ public class ContactsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load contacts";
+                var errorMessage = result.Error?.Message ?? "Unable to load contacts";
+                if (hasExistingContacts)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -392,10 +406,18 @@ public class ContactsViewModel : ViewModelBase
             TotalCount = result.Value.TotalCount;
             HasMore = result.Value.HasMore;
             _currentSkip = Contacts.Count;
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasExistingContacts)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {
@@ -704,6 +726,7 @@ public class ContactsViewModel : ViewModelBase
         if (e.PropertyName == nameof(ShellViewModel.IsExchangeConnected) && !_shellViewModel.IsExchangeConnected)
         {
             ClearMailUserPassword();
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
     }
 

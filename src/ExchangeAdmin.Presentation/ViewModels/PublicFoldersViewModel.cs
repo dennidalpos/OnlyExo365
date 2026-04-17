@@ -11,6 +11,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class PublicFoldersViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.PublicFolders;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
     private readonly DebounceHelper _searchDebounce = new();
@@ -324,7 +325,8 @@ public class PublicFoldersViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             Folders.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -353,18 +355,21 @@ public class PublicFoldersViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasExistingFolders = Folders.Count > 0;
         if (!_shellViewModel.IsExchangeConnected)
         {
             Folders.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
             TotalCount = 0;
             HasMore = false;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
         IsLoading = true;
         LoadProgress.Start("Loading public folders...", "folders");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Folders.Count);
         _currentSkip = 0;
 
@@ -383,7 +388,12 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load public folders";
+                var errorMessage = result.Error?.Message ?? "Unable to load public folders";
+                ErrorMessage = hasExistingFolders ? errorMessage : null;
+                if (!hasExistingFolders)
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -391,10 +401,15 @@ public class PublicFoldersViewModel : ViewModelBase
             TotalCount = result.Value.TotalCount;
             HasMore = result.Value.HasMore;
             _currentSkip = Folders.Count;
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = hasExistingFolders ? ex.Message : null;
+            if (!hasExistingFolders)
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {

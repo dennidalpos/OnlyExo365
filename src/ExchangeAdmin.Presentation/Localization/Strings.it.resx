@@ -300,6 +300,18 @@ Confermare?</value>
   <data name="Msg.ConfigurationError" xml:space="preserve">
     <value>Errore di configurazione ExchangeAdmin</value>
   </data>
+  <data name="Alert.ConnectionRequiredTitle" xml:space="preserve">
+    <value>Connessione richiesta</value>
+  </data>
+  <data name="Alert.ConnectionRequiredMessage" xml:space="preserve">
+    <value>Non connesso a Exchange Online.</value>
+  </data>
+  <data name="Alert.LoadFailedTitle" xml:space="preserve">
+    <value>Caricamento non riuscito</value>
+  </data>
+  <data name="Alert.PageUnavailableMessageFormat" xml:space="preserve">
+    <value>La pagina {0} non è al momento disponibile.</value>
+  </data>
   <!-- Progress -->
   <data name="Progress.LoadedRemaining" xml:space="preserve">
     <value>Caricati: {0} | Rimanenti: {1}</value>

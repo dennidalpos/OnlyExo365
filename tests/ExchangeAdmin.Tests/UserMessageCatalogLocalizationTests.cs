@@ -132,6 +132,10 @@ public sealed class UserMessageCatalogLocalizationTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.UnsavedChangesMessage));
         Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.ConfirmOperationTitle));
         Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.ConfirmOperationPrompt));
+        Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.ConnectionRequiredAlertTitle));
+        Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.ConnectionRequiredAlertMessage));
+        Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.LoadFailedAlertTitle));
+        Assert.False(string.IsNullOrWhiteSpace(UserMessageCatalog.FormatPageUnavailableMessage("Dashboard")));
     }
 
     [Fact]
@@ -142,8 +146,11 @@ public sealed class UserMessageCatalogLocalizationTests : IDisposable
 
         LocalizationService.Instance.SetLocale("it");
         var italianTitle = UserMessageCatalog.UnsavedChangesTitle;
+        var italianAlertTitle = UserMessageCatalog.ConnectionRequiredAlertTitle;
 
         Assert.NotEqual(englishTitle, italianTitle);
+        Assert.NotEqual(UserMessageCatalog.LoadFailedAlertTitle, UserMessageCatalog.ConnectionRequiredAlertTitle);
+        Assert.False(string.IsNullOrWhiteSpace(italianAlertTitle));
     }
 
     [Fact]

@@ -11,6 +11,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class DeletedMailboxesViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.DeletedMailboxes;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IWorkerService _workerService;
@@ -142,7 +143,8 @@ public class DeletedMailboxesViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             await RunOnUiThreadAsync(() => Mailboxes.Clear());
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -177,14 +179,16 @@ public class DeletedMailboxesViewModel : ViewModelBase
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         _loadCts?.Cancel();
+        var hasExistingMailboxes = Mailboxes.Count > 0;
         if (!_shellViewModel.IsExchangeConnected)
         {
             IsLoading = false;
             await RunOnUiThreadAsync(() => Mailboxes.Clear());
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
             TotalCount = 0;
             HasMore = false;
             _currentSkip = 0;
+            _shellViewModel.ClearPageAlert(AlertPage);
             OnPropertyChanged(nameof(StatusText));
             return;
         }
@@ -194,6 +198,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading deleted mailboxes...", "mailbox");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Mailboxes.Count);
         _currentSkip = 0;
 
@@ -221,6 +226,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
                     TotalCount = result.Value.TotalCount;
                     HasMore = result.Value.HasMore;
                     _currentSkip = Mailboxes.Count;
+                    _shellViewModel.ClearPageAlert(AlertPage);
                     OnPropertyChanged(nameof(StatusText));
                 });
             }
@@ -229,7 +235,11 @@ public class DeletedMailboxesViewModel : ViewModelBase
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
                     : "Failed to load deleted mailboxes (no error details)";
-                ErrorMessage = errorDetails;
+                ErrorMessage = hasExistingMailboxes ? errorDetails : null;
+                if (!hasExistingMailboxes)
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorDetails);
+                }
                 _shellViewModel.AddLog(LogLevel.Error, $"Deleted mailbox load failed: {errorDetails}");
             }
         }
@@ -238,7 +248,12 @@ public class DeletedMailboxesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            var errorDetails = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            ErrorMessage = hasExistingMailboxes ? errorDetails : null;
+            if (!hasExistingMailboxes)
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorDetails);
+            }
             _shellViewModel.AddLog(LogLevel.Error, $"Deleted mailbox exception: {ex.GetType().Name} - {ex.Message}");
         }
         finally
@@ -256,7 +271,8 @@ public class DeletedMailboxesViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             IsLoading = false;
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 

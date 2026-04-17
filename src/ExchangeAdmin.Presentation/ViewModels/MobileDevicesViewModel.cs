@@ -12,6 +12,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public partial class MobileDevicesViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MobileDevices;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
     private readonly DebounceHelper _searchDebounce = new();
@@ -321,12 +322,13 @@ public partial class MobileDevicesViewModel : ViewModelBase
             CapabilityMessage = null;
             Devices.Clear();
             Policies.Clear();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
             TotalCount = 0;
             IsTotalCountExact = true;
             HasMore = false;
             IsLoadingSelection = false;
             ClearLoadingProgress();
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -488,6 +490,7 @@ public partial class MobileDevicesViewModel : ViewModelBase
             {
                 IsLoadingSelection = false;
                 ClearLoadingProgress();
+                _shellViewModel.ClearPageAlert(AlertPage);
             }
 
             RaiseCanExecuteChanged();
@@ -525,6 +528,8 @@ public partial class MobileDevicesViewModel : ViewModelBase
 
     private static int GetRefreshPageSize(int loadedCount)
         => Math.Max(PageSize, loadedCount);
+
+    private bool HasWorkspaceData => Devices.Count > 0;
 }
 
 

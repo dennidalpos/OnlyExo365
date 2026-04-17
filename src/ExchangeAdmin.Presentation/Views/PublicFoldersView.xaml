@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.PublicFoldersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.1*"/>
@@ -104,7 +105,7 @@
 
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="{loc:Loc Key=PublicFolders.PublicFolderDetails}">
+                <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.PublicFolderDetails}">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -158,9 +159,9 @@
                                    Text="{loc:Loc Key=PublicFolders.NoteSavingUpdatesTheNameParentPathMailEnabledStatusAndEmailPrope}"
                                    Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,0"/>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=PublicFolders.ClientPermissions}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.ClientPermissions}" Margin="0,12,0,0">
                     <StackPanel Margin="8">
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
@@ -231,7 +232,7 @@
                                  MinHeight="120"
                                  VerticalScrollBarVisibility="Auto"/>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                     <Button Content="{loc:Loc Key=PublicFolders.Save}" Command="{Binding PublicFolders.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>

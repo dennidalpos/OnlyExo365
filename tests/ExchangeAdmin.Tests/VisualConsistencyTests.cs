@@ -63,11 +63,12 @@ public sealed class VisualConsistencyTests
         Assert.NotNull(groupBoxStyle);
         Assert.Contains(groupBoxStyle!.Descendants(), candidate =>
             candidate.Name.LocalName == "ContentPresenter" &&
-            string.Equals((string?)candidate.Attribute("ContentSource"), "Header", StringComparison.Ordinal));
+            string.Equals((string?)candidate.Attribute("ContentSource"), "Header", StringComparison.Ordinal) &&
+            string.Equals((string?)candidate.Attribute("Margin"), "0,0,0,8", StringComparison.Ordinal));
         Assert.Contains(groupBoxStyle.Descendants(), candidate =>
             candidate.Name.LocalName == "Border" &&
-            string.Equals((string?)candidate.Attribute("BorderBrush"), "{TemplateBinding BorderBrush}", StringComparison.Ordinal) &&
-            string.Equals((string?)candidate.Attribute("CornerRadius"), "4", StringComparison.Ordinal));
+            string.Equals((string?)candidate.Attribute("Style"), "{StaticResource GroupBoxContentCardBorderStyle}", StringComparison.Ordinal) &&
+            string.Equals((string?)candidate.Attribute("BorderBrush"), "{TemplateBinding BorderBrush}", StringComparison.Ordinal));
     }
 
     [Fact]

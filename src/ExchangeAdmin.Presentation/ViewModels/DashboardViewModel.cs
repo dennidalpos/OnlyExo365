@@ -10,6 +10,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class DashboardViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Dashboard;
     private readonly IDashboardWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
@@ -208,7 +209,8 @@ public class DashboardViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             Stats = null;
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -219,6 +221,7 @@ public class DashboardViewModel : ViewModelBase
             {
                 Stats = cached;
                 ErrorMessage = null;
+                _shellViewModel.ClearPageAlert(AlertPage);
             });
             return;
         }
@@ -228,11 +231,14 @@ public class DashboardViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasExistingStats = Stats != null;
+
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         _diagnosticCorrelationId = null;
         LoadingProgress = 0;
         LoadingStatus = "Loading dashboard...";
@@ -272,6 +278,7 @@ public class DashboardViewModel : ViewModelBase
                 {
                     _diagnosticCorrelationId = result.Value.CorrelationId ?? result.CorrelationId;
                     Stats = result.Value;
+                    _shellViewModel.ClearPageAlert(AlertPage);
                 });
                 _cacheService.Set(CacheService.Keys.DashboardStats, result.Value, DashboardCacheTtl);
                 await _shellViewModel.RefreshConnectionStatusAsync(_loadCts.Token);
@@ -307,7 +314,14 @@ public class DashboardViewModel : ViewModelBase
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
                     : "Failed to load dashboard (no error details)";
-                ErrorMessage = errorDetails;
+                if (hasExistingStats)
+                {
+                    ErrorMessage = errorDetails;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, BuildGlobalAlertDetails(errorDetails));
+                }
                 _shellViewModel.AddLog(LogLevel.Error, $"Dashboard load failed: {errorDetails}", correlationId: DiagnosticCorrelationId);
             }
 
@@ -319,7 +333,15 @@ public class DashboardViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            var errorDetails = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            if (hasExistingStats)
+            {
+                ErrorMessage = errorDetails;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, BuildGlobalAlertDetails(errorDetails));
+            }
             _shellViewModel.AddLog(LogLevel.Error, $"Dashboard exception: {ex.GetType().Name} - {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
         finally
@@ -341,5 +363,12 @@ public class DashboardViewModel : ViewModelBase
     {
         _shellViewModel.Mailboxes?.SetRecipientTypeFilter("SharedMailbox", refresh: false);
         _navigationService.NavigateTo(NavigationPage.Mailboxes);
+    }
+
+    private string BuildGlobalAlertDetails(string errorDetails)
+    {
+        return HasDiagnosticReference
+            ? $"{errorDetails}{Environment.NewLine}{Environment.NewLine}{DiagnosticReferenceText}"
+            : errorDetails;
     }
 }

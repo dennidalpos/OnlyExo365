@@ -8,6 +8,8 @@ public partial class MobileDevicesViewModel
 {
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasWorkspaceData = HasWorkspaceData;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ResetDisconnectedState();
@@ -34,7 +36,15 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load mobile devices";
+                var errorMessage = result.Error?.Message ?? "Unable to load mobile devices";
+                if (hasWorkspaceData)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -44,10 +54,18 @@ public partial class MobileDevicesViewModel
             IsTotalCountExact = result.Value.IsTotalCountExact;
             _currentSkip = Devices.Count;
             TryRestoreSelection();
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasWorkspaceData)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {
@@ -229,12 +247,13 @@ public partial class MobileDevicesViewModel
         CapabilityMessage = null;
         Devices.Clear();
         Policies.Clear();
-        ErrorMessage = "Not connected to Exchange Online";
+        ErrorMessage = null;
         TotalCount = 0;
         IsTotalCountExact = true;
         HasMore = false;
         IsLoadingSelection = false;
         ClearLoadingProgress();
+        _shellViewModel.ClearPageAlert(AlertPage);
     }
 
     private void ClearLoadingProgress()

@@ -1,7 +1,8 @@
 <UserControl x:Class="ExchangeAdmin.Presentation.Views.ResourcesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.2*"/>
@@ -104,7 +105,7 @@
 
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="{loc:Loc Key=Resources.ResourceMailboxDetails}">
+                <controls:SectionPanel Header="{loc:Loc Key=Resources.ResourceMailboxDetails}">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -153,9 +154,9 @@
                                        Foreground="{StaticResource SecondaryTextBrush}"/>
                         </StackPanel>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Resources.BookingSettings}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Resources.BookingSettings}" Margin="0,12,0,0">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -198,9 +199,9 @@
                         <TextBox Grid.Row="9" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.RequestOutOfPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
                         <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.ResourceDelegates, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Resources.MailboxDelegation}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Resources.MailboxDelegation}" Margin="0,12,0,0">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -219,7 +220,7 @@
                         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.SendAsUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
                         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Resources.Editor.SendOnBehalfUsers, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                     <Button Content="{loc:Loc Key=Resources.Save}" Command="{Binding Resources.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>

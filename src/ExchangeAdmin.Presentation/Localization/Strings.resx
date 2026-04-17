@@ -300,6 +300,18 @@ Confirm?</value>
   <data name="Msg.ConfigurationError" xml:space="preserve">
     <value>ExchangeAdmin configuration error</value>
   </data>
+  <data name="Alert.ConnectionRequiredTitle" xml:space="preserve">
+    <value>Connection required</value>
+  </data>
+  <data name="Alert.ConnectionRequiredMessage" xml:space="preserve">
+    <value>Not connected to Exchange Online.</value>
+  </data>
+  <data name="Alert.LoadFailedTitle" xml:space="preserve">
+    <value>Load failed</value>
+  </data>
+  <data name="Alert.PageUnavailableMessageFormat" xml:space="preserve">
+    <value>The {0} page is unavailable right now.</value>
+  </data>
   <!-- Progress -->
   <data name="Progress.LoadedRemaining" xml:space="preserve">
     <value>Loaded: {0} | Remaining: {1}</value>

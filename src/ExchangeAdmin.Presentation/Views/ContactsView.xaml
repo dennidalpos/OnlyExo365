@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:helpers="clr-namespace:ExchangeAdmin.Presentation.Helpers"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.2*"/>
@@ -112,7 +113,7 @@
 
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="{loc:Loc Key=Contact.DetailsHeading}">
+                <controls:SectionPanel Header="{loc:Loc Key=Contact.DetailsHeading}">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -171,9 +172,9 @@
                             </PasswordBox.Style>
                         </PasswordBox>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
-                <GroupBox Header="{loc:Loc Key=Contact.OptionsGroup}" Margin="0,12,0,0">
+                <controls:SectionPanel Header="{loc:Loc Key=Contact.OptionsGroup}" Margin="0,12,0,0">
                     <StackPanel Margin="8">
                         <TextBlock Text="{Binding Contacts.ContactIdentityDisplay}"
                                    Foreground="{StaticResource SecondaryTextBrush}"
@@ -187,7 +188,7 @@
                                     Visibility="{Binding Contacts.IsEditingExistingContact, Converter={StaticResource BoolToVisibility}}"/>
                         </StackPanel>
                     </StackPanel>
-                </GroupBox>
+                </controls:SectionPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

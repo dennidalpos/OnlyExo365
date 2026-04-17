@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:helpers="clr-namespace:ExchangeAdmin.Presentation.Helpers"
              xmlns:views="clr-namespace:ExchangeAdmin.Presentation.Views"
-             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization">
+             xmlns:loc="clr-namespace:ExchangeAdmin.Presentation.Localization"
+             xmlns:controls="clr-namespace:ExchangeAdmin.Presentation.Controls">
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -124,7 +125,7 @@
                     </ComboBox>
                 </Grid>
 
-                <GroupBox Grid.Row="2" Header="{Binding Mailboxes.CreateMailboxSectionTitle}" Margin="0,0,0,12">
+                <controls:SectionPanel Grid.Row="2" Header="{Binding Mailboxes.CreateMailboxSectionTitle}" Margin="0,0,0,12">
                     <Grid Margin="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -184,7 +185,7 @@
                         <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=Mailbox.List.WillCreateFormat}"/>
                     </Grid>
-                </GroupBox>
+                </controls:SectionPanel>
 
                 <Grid Grid.Row="3">
                     <DataGrid ItemsSource="{Binding Mailboxes.Mailboxes}"
@@ -330,12 +331,8 @@
                 </Grid>
 
                 <Border Grid.Row="2"
-                        Margin="0,0,0,12"
-                        Padding="12"
-                        Background="{StaticResource SecondaryBackgroundBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6">
+                        Style="{StaticResource InsetPanelBorderStyle}"
+                        Margin="0,0,0,12">
                     <TextBlock Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap"
                                Text="{loc:Loc Key=Mailbox.List.LicensingPanelInstructions}"/>
                 </Border>
@@ -415,11 +412,7 @@
                           ResizeBehavior="PreviousAndNext"/>
 
             <Border Grid.Column="2"
-                    Background="{StaticResource SecondaryBackgroundBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="12">
+                    Style="{StaticResource SectionCardBorderStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -441,11 +434,7 @@
                     </StackPanel>
 
                     <Border Grid.Row="2"
-                            Background="{StaticResource TertiaryBackgroundBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="16"
+                            Style="{StaticResource InsetPanelBorderStyle}"
                             Visibility="{Binding Mailboxes.Provisioning.HasSelectedCandidate, Converter={StaticResource InverseBoolToVisibility}}">
                         <TextBlock Text="{loc:Loc Key=Mailbox.List.LicensingPanelEmptyState}"
                                    Foreground="{StaticResource SecondaryTextBrush}"

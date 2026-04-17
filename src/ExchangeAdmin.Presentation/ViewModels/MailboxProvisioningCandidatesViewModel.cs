@@ -6,11 +6,13 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Paging;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
+using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Mailboxes;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IMailboxesWorkerService _workerService;
@@ -179,7 +181,8 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             Reset();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -219,11 +222,13 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         _loadCts?.Cancel();
+        var hasExistingCandidates = Candidates.Count > 0;
 
         if (!_shellViewModel.IsExchangeConnected)
         {
             Reset();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -232,6 +237,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading users Member...", "users");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Candidates.Count);
         _currentSkip = 0;
 
@@ -251,11 +257,17 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
                     HasMore = result.Value.HasMore;
                     _currentSkip = Candidates.Count;
                     SelectedCandidate = ResolveSelection(selectedUpn);
+                    _shellViewModel.ClearPageAlert(AlertPage);
                 });
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load member users";
+                var errorMessage = result.Error?.Message ?? "Failed to load member users";
+                ErrorMessage = hasExistingCandidates ? errorMessage : null;
+                if (!hasExistingCandidates)
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -263,7 +275,11 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = hasExistingCandidates ? ex.Message : null;
+            if (!hasExistingCandidates)
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {

@@ -93,7 +93,8 @@ public sealed class MailboxListViewModelTests
 
         Assert.Equal(0, worker.GetAcceptedDomainsCalls);
         Assert.Empty(viewModel.AvailableMailDomains);
-        Assert.Equal("Not connected to Exchange Online", viewModel.ErrorMessage);
+        Assert.Null(viewModel.ErrorMessage);
+        Assert.True(shell.GlobalAlert.IsVisible);
     }
 
     [Fact]

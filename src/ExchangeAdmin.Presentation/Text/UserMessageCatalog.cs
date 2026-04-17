@@ -13,6 +13,9 @@ public static class UserMessageCatalog
     public static string UnsavedChangesMessage => Loc.Get("Msg.UnsavedChangesText");
     public static string ConfirmOperationTitle => Loc.Get("Msg.ConfirmOperationTitle");
     public static string ConfirmOperationPrompt => Loc.Get("Msg.ConfirmOperationPrompt");
+    public static string ConnectionRequiredAlertTitle => Loc.Get("Alert.ConnectionRequiredTitle");
+    public static string ConnectionRequiredAlertMessage => Loc.Get("Alert.ConnectionRequiredMessage");
+    public static string LoadFailedAlertTitle => Loc.Get("Alert.LoadFailedTitle");
 
     public static string CombineMessageAndDetails(string message, string? details)
     {
@@ -30,6 +33,9 @@ public static class UserMessageCatalog
             ? Loc.GetFormat("Msg.ConfirmOperationFormat", operation, target)
             : Loc.GetFormat("Msg.ConfirmOperationImpactFormat", operation, target, impact);
     }
+
+    public static string FormatPageUnavailableMessage(string pageTitle)
+        => Loc.GetFormat("Alert.PageUnavailableMessageFormat", pageTitle);
 
     public static string GetFriendlyErrorMessage(NormalizedErrorDto error)
     {

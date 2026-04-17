@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public partial class MigrationViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Migration;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IMigrationWorkerService _workerService;
@@ -369,7 +370,8 @@ public partial class MigrationViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -421,16 +423,20 @@ public partial class MigrationViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasWorkspaceData = HasWorkspaceData;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
         IsLoading = true;
         LoadProgress.Start("Loading migration batches...", "batch");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Batches.Count);
         _currentSkip = 0;
         var previousIdentity = SelectedBatch?.Identity;
@@ -444,7 +450,15 @@ public partial class MigrationViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load migration batches";
+                var errorMessage = result.Error?.Message ?? "Unable to load migration batches";
+                if (hasWorkspaceData)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -452,6 +466,7 @@ public partial class MigrationViewModel : ViewModelBase
             TotalCount = result.Value.TotalCount;
             HasMore = result.Value.HasMore;
             _currentSkip = Batches.Count;
+            _shellViewModel.ClearPageAlert(AlertPage);
 
             SelectedBatch = RestoreSelection(previousIdentity);
             if (SelectedBatch == null)
@@ -461,7 +476,14 @@ public partial class MigrationViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasWorkspaceData)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {
@@ -668,7 +690,8 @@ public partial class MigrationViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
 
         RaiseCanExecuteChanged();
@@ -781,4 +804,8 @@ public partial class MigrationViewModel : ViewModelBase
     {
         _ = RunOnUiThreadAsync(() => LoadProgress.Apply(evt));
     }
+
+    private bool HasWorkspaceData =>
+        Batches.Count > 0 ||
+        Endpoints.Count > 0;
 }

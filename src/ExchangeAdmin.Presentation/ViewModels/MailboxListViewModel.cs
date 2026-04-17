@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MailboxListViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Mailboxes;
     private readonly IMailboxesWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
@@ -352,7 +353,8 @@ public class MailboxListViewModel : ViewModelBase
             ClearNewMailboxPassword();
             await RunOnUiThreadAsync(() => Mailboxes.Clear());
             Provisioning.Reset();
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -369,16 +371,18 @@ public class MailboxListViewModel : ViewModelBase
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         _loadCts?.Cancel();
+        var hasExistingMailboxes = Mailboxes.Count > 0;
         if (!_shellViewModel.IsExchangeConnected)
         {
             IsLoading = false;
             ClearNewMailboxPassword();
             await RunOnUiThreadAsync(() => Mailboxes.Clear());
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
             TotalCount = 0;
             IsTotalCountExact = true;
             HasMore = false;
             _currentSkip = 0;
+            _shellViewModel.ClearPageAlert(AlertPage);
             OnPropertyChanged(nameof(StatusText));
             return;
         }
@@ -388,6 +392,7 @@ public class MailboxListViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading mailbox...", "mailbox");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Mailboxes.Count);
         _currentSkip = 0;
 
@@ -416,6 +421,7 @@ public class MailboxListViewModel : ViewModelBase
                     IsTotalCountExact = result.Value.IsTotalCountExact;
                     HasMore = result.Value.HasMore;
                     _currentSkip = Mailboxes.Count;
+                    _shellViewModel.ClearPageAlert(AlertPage);
                     OnPropertyChanged(nameof(StatusText));
                 });
             }
@@ -427,7 +433,11 @@ public class MailboxListViewModel : ViewModelBase
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
                     : "Failed to load mailboxes (no error details)";
-                ErrorMessage = errorDetails;
+                ErrorMessage = hasExistingMailboxes ? errorDetails : null;
+                if (!hasExistingMailboxes)
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorDetails);
+                }
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox load failed: {errorDetails}");
             }
         }
@@ -436,7 +446,12 @@ public class MailboxListViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            var errorDetails = $"Exception: {ex.GetType().Name} - {ex.Message}";
+            ErrorMessage = hasExistingMailboxes ? errorDetails : null;
+            if (!hasExistingMailboxes)
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorDetails);
+            }
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox exception: {ex.GetType().Name} - {ex.Message}");
         }
         finally
@@ -454,7 +469,8 @@ public class MailboxListViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             IsLoading = false;
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -712,6 +728,7 @@ public class MailboxListViewModel : ViewModelBase
         if (e.PropertyName == nameof(ShellViewModel.IsExchangeConnected) && !_shellViewModel.IsExchangeConnected)
         {
             ClearNewMailboxPassword();
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
     }
 

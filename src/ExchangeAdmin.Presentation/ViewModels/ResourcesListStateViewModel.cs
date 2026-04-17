@@ -11,6 +11,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed class ResourcesListStateViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Resources;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IResourcesWorkerService _workerService;
@@ -137,7 +138,8 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
             Resources.Clear();
             TotalCount = 0;
             HasMore = false;
-            _setErrorMessage("Not connected to Exchange Online");
+            _setErrorMessage(null);
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -154,18 +156,22 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasExistingResources = Resources.Count > 0;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             Resources.Clear();
             TotalCount = 0;
             HasMore = false;
-            _setErrorMessage("Not connected to Exchange Online");
+            _setErrorMessage(null);
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
         IsLoading = true;
         LoadProgress.Start("Loading resource mailboxes...", "resources");
         _setErrorMessage(null);
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Resources.Count);
         _currentSkip = 0;
 
@@ -178,7 +184,16 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                _setErrorMessage(result.Error?.Message ?? "Unable to load resources");
+                var errorMessage = result.Error?.Message ?? "Unable to load resources";
+                if (hasExistingResources)
+                {
+                    _setErrorMessage(errorMessage);
+                }
+                else
+                {
+                    _setErrorMessage(null);
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -186,10 +201,19 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
             TotalCount = result.Value.TotalCount;
             HasMore = result.Value.HasMore;
             _currentSkip = Resources.Count;
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            _setErrorMessage(ex.Message);
+            if (hasExistingResources)
+            {
+                _setErrorMessage(ex.Message);
+            }
+            else
+            {
+                _setErrorMessage(null);
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
         }
         finally
         {

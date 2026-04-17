@@ -5,11 +5,13 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Paging;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
+using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class PermissionsViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Permissions;
     private const int PageSize = PagingDefaults.DefaultPageSize;
 
     private readonly IWorkerService _workerService;
@@ -328,6 +330,7 @@ public class PermissionsViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hasExistingGroups = RoleGroups.Count > 0;
         if (!_shellViewModel.IsExchangeConnected)
         {
             ResetDisconnectedState();
@@ -337,6 +340,7 @@ public class PermissionsViewModel : ViewModelBase
         IsLoading = true;
         LoadProgress.Start("Loading role groups...", "role groups");
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(RoleGroups.Count);
         _currentSkip = 0;
         var previousIdentity = SelectedRoleGroup?.Identity;
@@ -364,6 +368,7 @@ public class PermissionsViewModel : ViewModelBase
             TotalCount = result.Value.TotalCount;
             HasMore = result.Value.HasMore;
             _currentSkip = RoleGroups.Count;
+            _shellViewModel.ClearPageAlert(AlertPage);
             SelectedRoleGroup = RestoreSelection(previousIdentity);
             if (SelectedRoleGroup == null)
             {
@@ -624,7 +629,8 @@ public class PermissionsViewModel : ViewModelBase
         SelectedRoleGroupDetails = null;
         TotalCount = 0;
         HasMore = false;
-        ErrorMessage = "Not connected to Exchange Online";
+        ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
     }
 
     private void RaiseCanExecuteChanged()

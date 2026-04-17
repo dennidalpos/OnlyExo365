@@ -61,6 +61,54 @@ public sealed class PresentationViewModelCharacterizationTests
         Assert.Contains("ConfirmCommand = new RelayCommand(Confirm", content, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void WorkspaceViewModels_DoNotUseLocalDisconnectedExchangeBannerCopy()
+    {
+        string[] files =
+        [
+            "ComplianceViewModel.cs",
+            "DeletedMailboxesViewModel.cs",
+            "MailboxAccessReportViewModel.cs",
+            "MailboxListViewModel.cs",
+            "MailboxProvisioningCandidatesViewModel.cs",
+            "MailboxSpaceViewModel.cs",
+            "MailFlowViewModel.cs",
+            "MessageTraceViewModel.cs",
+            "MigrationViewModel.cs",
+            "MigrationViewModel.EndpointEditor.cs",
+            "MobileDevicesViewModel.cs",
+            "MobileDevicesViewModel.Loading.cs",
+            "PermissionsViewModel.cs",
+            "PublicFoldersViewModel.cs"
+        ];
+
+        foreach (var file in files)
+        {
+            var content = ReadViewModel(file);
+            Assert.DoesNotContain("Not connected to Exchange Online", content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void RemainingComposedWorkspaceViewModels_PublishBlockingFirstLoadFailuresThroughShellAlerts()
+    {
+        string[] files =
+        [
+            "ComplianceViewModel.cs",
+            "MailFlowViewModel.cs",
+            "MigrationViewModel.cs",
+            "MigrationViewModel.EndpointEditor.cs",
+            "MobileDevicesViewModel.Loading.cs"
+        ];
+
+        foreach (var file in files)
+        {
+            var content = ReadViewModel(file);
+            Assert.Contains("ShowPageLoadFailedAlert", content, StringComparison.Ordinal);
+            Assert.Contains("ClearPageAlert", content, StringComparison.Ordinal);
+        }
+    }
+
     private static string ReadViewModel(string fileName)
         => File.ReadAllText(TestPathHelper.GetRepositoryPath("src", "ExchangeAdmin.Presentation", "ViewModels", fileName));
 }

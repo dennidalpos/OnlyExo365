@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MailboxSpaceViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MailboxSpace;
     private readonly IMailboxesWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
     private bool _isLoading;
@@ -154,7 +155,8 @@ public class MailboxSpaceViewModel : ViewModelBase
     {
         if (!_shellViewModel.IsExchangeConnected)
         {
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -163,6 +165,7 @@ public class MailboxSpaceViewModel : ViewModelBase
         WarningsText = null;
         DiagnosticCorrelationId = null;
         Mailboxes.Clear();
+        _shellViewModel.ClearPageAlert(AlertPage);
         ProgressPercent = 0;
         ProgressStatus = "Starting scan...";
         ProgressCurrentItem = null;
@@ -220,13 +223,16 @@ public class MailboxSpaceViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                ErrorMessage = result.Error?.Message ?? "Unable to load the mailbox storage report.";
-                _shellViewModel.AddLog(LogLevel.Error, ErrorMessage, correlationId: DiagnosticCorrelationId);
+                var errorMessage = result.Error?.Message ?? "Unable to load the mailbox storage report.";
+                ErrorMessage = null;
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                _shellViewModel.AddLog(LogLevel.Error, errorMessage, correlationId: DiagnosticCorrelationId);
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = null;
+            _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox space scan error: {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
         finally

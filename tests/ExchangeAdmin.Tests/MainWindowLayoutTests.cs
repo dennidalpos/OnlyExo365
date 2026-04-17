@@ -228,6 +228,27 @@ public sealed class MainWindowLayoutTests
     }
 
     [Fact]
+    public void MainWindow_ExposesSingleGlobalAlertHost_BetweenHeaderAndContent()
+    {
+        var document = LoadViewDocument("MainWindow.xaml");
+
+        var alertBorder = document
+            .Descendants()
+            .FirstOrDefault(candidate =>
+                candidate.Name.LocalName == "Border" &&
+                string.Equals((string?)candidate.Attribute("Grid.Row"), "1", StringComparison.Ordinal) &&
+                string.Equals((string?)candidate.Attribute("Visibility"), "{Binding GlobalAlert.IsVisible, Converter={StaticResource BoolToVisibility}}", StringComparison.Ordinal));
+
+        Assert.NotNull(alertBorder);
+        Assert.Contains(alertBorder!.Descendants(), candidate =>
+            candidate.Name.LocalName == "TextBlock" &&
+            string.Equals((string?)candidate.Attribute("Text"), "{Binding GlobalAlert.Title}", StringComparison.Ordinal));
+        Assert.Contains(alertBorder.Descendants(), candidate =>
+            candidate.Name.LocalName == "TextBlock" &&
+            string.Equals((string?)candidate.Attribute("Text"), "{Binding GlobalAlert.Message}", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void NavigationSidebar_DoesNotExposeSeparateSharedMailboxesButton()
     {
         var document = LoadViewDocument("MainWindow.xaml");

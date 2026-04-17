@@ -9,12 +9,17 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Domain.Errors;
 using ExchangeAdmin.Infrastructure.Ipc;
+using ExchangeAdmin.Presentation.Localization;
 using ExchangeAdmin.Presentation.Services;
+using ExchangeAdmin.Presentation.Text;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed class ShellViewModel : ViewModelBase, IDisposable
 {
+    private const int ConnectionAlertPriority = 1000;
+    private const int PageAlertPriority = 500;
+
     private readonly IConnectionWorkerService _workerService;
     private readonly NavigationService _navigationService;
     private readonly ShellConnectionStateViewModel _connectionState;
@@ -22,6 +27,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     private readonly ShellProgressViewModel _progressState;
     private readonly ShellLogViewModel _logState;
     private readonly ShellPromptViewModel _promptState;
+    private readonly Dictionary<string, AlertRegistration> _registeredAlerts = new(StringComparer.Ordinal);
 
     public LanguageSelectionViewModel? LanguageSelection { get; set; }
 
@@ -72,6 +78,9 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _navigationState.PropertyChanged += OnSubViewModelPropertyChanged;
         _progressState.PropertyChanged += OnSubViewModelPropertyChanged;
         _logState.PropertyChanged += OnSubViewModelPropertyChanged;
+        LocalizationService.Instance.CultureChanged += OnCultureChanged;
+
+        UpdateGlobalAlert();
     }
 
     public NavigationService NavigationService => _navigationService;
@@ -81,6 +90,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
     public ShellProgressViewModel Progress => _progressState;
     public ShellLogViewModel Logging => _logState;
     public ShellPromptViewModel Prompt => _promptState;
+    public AppAlertViewModel GlobalAlert { get; } = new();
 
     public WorkerConnectionState WorkerState
     {
@@ -341,6 +351,57 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         RunOnUiThread(() => ErrorDialogService.ShowError(title, error));
     }
 
+    public void ShowGlobalAlert(
+        string key,
+        AppAlertSeverity severity,
+        string title,
+        string message,
+        string? details = null,
+        NavigationPage? sourcePage = null,
+        int priority = 0)
+    {
+        RunOnUiThread(() =>
+        {
+            _registeredAlerts[key] = new AlertRegistration(
+                severity,
+                title,
+                message,
+                details,
+                sourcePage,
+                sourcePage.HasValue ? UiTextCatalog.GetNavigationLabel(sourcePage.Value) : null,
+                priority);
+            UpdateGlobalAlert();
+        });
+    }
+
+    public void ClearGlobalAlert(string key)
+    {
+        RunOnUiThread(() =>
+        {
+            if (_registeredAlerts.Remove(key))
+            {
+                UpdateGlobalAlert();
+            }
+        });
+    }
+
+    public void ShowPageLoadFailedAlert(NavigationPage page, string details, AppAlertSeverity severity = AppAlertSeverity.Error)
+    {
+        ShowGlobalAlert(
+            GetPageAlertKey(page),
+            severity,
+            UserMessageCatalog.LoadFailedAlertTitle,
+            UserMessageCatalog.FormatPageUnavailableMessage(UiTextCatalog.GetNavigationLabel(page)),
+            details,
+            page,
+            PageAlertPriority);
+    }
+
+    public void ClearPageAlert(NavigationPage page)
+    {
+        ClearGlobalAlert(GetPageAlertKey(page));
+    }
+
     public void Dispose()
     {
         _workerService.StateChanged -= OnWorkerStateChanged;
@@ -351,6 +412,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _navigationState.PropertyChanged -= OnSubViewModelPropertyChanged;
         _progressState.PropertyChanged -= OnSubViewModelPropertyChanged;
         _logState.PropertyChanged -= OnSubViewModelPropertyChanged;
+        LocalizationService.Instance.CultureChanged -= OnCultureChanged;
 
         _navigationState.Dispose();
     }
@@ -399,9 +461,94 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private void OnSubViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(CurrentPage) or nameof(IsExchangeConnected) or nameof(ExchangeState) or nameof(IsExchangeConnectionDisabled))
+        {
+            UpdateGlobalAlert();
+        }
+
         if (!string.IsNullOrWhiteSpace(e.PropertyName))
         {
             OnPropertyChanged(e.PropertyName);
         }
     }
+
+    private void OnCultureChanged(object? sender, EventArgs e)
+    {
+        UpdateGlobalAlert();
+    }
+
+    private void UpdateGlobalAlert()
+    {
+        RunOnUiThread(() =>
+        {
+            if (TryBuildConnectionAlert(out var connectionAlert))
+            {
+                GlobalAlert.Update(
+                    connectionAlert.Severity,
+                    connectionAlert.Title,
+                    connectionAlert.Message,
+                    connectionAlert.Details,
+                    connectionAlert.Source,
+                    connectionAlert.Priority);
+                return;
+            }
+
+            var selectedAlert = _registeredAlerts
+                .Select(static pair => pair.Value)
+                .Where(IsAlertVisibleForCurrentPage)
+                .OrderByDescending(alert => alert.Priority)
+                .ThenBy(alert => alert.SourcePage.HasValue ? 0 : 1)
+                .FirstOrDefault();
+
+            if (selectedAlert == null)
+            {
+                GlobalAlert.Clear();
+                return;
+            }
+
+            GlobalAlert.Update(
+                selectedAlert.Severity,
+                selectedAlert.Title,
+                selectedAlert.Message,
+                selectedAlert.Details,
+                selectedAlert.Source,
+                selectedAlert.Priority);
+        });
+    }
+
+    private bool IsAlertVisibleForCurrentPage(AlertRegistration registration)
+    {
+        return registration.SourcePage == null || registration.SourcePage == CurrentPage;
+    }
+
+    private bool TryBuildConnectionAlert(out AlertRegistration alert)
+    {
+        if (IsExchangeConnected)
+        {
+            alert = default!;
+            return false;
+        }
+
+        alert = new AlertRegistration(
+            AppAlertSeverity.Warning,
+            UserMessageCatalog.ConnectionRequiredAlertTitle,
+            UserMessageCatalog.ConnectionRequiredAlertMessage,
+            null,
+            null,
+            null,
+            ConnectionAlertPriority);
+        return true;
+    }
+
+    private static string GetPageAlertKey(NavigationPage page)
+        => $"page:{page}";
+
+    private sealed record AlertRegistration(
+        AppAlertSeverity Severity,
+        string Title,
+        string Message,
+        string? Details,
+        NavigationPage? SourcePage,
+        string? Source,
+        int Priority);
 }

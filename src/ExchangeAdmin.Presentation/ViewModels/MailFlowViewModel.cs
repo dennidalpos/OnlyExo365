@@ -5,11 +5,13 @@ using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Presentation.Helpers;
+using ExchangeAdmin.Presentation.Services;
 
 namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MailFlowViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MailFlow;
     private readonly ShellViewModel _shellViewModel;
     private readonly MailFlowOperationCoordinator _coordinator;
     private readonly MailFlowRulesViewModel _rules;
@@ -261,7 +263,8 @@ public class MailFlowViewModel : ViewModelBase
     {
         if (!_shellViewModel.IsExchangeConnected)
         {
-            _coordinator.SetError("Not connected to Exchange Online");
+            _coordinator.ClearError();
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -281,8 +284,10 @@ public class MailFlowViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var hadWorkspaceData = HasWorkspaceData;
         _coordinator.BeginOperation("Loading Mail Flow workspace...");
         _coordinator.ClearError();
+        _shellViewModel.ClearPageAlert(AlertPage);
 
         try
         {
@@ -299,15 +304,31 @@ public class MailFlowViewModel : ViewModelBase
 
             if (!HasError)
             {
+                _shellViewModel.ClearPageAlert(AlertPage);
                 _shellViewModel.AddLog(
                     LogLevel.Information,
                     $"MailFlow refresh complete: rules={TransportRules.Count}, connectors={Connectors.Count}, domains={AcceptedDomains.Count}, remoteDomains={RemoteDomains.Count}, organizationRelationships={OrganizationRelationships.Count}, addressLists={AddressLists.Count}, addressBookPolicies={AddressBookPolicies.Count}, offlineAddressBooks={OfflineAddressBooks.Count}, sharingPolicies={SharingPolicies.Count}",
                     "MailFlow");
             }
+            else if (!hadWorkspaceData && !HasWorkspaceData)
+            {
+                var errorMessage = ErrorMessage ?? "Unable to load the Mail Flow workspace.";
+                _coordinator.ClearError();
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+            }
         }
         catch (Exception ex)
         {
-            _coordinator.SetError(ex.Message);
+            if (hadWorkspaceData || HasWorkspaceData)
+            {
+                _coordinator.SetError(ex.Message);
+            }
+            else
+            {
+                _coordinator.ClearError();
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
+
             _shellViewModel.AddLog(LogLevel.Error, $"MailFlow refresh exception: {ex.Message}", "MailFlow");
         }
         finally
@@ -320,6 +341,11 @@ public class MailFlowViewModel : ViewModelBase
     {
         if (e.PropertyName == nameof(ShellViewModel.IsExchangeConnected))
         {
+            if (!_shellViewModel.IsExchangeConnected)
+            {
+                _coordinator.ClearError();
+                _shellViewModel.ClearPageAlert(AlertPage);
+            }
             OnPropertyChanged(nameof(CanRefresh));
             CommandManager.InvalidateRequerySuggested();
         }
@@ -368,5 +394,16 @@ public class MailFlowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CanEditSelectedOfflineAddressBook));
         }
     }
+
+    private bool HasWorkspaceData =>
+        TransportRules.Count > 0 ||
+        Connectors.Count > 0 ||
+        AcceptedDomains.Count > 0 ||
+        RemoteDomains.Count > 0 ||
+        OrganizationRelationships.Count > 0 ||
+        AddressLists.Count > 0 ||
+        AddressBookPolicies.Count > 0 ||
+        OfflineAddressBooks.Count > 0 ||
+        SharingPolicies.Count > 0;
 }
 

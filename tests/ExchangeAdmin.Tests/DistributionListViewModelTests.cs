@@ -2,6 +2,7 @@ using ExchangeAdmin.Contracts.Dtos;
 using ExchangeAdmin.Contracts.Messages;
 using ExchangeAdmin.Domain.Results;
 using ExchangeAdmin.Infrastructure.Ipc;
+using ExchangeAdmin.Presentation.Text;
 using ExchangeAdmin.Presentation.Services;
 using ExchangeAdmin.Presentation.ViewModels;
 
@@ -20,7 +21,10 @@ public sealed class DistributionListViewModelTests
 
         Assert.Equal(0, worker.GetAcceptedDomainsCalls);
         Assert.Empty(viewModel.AvailableMailDomains);
-        Assert.Equal("Not connected to Exchange Online", viewModel.ErrorMessage);
+        Assert.Null(viewModel.ErrorMessage);
+        Assert.True(shell.GlobalAlert.IsVisible);
+        Assert.Equal(UserMessageCatalog.ConnectionRequiredAlertTitle, shell.GlobalAlert.Title);
+        Assert.Equal(UserMessageCatalog.ConnectionRequiredAlertMessage, shell.GlobalAlert.Message);
     }
 
     private sealed class DistributionListWorkerService : TestDistributionListsWorkerServiceBase

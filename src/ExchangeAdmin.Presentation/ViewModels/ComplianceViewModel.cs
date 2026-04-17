@@ -12,6 +12,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public sealed partial class ComplianceViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.Compliance;
     private readonly IComplianceWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
 
@@ -397,6 +398,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -408,9 +410,12 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
     private async Task RefreshWorkspaceAsync(CancellationToken cancellationToken)
     {
+        var hasWorkspaceData = HasWorkspaceData;
+
         if (!_shellViewModel.IsExchangeConnected)
         {
             ClearStateForDisconnectedSession();
+            _shellViewModel.ClearPageAlert(AlertPage);
             return;
         }
 
@@ -418,6 +423,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         ErrorMessage = null;
         WarningsText = null;
         DiagnosticCorrelationId = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         IsHoldListingUnsupported = false;
         HoldListingStatusMessage = null;
 
@@ -432,8 +438,16 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
+                var errorMessage = result.Error?.Message ?? Loc.Get("Compliance.WorkspaceLoadError");
                 DiagnosticCorrelationId = result.CorrelationId;
-                ErrorMessage = result.Error?.Message ?? Loc.Get("Compliance.WorkspaceLoadError");
+                if (hasWorkspaceData)
+                {
+                    ErrorMessage = errorMessage;
+                }
+                else
+                {
+                    _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                }
                 return;
             }
 
@@ -464,10 +478,20 @@ public sealed partial class ComplianceViewModel : ViewModelBase
             {
                 _shellViewModel.AddLog(LogLevel.Warning, warning, "Compliance", DiagnosticCorrelationId);
             }
+
+            _shellViewModel.ClearPageAlert(AlertPage);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            if (hasWorkspaceData)
+            {
+                ErrorMessage = ex.Message;
+            }
+            else
+            {
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
+            }
+
             _shellViewModel.AddLog(LogLevel.Error, $"Compliance workspace error: {ex.Message}", "Compliance", DiagnosticCorrelationId);
         }
         finally
@@ -721,7 +745,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         IsHoldListingUnsupported = false;
         HoldListingStatusMessage = null;
 
-        ErrorMessage = "Not connected to Exchange Online";
+        ErrorMessage = null;
         OnPropertyChanged(nameof(SearchesStatusText));
         OnPropertyChanged(nameof(CasesStatusText));
         OnPropertyChanged(nameof(ActionsStatusText));
@@ -770,5 +794,10 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
         return "Loading Compliance workspace...";
     }
+
+    private bool HasWorkspaceData =>
+        Searches.Count > 0 ||
+        Cases.Count > 0 ||
+        Actions.Count > 0;
 }
 

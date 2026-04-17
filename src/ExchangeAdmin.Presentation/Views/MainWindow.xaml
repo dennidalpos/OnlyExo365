@@ -15,6 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -147,7 +148,60 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1">
+        <Border Grid.Row="1"
+                Visibility="{Binding GlobalAlert.IsVisible, Converter={StaticResource BoolToVisibility}}">
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource ShellGlobalAlertBorderStyle}">
+                    <Setter Property="Background" Value="{StaticResource InfoBannerBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource InfoBrush}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Warning}">
+                            <Setter Property="Background" Value="{StaticResource WarningBannerBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Error}">
+                            <Setter Property="Background" Value="{StaticResource ErrorBannerBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding GlobalAlert.Title}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource ShellGlobalAlertTitleTextStyle}">
+                                <Setter Property="Foreground" Value="{StaticResource InfoBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Warning}">
+                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Error}">
+                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="{Binding GlobalAlert.Source}"
+                               Style="{StaticResource ShellGlobalAlertSourceTextStyle}"
+                               Visibility="{Binding GlobalAlert.HasSource, Converter={StaticResource BoolToVisibility}}"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding GlobalAlert.Message}"
+                           Style="{StaticResource ShellGlobalAlertMessageTextStyle}"/>
+
+                <Expander Header="{loc:Loc Key=Msg.DetailsHeading}"
+                          Margin="0,8,0,0"
+                          Visibility="{Binding GlobalAlert.HasDetails, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding GlobalAlert.Details}"
+                               Style="{StaticResource StatusBannerDetailTextStyle}"/>
+                </Expander>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="180"/>
                 <ColumnDefinition Width="*"/>
@@ -519,7 +573,7 @@
             </Grid>
         </Grid>
 
-        <Border Grid.Row="2" Background="{StaticResource TertiaryBackgroundBrush}"
+        <Border Grid.Row="3" Background="{StaticResource TertiaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="12,4">
             <Grid>

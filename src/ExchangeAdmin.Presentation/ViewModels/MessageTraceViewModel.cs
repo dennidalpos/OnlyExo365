@@ -13,6 +13,7 @@ namespace ExchangeAdmin.Presentation.ViewModels;
 
 public class MessageTraceViewModel : ViewModelBase
 {
+    private const NavigationPage AlertPage = NavigationPage.MessageTrace;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
 
@@ -297,11 +298,13 @@ public class MessageTraceViewModel : ViewModelBase
 
         if (!_shellViewModel.IsExchangeConnected)
         {
-            ErrorMessage = "Not connected to Exchange Online";
+            ErrorMessage = null;
+            _shellViewModel.ClearPageAlert(AlertPage);
             return Task.CompletedTask;
         }
 
         ErrorMessage = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         return Task.CompletedTask;
     }
 
@@ -335,6 +338,7 @@ public class MessageTraceViewModel : ViewModelBase
         ErrorMessage = null;
         WarningsText = null;
         DiagnosticCorrelationId = null;
+        _shellViewModel.ClearPageAlert(AlertPage);
         LoadingProgress = 0;
         LoadingStatus = "Searching messages...";
         LoadingCurrentItem = null;
@@ -411,8 +415,10 @@ public class MessageTraceViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                ErrorMessage = result.Error?.Message ?? "Unable to retrieve the message trace.";
-                _shellViewModel.AddLog(LogLevel.Error, $"Message trace failed: {ErrorMessage}", correlationId: DiagnosticCorrelationId);
+                var errorMessage = result.Error?.Message ?? "Unable to retrieve the message trace.";
+                ErrorMessage = null;
+                _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
+                _shellViewModel.AddLog(LogLevel.Error, $"Message trace failed: {errorMessage}", correlationId: DiagnosticCorrelationId);
             }
 
             LoadingProgress = 100;
@@ -423,7 +429,8 @@ public class MessageTraceViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = null;
+            _shellViewModel.ShowPageLoadFailedAlert(AlertPage, ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Message trace error: {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
         finally

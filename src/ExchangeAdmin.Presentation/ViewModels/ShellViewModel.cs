@@ -461,7 +461,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private void OnSubViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(CurrentPage) or nameof(IsExchangeConnected) or nameof(ExchangeState) or nameof(IsExchangeConnectionDisabled))
+        if (e.PropertyName is nameof(CurrentPage) or nameof(IsExchangeConnected) or nameof(ExchangeState) or nameof(IsExchangeConnectionDisabled) or nameof(ShellConnectionStateViewModel.HasWorkerStartupAlert) or nameof(ShellConnectionStateViewModel.WorkerStartupAlertDetails))
         {
             UpdateGlobalAlert();
         }
@@ -523,6 +523,19 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     private bool TryBuildConnectionAlert(out AlertRegistration alert)
     {
+        if (_connectionState.HasWorkerStartupAlert)
+        {
+            alert = new AlertRegistration(
+                AppAlertSeverity.Error,
+                _connectionState.WorkerStartupAlertTitle,
+                _connectionState.WorkerStartupAlertMessage,
+                _connectionState.WorkerStartupAlertDetails,
+                null,
+                UiTextCatalog.WorkerLabel,
+                ConnectionAlertPriority + 100);
+            return true;
+        }
+
         if (IsExchangeConnected)
         {
             alert = default!;

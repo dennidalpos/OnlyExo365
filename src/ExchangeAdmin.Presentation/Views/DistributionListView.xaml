@@ -57,7 +57,7 @@
             </Grid>
 
             <controls:SectionPanel Grid.Row="2" Header="{loc:Loc Key=Distribution.NewGroupHeader}" Margin="0,0,0,12">
-                <Grid Margin="8">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -160,7 +160,7 @@
                         </Border>
 
                         <controls:SectionPanel Header="{loc:Loc Key=Distribution.GroupDetailsGroup}" Margin="0,0,0,12">
-                            <Grid Margin="8">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -191,7 +191,7 @@
                         </controls:SectionPanel>
 
                         <controls:SectionPanel Header="{loc:Loc Key=Distribution.OwnersGroup}" Margin="0,0,0,12">
-                            <StackPanel Margin="8">
+                            <StackPanel>
                                 <ItemsControl ItemsSource="{Binding DistributionLists.SelectedDetails.ManagedBy}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -212,12 +212,12 @@
                         </controls:SectionPanel>
 
                         <controls:SectionPanel Header="{loc:Loc Key=Distribution.EmailAddressesGroup}" Margin="0,0,0,12">
-                            <ItemsControl Margin="8" ItemsSource="{Binding DistributionLists.SelectedDetails.EmailAddresses}"/>
+                            <ItemsControl ItemsSource="{Binding DistributionLists.SelectedDetails.EmailAddresses}"/>
                         </controls:SectionPanel>
 
                         <controls:SectionPanel Header="{loc:Loc Key=Distribution.DeliverySettingsGroup}" Margin="0,0,0,12"
                                   Visibility="{Binding DistributionLists.CanEditSettings, Converter={StaticResource BoolToVisibility}}">
-                            <StackPanel Margin="8">
+                            <StackPanel>
                                 <CheckBox Content="{loc:Loc Key=Distribution.AllowExternalSenders}"
                                           IsChecked="{Binding DistributionLists.AllowExternalSenders}"
                                           IsEnabled="{Binding DistributionLists.CanEditExternalSenders}"/>
@@ -287,7 +287,7 @@
                         </controls:SectionPanel>
 
                         <controls:SectionPanel Header="{loc:Loc Key=Distribution.MembersGroup}">
-                            <Grid Margin="8">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>

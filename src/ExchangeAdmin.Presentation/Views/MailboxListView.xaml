@@ -50,7 +50,7 @@
                 <Button Content="{loc:Loc Key=Mailbox.List.UnlicensedMembersHeading}"
                         Command="{Binding Mailboxes.ShowProvisioningWorkspaceCommand}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                        <Style TargetType="Button" BasedOn="{StaticResource ActionGroupPrimaryButton}">
                             <Setter Property="Opacity" Value="0.8"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Mailboxes.IsProvisioningWorkspace}" Value="True">
@@ -143,7 +143,7 @@
                                        Header="{Binding Mailboxes.CreateMailboxSectionTitle}"
                                        Margin="0,0,0,12"
                                        IsEnabled="{Binding IsExchangeConnected}">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -267,7 +267,7 @@
                                 <TextBlock Text="{loc:Loc Key=Mailbox.List.ErrorTitle}" Style="{StaticResource CompactErrorOverlayTitleTextStyle}"/>
                                 <TextBlock Text="{Binding Mailboxes.ErrorMessage}" Style="{StaticResource CompactErrorOverlayMessageTextStyle}" MaxWidth="400"/>
                                 <Button Content="{loc:Loc Key=Btn.Retry}" Command="{Binding Mailboxes.RefreshCommand}" Margin="0,12,0,0"
-                                        Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"/>
+                                        Style="{StaticResource InlinePrimaryActionButton}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </Border>
@@ -275,7 +275,7 @@
 
                 <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                     <Button Content="{loc:Loc Key=Btn.LoadMore}" Command="{Binding Mailboxes.LoadMoreCommand}"
-                            Style="{StaticResource PrimaryButton}"
+                            Style="{StaticResource InlineActionButton}"
                             Visibility="{Binding Mailboxes.HasMore, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
             </Grid>
@@ -426,7 +426,7 @@
                                 <Button Content="{loc:Loc Key=Btn.Retry}"
                                         Command="{Binding Mailboxes.Provisioning.RefreshCommand}"
                                         Margin="0,12,0,0"
-                                        Style="{StaticResource PrimaryButton}"
+                                        Style="{StaticResource InlinePrimaryActionButton}"
                                         HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
@@ -436,7 +436,7 @@
                 <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                     <Button Content="{loc:Loc Key=Btn.LoadMore}"
                             Command="{Binding Mailboxes.Provisioning.LoadMoreCommand}"
-                            Style="{StaticResource PrimaryButton}"
+                            Style="{StaticResource InlineActionButton}"
                             Visibility="{Binding Mailboxes.Provisioning.HasMore, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
             </Grid>

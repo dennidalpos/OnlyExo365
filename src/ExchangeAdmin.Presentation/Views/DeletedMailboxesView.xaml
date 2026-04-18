@@ -134,7 +134,7 @@
                         <TextBlock Text="{loc:Loc Key=DeletedMailbox.ErrorTitle}" Style="{StaticResource CompactErrorOverlayTitleTextStyle}"/>
                         <TextBlock Text="{Binding DeletedMailboxes.ErrorMessage}" Style="{StaticResource CompactErrorOverlayMessageTextStyle}" MaxWidth="400"/>
                         <Button Content="{loc:Loc Key=Btn.Retry}" Command="{Binding DeletedMailboxes.LoadAllCommand}" Margin="0,12,0,0"
-                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"/>
+                                Style="{StaticResource InlinePrimaryActionButton}" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
             </Border>
@@ -142,7 +142,7 @@
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
             <Button Content="{loc:Loc Key=Btn.LoadMore}" Command="{Binding DeletedMailboxes.LoadMoreCommand}"
-                    Style="{StaticResource PrimaryButton}"
+                    Style="{StaticResource InlineActionButton}"
                     Visibility="{Binding DeletedMailboxes.HasMore, Converter={StaticResource BoolToVisibility}}"/>
         </StackPanel>
     </Grid>

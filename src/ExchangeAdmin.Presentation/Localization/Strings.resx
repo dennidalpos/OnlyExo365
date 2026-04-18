@@ -133,6 +133,27 @@
   <data name="Nav.Logs" xml:space="preserve">
     <value>Logs</value>
   </data>
+  <data name="Nav.Tooltip.MobileDevices.Open" xml:space="preserve">
+    <value>Open the Mobile Devices workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MobileDevices.Unavailable" xml:space="preserve">
+    <value>The Mobile Devices workspace is not available for the current session.</value>
+  </data>
+  <data name="Nav.Tooltip.Migration.Open" xml:space="preserve">
+    <value>Open the Migration workspace</value>
+  </data>
+  <data name="Nav.Tooltip.RoleGroups.Open" xml:space="preserve">
+    <value>Open the Role Groups workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MessageTrace.Open" xml:space="preserve">
+    <value>Open the Message Trace workspace</value>
+  </data>
+  <data name="Nav.Tooltip.Compliance.Open" xml:space="preserve">
+    <value>Open the Compliance workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MailSecurity.Open" xml:space="preserve">
+    <value>Open the Mail Security workspace</value>
+  </data>
   <!-- Buttons -->
   <data name="Btn.StartWorker" xml:space="preserve">
     <value>Start Worker</value>
@@ -306,6 +327,12 @@ Confirm?</value>
   <data name="Alert.ConnectionRequiredMessage" xml:space="preserve">
     <value>Not connected to Exchange Online.</value>
   </data>
+  <data name="Alert.WorkerStartupFailedTitle" xml:space="preserve">
+    <value>Worker startup failed</value>
+  </data>
+  <data name="Alert.WorkerStartupFailedMessage" xml:space="preserve">
+    <value>The background worker did not start automatically. Use Start Worker to retry without leaving the current page.</value>
+  </data>
   <data name="Alert.LoadFailedTitle" xml:space="preserve">
     <value>Load failed</value>
   </data>
@@ -407,6 +434,27 @@ This can be caused by network issues or service load. Please try again.</value>
     <value>The background worker is not running.
 
 Start the worker before connecting to Exchange Online.</value>
+  </data>
+  <data name="Error.WorkerStartup.Title" xml:space="preserve">
+    <value>Worker failed to start</value>
+  </data>
+  <data name="Error.WorkerStartup.Message" xml:space="preserve">
+    <value>The background worker could not complete startup.</value>
+  </data>
+  <data name="Error.WorkerStartup.DetailsFormat" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Generic" xml:space="preserve">
+    <value>Try this:
+1. Verify PowerShell 7 is installed.
+2. Verify the worker executable is present in the application folder.
+3. Start the app from a local folder where executables are allowed to run.</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Handshake" xml:space="preserve">
+    <value>Try this:
+1. Close every running OnlyExo365 window and worker process.
+2. Start the app again from the same build or publish folder.
+3. If the problem persists, rebuild or republish so the shell and worker binaries match.</value>
   </data>
   <data name="Error.WorkerCrashed" xml:space="preserve">
     <value>The background worker stopped unexpectedly.
@@ -2092,7 +2140,7 @@ Try restarting the worker or the application.</value>
     <value>Loading migration batch details...</value>
   </data>
   <data name="Migration.EndpointsAndBatchCreation" xml:space="preserve">
-    <value>Endpoints &amp;amp; Batch Creation</value>
+    <value>Endpoints &amp; Batch Creation</value>
   </data>
   <data name="Migration.RefreshEndpoints" xml:space="preserve">
     <value>Refresh Endpoints</value>
@@ -3164,6 +3212,24 @@ Try restarting the worker or the application.</value>
 
 Manual installation:
 {1}</value>
+  </data>
+  <data name="Warn.ModuleMissing.Title" xml:space="preserve">
+    <value>Module not found</value>
+  </data>
+  <data name="Warn.ModuleMissing.Message" xml:space="preserve">
+    <value>ExchangeOnlineManagement is not available.
+
+To use this application:
+1. Open PowerShell 7 as Administrator.
+2. Run: Install-Module ExchangeOnlineManagement -Scope CurrentUser</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Title" xml:space="preserve">
+    <value>Connection disabled</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Message" xml:space="preserve">
+    <value>Exchange Online connections are disabled by policy.
+
+Unset EXCHANGEADMIN_DISABLE_EXO and restart the application to enable connections.</value>
   </data>
   <data name="Tools.LeastPrivilege.Summary" xml:space="preserve">
     <value>Ready: {0} | Blocked: {1} | Pending/session validation: {2}</value>

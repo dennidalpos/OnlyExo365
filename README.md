@@ -36,7 +36,7 @@ Packaging prerequisites, runtime configuration, and release validation stay in t
 ## Current Project Status
 
 - Verified in this repository context on 2026-04-18: locked restore through `bootstrap.ps1` for `win-x64` and `win-x86`, Debug compile, and the automated test suite.
-- Automated tests passed locally with 711 tests.
+- Automated tests passed locally with 713 tests.
 - Real release validation still depends on checks that cannot be completed from this local context alone: tenant-backed validation, real 32-bit installer validation, and upgrade validation from a legacy `ExchangeAdmin` installation.
 - Residual release-validation work is tracked in [PROJECT_STATUS.json](PROJECT_STATUS.json).
 

@@ -19,7 +19,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <TextBlock Text="{loc:Loc Key=Nav.MobileDevices}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding MobileDevices.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
@@ -116,7 +116,7 @@
                       VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <controls:SectionPanel Header="{loc:Loc Key=MobileDevices.DeviceDetails}">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -155,7 +155,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=MobileDevices.MailboxPolicy}" Margin="0,12,0,0">
-                    <StackPanel Margin="8" IsEnabled="{Binding MobileDevices.CanLoadPolicies}">
+                    <StackPanel IsEnabled="{Binding MobileDevices.CanLoadPolicies}">
                         <TextBlock Text="{loc:Loc Key=MobileDevices.PoliciesAreAppliedToTheMailboxAssociatedWithTheSelectedDevice}" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap"/>
                         <ComboBox ItemsSource="{Binding MobileDevices.Policies}"
                                   SelectedValuePath="Identity"
@@ -167,7 +167,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=MobileDevices.DeviceActions}" Margin="0,12,0,0">
-                    <WrapPanel Margin="8">
+                    <WrapPanel>
                         <Button Content="{loc:Loc Key=MobileDevices.Allow}" Command="{Binding MobileDevices.AllowDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
                         <Button Content="{loc:Loc Key=MobileDevices.Block}" Command="{Binding MobileDevices.BlockDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource DangerButton}" Margin="0,0,8,8"/>
                         <Button Content="{loc:Loc Key=MobileDevices.Quarantine}" Command="{Binding MobileDevices.QuarantineDeviceCommand}" IsEnabled="{Binding MobileDevices.CanManageDeviceAccessState}" Style="{StaticResource InlineActionButton}" Margin="0,0,8,8"/>

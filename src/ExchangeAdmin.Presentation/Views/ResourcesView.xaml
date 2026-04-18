@@ -28,7 +28,7 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=Resources.New}" Command="{Binding Resources.NewResourceCommand}"
                             Style="{StaticResource InlineActionButton}"/>
-                    <Button Content="{loc:Loc Key=Resources.Refresh}" Command="{Binding Resources.List.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                    <Button Content="{loc:Loc Key=Resources.Refresh}" Command="{Binding Resources.List.RefreshCommand}" Style="{StaticResource InlinePrimaryActionButton}"/>
                 </StackPanel>
             </DockPanel>
 
@@ -75,7 +75,7 @@
 
             <Button Grid.Row="4" Content="{loc:Loc Key=Resources.LoadMore}" Command="{Binding Resources.List.LoadMoreCommand}"
                     HorizontalAlignment="Center" Margin="0,12,0,0"
-                    Style="{StaticResource PrimaryButton}"
+                    Style="{StaticResource InlineActionButton}"
                     Visibility="{Binding Resources.List.HasMore, Converter={StaticResource BoolToVisibility}}"/>
 
             <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
@@ -106,7 +106,7 @@
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <controls:SectionPanel Header="{loc:Loc Key=Resources.ResourceMailboxDetails}">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -157,7 +157,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=Resources.BookingSettings}" Margin="0,12,0,0">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -202,7 +202,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=Resources.MailboxDelegation}" Margin="0,12,0,0">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>

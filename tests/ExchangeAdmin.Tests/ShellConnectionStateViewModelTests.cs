@@ -6,6 +6,7 @@ using ExchangeAdmin.Application.Services;
 using ExchangeAdmin.Contracts;
 using ExchangeAdmin.Infrastructure.Ipc;
 using ExchangeAdmin.Presentation.ViewModels;
+using ExchangeAdmin.Presentation.Localization;
 
 namespace ExchangeAdmin.Tests;
 
@@ -96,6 +97,91 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     }
 
     [Fact]
+    public void BuildWorkerStartupErrorDetails_UsesHandshakeGuidanceForHandshakeFailures()
+    {
+        var previousLocale = LocalizationService.Instance.CurrentLocale;
+        LocalizationService.Instance.SetLocale("en");
+
+        try
+        {
+            var viewModel = CreateViewModel(new WorkerConsoleConnectionWorkerServiceStub(), out _);
+
+            var details = viewModel.BuildWorkerStartupErrorDetails("Handshake failed: IPC session validation failed.");
+
+            Assert.Contains("Error: Handshake failed: IPC session validation failed.", details, StringComparison.Ordinal);
+            Assert.Contains("Close every running OnlyExo365 window and worker process.", details, StringComparison.Ordinal);
+            Assert.DoesNotContain("Verify PowerShell 7 is installed.", details, StringComparison.Ordinal);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetLocale(previousLocale);
+        }
+    }
+
+    [Fact]
+    public async Task StartWorkerOnStartupAsync_CapturesInlineStartupAlertDetails()
+    {
+        var previousLocale = LocalizationService.Instance.CurrentLocale;
+        LocalizationService.Instance.SetLocale("en");
+
+        try
+        {
+            var workerService = new WorkerConsoleConnectionWorkerServiceStub();
+            workerService.SetStartWorkerResult(
+                success: false,
+                lastError: "Worker executable not found: ExchangeAdmin.Worker.exe",
+                resultingState: WorkerConnectionState.Crashed);
+            var viewModel = CreateViewModel(workerService, out _);
+
+            await viewModel.StartWorkerOnStartupAsync();
+
+            Assert.True(viewModel.HasWorkerStartupAlert);
+            Assert.Equal("Worker startup failed", viewModel.WorkerStartupAlertTitle);
+            Assert.Contains("Use Start Worker to retry without leaving the current page.", viewModel.WorkerStartupAlertMessage, StringComparison.Ordinal);
+            Assert.Contains("Worker executable not found: ExchangeAdmin.Worker.exe", viewModel.WorkerStartupAlertDetails, StringComparison.Ordinal);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetLocale(previousLocale);
+        }
+    }
+
+    [Fact]
+    public async Task StartWorkerCommand_WhenFailureOccurs_DoesNotReuseStartupBannerFeedback()
+    {
+        var workerService = new WorkerConsoleConnectionWorkerServiceStub();
+        workerService.SetStartWorkerResult(
+            success: false,
+            lastError: "Worker executable not found: ExchangeAdmin.Worker.exe",
+            resultingState: WorkerConnectionState.Crashed);
+        var viewModel = CreateViewModel(workerService, out var logState);
+
+        viewModel.StartWorkerCommand.Execute(null);
+        await WaitForAsync(() => logState.LogEntries.Any(entry => entry.Message.Contains("Failed to start worker", StringComparison.Ordinal)));
+
+        Assert.False(viewModel.HasWorkerStartupAlert);
+    }
+
+    [Fact]
+    public void NavigationTooltips_FollowSelectedLocale()
+    {
+        var previousLocale = LocalizationService.Instance.CurrentLocale;
+        LocalizationService.Instance.SetLocale("it");
+
+        try
+        {
+            var viewModel = CreateViewModel(new WorkerConsoleConnectionWorkerServiceStub(), out _);
+
+            Assert.Equal("Apri l'area di lavoro Migrazione", viewModel.MigrationNavigationTooltip);
+            Assert.Equal("Apri l'area di lavoro Traccia messaggi", viewModel.MessageTraceNavigationTooltip);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetLocale(previousLocale);
+        }
+    }
+
+    [Fact]
     public void CanToggleWorkerConsole_IsFalseWhenWorkerIsStopped()
     {
         var viewModel = CreateViewModel(new WorkerConsoleConnectionWorkerServiceStub(), out _);
@@ -148,6 +234,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     {
         private WorkerStatus _status;
         private Result<SetWorkerConsoleVisibilityResponse> _toggleResult;
+        private bool _startWorkerResult = true;
 
         public WorkerConsoleConnectionWorkerServiceStub(bool initialConsoleVisibility = false)
         {
@@ -171,6 +258,23 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         public void SetToggleResult(Result<SetWorkerConsoleVisibilityResponse> result)
         {
             _toggleResult = result;
+        }
+
+        public void SetStartWorkerResult(bool success, string? lastError = null, WorkerConnectionState resultingState = WorkerConnectionState.Connected)
+        {
+            _startWorkerResult = success;
+            _status = new WorkerStatus
+            {
+                State = resultingState,
+                IsModuleAvailable = success,
+                IsConsoleVisible = false,
+                LastError = lastError
+            };
+        }
+
+        public override Task<bool> StartWorkerAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_startWorkerResult);
         }
 
         public override Task<Result<SetWorkerConsoleVisibilityResponse>> SetWorkerConsoleVisibilityAsync(

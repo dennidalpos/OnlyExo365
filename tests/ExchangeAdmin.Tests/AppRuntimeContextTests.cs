@@ -1,5 +1,7 @@
 using System.IO;
+using ExchangeAdmin.Infrastructure.Ipc;
 using ExchangeAdmin.Presentation.Bootstrap;
+using ExchangeAdmin.Presentation.Localization;
 using ExchangeAdmin.Presentation.Services;
 using ExchangeAdmin.Presentation.ViewModels;
 
@@ -64,6 +66,46 @@ public sealed class AppRuntimeContextTests
         Assert.Equal(1, workerService.DisposeCalls);
     }
 
+    [Fact]
+    public async Task StartAsync_WhenWorkerStartupFails_ShowsSpecificInlineAlertInsteadOfGenericConnectionBanner()
+    {
+        var previousLocale = LocalizationService.Instance.CurrentLocale;
+        LocalizationService.Instance.SetLocale("en");
+
+        try
+        {
+            var workerService = new StartupFailureWorkerService();
+            var navigationService = new NavigationService();
+            using var shellViewModel = new ShellViewModel(workerService, navigationService);
+            using var catalogService = CreateNoOpCatalogService();
+            await using var runtimeContext = new AppRuntimeContext
+            {
+                WorkerService = workerService,
+                ShellViewModel = shellViewModel,
+                NavigationService = navigationService,
+                MainWindow = null!,
+                PageLoadCoordinator = new AppPageLoadCoordinator(
+                    shellViewModel,
+                    navigationService,
+                    new Dictionary<NavigationPage, Func<Task>>()),
+                CatalogUpdateService = catalogService
+            };
+
+            await runtimeContext.StartAsync();
+
+            Assert.True(shellViewModel.GlobalAlert.IsVisible);
+            Assert.Equal("Worker startup failed", shellViewModel.GlobalAlert.Title);
+            Assert.Contains("Use Start Worker to retry without leaving the current page.", shellViewModel.GlobalAlert.Message, StringComparison.Ordinal);
+            Assert.Equal("Worker:", shellViewModel.GlobalAlert.Source);
+            Assert.Contains("Worker executable not found: ExchangeAdmin.Worker.exe", shellViewModel.GlobalAlert.Details, StringComparison.Ordinal);
+            Assert.NotEqual("Connection required", shellViewModel.GlobalAlert.Title);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetLocale(previousLocale);
+        }
+    }
+
     private sealed class TrackingWorkerService : TestWorkerServiceBase, IAsyncDisposable
     {
         public int StopCalls { get; private set; }
@@ -80,5 +122,18 @@ public sealed class AppRuntimeContextTests
             DisposeCalls++;
             return ValueTask.CompletedTask;
         }
+    }
+
+    private sealed class StartupFailureWorkerService : TestWorkerServiceBase
+    {
+        public override WorkerStatus Status { get; } = new()
+        {
+            State = WorkerConnectionState.Crashed,
+            IsModuleAvailable = false,
+            LastError = "Worker executable not found: ExchangeAdmin.Worker.exe"
+        };
+
+        public override Task<bool> StartWorkerAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
     }
 }

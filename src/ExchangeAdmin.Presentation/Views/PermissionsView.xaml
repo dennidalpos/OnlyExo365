@@ -28,7 +28,7 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=Btn.New}" Command="{Binding Permissions.NewRoleGroupCommand}"
                             Style="{StaticResource InlineActionButton}"/>
-                    <Button Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding Permissions.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                    <Button Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding Permissions.RefreshCommand}" Style="{StaticResource InlinePrimaryActionButton}"/>
                 </StackPanel>
             </DockPanel>
 
@@ -71,7 +71,7 @@
 
                 <Button Grid.Row="1" Content="{loc:Loc Key=Btn.LoadMore}" Command="{Binding Permissions.LoadMoreCommand}"
                         HorizontalAlignment="Center" Margin="0,12,0,0"
-                        Style="{StaticResource PrimaryButton}"
+                        Style="{StaticResource InlineActionButton}"
                         Visibility="{Binding Permissions.HasMore, Converter={StaticResource BoolToVisibility}}"/>
 
                 <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
@@ -103,7 +103,7 @@
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <controls:SectionPanel Header="{loc:Loc Key=Permissions.RoleGroupDetailsHeading}">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -160,7 +160,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=Permissions.MembershipHeading}" Margin="0,12,0,0">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -195,7 +195,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=Permissions.NewGroupHeading}" Margin="0,12,0,0">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>

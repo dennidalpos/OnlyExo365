@@ -28,7 +28,7 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=PublicFolders.New}" Command="{Binding PublicFolders.NewFolderCommand}"
                             Style="{StaticResource InlineActionButton}"/>
-                    <Button Content="{loc:Loc Key=PublicFolders.Refresh}" Command="{Binding PublicFolders.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
+                    <Button Content="{loc:Loc Key=PublicFolders.Refresh}" Command="{Binding PublicFolders.RefreshCommand}" Style="{StaticResource InlinePrimaryActionButton}"/>
                 </StackPanel>
             </DockPanel>
 
@@ -75,7 +75,7 @@
 
             <Button Grid.Row="4" Content="{loc:Loc Key=PublicFolders.LoadMore}" Command="{Binding PublicFolders.LoadMoreCommand}"
                     HorizontalAlignment="Center" Margin="0,12,0,0"
-                    Style="{StaticResource PrimaryButton}"
+                    Style="{StaticResource InlineActionButton}"
                     Visibility="{Binding PublicFolders.HasMore, Converter={StaticResource BoolToVisibility}}"/>
 
             <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
@@ -106,7 +106,7 @@
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.PublicFolderDetails}">
-                    <Grid Margin="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -162,7 +162,7 @@
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.ClientPermissions}" Margin="0,12,0,0">
-                    <StackPanel Margin="8">
+                    <StackPanel>
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

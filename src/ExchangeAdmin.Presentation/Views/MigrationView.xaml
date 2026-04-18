@@ -11,7 +11,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                 <TextBlock Text="{loc:Loc Key=Nav.Migration}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                 <TextBlock Text="{Binding Migration.StatusText}"
@@ -127,7 +127,7 @@
                     <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.BatchDetails}">
-                                <Grid Margin="8">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -210,7 +210,7 @@
                             </controls:SectionPanel>
 
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.Report}" Margin="0,12,0,0">
-                                <TextBox Margin="8"
+                                <TextBox
                                          Text="{Binding Migration.SelectedDetails.Report}"
                                          IsReadOnly="True"
                                          TextWrapping="Wrap"
@@ -220,7 +220,7 @@
                             </controls:SectionPanel>
 
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.BatchActions}" Margin="0,12,0,0">
-                                <WrapPanel Margin="8">
+                                <WrapPanel>
                                     <Button Content="{loc:Loc Key=Migration.Start}" Command="{Binding Migration.StartBatchCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
                                     <Button Content="{loc:Loc Key=Migration.Complete}" Command="{Binding Migration.CompleteBatchCommand}" Style="{StaticResource ToolbarButton}"/>
                                     <Button Content="{loc:Loc Key=Migration.Remove}" Command="{Binding Migration.RemoveBatchCommand}" Style="{StaticResource ToolbarDangerButton}"/>
@@ -293,7 +293,7 @@
                     <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.EndpointEditor}">
-                                <Grid Margin="8">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -339,7 +339,7 @@
                             </controls:SectionPanel>
 
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.CredentialsAndLimits}" Margin="0,12,0,0">
-                                <Grid Margin="8">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -380,7 +380,7 @@
                             </controls:SectionPanel>
 
                             <controls:SectionPanel Header="{loc:Loc Key=Migration.CreateMigrationBatch}" Margin="0,12,0,0">
-                                <Grid Margin="8">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>

@@ -36,6 +36,7 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
     private CapabilityMapDto? _capabilities;
     private bool _isWorkerConsoleVisible;
     private bool _isWorkerConsoleToggleBusy;
+    private string? _workerStartupAlertDetails;
 
     public ShellConnectionStateViewModel(
         IConnectionWorkerService workerService,
@@ -54,7 +55,9 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
         }
         IsExchangeConnectionDisabled = IsEnvironmentFlagEnabled(DisableExchangeEnvVar);
 
-        StartWorkerCommand = new AsyncRelayCommand(StartWorkerAsync, () => CanStartWorker);
+        StartWorkerCommand = new AsyncRelayCommand(
+            cancellationToken => StartWorkerAsync(cancellationToken, showFailureDialog: true),
+            () => CanStartWorker);
         StopWorkerCommand = new AsyncRelayCommand(StopWorkerAsync, () => CanStopWorker);
         RestartWorkerCommand = new AsyncRelayCommand(RestartWorkerAsync, () => CanRestartWorker);
         KillWorkerCommand = new RelayCommand(() => _workerService.KillWorker(), () => CanKillWorker);
@@ -103,6 +106,14 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
     public string WorkerRunningDisplay => IsWorkerRunning
         ? Loc.Get("Common.Yes")
         : Loc.Get("Common.No");
+
+    internal bool HasWorkerStartupAlert => !string.IsNullOrWhiteSpace(_workerStartupAlertDetails);
+
+    internal string WorkerStartupAlertTitle => Loc.Get("Alert.WorkerStartupFailedTitle");
+
+    internal string WorkerStartupAlertMessage => Loc.Get("Alert.WorkerStartupFailedMessage");
+
+    internal string? WorkerStartupAlertDetails => _workerStartupAlertDetails;
 
     public bool IsWorkerConsoleVisible
     {
@@ -266,38 +277,38 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
                                               MobileDevicesCapabilityState.From(Capabilities).IsModuleAvailable;
 
     public string MobileDevicesNavigationTooltip => CanAccessMobileDevicesPage
-        ? "Open the Mobile Devices workspace"
-        : MobileDevicesCapabilityState.From(Capabilities).Message ?? "The Mobile Devices workspace is not available for the current session.";
+        ? Loc.Get("Nav.Tooltip.MobileDevices.Open")
+        : MobileDevicesCapabilityState.From(Capabilities).Message ?? Loc.Get("Nav.Tooltip.MobileDevices.Unavailable");
 
     public bool CanAccessMigrationPage => CanAccessFeature(LeastPrivilegeCatalog.MigrationBatches);
 
     public string MigrationNavigationTooltip => GetFeatureNavigationTooltip(
         LeastPrivilegeCatalog.MigrationBatches,
-        "Open the Migration workspace");
+        Loc.Get("Nav.Tooltip.Migration.Open"));
 
     public bool CanAccessPermissionsPage => CanAccessFeature(LeastPrivilegeCatalog.PermissionsRoleGroups);
 
     public string PermissionsNavigationTooltip => GetFeatureNavigationTooltip(
         LeastPrivilegeCatalog.PermissionsRoleGroups,
-        "Open the Role Groups workspace");
+        Loc.Get("Nav.Tooltip.RoleGroups.Open"));
 
     public bool CanAccessMessageTracePage => CanAccessFeature(LeastPrivilegeCatalog.MessageTraceRead);
 
     public string MessageTraceNavigationTooltip => GetFeatureNavigationTooltip(
         LeastPrivilegeCatalog.MessageTraceRead,
-        "Open the Message Trace workspace");
+        Loc.Get("Nav.Tooltip.MessageTrace.Open"));
 
     public bool CanAccessCompliancePage => CanAccessFeature(LeastPrivilegeCatalog.ComplianceAuditAndEDiscovery);
 
     public string ComplianceNavigationTooltip => GetFeatureNavigationTooltip(
         LeastPrivilegeCatalog.ComplianceAuditAndEDiscovery,
-        "Open the Compliance workspace");
+        Loc.Get("Nav.Tooltip.Compliance.Open"));
 
     public bool CanAccessMailSecurityPage => CanAccessFeature(LeastPrivilegeCatalog.MailSecurityBaseline);
 
     public string MailSecurityNavigationTooltip => GetFeatureNavigationTooltip(
         LeastPrivilegeCatalog.MailSecurityBaseline,
-        "Open the Mail Security workspace");
+        Loc.Get("Nav.Tooltip.MailSecurity.Open"));
 
     public bool CanStartWorker => WorkerState == WorkerConnectionState.NotStarted ||
                                   WorkerState == WorkerConnectionState.Stopped ||
@@ -332,6 +343,11 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
         WorkerState = state;
         IsWorkerConsoleVisible = state == WorkerConnectionState.Connected && _workerService.Status.IsConsoleVisible;
         _logState.AddLog(LogLevel.Information, $"Worker state changed: {state}");
+
+        if (state == WorkerConnectionState.Connected)
+        {
+            ClearWorkerStartupAlert();
+        }
 
         if (state != WorkerConnectionState.Connected && ExchangeState == ConnectionState.Connected)
         {
@@ -403,7 +419,7 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
             return Task.CompletedTask;
         }
 
-        return StartWorkerAsync(CancellationToken.None);
+        return StartWorkerAsync(CancellationToken.None, showFailureDialog: false);
     }
 
     public bool IsFeatureAvailable(Func<FeatureCapabilitiesDto, bool> featureCheck)
@@ -424,39 +440,41 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
     public LeastPrivilegeFeatureEvaluation EvaluateLeastPrivilege(string featureId)
         => _leastPrivilegeEvaluator.Evaluate(featureId, Capabilities);
 
-    private async Task StartWorkerAsync(CancellationToken cancellationToken)
+    private async Task StartWorkerAsync(CancellationToken cancellationToken, bool showFailureDialog)
     {
+        ClearWorkerStartupAlert();
         _logState.AddLog(LogLevel.Information, "Starting worker...");
 
         var success = await _workerService.StartWorkerAsync(cancellationToken);
         if (success)
         {
+            ClearWorkerStartupAlert();
             _logState.AddLog(LogLevel.Information, "Worker started successfully");
 
             var status = _workerService.Status;
             if (!status.IsModuleAvailable)
             {
-                var warning = "ExchangeOnlineManagement module is not available.\n\n" +
-                              "To use this application, you need to install the module:\n" +
-                              "1. Open PowerShell 7 as Administrator\n" +
-                              "2. Run: Install-Module ExchangeOnlineManagement -Scope CurrentUser";
+                var warning = Loc.Get("Warn.ModuleMissing.Message");
                 _logState.AddLog(LogLevel.Warning, "ExchangeOnlineManagement module is not available. Install it with: Install-Module ExchangeOnlineManagement");
-                ErrorDialogService.ShowWarning("Module Not Found", warning);
+                ErrorDialogService.ShowWarning(Loc.Get("Warn.ModuleMissing.Title"), warning);
             }
 
             return;
         }
 
-        var errorMessage = _workerService.Status.LastError ?? "Unknown error";
+        var errorMessage = _workerService.Status.LastError;
+        var errorDetails = BuildWorkerStartupErrorDetails(errorMessage);
         _logState.AddLog(LogLevel.Error, $"Failed to start worker: {errorMessage}");
-        ShowErrorDialog(
-            "Worker Failed to Start",
-            "The background worker process could not be started.",
-            $"Error: {errorMessage}\n\n" +
-            "Please ensure:\n" +
-            "1. PowerShell 7+ is installed\n" +
-            "2. The worker executable exists in the application folder\n" +
-            "3. You have permission to run executables");
+        if (showFailureDialog)
+        {
+            ShowErrorDialog(
+                Loc.Get("Error.WorkerStartup.Title"),
+                Loc.Get("Error.WorkerStartup.Message"),
+                errorDetails);
+            return;
+        }
+
+        SetWorkerStartupAlert(errorDetails);
     }
 
     private async Task StopWorkerAsync(CancellationToken cancellationToken)
@@ -532,9 +550,8 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
         {
             _logState.AddLog(LogLevel.Warning, "Exchange Online connections are disabled by policy (EXCHANGEADMIN_DISABLE_EXO=1).");
             ErrorDialogService.ShowWarning(
-                "Connection Disabled",
-                "Exchange Online connections are disabled by policy.\n\n" +
-                "To enable connections, unset EXCHANGEADMIN_DISABLE_EXO and restart the application.");
+                Loc.Get("Warn.ConnectionDisabled.Title"),
+                Loc.Get("Warn.ConnectionDisabled.Message"));
             return;
         }
 
@@ -723,6 +740,61 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
                value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
                value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
                value.Equals("on", StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal string BuildWorkerStartupErrorDetails(string? errorMessage)
+    {
+        var normalizedError = string.IsNullOrWhiteSpace(errorMessage)
+            ? Loc.Get("Status.Unknown")
+            : errorMessage.Trim();
+
+        var guidance = IsHandshakeStartupError(normalizedError)
+            ? Loc.Get("Error.WorkerStartup.Guidance.Handshake")
+            : Loc.Get("Error.WorkerStartup.Guidance.Generic");
+
+        return string.Join(
+            Environment.NewLine + Environment.NewLine,
+            Loc.GetFormat("Error.WorkerStartup.DetailsFormat", normalizedError),
+            guidance);
+    }
+
+    internal static bool IsHandshakeStartupError(string errorMessage)
+    {
+        return errorMessage.Contains("handshake", StringComparison.OrdinalIgnoreCase) ||
+               errorMessage.Contains("ipc session", StringComparison.OrdinalIgnoreCase) ||
+               errorMessage.Contains("session validation", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void SetWorkerStartupAlert(string details)
+    {
+        var normalizedDetails = string.IsNullOrWhiteSpace(details)
+            ? null
+            : details.Trim();
+
+        if (string.Equals(_workerStartupAlertDetails, normalizedDetails, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _workerStartupAlertDetails = normalizedDetails;
+        OnPropertyChanged(nameof(HasWorkerStartupAlert));
+        OnPropertyChanged(nameof(WorkerStartupAlertTitle));
+        OnPropertyChanged(nameof(WorkerStartupAlertMessage));
+        OnPropertyChanged(nameof(WorkerStartupAlertDetails));
+    }
+
+    private void ClearWorkerStartupAlert()
+    {
+        if (string.IsNullOrWhiteSpace(_workerStartupAlertDetails))
+        {
+            return;
+        }
+
+        _workerStartupAlertDetails = null;
+        OnPropertyChanged(nameof(HasWorkerStartupAlert));
+        OnPropertyChanged(nameof(WorkerStartupAlertTitle));
+        OnPropertyChanged(nameof(WorkerStartupAlertMessage));
+        OnPropertyChanged(nameof(WorkerStartupAlertDetails));
     }
 
     private void ShowErrorDialog(string title, string message, string? details = null)

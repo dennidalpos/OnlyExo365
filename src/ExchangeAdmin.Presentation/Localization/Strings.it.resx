@@ -133,6 +133,27 @@
   <data name="Nav.Logs" xml:space="preserve">
     <value>Log</value>
   </data>
+  <data name="Nav.Tooltip.MobileDevices.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Dispositivi mobili</value>
+  </data>
+  <data name="Nav.Tooltip.MobileDevices.Unavailable" xml:space="preserve">
+    <value>L'area di lavoro Dispositivi mobili non è disponibile per la sessione corrente.</value>
+  </data>
+  <data name="Nav.Tooltip.Migration.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Migrazione</value>
+  </data>
+  <data name="Nav.Tooltip.RoleGroups.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Gruppi di ruolo</value>
+  </data>
+  <data name="Nav.Tooltip.MessageTrace.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Traccia messaggi</value>
+  </data>
+  <data name="Nav.Tooltip.Compliance.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Conformità</value>
+  </data>
+  <data name="Nav.Tooltip.MailSecurity.Open" xml:space="preserve">
+    <value>Apri l'area di lavoro Sicurezza posta</value>
+  </data>
   <!-- Buttons -->
   <data name="Btn.StartWorker" xml:space="preserve">
     <value>Avvia Worker</value>
@@ -306,6 +327,12 @@ Confermare?</value>
   <data name="Alert.ConnectionRequiredMessage" xml:space="preserve">
     <value>Non connesso a Exchange Online.</value>
   </data>
+  <data name="Alert.WorkerStartupFailedTitle" xml:space="preserve">
+    <value>Avvio automatico del worker non riuscito</value>
+  </data>
+  <data name="Alert.WorkerStartupFailedMessage" xml:space="preserve">
+    <value>Il worker in background non si è avviato automaticamente. Usa Avvia Worker per riprovare senza uscire dalla pagina corrente.</value>
+  </data>
   <data name="Alert.LoadFailedTitle" xml:space="preserve">
     <value>Caricamento non riuscito</value>
   </data>
@@ -407,6 +434,27 @@ Questo può essere causato da problemi di rete o carico del servizio. Riprova.</
     <value>Il worker in background non è in esecuzione.
 
 Avvia il worker prima di connetterti a Exchange Online.</value>
+  </data>
+  <data name="Error.WorkerStartup.Title" xml:space="preserve">
+    <value>Avvio del worker non riuscito</value>
+  </data>
+  <data name="Error.WorkerStartup.Message" xml:space="preserve">
+    <value>Il worker in background non ha completato l'avvio.</value>
+  </data>
+  <data name="Error.WorkerStartup.DetailsFormat" xml:space="preserve">
+    <value>Errore: {0}</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Generic" xml:space="preserve">
+    <value>Prova così:
+1. Verifica che PowerShell 7 sia installato.
+2. Verifica che l'eseguibile del worker sia presente nella cartella dell'applicazione.
+3. Avvia l'app da una cartella locale in cui sia consentito eseguire file eseguibili.</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Handshake" xml:space="preserve">
+    <value>Prova così:
+1. Chiudi tutte le finestre e i processi worker di OnlyExo365 ancora in esecuzione.
+2. Riavvia l'app dalla stessa cartella di build o publish.
+3. Se il problema persiste, rigenera o ripubblica l'app in modo che shell e worker usino binari allineati.</value>
   </data>
   <data name="Error.WorkerCrashed" xml:space="preserve">
     <value>Il worker in background si è arrestato inaspettatamente.
@@ -3164,6 +3212,24 @@ Prova a riavviare il worker o l'applicazione.</value>
 
 Installazione manuale:
 {1}</value>
+  </data>
+  <data name="Warn.ModuleMissing.Title" xml:space="preserve">
+    <value>Modulo non trovato</value>
+  </data>
+  <data name="Warn.ModuleMissing.Message" xml:space="preserve">
+    <value>ExchangeOnlineManagement non è disponibile.
+
+Per usare questa applicazione:
+1. Apri PowerShell 7 come amministratore.
+2. Esegui: Install-Module ExchangeOnlineManagement -Scope CurrentUser</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Title" xml:space="preserve">
+    <value>Connessione disabilitata</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Message" xml:space="preserve">
+    <value>Le connessioni a Exchange Online sono disabilitate da criterio.
+
+Rimuovi EXCHANGEADMIN_DISABLE_EXO e riavvia l'applicazione per abilitarle.</value>
   </data>
   <data name="Tools.LeastPrivilege.Summary" xml:space="preserve">
     <value>Pronte: {0} | Bloccate: {1} | In attesa/validazione sessione: {2}</value>

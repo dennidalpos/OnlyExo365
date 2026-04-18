@@ -10,7 +10,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
             <TextBlock Text="{loc:Loc Key=MailFlow.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0" DockPanel.Dock="Left"/>
             <Button Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding MailFlow.RefreshCommand}" Style="{StaticResource PrimaryButton}" DockPanel.Dock="Right"/>
         </DockPanel>
@@ -37,7 +37,7 @@
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewRuleCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
                                 <Button Content="{loc:Loc Key=MailFlow.Enable}" Command="{Binding MailFlow.EnableRuleCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
                                 <Button Content="{loc:Loc Key=MailFlow.Disable}" Command="{Binding MailFlow.DisableRuleCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.Delete}" Command="{Binding MailFlow.RemoveRuleCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.Delete}" Command="{Binding MailFlow.RemoveRuleCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.TransportRules}"
                                       SelectedItem="{Binding MailFlow.SelectedRule, Mode=TwoWay}"
@@ -57,7 +57,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewConnectorCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveConnectorCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveConnectorCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.Connectors}"
                                       SelectedItem="{Binding MailFlow.SelectedConnector, Mode=TwoWay}"
@@ -77,7 +77,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewDomainCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveDomainCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveDomainCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.AcceptedDomains}"
                                       SelectedItem="{Binding MailFlow.SelectedDomain, Mode=TwoWay}"
@@ -97,7 +97,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewRemoteDomainCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveRemoteDomainCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveRemoteDomainCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.RemoteDomains}"
                                       SelectedItem="{Binding MailFlow.SelectedRemoteDomain, Mode=TwoWay}"
@@ -118,7 +118,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewOrganizationRelationshipCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveOrganizationRelationshipCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveOrganizationRelationshipCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.OrganizationRelationships}"
                                       SelectedItem="{Binding MailFlow.SelectedOrganizationRelationship, Mode=TwoWay}"
@@ -139,7 +139,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewAddressListCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveAddressListCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveAddressListCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <TextBlock Text="{Binding MailFlow.AddressListSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
@@ -164,7 +164,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewAddressBookPolicyCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveAddressBookPolicyCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveAddressBookPolicyCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.AddressBookPolicies}"
                                       SelectedItem="{Binding MailFlow.SelectedAddressBookPolicy, Mode=TwoWay}"
@@ -184,7 +184,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewOfflineAddressBookCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveOfflineAddressBookCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveOfflineAddressBookCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <TextBlock Text="{Binding MailFlow.OfflineAddressBookSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
@@ -209,7 +209,7 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <Button Content="{loc:Loc Key=MailFlow.NewReset}" Command="{Binding MailFlow.NewSharingPolicyCommand}" Style="{StaticResource ActionGroupPrimaryButton}"/>
-                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveSharingPolicyCommand}" Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="{loc:Loc Key=MailFlow.DeleteSelected}" Command="{Binding MailFlow.RemoveSharingPolicyCommand}" Style="{StaticResource ActionGroupDangerButton}"/>
                             </StackPanel>
                             <DataGrid ItemsSource="{Binding MailFlow.SharingPolicies}"
                                       SelectedItem="{Binding MailFlow.SelectedSharingPolicy, Mode=TwoWay}"
@@ -230,7 +230,7 @@
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditTransportRule}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.RuleIdentity}" IsReadOnly="True"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
@@ -281,7 +281,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.TestTransportRules}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Sender}"/>
                             <TextBox Text="{Binding MailFlow.TestSender, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Recipient}" Margin="0,6,0,0"/>
@@ -298,7 +298,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditConnector}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.ConnectorIdentityDisplay}" IsReadOnly="True"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Type}" Margin="0,6,0,0"/>
@@ -320,7 +320,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAcceptedDomain}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.DomainIdentity}" IsReadOnly="True"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
@@ -338,7 +338,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditRemoteDomain}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.RemoteDomainIdentity}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DefaultRemoteDomain}" IsChecked="{Binding MailFlow.RemoteDomainIsDefault}" Margin="0,6,0,0" IsEnabled="False"/>
@@ -363,7 +363,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditOrganizationRelationship}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.OrganizationRelationshipIdentity}" IsReadOnly="True"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
@@ -393,7 +393,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAddressList}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{Binding MailFlow.AddressListSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
                                        Margin="0,0,0,8"
@@ -426,7 +426,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAddressBookPolicy}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.AddressBookPolicyIdentity}" IsReadOnly="True"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
@@ -447,7 +447,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditOfflineAddressBook}" Margin="0,0,0,8">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{Binding MailFlow.OfflineAddressBookSectionWarningMessage}"
                                        Style="{StaticResource InlineValidationTextStyle}"
                                        Margin="0,0,0,8"
@@ -469,7 +469,7 @@
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditSharingPolicy}">
-                        <StackPanel Margin="8">
+                        <StackPanel>
                             <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
                             <TextBox Text="{Binding MailFlow.SharingPolicyIdentity}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DefaultSharingPolicy}" IsChecked="{Binding MailFlow.SharingPolicyIsDefault}" Margin="0,6,0,0" IsEnabled="False"/>

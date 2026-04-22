@@ -1,8 +1,8 @@
 # Microsoft 365 SKU Catalog Maintenance
 
-This document covers the versioned embedded catalog at `src/ExchangeAdmin.Worker/Data/Microsoft365SkuCatalog.json`.
+This document covers the versioned embedded catalog at `src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json`.
 
-The app also has a runtime cache managed by the presentation process. Runtime cache behavior is configured by the `licensingCatalog` section in `src/ExchangeAdmin.Presentation/appsettings.json` and described in [../operations/operator-setup.md](../operations/operator-setup.md).
+The app also has a runtime cache managed by the presentation process. Runtime cache behavior is configured by the `licensingCatalog` section in `src/OnlyExo365.Shell/appsettings.json` and described in [../operations/operator-setup.md](../operations/operator-setup.md).
 
 ## Purpose
 
@@ -24,7 +24,7 @@ The script:
 
 - resolves the current Microsoft Learn licensing CSV link
 - downloads the CSV into `artifacts/tmp/licensing-catalog`
-- regenerates `src/ExchangeAdmin.Worker/Data/Microsoft365SkuCatalog.json`
+- regenerates `src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json`
 - updates the `generatedOn` field
 
 ## Expected JSON Shape
@@ -51,3 +51,4 @@ The current versioned catalog reports:
 pwsh ./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 pwsh ./scripts/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 ```
+

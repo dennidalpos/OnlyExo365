@@ -121,7 +121,7 @@ function Get-RepoRelativePath {
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " ExchangeAdmin Clean Script" -ForegroundColor Cyan
+Write-Host " OnlyExo365 Clean Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Solution: $SolutionDir"
@@ -314,7 +314,7 @@ if ($All) {
 }
 
 Write-Step "Running dotnet clean"
-$solutionFile = Join-Path $SolutionDir "ExchangeAdmin.sln"
+$solutionFile = Join-Path $SolutionDir "OnlyExo365.sln"
 
 if ($SkipDotNetClean) {
     Write-Skipped 'dotnet clean skipped by -SkipDotNetClean'
@@ -364,3 +364,4 @@ if ($DryRun) {
 
 Write-Host ""
 exit 0
+

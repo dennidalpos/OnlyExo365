@@ -209,7 +209,7 @@ $resolvedSourcePath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue
 $resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
 $resolvedToolManifestPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ToolManifestPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
-$cacheDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "exchangeadmin-security-tools"
+$cacheDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "onlyexo365-security-tools"
 
 if (-not (Test-Path $resolvedSourcePath)) {
     Stop-WithError "Source path not found: $resolvedSourcePath"

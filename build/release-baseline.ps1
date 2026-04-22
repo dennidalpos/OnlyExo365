@@ -26,9 +26,9 @@ $ProgressPreference = "SilentlyContinue"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$solutionFile = Join-Path $repoRoot "ExchangeAdmin.sln"
+$solutionFile = Join-Path $repoRoot "OnlyExo365.sln"
 $buildScript = Join-Path $scriptDir "build.ps1"
-$presentationProject = Join-Path $repoRoot "src\ExchangeAdmin.Presentation\ExchangeAdmin.Presentation.csproj"
+$presentationProject = Join-Path $repoRoot "src\OnlyExo365.Shell\OnlyExo365.Shell.csproj"
 $outputRootPath = if ([System.IO.Path]::IsPathRooted($OutputRoot)) { $OutputRoot } else { Join-Path $repoRoot $OutputRoot }
 
 . (Join-Path $scriptDir "helpers\common.ps1")
@@ -289,3 +289,4 @@ Write-Host ""
 Write-Host "Manifest: $manifestPath" -ForegroundColor Cyan
 Write-Host "Package : $packagePath" -ForegroundColor Cyan
 Write-Host ""
+

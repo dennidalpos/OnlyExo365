@@ -6,7 +6,7 @@ param(
     [string]$Configuration = "Release",
 
     [ValidateNotNullOrEmpty()]
-    [string]$RuntimeIdentifier = "multi-arch",
+    [string]$RuntimeIdentifier = "win-x64",
 
     [string]$ReportPath = "artifacts/reproducibility/package-reproducibility.json"
 )
@@ -64,7 +64,8 @@ function Invoke-PackRun {
     & pwsh -NoLogo -NoProfile -File $packScriptPath `
         -Configuration $Configuration `
         -Clean:$true `
-        -LockedMode | Out-Host
+        -LockedMode `
+        -RuntimeIdentifier $RuntimeIdentifier | Out-Host
 
     if ($LASTEXITCODE -ne 0) {
         throw "scripts/pack.ps1 failed during iteration $Iteration with exit code $LASTEXITCODE."

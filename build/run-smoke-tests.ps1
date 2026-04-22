@@ -72,14 +72,6 @@ function Get-DefaultSecretDirectory {
     return Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "OnlyExo365\ipc-secrets"
 }
 
-function Get-LegacyLogDirectory {
-    return Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "OnlyExo365\ExchangeAdmin\logs"
-}
-
-function Get-LegacySecretDirectory {
-    return Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "OnlyExo365\ExchangeAdmin\ipc-secrets"
-}
-
 function Get-DefaultExportDirectory {
     return Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "OnlyExo365\exports"
 }
@@ -171,7 +163,7 @@ function Get-WorkerProcessInfo {
     )
 
     $normalizedExpectedPath = Normalize-FileSystemPath -PathValue $ExpectedPath
-    $workers = Get-CimInstance Win32_Process -Filter "Name = 'ExchangeAdmin.Worker.exe'" -ErrorAction SilentlyContinue
+    $workers = Get-CimInstance Win32_Process -Filter "Name = 'OnlyExo365.Worker.exe'" -ErrorAction SilentlyContinue
     foreach ($worker in @($workers)) {
         if ($null -eq $worker -or [string]::IsNullOrWhiteSpace($worker.ExecutablePath)) {
             continue
@@ -262,11 +254,11 @@ if (-not (Test-Path $reportDirectory)) {
     New-Item -Path $reportDirectory -ItemType Directory -Force | Out-Null
 }
 
-$presentationExe = Join-Path $resolvedPublishPath "ExchangeAdmin.Presentation.exe"
-$workerExe = Join-Path $resolvedPublishPath "ExchangeAdmin.Worker.exe"
+$presentationExe = Join-Path $resolvedPublishPath "OnlyExo365.Shell.exe"
+$workerExe = Join-Path $resolvedPublishPath "OnlyExo365.Worker.exe"
 $appSettingsPath = Join-Path $resolvedPublishPath "appsettings.json"
-$presentationRuntimeConfig = Join-Path $resolvedPublishPath "ExchangeAdmin.Presentation.runtimeconfig.json"
-$workerRuntimeConfig = Join-Path $resolvedPublishPath "ExchangeAdmin.Worker.runtimeconfig.json"
+$presentationRuntimeConfig = Join-Path $resolvedPublishPath "OnlyExo365.Shell.runtimeconfig.json"
+$workerRuntimeConfig = Join-Path $resolvedPublishPath "OnlyExo365.Worker.runtimeconfig.json"
 $requiredPublishFiles = @($presentationExe, $workerExe, $appSettingsPath, $presentationRuntimeConfig, $workerRuntimeConfig)
 Assert-RequiredFilesExist -Paths $requiredPublishFiles -Label "Publish output"
 
@@ -331,21 +323,19 @@ try {
     if (-not $SkipRealInstall) {
         $preExistingServices = @(Get-ProjectServiceEntries -PathHints @($resolvedPublishPath))
         if ($preExistingServices.Count -gt 0) {
-            Stop-WithError "Existing ExchangeAdmin / OnlyExo365 services detected. Installer smoke tests require a clean host to avoid altering operator services."
+            Stop-WithError "Existing OnlyExo365 / OnlyExo365 services detected. Installer smoke tests require a clean host to avoid altering operator services."
         }
 
         $projectDataBackup = Backup-ProjectDataRoots -Paths @(
             $logDirectory,
             $secretDirectory,
-            $exportDirectory,
-            (Get-LegacyLogDirectory),
-            (Get-LegacySecretDirectory)
+            $exportDirectory
         )
         $projectDataBackupRoot = $projectDataBackup.BackupRoot
         $projectDataBackupEntries = @($projectDataBackup.Entries)
         $report["installer"]["local_data_backup_entries"] = @($projectDataBackupEntries)
         if ($projectDataBackupEntries.Count -gt 0) {
-            Write-Success "Backed up $($projectDataBackupEntries.Count) ExchangeAdmin local data root(s) before installer validation."
+            Write-Success "Backed up $($projectDataBackupEntries.Count) OnlyExo365 local data root(s) before installer validation."
         }
     }
 
@@ -380,7 +370,7 @@ try {
             Stop-WithError "Existing installation detected for '$($report["installer"]["product_name"])'. Real installer smoke tests require a clean host to avoid altering an operator installation."
         }
 
-        $installerSmokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("exchangeadmin-setup-smoke-" + [guid]::NewGuid().ToString("N"))
+        $installerSmokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-setup-smoke-" + [guid]::NewGuid().ToString("N"))
         $realInstallRoot = Join-Path $installerSmokeRoot "installed\OnlyExo365"
         New-Item -Path $realInstallRoot -ItemType Directory -Force | Out-Null
         $report["installer"]["install_root"] = $realInstallRoot
@@ -452,8 +442,8 @@ try {
         }
         Write-Success "Setup reinstall preserved a single uninstall registry entry."
 
-        $installedPresentationExe = Join-Path $realInstallRoot "ExchangeAdmin.Presentation.exe"
-        $installedWorkerExe = Join-Path $realInstallRoot "ExchangeAdmin.Worker.exe"
+        $installedPresentationExe = Join-Path $realInstallRoot "OnlyExo365.Shell.exe"
+        $installedWorkerExe = Join-Path $realInstallRoot "OnlyExo365.Worker.exe"
         $installedLaunchReport = Invoke-ApplicationSmokeTest `
             -Label "installed setup" `
             -ExecutablePath $installedPresentationExe `
@@ -515,7 +505,7 @@ try {
             return $true
         } | Out-Null
 
-        Wait-Until -TimeoutSeconds $InstallerOperationTimeoutSeconds -FailureMessage "Residual ExchangeAdmin files or directories are still present after setup uninstall." -Condition {
+        Wait-Until -TimeoutSeconds $InstallerOperationTimeoutSeconds -FailureMessage "Residual OnlyExo365 files or directories are still present after setup uninstall." -Condition {
             foreach ($path in $residualMarkerPaths) {
                 if (Test-Path $path -PathType Leaf) {
                     return $null
@@ -534,7 +524,7 @@ try {
         $remainingServices = @(Get-ProjectServiceEntries -PathHints @($realInstallRoot, $resolvedPublishPath))
         $report["installer"]["remaining_services"] = $remainingServices
         if ($remainingServices.Count -gt 0) {
-            Stop-WithError "ExchangeAdmin / OnlyExo365 services still present after setup uninstall."
+            Stop-WithError "OnlyExo365 / OnlyExo365 services still present after setup uninstall."
         }
 
         $report["installer"]["required_files"] = Get-RequiredPayloadFiles -RootPath $realInstallRoot
@@ -551,12 +541,12 @@ try {
     if ($projectDataBackupEntries.Count -gt 0) {
         $restoredCount = Restore-ProjectDataRoots -Entries $projectDataBackupEntries
         if ($restoredCount -ne $projectDataBackupEntries.Count) {
-            Stop-WithError "Unable to restore all pre-existing ExchangeAdmin local data after installer validation."
+            Stop-WithError "Unable to restore all pre-existing OnlyExo365 local data after installer validation."
         }
 
         $projectDataBackupEntries = @()
         $report["installer"]["local_data_restore_confirmed"] = $true
-        Write-Success "Restored pre-existing ExchangeAdmin local data after installer validation."
+        Write-Success "Restored pre-existing OnlyExo365 local data after installer validation."
     }
 
     $report | ConvertTo-Json -Depth 10 | Out-File -FilePath $resolvedReportPath -Encoding utf8
@@ -571,15 +561,15 @@ finally {
         try {
             $restoredCount = Restore-ProjectDataRoots -Entries $projectDataBackupEntries
             if ($restoredCount -eq $projectDataBackupEntries.Count) {
-                Write-Warn "Recovered pre-existing ExchangeAdmin local data during final cleanup after an interrupted installer smoke test run."
+                Write-Warn "Recovered pre-existing OnlyExo365 local data during final cleanup after an interrupted installer smoke test run."
                 $projectDataBackupEntries = @()
             }
             else {
-                Write-Warn "Smoke test cleanup could not restore all pre-existing ExchangeAdmin local data automatically."
+                Write-Warn "Smoke test cleanup could not restore all pre-existing OnlyExo365 local data automatically."
             }
         }
         catch {
-            Write-Warn "Smoke test cleanup failed while restoring pre-existing ExchangeAdmin local data: $($_.Exception.Message)"
+            Write-Warn "Smoke test cleanup failed while restoring pre-existing OnlyExo365 local data: $($_.Exception.Message)"
         }
     }
 
@@ -593,3 +583,4 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host " SMOKE TESTS COMPLETED" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
+

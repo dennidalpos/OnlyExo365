@@ -25,12 +25,11 @@ $repositoryRoot = Split-Path -Parent $scriptDirectory
 
 $resolvedPublishPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $PublishPath
 $resolvedPublishPathX64 = Join-Path $resolvedPublishPath "win-x64"
-$resolvedPublishPathX86 = Join-Path $resolvedPublishPath "win-x86"
 $resolvedOutputDirectory = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $OutputDirectory
 $resolvedOutputPath = Join-Path $resolvedOutputDirectory $OutputFileName
-$resolvedInstallerScriptPath = Join-Path $repositoryRoot "installer\ExchangeAdmin.iss"
+$resolvedInstallerScriptPath = Join-Path $repositoryRoot "installer\OnlyExo365.iss"
 $resolvedCleanupScriptPath = Join-Path $repositoryRoot "build\remove-project-services.ps1"
-$resolvedIconPath = Join-Path $repositoryRoot "src\ExchangeAdmin.Presentation\Assets\AppIcon.ico"
+$resolvedIconPath = Join-Path $repositoryRoot "src\OnlyExo365.Shell\Assets\AppIcon.ico"
 $appVersion = Get-ApplicationVersion -RepositoryRoot $repositoryRoot
 $versionSegments = @($appVersion.Split('.'))
 while ($versionSegments.Count -lt 4) {
@@ -43,13 +42,8 @@ if (-not (Test-Path $resolvedPublishPath -PathType Container)) {
     throw "Publish path not found: $resolvedPublishPath"
 }
 
-foreach ($publishPathForRuntime in @(
-        @{ Path = $resolvedPublishPathX64; Runtime = "win-x64" },
-        @{ Path = $resolvedPublishPathX86; Runtime = "win-x86" }
-    )) {
-    if (-not (Test-Path $publishPathForRuntime.Path -PathType Container)) {
-        throw "Publish path not found for runtime $($publishPathForRuntime.Runtime): $($publishPathForRuntime.Path)"
-    }
+if (-not (Test-Path $resolvedPublishPathX64 -PathType Container)) {
+    throw "Publish path not found for runtime win-x64: $resolvedPublishPathX64"
 }
 
 if (-not (Test-Path $resolvedInstallerScriptPath -PathType Leaf)) {
@@ -64,17 +58,13 @@ if (-not (Test-Path $resolvedIconPath -PathType Leaf)) {
     throw "Application icon not found: $resolvedIconPath"
 }
 
-foreach ($runtimePublishPath in @($resolvedPublishPathX64, $resolvedPublishPathX86)) {
-    $requiredPublishFiles = @(
-        (Join-Path $runtimePublishPath "ExchangeAdmin.Presentation.exe"),
-        (Join-Path $runtimePublishPath "ExchangeAdmin.Worker.exe"),
-        (Join-Path $runtimePublishPath "appsettings.json")
-    )
-
-    foreach ($path in $requiredPublishFiles) {
-        if (-not (Test-Path $path -PathType Leaf)) {
-            throw "Publish output missing required file: $path"
-        }
+foreach ($path in @(
+        (Join-Path $resolvedPublishPathX64 "OnlyExo365.Shell.exe"),
+        (Join-Path $resolvedPublishPathX64 "OnlyExo365.Worker.exe"),
+        (Join-Path $resolvedPublishPathX64 "appsettings.json")
+    )) {
+    if (-not (Test-Path $path -PathType Leaf)) {
+        throw "Publish output missing required file: $path"
     }
 }
 
@@ -86,7 +76,6 @@ Write-Step "Creating native setup EXE"
 Write-Info "ISCC      : $isccPath"
 Write-Info "Publish    : $resolvedPublishPath"
 Write-Info "Publish x64: $resolvedPublishPathX64"
-Write-Info "Publish x86: $resolvedPublishPathX86"
 Write-Info "Setup EXE  : $resolvedOutputPath"
 Write-Info "Version    : $appVersion"
 Write-Info "FileVersion: $fileVersion"
@@ -98,7 +87,6 @@ $arguments = @(
     "/DAppVersion=$appVersion",
     "/DFileVersion=$fileVersion",
     "/DPublishDirX64=$resolvedPublishPathX64",
-    "/DPublishDirX86=$resolvedPublishPathX86",
     "/DOutputDir=$resolvedOutputDirectory",
     "/DOutputBaseFilename=$outputBaseName",
     "/DIconPath=$resolvedIconPath",
@@ -116,3 +104,4 @@ if (-not (Test-Path $resolvedOutputPath -PathType Leaf)) {
 }
 
 Write-Success "Setup EXE created: $resolvedOutputPath"
+

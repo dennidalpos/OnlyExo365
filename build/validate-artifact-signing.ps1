@@ -5,7 +5,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string[]]$Path,
 
-    [string]$SignerSubject = "CN=ExchangeAdmin CI Validation",
+    [string]$SignerSubject = "CN=OnlyExo365 CI Validation",
     [string]$TimestampUrl = "http://timestamp.digicert.com"
 )
 
@@ -109,7 +109,7 @@ foreach ($entry in $Path) {
     }
 }
 
-$temporaryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("exchangeadmin-signing-validation-" + [guid]::NewGuid().ToString("N"))
+$temporaryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-signing-validation-" + [guid]::NewGuid().ToString("N"))
 $certificatePath = Join-Path $temporaryRoot "validation-signing.pfx"
 $clonedTargets = New-Object System.Collections.Generic.List[string]
 $certificateThumbprint = $null
@@ -198,3 +198,4 @@ finally {
         Remove-Item -Path $temporaryRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+

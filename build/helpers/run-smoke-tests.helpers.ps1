@@ -133,8 +133,8 @@ function Get-PrerequisiteReport {
 
     $runtimeCatalog = Get-InstalledRuntimeCatalog
     $requirements = @()
-    $requirements += @(Get-RequiredRuntimeEntries -ComponentName "ExchangeAdmin.Presentation" -RuntimeConfigPath $PresentationRuntimeConfig)
-    $requirements += @(Get-RequiredRuntimeEntries -ComponentName "ExchangeAdmin.Worker" -RuntimeConfigPath $WorkerRuntimeConfig)
+    $requirements += @(Get-RequiredRuntimeEntries -ComponentName "OnlyExo365.Shell" -RuntimeConfigPath $PresentationRuntimeConfig)
+    $requirements += @(Get-RequiredRuntimeEntries -ComponentName "OnlyExo365.Worker" -RuntimeConfigPath $WorkerRuntimeConfig)
 
     $runtimeEntries = New-Object System.Collections.Generic.List[object]
     foreach ($requirement in $requirements) {
@@ -257,12 +257,12 @@ function Resolve-SmokePublishPath {
         [bool]$Prefer64BitPayload
     )
 
-    $presentationExeAtRoot = Join-Path $PublishRootPath "ExchangeAdmin.Presentation.exe"
+    $presentationExeAtRoot = Join-Path $PublishRootPath "OnlyExo365.Shell.exe"
     if (Test-Path $presentationExeAtRoot -PathType Leaf) {
         return $PublishRootPath
     }
 
-    $runtimeIdentifier = if ($Prefer64BitPayload) { "win-x64" } else { "win-x86" }
+    $runtimeIdentifier = "win-x64"
     $runtimePublishPath = Join-Path $PublishRootPath $runtimeIdentifier
     if (Test-Path $runtimePublishPath -PathType Container) {
         return $runtimePublishPath
@@ -299,8 +299,8 @@ function Get-RequiredPayloadFiles {
     param([string]$RootPath)
 
     return @(
-        (Join-Path $RootPath "ExchangeAdmin.Presentation.exe"),
-        (Join-Path $RootPath "ExchangeAdmin.Worker.exe"),
+        (Join-Path $RootPath "OnlyExo365.Shell.exe"),
+        (Join-Path $RootPath "OnlyExo365.Worker.exe"),
         (Join-Path $RootPath "appsettings.json")
     )
 }
@@ -342,7 +342,7 @@ function Invoke-ApplicationSmokeTest {
         $startInfo.FileName = $ExecutablePath
         $startInfo.WorkingDirectory = $WorkingDirectory
         $startInfo.UseShellExecute = $false
-        $startInfo.EnvironmentVariables["EXCHANGEADMIN_DISABLE_EXO"] = "1"
+        $startInfo.EnvironmentVariables["ONLYEXO365_DISABLE_EXO"] = "1"
 
         $presentationProcess = [System.Diagnostics.Process]::Start($startInfo)
         if ($null -eq $presentationProcess) {
@@ -500,7 +500,7 @@ function Get-ProjectServiceEntries {
 
         $isProjectService = $false
         foreach ($value in $searchValues) {
-            if ($value -match 'ExchangeAdmin|OnlyExo365') {
+            if ($value -match 'OnlyExo365|OnlyExo365') {
                 $isProjectService = $true
                 break
             }
@@ -550,7 +550,7 @@ function Backup-ProjectDataRoots {
         }
     }
 
-    $backupRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("exchangeadmin-localdata-backup-" + [guid]::NewGuid().ToString("N"))
+    $backupRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-localdata-backup-" + [guid]::NewGuid().ToString("N"))
     $entries = New-Object System.Collections.Generic.List[object]
 
     foreach ($path in $normalizedPaths) {
@@ -568,7 +568,7 @@ function Backup-ProjectDataRoots {
             New-Item -Path $backupParent -ItemType Directory -Force | Out-Null
         }
 
-        Write-Warn "Existing ExchangeAdmin local data detected at '$path'. Moving it to temporary backup before installer uninstall validation."
+        Write-Warn "Existing OnlyExo365 local data detected at '$path'. Moving it to temporary backup before installer uninstall validation."
         Move-Item -Path $path -Destination $backupPath -Force
         $entries.Add([ordered]@{
                 original_path = $path
@@ -639,3 +639,4 @@ function New-ResidualMarkerFile {
     Set-Content -Path $targetPath -Value "residual-marker" -Encoding utf8
     return $targetPath
 }
+

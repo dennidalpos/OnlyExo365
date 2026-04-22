@@ -11,7 +11,7 @@ param(
 
     [Alias("RuntimeIdentifier")]
     [ValidateNotNullOrEmpty()]
-    [string[]]$RuntimeIdentifiers = @("win-x64", "win-x86"),
+    [string[]]$RuntimeIdentifiers = @("win-x64"),
 
     [switch]$SelfContained = $false
 )
@@ -24,13 +24,7 @@ $setupExeScriptPath = Join-Path $repositoryRoot "build\\create-setup-exe.ps1"
 $packagesDirectory = Join-Path $repositoryRoot "artifacts\\packages"
 $canonicalSetupExePath = Join-Path $packagesDirectory "OnlyExo365.Setup.exe"
 $publishDirectory = Get-PublishArtifactsPath -RepositoryRoot $repositoryRoot
-$resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64", "win-x86")
-
-foreach ($requiredRuntimeIdentifier in @("win-x64", "win-x86")) {
-    if ($resolvedRuntimeIdentifiers -notcontains $requiredRuntimeIdentifier) {
-        $resolvedRuntimeIdentifiers += $requiredRuntimeIdentifier
-    }
-}
+$resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
 
 Write-Step "Packaging distributable artifacts"
 Initialize-ArtifactsLayout -RepositoryRoot $repositoryRoot | Out-Null

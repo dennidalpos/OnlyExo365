@@ -1,0 +1,444 @@
+<UserControl x:Class="OnlyExo365.Shell.Views.MigrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:OnlyExo365.Shell.Helpers"
+             xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
+             xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <TextBlock Text="{loc:Loc Key=Nav.Migration}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
+                <TextBlock Text="{Binding Migration.StatusText}"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource SecondaryTextBrush}"/>
+            </StackPanel>
+            <Button DockPanel.Dock="Right"
+                    Content="{loc:Loc Key=Migration.RefreshBatches}"
+                    Command="{Binding Migration.RefreshCommand}"
+                    Style="{StaticResource ToolbarPrimaryButton}"/>
+        </DockPanel>
+
+        <Border Grid.Row="1"
+                Style="{StaticResource ErrorBannerBorderStyle}"
+                Margin="0,0,0,12"
+                Visibility="{Binding Migration.HasError, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding Migration.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
+        </Border>
+
+        <TabControl Grid.Row="2">
+            <TabItem Header="{loc:Loc Key=Migration.Batches}">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.35*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="220"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding Migration.SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,12,0"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Migration.StatusFilters}"
+                                      SelectedItem="{Binding Migration.StatusFilter}"/>
+                        </Grid>
+
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding Migration.Batches}"
+                                  SelectedItem="{Binding Migration.SelectedBatch}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Background="{StaticResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{StaticResource BorderBrush}"
+                                  RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                                  AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="220"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Status}" Binding="{Binding Status}" Width="120"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Type}" Binding="{Binding BatchType}" Width="110"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Endpoint}" Binding="{Binding SourceEndpoint}" Width="160"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Total}" Binding="{Binding TotalCount}" Width="80"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Synced}" Binding="{Binding SyncedCount}" Width="80"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Failed}" Binding="{Binding FailedCount}" Width="80"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Updated}" Binding="{Binding LastSyncedDateTime, StringFormat={}{0:g}}" Width="130"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <Button Grid.Row="2"
+                                Content="{loc:Loc Key=Migration.LoadMore}"
+                                Command="{Binding Migration.LoadMoreCommand}"
+                                HorizontalAlignment="Center"
+                                Margin="0,12,0,0"
+                                Style="{StaticResource ToolbarPrimaryButton}"
+                                Visibility="{Binding Migration.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+                        <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                                Visibility="{Binding Migration.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                            <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Migration.LoadProgress.Status}"
+                                               Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                                    <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                                 Value="{Binding Migration.LoadProgress.Progress, Mode=OneWay}"/>
+                                    <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                                        <TextBlock Text="{Binding Migration.LoadProgress.PercentText}"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Migration.LoadProgress.CountText}"
+                                                   Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                                   Visibility="{Binding Migration.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1"
+                                  Width="4"
+                                  Background="{StaticResource BorderBrush}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Stretch"
+                                  ResizeDirection="Columns"
+                                  ResizeBehavior="PreviousAndNext"/>
+
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.BatchDetails}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Migration.SelectedBatchSummary}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                    <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                        <Button Content="{loc:Loc Key=Migration.LoadDetails}"
+                                                Command="{Binding Migration.LoadBatchDetailsCommand}"
+                                                Style="{StaticResource ToolbarPrimaryButton}"/>
+                                        <TextBlock Text="{Binding Migration.BatchDetailsStatusText}"
+                                                   VerticalAlignment="Center"
+                                                   TextWrapping="Wrap"
+                                                   Width="420"/>
+                                    </WrapPanel>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.Identity}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.StatusDetail}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.SelectedDetails.Identity}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.SelectedDetails.StatusDetail}" IsReadOnly="True"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.Endpoints}" Margin="0,8,8,6"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.Counters}" Margin="0,8,8,6"/>
+                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.SelectedDetails.SourceEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Migration.CountersText}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetEndpoint}" Margin="0,8,8,6"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,8,8,6"/>
+                                    <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Migration.SelectedDetails.TargetEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Migration.NotificationEmailsText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
+
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Migration.CreatedStartedCompleted}" Margin="0,8,8,6"/>
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Migration.Flags}" Margin="0,8,8,6"/>
+                                    <StackPanel Grid.Row="9" Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.CreatedPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.CreatedDateTime, StringFormat={}{0:g}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.StartedPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.StartDateTime, StringFormat={}{0:g}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.CompletedPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.CompleteDateTime, StringFormat={}{0:g}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="9" Grid.Column="1">
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.AutoStartPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.AutoStart, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.AutoCompletePrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.AutoComplete, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.BadItemLimitPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.BadItemLimit, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{loc:Loc Key=Migration.LargeItemLimitPrefix}"/>
+                                            <Run Text="{Binding Migration.SelectedDetails.LargeItemLimit, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </controls:SectionPanel>
+
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.Report}" Margin="0,12,0,0">
+                                <TextBox
+                                         Text="{Binding Migration.SelectedDetails.Report}"
+                                         IsReadOnly="True"
+                                         TextWrapping="Wrap"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         MinHeight="120"/>
+                            </controls:SectionPanel>
+
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.BatchActions}" Margin="0,12,0,0">
+                                <WrapPanel>
+                                    <Button Content="{loc:Loc Key=Migration.Start}" Command="{Binding Migration.StartBatchCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
+                                    <Button Content="{loc:Loc Key=Migration.Complete}" Command="{Binding Migration.CompleteBatchCommand}" Style="{StaticResource ToolbarButton}"/>
+                                    <Button Content="{loc:Loc Key=Migration.Remove}" Command="{Binding Migration.RemoveBatchCommand}" Style="{StaticResource ToolbarDangerButton}"/>
+                                </WrapPanel>
+                            </controls:SectionPanel>
+
+                            <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                                    Padding="12"
+                                    Visibility="{Binding Migration.IsLoadingDetails, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{loc:Loc Key=Migration.LoadingMigrationBatchDetails}" HorizontalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="{loc:Loc Key=Migration.EndpointsAndBatchCreation}">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.1*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="1.3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <WrapPanel Grid.Row="0" Margin="0,0,0,12">
+                            <Button Content="{loc:Loc Key=Migration.RefreshEndpoints}" Command="{Binding Migration.RefreshEndpointsCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
+                            <Button Content="{loc:Loc Key=Migration.NewEndpoint}" Command="{Binding Migration.NewEndpointCommand}" Style="{StaticResource ToolbarButton}"/>
+                            <Button Content="{loc:Loc Key=Migration.SaveEndpoint}" Command="{Binding Migration.SaveEndpointCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
+                            <Button Content="{loc:Loc Key=Migration.TestEndpoint}" Command="{Binding Migration.TestEndpointCommand}" Style="{StaticResource ToolbarButton}"/>
+                        </WrapPanel>
+
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding Migration.Endpoints}"
+                                  SelectedItem="{Binding Migration.SelectedEndpoint}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Background="{StaticResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{StaticResource BorderBrush}"
+                                  RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                                  AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="200"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Type}" Binding="{Binding EndpointType}" Width="140"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.RemoteServer}" Binding="{Binding RemoteServer}" Width="160"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.RPCProxy}" Binding="{Binding RpcProxyServer}" Width="160"/>
+                                <DataGridTextColumn Header="{loc:Loc Key=Migration.Updated}" Binding="{Binding LastModifiedTime, StringFormat={}{0:g}}" Width="130"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1"
+                                  Width="4"
+                                  Background="{StaticResource BorderBrush}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Stretch"
+                                  ResizeDirection="Columns"
+                                  ResizeBehavior="PreviousAndNext"/>
+
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.EndpointEditor}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Name}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Type}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.EndpointTypes}" SelectedItem="{Binding Migration.EndpointType}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteServer}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.EmailAddress}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointRemoteServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointEmailAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.RPCProxyServer}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.ExchangeServer}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.EndpointRpcProxyServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Migration.EndpointExchangeServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteTenant}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.Port}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Migration.EndpointRemoteTenant, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Migration.EndpointPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Migration.Security}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Migration.Authentication}" Margin="0,0,8,6"/>
+                                    <ComboBox Grid.Row="9" Grid.Column="0" ItemsSource="{Binding Migration.EndpointSecurities}" SelectedItem="{Binding Migration.EndpointSecurity}" Margin="0,0,8,8"/>
+                                    <ComboBox Grid.Row="9" Grid.Column="1" ItemsSource="{Binding Migration.EndpointAuthentications}" SelectedItem="{Binding Migration.EndpointAuthentication}" Margin="0,0,0,8"/>
+                                </Grid>
+                            </controls:SectionPanel>
+
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.CredentialsAndLimits}" Margin="0,12,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Username}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Password}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointUsername, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <PasswordBox Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Margin="0,0,0,8"
+                                                 PasswordChanged="EndpointPasswordBox_OnPasswordChanged"
+                                                 helpers:PasswordBoxClearHelper.ClearTrigger="{Binding Migration.EndpointPasswordClearTrigger}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.MaxConcurrentMigrations}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.MaxIncrementalSyncs}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointMaxConcurrentMigrations, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointMaxConcurrentIncrementalSyncs, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <CheckBox Grid.Row="4" Grid.Column="0" Content="{loc:Loc Key=Migration.SkipVerification}" IsChecked="{Binding Migration.EndpointSkipVerification}" Margin="0,0,8,8"/>
+                                    <CheckBox Grid.Row="4" Grid.Column="1" Content="{loc:Loc Key=Migration.AcceptUntrustedCertificates}" IsChecked="{Binding Migration.EndpointAcceptUntrustedCertificates}" Margin="0,0,0,8"/>
+
+                                    <TextBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                             Text="{Binding Migration.EndpointTestSummary, Mode=OneWay}"
+                                             IsReadOnly="True"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             MinHeight="90"/>
+                                </Grid>
+                            </controls:SectionPanel>
+
+                            <controls:SectionPanel Header="{loc:Loc Key=Migration.CreateMigrationBatch}" Margin="0,12,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.BatchName}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.BatchType}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.NewBatchName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.BatchTypes}" SelectedItem="{Binding Migration.NewBatchType}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.EndpointIdentity}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.CSVFilePath}" Margin="0,0,8,6"/>
+                                    <ComboBox Grid.Row="3" Grid.Column="0"
+                                              ItemsSource="{Binding Migration.Endpoints}"
+                                              SelectedValuePath="Identity"
+                                              DisplayMemberPath="Name"
+                                              SelectedValue="{Binding Migration.NewBatchEndpointIdentity}"
+                                              Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.NewBatchCsvFilePath, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetDeliveryDomain}" Margin="0,0,8,6"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,0,8,6"/>
+                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.NewBatchTargetDeliveryDomain, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Migration.NewBatchNotificationEmailsText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+
+                                    <CheckBox Grid.Row="6" Grid.Column="0" Content="{loc:Loc Key=Migration.AutoStart}" IsChecked="{Binding Migration.NewBatchAutoStart}" Margin="0,0,8,8"/>
+                                    <CheckBox Grid.Row="6" Grid.Column="1" Content="{loc:Loc Key=Migration.AutoComplete}" IsChecked="{Binding Migration.NewBatchAutoComplete}" Margin="0,0,0,8"/>
+
+                                    <WrapPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8">
+                                        <Button Content="{loc:Loc Key=Migration.RunPreflight}" Command="{Binding Migration.RunBatchPreflightCommand}" Style="{StaticResource ToolbarButton}"/>
+                                        <Button Content="{loc:Loc Key=Migration.CreateBatch}" Command="{Binding Migration.CreateBatchCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
+                                    </WrapPanel>
+
+                                    <TextBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+                                             Text="{Binding Migration.BatchPreflightSummary, Mode=OneWay}"
+                                             IsReadOnly="True"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             MinHeight="120"/>
+                                </Grid>
+                            </controls:SectionPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
+

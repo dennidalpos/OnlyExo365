@@ -2,7 +2,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$SolutionPath = "ExchangeAdmin.sln",
+    [string]$SolutionPath = "OnlyExo365.sln",
     [switch]$IncludeTransitive = $true,
     [string]$ReportPath = "artifacts/security/nuget-vulnerabilities.json",
     [switch]$LockedMode = $true
@@ -281,3 +281,4 @@ if ($aggregatedProblems.Count -gt 0) {
 }
 
 Write-Success "No known NuGet vulnerabilities reported across $($projectPaths.Count) project(s)."
+

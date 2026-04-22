@@ -2,8 +2,8 @@
 
 [CmdletBinding()]
 param(
-    [string]$OutputIcoPath = "src/ExchangeAdmin.Presentation/Assets/AppIcon.ico",
-    [string]$OutputPngPath = "src/ExchangeAdmin.Presentation/Assets/AppIcon.png"
+    [string]$OutputIcoPath = "src/OnlyExo365.Shell/Assets/AppIcon.ico",
+    [string]$OutputPngPath = "src/OnlyExo365.Shell/Assets/AppIcon.png"
 )
 
 Set-StrictMode -Version Latest
@@ -228,3 +228,4 @@ finally {
 Write-Host "Generated icon assets:" -ForegroundColor Cyan
 Write-Host "  ICO: $resolvedIcoPath" -ForegroundColor Green
 Write-Host "  PNG: $resolvedPngPath" -ForegroundColor Green
+

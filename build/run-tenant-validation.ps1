@@ -209,19 +209,19 @@ function Load-ExchangeConfiguration {
         }
     }
 
-    Merge-StringValue -Target $configuration -Key "AuthenticationMode" -Value (Get-EnvValue "EXCHANGEADMIN_AUTH_MODE")
-    Merge-StringValue -Target $configuration -Key "ExchangeEnvironmentName" -Value (Get-EnvValue "EXCHANGEADMIN_EXO_ENV")
-    Merge-StringValue -Target $configuration -Key "ExchangeOrganization" -Value (Get-EnvValue "EXCHANGEADMIN_EXO_ORGANIZATION")
-    Merge-StringValue -Target $configuration -Key "DelegatedOrganization" -Value (Get-EnvValue "EXCHANGEADMIN_EXO_DELEGATED_ORGANIZATION")
-    Merge-StringValue -Target $configuration -Key "UserPrincipalNameHint" -Value (Get-EnvValue "EXCHANGEADMIN_EXO_UPN_HINT")
-    Merge-StringValue -Target $configuration -Key "ApplicationId" -Value (Get-EnvValue "EXCHANGEADMIN_APP_ID")
-    Merge-StringValue -Target $configuration -Key "CertificateThumbprint" -Value (Get-EnvValue "EXCHANGEADMIN_CERT_THUMBPRINT")
-    Merge-StringValue -Target $configuration -Key "CertificateSubjectName" -Value (Get-EnvValue "EXCHANGEADMIN_CERT_SUBJECT")
-    Merge-StringValue -Target $configuration -Key "ManagedIdentityAccountId" -Value (Get-EnvValue "EXCHANGEADMIN_MANAGED_IDENTITY_ACCOUNT_ID")
-    Merge-StringValue -Target $configuration -Key "GraphTenantId" -Value (Get-EnvValue "EXCHANGEADMIN_GRAPH_TENANT_ID")
-    Merge-StringListValue -Target $configuration -Key "GraphScopes" -Value (Get-EnvValue "EXCHANGEADMIN_GRAPH_SCOPES")
-    Merge-StringListValue -Target $configuration -Key "GraphLicenseWriteScopes" -Value (Get-EnvValue "EXCHANGEADMIN_GRAPH_LICENSE_WRITE_SCOPES")
-    $enableGraphFromEnv = Read-OptionalBoolean (Get-EnvValue "EXCHANGEADMIN_ENABLE_GRAPH")
+    Merge-StringValue -Target $configuration -Key "AuthenticationMode" -Value (Get-EnvValue "ONLYEXO365_AUTH_MODE")
+    Merge-StringValue -Target $configuration -Key "ExchangeEnvironmentName" -Value (Get-EnvValue "ONLYEXO365_EXO_ENV")
+    Merge-StringValue -Target $configuration -Key "ExchangeOrganization" -Value (Get-EnvValue "ONLYEXO365_EXO_ORGANIZATION")
+    Merge-StringValue -Target $configuration -Key "DelegatedOrganization" -Value (Get-EnvValue "ONLYEXO365_EXO_DELEGATED_ORGANIZATION")
+    Merge-StringValue -Target $configuration -Key "UserPrincipalNameHint" -Value (Get-EnvValue "ONLYEXO365_EXO_UPN_HINT")
+    Merge-StringValue -Target $configuration -Key "ApplicationId" -Value (Get-EnvValue "ONLYEXO365_APP_ID")
+    Merge-StringValue -Target $configuration -Key "CertificateThumbprint" -Value (Get-EnvValue "ONLYEXO365_CERT_THUMBPRINT")
+    Merge-StringValue -Target $configuration -Key "CertificateSubjectName" -Value (Get-EnvValue "ONLYEXO365_CERT_SUBJECT")
+    Merge-StringValue -Target $configuration -Key "ManagedIdentityAccountId" -Value (Get-EnvValue "ONLYEXO365_MANAGED_IDENTITY_ACCOUNT_ID")
+    Merge-StringValue -Target $configuration -Key "GraphTenantId" -Value (Get-EnvValue "ONLYEXO365_GRAPH_TENANT_ID")
+    Merge-StringListValue -Target $configuration -Key "GraphScopes" -Value (Get-EnvValue "ONLYEXO365_GRAPH_SCOPES")
+    Merge-StringListValue -Target $configuration -Key "GraphLicenseWriteScopes" -Value (Get-EnvValue "ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES")
+    $enableGraphFromEnv = Read-OptionalBoolean (Get-EnvValue "ONLYEXO365_ENABLE_GRAPH")
     if ($null -ne $enableGraphFromEnv) {
         $configuration.EnableGraphAfterExchangeConnect = $enableGraphFromEnv
     }
@@ -410,7 +410,7 @@ function Get-ExchangeConnectCommand {
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
-                Stop-WithError "AppCertificate validation requires EXCHANGEADMIN_APP_ID and EXCHANGEADMIN_EXO_ORGANIZATION."
+                Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_EXO_ORGANIZATION."
             }
 
             $certPart = if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
@@ -420,14 +420,14 @@ function Get-ExchangeConnectCommand {
                 " -CertificateSubjectName '$($Configuration.CertificateSubjectName.Replace("'", "''"))'"
             }
             else {
-                Stop-WithError "AppCertificate validation requires EXCHANGEADMIN_CERT_THUMBPRINT or EXCHANGEADMIN_CERT_SUBJECT."
+                Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT."
             }
 
             return "Connect-ExchangeOnline -ShowBanner:`$false$environmentPart$delegatedPart -AppId '$($Configuration.ApplicationId.Replace("'", "''"))' -Organization '$($Configuration.ExchangeOrganization.Replace("'", "''"))'$certPart"
         }
         "managedidentity" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
-                Stop-WithError "ManagedIdentity validation requires EXCHANGEADMIN_EXO_ORGANIZATION."
+                Stop-WithError "ManagedIdentity validation requires ONLYEXO365_EXO_ORGANIZATION."
             }
 
             $accountIdPart = if ([string]::IsNullOrWhiteSpace($Configuration.ManagedIdentityAccountId)) { "" } else { " -ManagedIdentityAccountId '$($Configuration.ManagedIdentityAccountId.Replace("'", "''"))'" }
@@ -463,7 +463,7 @@ function Get-GraphConnectCommand {
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.GraphTenantId)) {
-                Stop-WithError "AppCertificate validation requires EXCHANGEADMIN_APP_ID and EXCHANGEADMIN_GRAPH_TENANT_ID for Graph."
+                Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_GRAPH_TENANT_ID for Graph."
             }
 
             $certPart = if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
@@ -473,7 +473,7 @@ function Get-GraphConnectCommand {
                 " -CertificateSubjectName '$($Configuration.CertificateSubjectName.Replace("'", "''"))'"
             }
             else {
-                Stop-WithError "AppCertificate validation requires EXCHANGEADMIN_CERT_THUMBPRINT or EXCHANGEADMIN_CERT_SUBJECT for Graph."
+                Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT for Graph."
             }
 
             return "Connect-MgGraph -ClientId '$($Configuration.ApplicationId.Replace("'", "''"))' -TenantId '$($Configuration.GraphTenantId.Replace("'", "''"))'$certPart -ContextScope Process -NoWelcome"
@@ -576,7 +576,7 @@ function Get-ReportProbeResults {
 $resolvedConfigurationPath = if ([string]::IsNullOrWhiteSpace($ConfigurationPath)) { $null } else { Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ConfigurationPath }
 $resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
-$bootstrapPolicyPath = Join-Path $repositoryRoot "src\ExchangeAdmin.Worker\Data\PowerShellModuleBootstrapPolicy.json"
+$bootstrapPolicyPath = Join-Path $repositoryRoot "src\OnlyExo365.Worker\Data\PowerShellModuleBootstrapPolicy.json"
 
 if (-not (Test-Path $reportDirectory)) {
     New-Item -Path $reportDirectory -ItemType Directory -Force | Out-Null
@@ -900,3 +900,4 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host " TENANT VALIDATION COMPLETED" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
+

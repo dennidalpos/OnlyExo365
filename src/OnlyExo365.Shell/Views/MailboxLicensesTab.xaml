@@ -1,0 +1,146 @@
+<UserControl x:Class="OnlyExo365.Shell.Views.MailboxLicensesTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
+             xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <controls:SectionPanel Header="{loc:Loc Key=Mailbox.Licenses.GroupHeader}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Border Style="{StaticResource WarningBannerBorderStyle}"
+                            Padding="8" Margin="0,0,0,8"
+                            Visibility="{Binding Licenses.IsLicenseWriteBlocked, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding Licenses.LicenseWriteDisabledMessage}" TextWrapping="Wrap"
+                                   Style="{StaticResource WarningBannerTextStyle}" FontSize="11"/>
+                    </Border>
+
+                    <Border Style="{StaticResource ErrorBannerBorderStyle}"
+                            Padding="8" Margin="0,0,0,8"
+                            Visibility="{Binding Licenses.HasLicenseError, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding Licenses.LicenseErrorMessage}" TextWrapping="Wrap"
+                                   Style="{StaticResource ErrorBannerTextStyle}" FontSize="11"/>
+                    </Border>
+
+                    <Border Style="{StaticResource InfoBannerBorderStyle}"
+                            Padding="8" Margin="0,0,0,8"
+                            Visibility="{Binding Licenses.HasUsageLocationSuggestion, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Licenses.UsageLocationSuggestionMessage}" TextWrapping="Wrap"
+                                       Style="{StaticResource InfoBannerTextStyle}" FontSize="11" Margin="0,0,0,8"/>
+                            <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.SuggestedValueInstructions}"
+                                       TextWrapping="Wrap"
+                                       Style="{StaticResource CaptionTextStyle}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8"
+                                Visibility="{Binding Licenses.IsLicenseLoading, Converter={StaticResource BoolToVisibility}}">
+                        <ProgressBar IsIndeterminate="True" Width="100" Height="4"/>
+                        <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.LoadingStatus}" Margin="8,0,0,0"
+                                   Style="{StaticResource CaptionTextStyle}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AssignedHeading}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.NoLicensesAssigned}"
+                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"
+                               Visibility="{Binding Licenses.HasAssignedLicenses, Converter={StaticResource InverseBoolToVisibility}}"/>
+                    <ItemsControl ItemsSource="{Binding Licenses.AssignedLicenses}" Margin="0,0,0,8">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource InsetPanelBorderStyle}"
+                                        Margin="0,0,0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Vertical">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{loc:Loc Key=Dashboard.SkuPrefix}"
+                                                           Style="{StaticResource CaptionTextStyle}"/>
+                                                <TextBlock Text="{Binding SkuPartNumber}"
+                                                           Style="{StaticResource CaptionTextStyle}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Remove}"
+                                                Command="{Binding DataContext.Licenses.RemoveLicenseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource InlineDangerActionButton}"
+                                                VerticalAlignment="Center"
+                                                ToolTip="{Binding DataContext.Licenses.LicenseWriteActionTooltip, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.UsageLocationHeading}" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                    <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.UsageLocationInstructions}"
+                               Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding Licenses.UsageLocations}"
+                                  SelectedItem="{Binding Licenses.SelectedUsageLocation}"
+                                  DisplayMemberPath="DisplayLabel"
+                                  IsTextSearchEnabled="True"
+                                  Margin="0,0,8,0"
+                                  ToolTip="{loc:Loc Key=Mailbox.Licenses.UsageLocationTooltip}"/>
+                        <Button Grid.Column="1"
+                                Content="{Binding Licenses.UsageLocationActionLabel}"
+                                Command="{Binding Licenses.ApplySuggestedUsageLocationCommand}"
+                                Style="{StaticResource InlinePrimaryActionButton}"
+                                ToolTip="{loc:Loc Key=Mailbox.Licenses.UsageLocationActionTooltip}"/>
+                    </Grid>
+
+                    <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AddLicenseHeading}" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding Licenses.AvailableLicenses}"
+                                  SelectedItem="{Binding Licenses.SelectedLicenseToAdd}"
+                                  Margin="0,0,8,0"
+                                  ToolTip="{loc:Loc Key=Mailbox.Licenses.SelectLicenseTooltip}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding DisplayName, Mode=OneWay}"/>
+                                        <TextBlock Text=" - " Foreground="{StaticResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{loc:Loc Key=Dashboard.SkuPrefix}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding SkuPartNumber, Mode=OneWay}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                        <TextBlock Text=" (" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Available, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
+                                        <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AvailableSuffix}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Assign}"
+                                Command="{Binding Licenses.AddLicenseCommand}"
+                                Style="{StaticResource InlinePrimaryActionButton}"
+                                ToolTip="{Binding Licenses.LicenseWriteActionTooltip}"/>
+                        <Button Grid.Column="2" Content="{loc:Loc Key=Btn.Refresh}"
+                                Command="{Binding Licenses.RefreshLicensesCommand}"
+                                Style="{StaticResource InlineActionButton}"
+                                ToolTip="{loc:Loc Key=Mailbox.Licenses.RefreshTooltip}"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                Visibility="{Binding Licenses.IsLicenseSaving, Converter={StaticResource BoolToVisibility}}">
+                        <ProgressBar IsIndeterminate="True" Width="100" Height="4"/>
+                        <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.OperationInProgress}" Margin="8,0,0,0"
+                                   Style="{StaticResource CaptionTextStyle}"/>
+                    </StackPanel>
+                </StackPanel>
+            </controls:SectionPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

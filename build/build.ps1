@@ -13,7 +13,7 @@ param(
 
     [Alias("RuntimeIdentifier")]
     [ValidateNotNullOrEmpty()]
-    [string[]]$RuntimeIdentifiers = @("win-x64", "win-x86"),
+    [string[]]$RuntimeIdentifiers = @("win-x64"),
 
     [switch]$LockedMode = $false,
 
@@ -52,7 +52,7 @@ function Test-IsCiBuild {
 function Get-BootstrapModuleVersion {
     param([string]$ModuleName)
 
-    $bootstrapPolicyPath = Join-Path $RepositoryRoot "src\ExchangeAdmin.Worker\Data\PowerShellModuleBootstrapPolicy.json"
+    $bootstrapPolicyPath = Join-Path $RepositoryRoot "src\OnlyExo365.Worker\Data\PowerShellModuleBootstrapPolicy.json"
 
     if (-not (Test-Path $bootstrapPolicyPath)) {
         return $null
@@ -99,10 +99,10 @@ function Test-PathWithinRoot {
     return $normalizedCandidate.StartsWith($normalizedRoot, [System.StringComparison]::OrdinalIgnoreCase)
 }
 
-function Get-ArtifactExchangeAdminProcesses {
+function Get-ArtifactOnlyExo365Processes {
     param([string]$RootPath)
 
-    $targetNames = @("ExchangeAdmin.Presentation.exe", "ExchangeAdmin.Worker.exe")
+    $targetNames = @("OnlyExo365.Shell.exe", "OnlyExo365.Worker.exe")
     $processes = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
         $targetNames -contains $_.Name -and
         -not [string]::IsNullOrWhiteSpace($_.ExecutablePath) -and
@@ -112,15 +112,15 @@ function Get-ArtifactExchangeAdminProcesses {
     return @($processes | Sort-Object ProcessId -Unique)
 }
 
-function Stop-ArtifactExchangeAdminProcesses {
+function Stop-ArtifactOnlyExo365Processes {
     param([string]$RootPath)
 
-    $processes = @(Get-ArtifactExchangeAdminProcesses -RootPath $RootPath)
+    $processes = @(Get-ArtifactOnlyExo365Processes -RootPath $RootPath)
     if ($processes.Count -eq 0) {
         return $false
     }
 
-    Write-Warn "Detected running ExchangeAdmin process(es) from artifacts. Stopping them before clean."
+    Write-Warn "Detected running OnlyExo365 process(es) from artifacts. Stopping them before clean."
 
     foreach ($process in $processes) {
         Write-Info "Stopping PID $($process.ProcessId): $($process.ExecutablePath)"
@@ -158,7 +158,7 @@ function Remove-DirectoryRobust {
         }
         catch {
             if (-not $stoppedProcesses -and -not [string]::IsNullOrWhiteSpace($ArtifactRootForProcessStop)) {
-                $stoppedProcesses = Stop-ArtifactExchangeAdminProcesses -RootPath $ArtifactRootForProcessStop
+                $stoppedProcesses = Stop-ArtifactOnlyExo365Processes -RootPath $ArtifactRootForProcessStop
             }
 
             if ($attempt -lt $RetryCount) {
@@ -168,10 +168,10 @@ function Remove-DirectoryRobust {
             }
 
             $hint = if ($stoppedProcesses) {
-                "A lock is still active after stopping ExchangeAdmin artifact processes."
+                "A lock is still active after stopping OnlyExo365 artifact processes."
             }
             else {
-                "No ExchangeAdmin process from artifacts was found to stop automatically."
+                "No OnlyExo365 process from artifacts was found to stop automatically."
             }
 
             Stop-WithError "Unable to remove $Description at '$Path'. $hint Close external file handles and retry. Root cause: $($_.Exception.Message)"
@@ -217,11 +217,11 @@ $PublishDir = Get-PublishArtifactsPath -RepositoryRoot $RepositoryRoot
 $ExportDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $OutputDir "exports" } else { Resolve-RepositoryPath -RepositoryRoot $RepositoryRoot -PathValue $ExportDirPath }
 $ImportDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $OutputDir "imports" } else { Resolve-RepositoryPath -RepositoryRoot $RepositoryRoot -PathValue $ImportDirPath }
 $BuildStartTime = Get-Date
-$ResolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64", "win-x86")
+$ResolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " ExchangeAdmin Build Script" -ForegroundColor Cyan
+Write-Host " OnlyExo365 Build Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Configuration : $Configuration"
@@ -320,8 +320,8 @@ if ($Publish) {
         }
     }
 
-    $presentationProject = Join-Path $RepositoryRoot "src\ExchangeAdmin.Presentation\ExchangeAdmin.Presentation.csproj"
-    $workerProject = Join-Path $RepositoryRoot "src\ExchangeAdmin.Worker\ExchangeAdmin.Worker.csproj"
+    $presentationProject = Join-Path $RepositoryRoot "src\OnlyExo365.Shell\OnlyExo365.Shell.csproj"
+    $workerProject = Join-Path $RepositoryRoot "src\OnlyExo365.Worker\OnlyExo365.Worker.csproj"
 
     if (-not (Test-Path $presentationProject)) {
         Stop-WithError "Presentation project not found: $presentationProject"
@@ -357,13 +357,13 @@ if ($Publish) {
             $publishArgs += "--verbosity", "minimal"
         }
 
-        Write-Info "Publishing ExchangeAdmin.Presentation for $runtimeIdentifier..."
+        Write-Info "Publishing OnlyExo365.Shell for $runtimeIdentifier..."
         Invoke-DotNet -Command "publish" -Arguments (@($presentationProject) + $publishArgs) -ErrorMessage "Publish of Presentation failed"
-        Write-Success "ExchangeAdmin.Presentation published for $runtimeIdentifier"
+        Write-Success "OnlyExo365.Shell published for $runtimeIdentifier"
 
-        Write-Info "Publishing ExchangeAdmin.Worker for $runtimeIdentifier..."
+        Write-Info "Publishing OnlyExo365.Worker for $runtimeIdentifier..."
         Invoke-DotNet -Command "publish" -Arguments (@($workerProject) + $publishArgs) -ErrorMessage "Publish of Worker failed"
-        Write-Success "ExchangeAdmin.Worker published for $runtimeIdentifier"
+        Write-Success "OnlyExo365.Worker published for $runtimeIdentifier"
     }
 
     $publishedFiles = Get-ChildItem -Path $PublishDir -Recurse -Filter "*.exe" | Select-Object -ExpandProperty FullName
@@ -389,7 +389,7 @@ if ($Publish) {
     Write-Host ""
     Write-Host "To run the application:" -ForegroundColor Yellow
     Write-Host "  cd `"$((Get-RuntimePublishPath -RepositoryRoot $RepositoryRoot -RuntimeIdentifier ($ResolvedRuntimeIdentifiers[0])))`""
-    Write-Host "  .\ExchangeAdmin.Presentation.exe"
+    Write-Host "  .\OnlyExo365.Shell.exe"
     Write-Host ""
     Write-Host "Runtime prerequisites:" -ForegroundColor Yellow
     Write-Host "  1. PowerShell 7+ (pwsh.exe in PATH)"
@@ -405,3 +405,4 @@ if ($Publish) {
         Write-Host "  3. .NET 10 Runtime (framework-dependent build)"
     }
 }
+

@@ -12,7 +12,7 @@ param(
     [string]$ReleaseTag,
 
     [ValidateNotNullOrEmpty()]
-    [string]$RuntimeIdentifier = "multi-arch",
+    [string]$RuntimeIdentifier = "win-x64",
 
     [string]$OutputDirectory = "artifacts/publish/release-assets"
 )
@@ -92,7 +92,7 @@ $zipDestination = Join-Path $resolvedOutputDirectory $zipFileName
 $setupExeDestination = Join-Path $resolvedOutputDirectory $setupExeFileName
 $checksumsPath = Join-Path $resolvedOutputDirectory $checksumsFileName
 $manifestPath = Join-Path $resolvedOutputDirectory $manifestFileName
-$temporaryZipPath = Join-Path ([System.IO.Path]::GetTempPath()) ("exchangeadmin-release-assets-" + [guid]::NewGuid().ToString("N") + ".zip")
+$temporaryZipPath = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-release-assets-" + [guid]::NewGuid().ToString("N") + ".zip")
 
 Write-Step "Preparing release assets"
 Write-Info "PublishPath : $resolvedPublishPath"

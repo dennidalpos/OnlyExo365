@@ -1,0 +1,3298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Shell -->
+  <data name="Shell.WindowTitle" xml:space="preserve">
+    <value>OnlyExo365 - Exchange Online Admin</value>
+  </data>
+  <data name="Shell.AppName" xml:space="preserve">
+    <value>OnlyExo365</value>
+  </data>
+  <data name="Shell.LanguageSelectorLabel" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <!-- Status indicators -->
+  <data name="Status.WorkerLabel" xml:space="preserve">
+    <value>Worker:</value>
+  </data>
+  <data name="Status.ExchangeLabel" xml:space="preserve">
+    <value>Exchange:</value>
+  </data>
+  <data name="Status.GraphLabel" xml:space="preserve">
+    <value>Graph:</value>
+  </data>
+  <!-- Navigation -->
+  <data name="Nav.Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Nav.MailContacts" xml:space="preserve">
+    <value>Mail Contacts</value>
+  </data>
+  <data name="Nav.ResourceMailboxes" xml:space="preserve">
+    <value>Resource Mailboxes</value>
+  </data>
+  <data name="Nav.DistributionLists" xml:space="preserve">
+    <value>Distribution Lists</value>
+  </data>
+  <data name="Nav.Mailboxes" xml:space="preserve">
+    <value>Mailboxes</value>
+  </data>
+  <data name="Nav.DeletedMailboxes" xml:space="preserve">
+    <value>Deleted Mailboxes</value>
+  </data>
+  <data name="Nav.MailboxStorage" xml:space="preserve">
+    <value>Mailbox Storage</value>
+  </data>
+  <data name="Nav.MailboxAccess" xml:space="preserve">
+    <value>Mailbox Access</value>
+  </data>
+  <data name="Nav.PublicFolders" xml:space="preserve">
+    <value>Public Folders</value>
+  </data>
+  <data name="Nav.MobileDevices" xml:space="preserve">
+    <value>Mobile Devices</value>
+  </data>
+  <data name="Nav.MailFlow" xml:space="preserve">
+    <value>Mail Flow</value>
+  </data>
+  <data name="Nav.MailSecurity" xml:space="preserve">
+    <value>Mail Security</value>
+  </data>
+  <data name="Nav.MessageTrace" xml:space="preserve">
+    <value>Message Trace</value>
+  </data>
+  <data name="Nav.Migration" xml:space="preserve">
+    <value>Migration</value>
+  </data>
+  <data name="Nav.RoleGroups" xml:space="preserve">
+    <value>Role Groups</value>
+  </data>
+  <data name="Nav.Compliance" xml:space="preserve">
+    <value>Compliance</value>
+  </data>
+  <data name="Nav.Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Nav.Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Nav.Tooltip.MobileDevices.Open" xml:space="preserve">
+    <value>Open the Mobile Devices workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MobileDevices.Unavailable" xml:space="preserve">
+    <value>The Mobile Devices workspace is not available for the current session.</value>
+  </data>
+  <data name="Nav.Tooltip.Migration.Open" xml:space="preserve">
+    <value>Open the Migration workspace</value>
+  </data>
+  <data name="Nav.Tooltip.RoleGroups.Open" xml:space="preserve">
+    <value>Open the Role Groups workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MessageTrace.Open" xml:space="preserve">
+    <value>Open the Message Trace workspace</value>
+  </data>
+  <data name="Nav.Tooltip.Compliance.Open" xml:space="preserve">
+    <value>Open the Compliance workspace</value>
+  </data>
+  <data name="Nav.Tooltip.MailSecurity.Open" xml:space="preserve">
+    <value>Open the Mail Security workspace</value>
+  </data>
+  <!-- Buttons -->
+  <data name="Btn.StartWorker" xml:space="preserve">
+    <value>Start Worker</value>
+  </data>
+  <data name="Btn.StopWorker" xml:space="preserve">
+    <value>Stop Worker</value>
+  </data>
+  <data name="Btn.ConnectExchange" xml:space="preserve">
+    <value>Connect Exchange</value>
+  </data>
+  <data name="Btn.Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="Btn.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Btn.Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Btn.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Btn.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Btn.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Btn.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Btn.LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="Btn.New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Btn.Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Btn.Assign" xml:space="preserve">
+    <value>Assign</value>
+  </data>
+  <data name="Btn.Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Btn.BackToMailboxList" xml:space="preserve">
+    <value>â† Back</value>
+  </data>
+  <data name="Btn.Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Btn.Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Btn.Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Btn.ExportBundle" xml:space="preserve">
+    <value>Export Bundle</value>
+  </data>
+  <data name="Btn.Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Btn.OpenCompliance" xml:space="preserve">
+    <value>Open Compliance</value>
+  </data>
+  <data name="Btn.QueueAuditSearch" xml:space="preserve">
+    <value>Queue Audit Search</value>
+  </data>
+  <!-- Tabs -->
+  <data name="Tab.MailboxOverview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Tab.MailboxSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tab.MailboxLicenses" xml:space="preserve">
+    <value>Licenses</value>
+  </data>
+  <data name="Tab.MailboxRestore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Tab.MailboxPermissions" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <!-- Mailbox detail -->
+  <data name="Mailbox.DetailsFallbackTitle" xml:space="preserve">
+    <value>Mailbox details</value>
+  </data>
+  <data name="Mailbox.ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Mailbox.LoadingTitle" xml:space="preserve">
+    <value>Loading mailbox details...</value>
+  </data>
+  <data name="Mailbox.LoadingOverlayTitle" xml:space="preserve">
+    <value>Loading details...</value>
+  </data>
+  <data name="Mailbox.SavingOverlayTitle" xml:space="preserve">
+    <value>Saving changes...</value>
+  </data>
+  <data name="Mailbox.BackTooltip" xml:space="preserve">
+    <value>Return to the mailbox list</value>
+  </data>
+  <data name="Mailbox.RefreshTooltip" xml:space="preserve">
+    <value>Reload mailbox details and permissions</value>
+  </data>
+  <data name="Mailbox.PendingChangesLabel" xml:space="preserve">
+    <value>âš  Pending mailbox changes</value>
+  </data>
+  <data name="Mailbox.PendingChangesTooltip" xml:space="preserve">
+    <value>Apply all pending mailbox changes</value>
+  </data>
+  <data name="Mailbox.PendingChangesDiscardTooltip" xml:space="preserve">
+    <value>Discard pending changes and restore the original values</value>
+  </data>
+  <data name="Mailbox.PendingPermissionsTooltip" xml:space="preserve">
+    <value>Apply all pending permission changes in Exchange</value>
+  </data>
+  <data name="Mailbox.PendingPermissionsDiscardTooltip" xml:space="preserve">
+    <value>Discard pending changes and restore the current state</value>
+  </data>
+  <data name="Mailbox.PendingPermissionsFormat" xml:space="preserve">
+    <value>âš  {0} pending permission changes</value>
+  </data>
+  <!-- Messages / dialogs -->
+  <data name="Msg.DetailsHeading" xml:space="preserve">
+    <value>Details:</value>
+  </data>
+  <data name="Msg.OperationInProgressTitle" xml:space="preserve">
+    <value>Operation in progress</value>
+  </data>
+  <data name="Msg.OperationInProgressText" xml:space="preserve">
+    <value>Wait for the current load or save operation to finish before changing section.</value>
+  </data>
+  <data name="Msg.UnsavedChangesTitle" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="Msg.UnsavedChangesText" xml:space="preserve">
+    <value>There are unsaved changes in the current section.
+Changing page or section will discard them permanently.
+
+Continue with navigation?</value>
+  </data>
+  <data name="Msg.ConfirmOperationTitle" xml:space="preserve">
+    <value>Confirm operation</value>
+  </data>
+  <data name="Msg.ConfirmOperationPrompt" xml:space="preserve">
+    <value>Confirm?</value>
+  </data>
+  <data name="Msg.ConfirmOperationFormat" xml:space="preserve">
+    <value>Operation: {0}
+Target: {1}
+
+Confirm?</value>
+  </data>
+  <data name="Msg.ConfirmOperationImpactFormat" xml:space="preserve">
+    <value>Operation: {0}
+Target: {1}
+Impact: {2}
+
+Confirm?</value>
+  </data>
+  <data name="Msg.ConfigurationError" xml:space="preserve">
+    <value>OnlyExo365 configuration error</value>
+  </data>
+  <data name="Alert.ConnectionRequiredTitle" xml:space="preserve">
+    <value>Connection required</value>
+  </data>
+  <data name="Alert.ConnectionRequiredMessage" xml:space="preserve">
+    <value>Not connected to Exchange Online.</value>
+  </data>
+  <data name="Alert.WorkerStartupFailedTitle" xml:space="preserve">
+    <value>Worker startup failed</value>
+  </data>
+  <data name="Alert.WorkerStartupFailedMessage" xml:space="preserve">
+    <value>The background worker did not start automatically. Use Start Worker to retry without leaving the current page.</value>
+  </data>
+  <data name="Alert.LoadFailedTitle" xml:space="preserve">
+    <value>Load failed</value>
+  </data>
+  <data name="Alert.PageUnavailableMessageFormat" xml:space="preserve">
+    <value>The {0} page is unavailable right now.</value>
+  </data>
+  <!-- Progress -->
+  <data name="Progress.LoadedRemaining" xml:space="preserve">
+    <value>Loaded: {0} | Remaining: {1}</value>
+  </data>
+  <data name="Progress.LoadedCount" xml:space="preserve">
+    <value>Loaded: {0}</value>
+  </data>
+  <data name="Progress.LoadedWithLabel" xml:space="preserve">
+    <value>Loaded: {0} {1}</value>
+  </data>
+  <!-- Error messages -->
+  <data name="Error.AuthenticationFailed" xml:space="preserve">
+    <value>Authentication failed. Check your credentials and try again.</value>
+  </data>
+  <data name="Error.ConditionalAccessBlocked" xml:space="preserve">
+    <value>Access was blocked by a Conditional Access policy.
+
+Contact your IT administrator for help.</value>
+  </data>
+  <data name="Error.MfaRequired" xml:space="preserve">
+    <value>Multi-factor authentication is required.
+
+Complete the MFA verification in the authentication prompt.</value>
+  </data>
+  <data name="Error.TokenExpired" xml:space="preserve">
+    <value>Your session has expired.
+
+Disconnect and reconnect to Exchange Online.</value>
+  </data>
+  <data name="Error.PermissionDenied" xml:space="preserve">
+    <value>You do not have permission to perform this operation.
+
+Contact your Exchange administrator to request the required access.</value>
+  </data>
+  <data name="Error.CmdletNotAvailable" xml:space="preserve">
+    <value>The required PowerShell command is not available.
+
+Make sure the ExchangeOnlineManagement module is installed correctly.</value>
+  </data>
+  <data name="Error.ModuleNotLoaded" xml:space="preserve">
+    <value>The ExchangeOnlineManagement module is not loaded.
+
+Try restarting the worker or reinstalling the module.</value>
+  </data>
+  <data name="Error.InvalidParameter" xml:space="preserve">
+    <value>An invalid parameter was provided for this operation.
+
+{0}</value>
+  </data>
+  <data name="Error.OperationNotSupported" xml:space="preserve">
+    <value>This operation is not supported.
+
+The feature may not be available with your current Exchange configuration.</value>
+  </data>
+  <data name="Error.Throttling" xml:space="preserve">
+    <value>Exchange Online is limiting the number of requests.
+
+Please wait a moment. The operation will be retried automatically.</value>
+  </data>
+  <data name="Error.ThrottlingRetryAfter" xml:space="preserve">
+    <value>Exchange Online is limiting the number of requests.
+
+Please wait a moment. The operation will be retried automatically.
+
+Retry after: {0} seconds</value>
+  </data>
+  <data name="Error.ServiceUnavailable" xml:space="preserve">
+    <value>Exchange Online is temporarily unavailable.
+
+Please try again in a few moments.</value>
+  </data>
+  <data name="Error.NetworkError" xml:space="preserve">
+    <value>A network error occurred.
+
+Check your internet connection and try again.</value>
+  </data>
+  <data name="Error.Timeout" xml:space="preserve">
+    <value>The operation timed out.
+
+This can be caused by network issues or service load. Please try again.</value>
+  </data>
+  <data name="Error.ResourceNotFound" xml:space="preserve">
+    <value>The requested resource was not found.
+
+{0}</value>
+  </data>
+  <data name="Error.ResourceAlreadyExists" xml:space="preserve">
+    <value>The resource already exists.
+
+{0}</value>
+  </data>
+  <data name="Error.WorkerNotRunning" xml:space="preserve">
+    <value>The background worker is not running.
+
+Start the worker before connecting to Exchange Online.</value>
+  </data>
+  <data name="Error.WorkerStartup.Title" xml:space="preserve">
+    <value>Worker failed to start</value>
+  </data>
+  <data name="Error.WorkerStartup.Message" xml:space="preserve">
+    <value>The background worker could not complete startup.</value>
+  </data>
+  <data name="Error.WorkerStartup.DetailsFormat" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Generic" xml:space="preserve">
+    <value>Try this:
+1. Verify PowerShell 7 is installed.
+2. Verify the worker executable is present in the application folder.
+3. Start the app from a local folder where executables are allowed to run.</value>
+  </data>
+  <data name="Error.WorkerStartup.Guidance.Handshake" xml:space="preserve">
+    <value>Try this:
+1. Close every running OnlyExo365 window and worker process.
+2. Start the app again from the same build or publish folder.
+3. If the problem persists, rebuild or republish so the shell and worker binaries match.</value>
+  </data>
+  <data name="Error.WorkerCrashed" xml:space="preserve">
+    <value>The background worker stopped unexpectedly.
+
+Try restarting the worker and check the logs for more details.</value>
+  </data>
+  <data name="Error.IpcError" xml:space="preserve">
+    <value>A communication error occurred with the background worker.
+
+Try restarting the worker or the application.</value>
+  </data>
+  <data name="Error.UnknownWithMessage" xml:space="preserve">
+    <value>An error occurred:
+
+{0}</value>
+  </data>
+  <data name="Error.UnknownGeneric" xml:space="preserve">
+    <value>An unexpected error occurred. Check the logs for more information.</value>
+  </data>
+  <!-- Dashboard -->
+  <data name="Dashboard.Title" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Dashboard.Warnings" xml:space="preserve">
+    <value>Warnings</value>
+  </data>
+  <data name="Dashboard.DisconnectedTitle" xml:space="preserve">
+    <value>Connect to Exchange to load the tenant summary</value>
+  </data>
+  <data name="Dashboard.DisconnectedMessage" xml:space="preserve">
+    <value>The dashboard stays empty until an Exchange Online session is active. Use Connect Exchange in the header, then refresh this page.</value>
+  </data>
+  <data name="Dashboard.MailboxesGroup" xml:space="preserve">
+    <value>Mailboxes</value>
+  </data>
+  <data name="Dashboard.UserMailboxes" xml:space="preserve">
+    <value>User Mailboxes</value>
+  </data>
+  <data name="Dashboard.UserMailboxesTooltip" xml:space="preserve">
+    <value>Open the mailbox list</value>
+  </data>
+  <data name="Dashboard.SharedMailboxes" xml:space="preserve">
+    <value>Shared Mailboxes</value>
+  </data>
+  <data name="Dashboard.SharedMailboxesTooltip" xml:space="preserve">
+    <value>Open the mailbox list filtered to shared mailboxes</value>
+  </data>
+  <data name="Dashboard.RoomMailboxes" xml:space="preserve">
+    <value>Room Mailboxes</value>
+  </data>
+  <data name="Dashboard.EquipmentMailboxes" xml:space="preserve">
+    <value>Equipment Mailboxes</value>
+  </data>
+  <data name="Dashboard.Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Dashboard.ApproximateCount" xml:space="preserve">
+    <value>Approximate count</value>
+  </data>
+  <data name="Dashboard.DistributionGroupsGroup" xml:space="preserve">
+    <value>Distribution Groups</value>
+  </data>
+  <data name="Dashboard.DistributionGroups" xml:space="preserve">
+    <value>Distribution Groups</value>
+  </data>
+  <data name="Dashboard.DistributionGroupsTooltip" xml:space="preserve">
+    <value>Open distribution lists</value>
+  </data>
+  <data name="Dashboard.DynamicGroups" xml:space="preserve">
+    <value>Dynamic Groups</value>
+  </data>
+  <data name="Dashboard.M365Groups" xml:space="preserve">
+    <value>M365 Groups</value>
+  </data>
+  <data name="Dashboard.TenantLicenses" xml:space="preserve">
+    <value>Tenant Licenses</value>
+  </data>
+  <data name="Dashboard.LicensesTotal" xml:space="preserve">
+    <value>Total: </value>
+  </data>
+  <data name="Dashboard.LicensesAssigned" xml:space="preserve">
+    <value>Assigned: </value>
+  </data>
+  <data name="Dashboard.LicensesAvailable" xml:space="preserve">
+    <value>Available: </value>
+  </data>
+  <data name="Dashboard.AdminUsers" xml:space="preserve">
+    <value>Admin Users</value>
+  </data>
+  <data name="Dashboard.ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Dashboard.ColUpn" xml:space="preserve">
+    <value>UPN</value>
+  </data>
+  <data name="Dashboard.ColRole" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Dashboard.ErrorBanner" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <!-- Mailbox list -->
+  <data name="Mailbox.List.Title" xml:space="preserve">
+    <value>Mailboxes</value>
+  </data>
+  <data name="Mailbox.List.ExchangeTab" xml:space="preserve">
+    <value>Exchange Mailboxes</value>
+  </data>
+  <data name="Mailbox.List.ProvisionTab" xml:space="preserve">
+    <value>Users to Provision</value>
+  </data>
+  <data name="Mailbox.List.ExchangeInventoryHeading" xml:space="preserve">
+    <value>Exchange inventory</value>
+  </data>
+  <data name="Mailbox.List.SearchPlaceholder" xml:space="preserve">
+    <value>Search mailboxes...</value>
+  </data>
+  <data name="Mailbox.List.SearchLabel" xml:space="preserve">
+    <value>Search mailboxes</value>
+  </data>
+  <data name="Mailbox.List.FilterUserMailboxes" xml:space="preserve">
+    <value>User Mailboxes</value>
+  </data>
+  <data name="Mailbox.List.FilterSharedMailboxes" xml:space="preserve">
+    <value>Shared Mailboxes</value>
+  </data>
+  <data name="Mailbox.List.FilterRoomMailboxes" xml:space="preserve">
+    <value>Room Mailboxes</value>
+  </data>
+  <data name="Mailbox.List.FilterEquipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="Mailbox.List.FilterAllTypes" xml:space="preserve">
+    <value>All Types</value>
+  </data>
+  <data name="Mailbox.List.ColDisplayName" xml:space="preserve">
+    <value>Friendly Name</value>
+  </data>
+  <data name="Mailbox.List.ColUPN" xml:space="preserve">
+    <value>UPN</value>
+  </data>
+  <data name="Mailbox.List.ColEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Mailbox.List.ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Mailbox.List.ColAlias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="Mailbox.List.ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Mailbox.List.CreateFormDisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Mailbox.List.CreateFormAlias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="Mailbox.List.CreateFormEmailLocalPart" xml:space="preserve">
+    <value>Email local part</value>
+  </data>
+  <data name="Mailbox.List.CreateFormEmailDomain" xml:space="preserve">
+    <value>Email domain (from accepted domains)</value>
+  </data>
+  <data name="Mailbox.List.CreateFormPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Mailbox.List.CreateFormPasswordTooltip" xml:space="preserve">
+    <value>Enter the initial password</value>
+  </data>
+  <data name="Mailbox.List.WillCreateHint" xml:space="preserve">
+    <value>Will create: local-part@selected-domain</value>
+  </data>
+  <data name="Mailbox.List.UnlicensedMembersHeading" xml:space="preserve">
+    <value>Unlicensed member users</value>
+  </data>
+  <data name="Mailbox.List.UnlicensedMembersDescription" xml:space="preserve">
+    <value>Internal Graph view used to find member users, including disabled accounts, that need licensing before the Exchange mailbox.</value>
+  </data>
+  <data name="Mailbox.List.MemberSearchPlaceholder" xml:space="preserve">
+    <value>Search member users...</value>
+  </data>
+  <data name="Mailbox.List.OnlyWithoutLicenses" xml:space="preserve">
+    <value>Only without licenses</value>
+  </data>
+  <data name="Mailbox.List.OnlyWithoutMail" xml:space="preserve">
+    <value>Only without mail</value>
+  </data>
+  <data name="Mailbox.List.LicensingPanelInstructions" xml:space="preserve">
+    <value>If a user does not yet have `mail` and/or has no assigned SKUs, select the user and use the panel on the right to assign the Microsoft 365 license before creating or managing the mailbox.</value>
+  </data>
+  <data name="Mailbox.List.LicensingPanelHeading" xml:space="preserve">
+    <value>Licensing panel</value>
+  </data>
+  <data name="Mailbox.List.LicensingPanelEmptyState" xml:space="preserve">
+    <value>Select a member user from the list on the left to use the licensing panel.</value>
+  </data>
+  <data name="Mailbox.List.InventoryDisconnectedMessage" xml:space="preserve">
+    <value>Connect to Exchange before searching, creating, or loading mailbox inventory.</value>
+  </data>
+  <data name="Mailbox.List.DetailsEmptyState" xml:space="preserve">
+    <value>Select a mailbox from the inventory to view details and actions.</value>
+  </data>
+  <data name="Mailbox.List.MailNotSet" xml:space="preserve">
+    <value>Mail not set</value>
+  </data>
+  <!-- Mailbox overview tab -->
+  <data name="Mailbox.Overview.DisplayName" xml:space="preserve">
+    <value>Display name:</value>
+  </data>
+  <data name="Mailbox.Overview.PrimaryEmail" xml:space="preserve">
+    <value>Primary email:</value>
+  </data>
+  <data name="Mailbox.Overview.Type" xml:space="preserve">
+    <value>Type:</value>
+  </data>
+  <data name="Mailbox.Overview.Alias" xml:space="preserve">
+    <value>Alias:</value>
+  </data>
+  <data name="Mailbox.Overview.AllAddresses" xml:space="preserve">
+    <value>All addresses:</value>
+  </data>
+  <data name="Mailbox.Overview.AdminInterventionWarning" xml:space="preserve">
+    <value>This action requires administrative intervention to reverse.</value>
+  </data>
+  <!-- Mailbox licenses tab -->
+  <data name="Mailbox.Licenses.SuggestedValueInstructions" xml:space="preserve">
+    <value>You can confirm the suggested value or choose a different one from the UsageLocation list below.</value>
+  </data>
+  <data name="Mailbox.Licenses.LoadingStatus" xml:space="preserve">
+    <value>Loading licenses...</value>
+  </data>
+  <data name="Mailbox.Licenses.AssignedHeading" xml:space="preserve">
+    <value>Assigned licenses</value>
+  </data>
+  <data name="Mailbox.Licenses.NoLicensesAssigned" xml:space="preserve">
+    <value>No licenses assigned</value>
+  </data>
+  <data name="Mailbox.Licenses.UsageLocationHeading" xml:space="preserve">
+    <value>UsageLocation</value>
+  </data>
+  <data name="Mailbox.Licenses.UsageLocationInstructions" xml:space="preserve">
+    <value>If the user does not have a valid UsageLocation country or region code, select the correct value and apply it before or during the license retry.</value>
+  </data>
+  <data name="Mailbox.Licenses.AddLicenseHeading" xml:space="preserve">
+    <value>Add license</value>
+  </data>
+  <data name="Mailbox.Licenses.OperationInProgress" xml:space="preserve">
+    <value>License operation in progress...</value>
+  </data>
+  <!-- Contacts -->
+  <data name="Contact.Title" xml:space="preserve">
+    <value>Mail Contacts</value>
+  </data>
+  <data name="Contact.DetailsHeading" xml:space="preserve">
+    <value>Contact details</value>
+  </data>
+  <data name="Contact.ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Contact.ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Contact.ColPrimaryEmail" xml:space="preserve">
+    <value>Primary email</value>
+  </data>
+  <data name="Contact.ColExternalEmail" xml:space="preserve">
+    <value>External email</value>
+  </data>
+  <data name="Contact.ColHideFromGal" xml:space="preserve">
+    <value>Hide from GAL</value>
+  </data>
+  <data name="Contact.FieldType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Contact.FieldDisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Contact.FieldName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Contact.FieldAlias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="Contact.FieldPrimarySmtp" xml:space="preserve">
+    <value>Primary SMTP</value>
+  </data>
+  <data name="Contact.FieldExternalEmail" xml:space="preserve">
+    <value>External email</value>
+  </data>
+  <data name="Contact.FieldUpn" xml:space="preserve">
+    <value>User principal name (MailUser only)</value>
+  </data>
+  <data name="Contact.FieldPassword" xml:space="preserve">
+    <value>Password (create MailUser only)</value>
+  </data>
+  <data name="Contact.OptionsGroup" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="Contact.HideFromAddressLists" xml:space="preserve">
+    <value>Hide from address lists</value>
+  </data>
+  <!-- Compliance -->
+  <data name="Compliance.Title" xml:space="preserve">
+    <value>Compliance</value>
+  </data>
+  <data name="Compliance.QueueSearchBtn" xml:space="preserve">
+    <value>Queue Audit Search</value>
+  </data>
+  <data name="Compliance.AuditDateRangeError" xml:space="preserve">
+    <value>The audit end date must be on or after the start date.</value>
+  </data>
+  <data name="Compliance.WorkspaceLoadError" xml:space="preserve">
+    <value>Unable to load the Compliance workspace.</value>
+  </data>
+  <data name="Compliance.HoldCmdletWarning" xml:space="preserve">
+    <value>Existing holds may not appear in the Actions list until the Purview session exposes the required cmdlet.</value>
+  </data>
+  <data name="Compliance.SearchGroup" xml:space="preserve">
+    <value>Compliance Search</value>
+  </data>
+  <data name="Compliance.CasesActionsGroup" xml:space="preserve">
+    <value>Cases and Actions</value>
+  </data>
+  <data name="Compliance.RefreshWorkspaceBtn" xml:space="preserve">
+    <value>Refresh Workspace</value>
+  </data>
+  <data name="Compliance.CreateSearchBtn" xml:space="preserve">
+    <value>Create Search</value>
+  </data>
+  <data name="Compliance.StartSearchBtn" xml:space="preserve">
+    <value>Start Search</value>
+  </data>
+  <data name="Compliance.RemoveSearchBtn" xml:space="preserve">
+    <value>Remove Search</value>
+  </data>
+  <data name="Compliance.RunPurgeBtn" xml:space="preserve">
+    <value>Run Purge</value>
+  </data>
+  <data name="Compliance.CreateHoldBtn" xml:space="preserve">
+    <value>Create Hold</value>
+  </data>
+  <data name="Compliance.AuditLogGroup" xml:space="preserve">
+    <value>Unified Audit Log</value>
+  </data>
+  <data name="Compliance.StartDate" xml:space="preserve">
+    <value>Start date</value>
+  </data>
+  <data name="Compliance.EndDate" xml:space="preserve">
+    <value>End date</value>
+  </data>
+  <data name="Compliance.UserIds" xml:space="preserve">
+    <value>User IDs</value>
+  </data>
+  <data name="Compliance.Operations" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+  <data name="Compliance.ObjectIds" xml:space="preserve">
+    <value>Object IDs</value>
+  </data>
+  <data name="Compliance.FreeText" xml:space="preserve">
+    <value>Free text</value>
+  </data>
+  <data name="Compliance.MaxResults" xml:space="preserve">
+    <value>Max results</value>
+  </data>
+  <data name="Compliance.ColTask" xml:space="preserve">
+    <value>Task</value>
+  </data>
+  <data name="Compliance.ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Compliance.ColProgress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="Compliance.ColRecords" xml:space="preserve">
+    <value>Records</value>
+  </data>
+  <data name="Compliance.ColRequested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="Compliance.ColFilters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="Compliance.ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Compliance.ColCase" xml:space="preserve">
+    <value>Case</value>
+  </data>
+  <data name="Compliance.ColLocations" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="Compliance.ColQuery" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="Compliance.ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Compliance.ColActionType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Compliance.ColSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Compliance.ColCreated" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Compliance.ColDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Compliance.AuditColDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Compliance.AuditColUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Compliance.AuditColOperation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="Compliance.AuditColObject" xml:space="preserve">
+    <value>Object</value>
+  </data>
+  <data name="Compliance.AuditColRecordType" xml:space="preserve">
+    <value>RecordType</value>
+  </data>
+  <data name="Compliance.AuditColAuditData" xml:space="preserve">
+    <value>AuditData</value>
+  </data>
+  <data name="Compliance.SelectedSearchDetails" xml:space="preserve">
+    <value>Selected search details</value>
+  </data>
+  <data name="Compliance.Locations" xml:space="preserve">
+    <value>Locations: </value>
+  </data>
+  <data name="Compliance.NewSearchHeading" xml:space="preserve">
+    <value>New Search</value>
+  </data>
+  <data name="Compliance.FieldName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Compliance.FieldCase" xml:space="preserve">
+    <value>Case (optional)</value>
+  </data>
+  <data name="Compliance.FieldExchangeLocations" xml:space="preserve">
+    <value>Exchange locations</value>
+  </data>
+  <data name="Compliance.FieldContentQuery" xml:space="preserve">
+    <value>Content match query</value>
+  </data>
+  <data name="Compliance.SelectedActionsHeading" xml:space="preserve">
+    <value>Selected Search Actions</value>
+  </data>
+  <data name="Compliance.FieldPurgeType" xml:space="preserve">
+    <value>Purge type</value>
+  </data>
+  <data name="Compliance.FieldCaseForHold" xml:space="preserve">
+    <value>Case for hold</value>
+  </data>
+  <data name="Compliance.FieldHoldName" xml:space="preserve">
+    <value>Hold name</value>
+  </data>
+  <!-- Logs -->
+  <data name="Logs.Title" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Logs.EntryCount" xml:space="preserve">
+    <value>({0} entries)</value>
+  </data>
+  <data name="Logs.FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Logs.FilterDebugPlus" xml:space="preserve">
+    <value>Debug+</value>
+  </data>
+  <data name="Logs.FilterInfoPlus" xml:space="preserve">
+    <value>Info+</value>
+  </data>
+  <data name="Logs.FilterWarningPlus" xml:space="preserve">
+    <value>Warning+</value>
+  </data>
+  <data name="Logs.FilterError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Logs.TooltipInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Logs.TooltipWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Logs.TooltipError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Logs.SearchPlaceholder" xml:space="preserve">
+    <value>Filter log entries...</value>
+  </data>
+  <!-- Distribution lists -->
+  <data name="Distribution.Title" xml:space="preserve">
+    <value>Distribution Lists</value>
+  </data>
+  <data name="Distribution.IncludeDynamic" xml:space="preserve">
+    <value>Include dynamic</value>
+  </data>
+  <data name="Distribution.NewGroupHeader" xml:space="preserve">
+    <value>New distribution list</value>
+  </data>
+  <data name="Distribution.ColDisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Distribution.ColEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Distribution.ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Distribution.ColRecipientTypeDetails" xml:space="preserve">
+    <value>Recipient type</value>
+  </data>
+  <data name="Distribution.BackBtn" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Distribution.OwnersGroup" xml:space="preserve">
+    <value>Owners</value>
+  </data>
+  <data name="Distribution.GroupDetailsGroup" xml:space="preserve">
+    <value>Group details</value>
+  </data>
+  <data name="Distribution.EmptyState" xml:space="preserve">
+    <value>Select a distribution list to view details</value>
+  </data>
+  <data name="Distribution.UnsavedChangesLabel" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="Distribution.FieldAlias" xml:space="preserve">
+    <value>Alias:</value>
+  </data>
+  <data name="Distribution.FieldAccess" xml:space="preserve">
+    <value>Access:</value>
+  </data>
+  <data name="Distribution.FieldClassification" xml:space="preserve">
+    <value>Classification:</value>
+  </data>
+  <data name="Distribution.FieldNotes" xml:space="preserve">
+    <value>Notes:</value>
+  </data>
+  <data name="Distribution.AcceptFrom" xml:space="preserve">
+    <value>Accept messages only from</value>
+  </data>
+  <data name="Distribution.RejectFrom" xml:space="preserve">
+    <value>Reject messages from</value>
+  </data>
+  <data name="Distribution.DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Distribution.Alias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="Distribution.EmailLocalPart" xml:space="preserve">
+    <value>Email local part</value>
+  </data>
+  <data name="Distribution.EmailDomain" xml:space="preserve">
+    <value>Email domain</value>
+  </data>
+  <data name="Distribution.DistributionGroupOnly" xml:space="preserve">
+    <value>Distribution group only</value>
+  </data>
+  <!-- Deleted mailboxes -->
+  <data name="DeletedMailbox.Title" xml:space="preserve">
+    <value>Deleted Mailboxes</value>
+  </data>
+  <data name="DeletedMailbox.ListDescription" xml:space="preserve">
+    <value>Exchange list: soft-deleted and inactive mailboxes. Hard-deleted mailboxes cannot be recovered and do not appear in this view.</value>
+  </data>
+  <data name="DeletedMailbox.ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <!-- Mailbox access report -->
+  <data name="MailboxAccess.Title" xml:space="preserve">
+    <value>Mailbox Access</value>
+  </data>
+  <data name="MailboxAccess.SummaryHeading" xml:space="preserve">
+    <value>Mailbox access summary</value>
+  </data>
+  <data name="MailboxAccess.AnalyzeDescription" xml:space="preserve">
+    <value>Analyze all mailboxes and group delegated access by user across other mailboxes.</value>
+  </data>
+  <data name="MailboxAccess.WarningBanner" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="MailboxAccess.ErrorBanner" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <!-- Language options -->
+  <data name="Lang.English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Lang.Italian" xml:space="preserve">
+    <value>Italiano</value>
+  </data>
+  <data name="MessageTrace.From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="MessageTrace.To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="MessageTrace.Sender" xml:space="preserve">
+    <value>Sender</value>
+  </data>
+  <data name="MessageTrace.Recipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="MessageTrace.SearchBtn" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="MessageTrace.QuickFilters" xml:space="preserve">
+    <value>Quick filter by status:</value>
+  </data>
+  <data name="MailFlow.Title" xml:space="preserve">
+    <value>Mail Flow Essentials</value>
+  </data>
+  <data name="MailSecurity.Title" xml:space="preserve">
+    <value>Mail Security Baseline</value>
+  </data>
+  <data name="MailSecurity.RefreshWorkspaceBtn" xml:space="preserve">
+    <value>Refresh Workspace</value>
+  </data>
+  <data name="Permissions.Title" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <!-- Permissions view -->
+  <data name="Permissions.ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Permissions.ColDisplayName" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="Permissions.ColRoles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="Permissions.ColMembers" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="Permissions.ColModified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="Permissions.RoleGroupDetailsHeading" xml:space="preserve">
+    <value>Role group details</value>
+  </data>
+  <data name="Permissions.FieldIdentity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="Permissions.FieldDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Permissions.FieldRbacRoles" xml:space="preserve">
+    <value>RBAC roles</value>
+  </data>
+  <data name="Permissions.FieldScopes" xml:space="preserve">
+    <value>Scopes</value>
+  </data>
+  <data name="Permissions.FieldManagedBy" xml:space="preserve">
+    <value>Managed by</value>
+  </data>
+  <data name="Permissions.FieldCreatedChanged" xml:space="preserve">
+    <value>Created / Changed</value>
+  </data>
+  <data name="Permissions.LoadingDetails" xml:space="preserve">
+    <value>Loading role group details...</value>
+  </data>
+  <data name="Permissions.MembershipHeading" xml:space="preserve">
+    <value>Membership</value>
+  </data>
+  <data name="Permissions.AddMember" xml:space="preserve">
+    <value>Add member</value>
+  </data>
+  <data name="Permissions.RemoveMemberSelected" xml:space="preserve">
+    <value>Remove member selected</value>
+  </data>
+  <data name="Permissions.NewGroupHeading" xml:space="preserve">
+    <value>New role group / Copy</value>
+  </data>
+  <data name="Permissions.FieldCopyFrom" xml:space="preserve">
+    <value>Copy from existing role group</value>
+  </data>
+  <data name="Permissions.FieldRolesCsv" xml:space="preserve">
+    <value>Roles (CSV)</value>
+  </data>
+  <data name="Permissions.CopyHint" xml:space="preserve">
+    <value>If you use Copy, roles and members can be inherited from the source group; the local CSV overrides values only when it is populated.</value>
+  </data>
+  <data name="Permissions.InitialMembers" xml:space="preserve">
+    <value>Initial members (optional CSV)</value>
+  </data>
+  <data name="Permissions.SaveRoleGroup" xml:space="preserve">
+    <value>Save role group</value>
+  </data>
+  <data name="Permissions.Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <!-- Mailbox permissions tab -->
+  <data name="MailboxPerms.ManagementHeading" xml:space="preserve">
+    <value>Permission management</value>
+  </data>
+  <data name="MailboxPerms.FieldUser" xml:space="preserve">
+    <value>User (email or name):</value>
+  </data>
+  <data name="MailboxPerms.FieldPermissionType" xml:space="preserve">
+    <value>Permission type:</value>
+  </data>
+  <data name="MailboxPerms.FieldAutoMap" xml:space="preserve">
+    <value>AutoMap:</value>
+  </data>
+  <data name="MailboxPerms.FullAccessHeading" xml:space="preserve">
+    <value>Full access permissions</value>
+  </data>
+  <data name="MailboxPerms.SendAsHeading" xml:space="preserve">
+    <value>Send as permissions</value>
+  </data>
+  <data name="MailboxPerms.SendOnBehalfHeading" xml:space="preserve">
+    <value>Send on behalf permissions</value>
+  </data>
+  <data name="MailboxPerms.FolderPermissionsHeading" xml:space="preserve">
+    <value>Folder permissions</value>
+  </data>
+  <data name="MailboxPerms.FieldFolderPath" xml:space="preserve">
+    <value>Folder path:</value>
+  </data>
+  <data name="MailboxPerms.FieldResolvedTarget" xml:space="preserve">
+    <value>Resolved target:</value>
+  </data>
+  <data name="MailboxPerms.ColUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="MailboxPerms.ColAutoMap" xml:space="preserve">
+    <value>AutoMap</value>
+  </data>
+  <data name="MailboxPerms.ColInherited" xml:space="preserve">
+    <value>Inherited</value>
+  </data>
+  <data name="MailboxPerms.ColActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="MailboxPerms.ColRole" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="MailboxPerms.ColCurrentRights" xml:space="preserve">
+    <value>Current rights</value>
+  </data>
+  <data name="MailboxPerms.BtnAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="MailboxPerms.BtnLoad" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="MailboxPerms.BtnGrantUpdate" xml:space="preserve">
+    <value>Grant / update</value>
+  </data>
+  <data name="MailboxPerms.BtnApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <!-- Mailbox settings tab -->
+  <data name="MailboxSettings.SmtpHeading" xml:space="preserve">
+    <value>SMTP identity and visibility</value>
+  </data>
+  <data name="MailboxSettings.PrimarySmtp" xml:space="preserve">
+    <value>Primary SMTP:</value>
+  </data>
+  <data name="MailboxSettings.PrimarySmtpTooltip" xml:space="preserve">
+    <value>Primary SMTP address of the mailbox</value>
+  </data>
+  <data name="MailboxSettings.ProxyAddresses" xml:space="preserve">
+    <value>Proxy addresses:</value>
+  </data>
+  <data name="MailboxSettings.ProxyAddressesTooltip" xml:space="preserve">
+    <value>One address per line. Without a prefix, it is interpreted as a secondary SMTP address.</value>
+  </data>
+  <data name="MailboxSettings.ProxyAddressesHint" xml:space="preserve">
+    <value>Supported values: smtp:alias@contoso.com, x500:/o=Org/ou=.../cn=user, or simple SMTP addresses.</value>
+  </data>
+  <data name="MailboxSettings.ForwardingHeading" xml:space="preserve">
+    <value>Forwarding and message limits</value>
+  </data>
+  <data name="MailboxSettings.ForwardingAddress" xml:space="preserve">
+    <value>Forwarding (address):</value>
+  </data>
+  <data name="MailboxSettings.ForwardingAddressTooltip" xml:space="preserve">
+    <value>Internal forwarding target (alias or UPN)</value>
+  </data>
+  <data name="MailboxSettings.ForwardingSmtp" xml:space="preserve">
+    <value>Forwarding (SMTP):</value>
+  </data>
+  <data name="MailboxSettings.ForwardingSmtpTooltip" xml:space="preserve">
+    <value>External SMTP address for forwarding</value>
+  </data>
+  <data name="MailboxSettings.DeliverToMailboxLabel" xml:space="preserve">
+    <value>Deliver to mailbox too:</value>
+  </data>
+  <data name="MailboxSettings.DeliverToMailboxTooltip" xml:space="preserve">
+    <value>If enabled, messages are also delivered to the original mailbox</value>
+  </data>
+  <data name="MailboxSettings.MaxSendLabel" xml:space="preserve">
+    <value>Send limit (MaxSend):</value>
+  </data>
+  <data name="MailboxSettings.MaxSendTooltip" xml:space="preserve">
+    <value>Supported format: 25 MB, 1 GB, Unlimited</value>
+  </data>
+  <data name="MailboxSettings.MaxReceiveLabel" xml:space="preserve">
+    <value>Receive limit (MaxReceive):</value>
+  </data>
+  <data name="MailboxSettings.MaxReceiveTooltip" xml:space="preserve">
+    <value>Supported format: 25 MB, 1 GB, Unlimited</value>
+  </data>
+  <data name="MailboxSettings.SizeFormatHint" xml:space="preserve">
+    <value>Tip: use formats such as 25 MB, 1 GB, or Unlimited.</value>
+  </data>
+  <data name="MailboxSettings.MailAppsHeading" xml:space="preserve">
+    <value>Mail apps and protocols</value>
+  </data>
+  <data name="MailboxSettings.ArchiveHeading" xml:space="preserve">
+    <value>Archive</value>
+  </data>
+  <data name="MailboxSettings.FeaturesHeading" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="MailboxSettings.RetentionHeading" xml:space="preserve">
+    <value>Retention Policy</value>
+  </data>
+  <data name="MailboxSettings.QuotasHeading" xml:space="preserve">
+    <value>Mailbox quotas</value>
+  </data>
+  <data name="MailboxSettings.AutoReplyHeading" xml:space="preserve">
+    <value>Automatic replies</value>
+  </data>
+  <data name="MailboxSettings.HideFromGal" xml:space="preserve">
+    <value>Hide from the Global Address List</value>
+  </data>
+  <data name="MailboxSettings.DeliverToMailboxEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="MailboxSettings.CheckOwa" xml:space="preserve">
+    <value>Outlook on the web (OWA)</value>
+  </data>
+  <data name="MailboxSettings.CheckActiveSync" xml:space="preserve">
+    <value>Exchange ActiveSync</value>
+  </data>
+  <data name="MailboxSettings.CheckMapi" xml:space="preserve">
+    <value>Outlook desktop / MAPI</value>
+  </data>
+  <data name="MailboxSettings.CheckSmtpAuthDisabled" xml:space="preserve">
+    <value>SMTP AUTH disabled for clients</value>
+  </data>
+  <data name="MailboxSettings.ArchiveEnabled" xml:space="preserve">
+    <value>Archive enabled</value>
+  </data>
+  <data name="MailboxSettings.LitigationHold" xml:space="preserve">
+    <value>Litigation hold</value>
+  </data>
+  <data name="MailboxSettings.AuditEnabled" xml:space="preserve">
+    <value>Audit enabled</value>
+  </data>
+  <data name="MailboxSettings.SingleItemRecovery" xml:space="preserve">
+    <value>Single item recovery</value>
+  </data>
+  <data name="MailboxSettings.RetentionHold" xml:space="preserve">
+    <value>Retention hold</value>
+  </data>
+  <data name="MailboxSettings.EnableAutoReply" xml:space="preserve">
+    <value>Enable automatic replies</value>
+  </data>
+  <data name="MailboxSettings.ScheduleAutoReply" xml:space="preserve">
+    <value>Schedule a time range</value>
+  </data>
+  <data name="MailboxSettings.KnownContactsOnly" xml:space="preserve">
+    <value>Known contacts only</value>
+  </data>
+  <data name="MailboxSettings.Everyone" xml:space="preserve">
+    <value>Everyone</value>
+  </data>
+  <!-- Mailbox restore tab -->
+  <data name="MailboxRestore.Heading" xml:space="preserve">
+    <value>Mailbox restore</value>
+  </data>
+  <data name="MailboxRestore.Description" xml:space="preserve">
+    <value>Restore a soft-deleted mailbox or start a restore from an inactive mailbox to a target mailbox. Hard-deleted mailboxes cannot be recovered.</value>
+  </data>
+  <data name="MailboxRestore.AllowLegacyDn" xml:space="preserve">
+    <value>Allow LegacyDN mismatch</value>
+  </data>
+  <data name="MailboxRestore.BtnStart" xml:space="preserve">
+    <value>Start restore</value>
+  </data>
+  <data name="MailboxRestore.InProgress" xml:space="preserve">
+    <value>Restore in progress...</value>
+  </data>
+  <data name="MailboxRestore.ErrorTitle" xml:space="preserve">
+    <value>Restore error</value>
+  </data>
+  <data name="MailboxRestore.StatusHeading" xml:space="preserve">
+    <value>Restore status</value>
+  </data>
+  <data name="MailFlow.TransportRules" xml:space="preserve">
+    <value>Transport Rules</value>
+  </data>
+  <data name="MailFlow.NewReset" xml:space="preserve">
+    <value>New / Reset</value>
+  </data>
+  <data name="MailFlow.Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="MailFlow.Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="MailFlow.Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="MailFlow.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MailFlow.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="MailFlow.State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="MailFlow.Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="MailFlow.Connectors" xml:space="preserve">
+    <value>Connectors</value>
+  </data>
+  <data name="MailFlow.DeleteSelected" xml:space="preserve">
+    <value>Delete Selected</value>
+  </data>
+  <data name="MailFlow.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="MailFlow.Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="MailFlow.Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="MailFlow.AcceptedDomains" xml:space="preserve">
+    <value>Accepted Domains</value>
+  </data>
+  <data name="MailFlow.Domain" xml:space="preserve">
+    <value>Domain</value>
+  </data>
+  <data name="MailFlow.Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="MailFlow.RemoteDomains" xml:space="preserve">
+    <value>Remote Domains</value>
+  </data>
+  <data name="MailFlow.OOF" xml:space="preserve">
+    <value>OOF</value>
+  </data>
+  <data name="MailFlow.AutoReply" xml:space="preserve">
+    <value>AutoReply</value>
+  </data>
+  <data name="MailFlow.NDR" xml:space="preserve">
+    <value>NDR</value>
+  </data>
+  <data name="MailFlow.OrganizationRelationships" xml:space="preserve">
+    <value>Organization Relationships</value>
+  </data>
+  <data name="MailFlow.Domains" xml:space="preserve">
+    <value>Domains</value>
+  </data>
+  <data name="MailFlow.FreeBusy" xml:space="preserve">
+    <value>Free/Busy</value>
+  </data>
+  <data name="MailFlow.MailTips" xml:space="preserve">
+    <value>MailTips</value>
+  </data>
+  <data name="MailFlow.AddressLists" xml:space="preserve">
+    <value>Address Lists</value>
+  </data>
+  <data name="MailFlow.Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="MailFlow.Recipients" xml:space="preserve">
+    <value>Recipients</value>
+  </data>
+  <data name="MailFlow.Container" xml:space="preserve">
+    <value>Container</value>
+  </data>
+  <data name="MailFlow.AddressBookPolicies" xml:space="preserve">
+    <value>Address Book Policies</value>
+  </data>
+  <data name="MailFlow.GAL" xml:space="preserve">
+    <value>GAL</value>
+  </data>
+  <data name="MailFlow.OAB" xml:space="preserve">
+    <value>OAB</value>
+  </data>
+  <data name="MailFlow.RoomList" xml:space="preserve">
+    <value>RoomList</value>
+  </data>
+  <data name="MailFlow.OfflineAddressBooks" xml:space="preserve">
+    <value>Offline Address Books</value>
+  </data>
+  <data name="MailFlow.AddressList" xml:space="preserve">
+    <value>AddressList</value>
+  </data>
+  <data name="MailFlow.DiffRetention" xml:space="preserve">
+    <value>DiffRetention</value>
+  </data>
+  <data name="MailFlow.SharingPolicies" xml:space="preserve">
+    <value>Sharing Policies</value>
+  </data>
+  <data name="MailFlow.CreateEditTransportRule" xml:space="preserve">
+    <value>Create / Edit Transport Rule</value>
+  </data>
+  <data name="MailFlow.IdentityEditOnly" xml:space="preserve">
+    <value>Identity (edit only)</value>
+  </data>
+  <data name="MailFlow.Conditions" xml:space="preserve">
+    <value>Conditions</value>
+  </data>
+  <data name="MailFlow.FromCsvEmail" xml:space="preserve">
+    <value>From (csv email)</value>
+  </data>
+  <data name="MailFlow.SentToCsvEmail" xml:space="preserve">
+    <value>SentTo (csv email)</value>
+  </data>
+  <data name="MailFlow.SenderDomainIsCsvDomain" xml:space="preserve">
+    <value>SenderDomainIs (csv domain)</value>
+  </data>
+  <data name="MailFlow.RecipientDomainIsCsvDomain" xml:space="preserve">
+    <value>RecipientDomainIs (csv domain)</value>
+  </data>
+  <data name="MailFlow.SentToMemberOfCsvGroupIdentity" xml:space="preserve">
+    <value>SentToMemberOf (csv group identity)</value>
+  </data>
+  <data name="MailFlow.SubjectContainsWordsCsv" xml:space="preserve">
+    <value>SubjectContainsWords (csv)</value>
+  </data>
+  <data name="MailFlow.Exceptions" xml:space="preserve">
+    <value>Exceptions</value>
+  </data>
+  <data name="MailFlow.ExceptIfFromCsvEmail" xml:space="preserve">
+    <value>ExceptIfFrom (csv email)</value>
+  </data>
+  <data name="MailFlow.ExceptIfSentToCsvEmail" xml:space="preserve">
+    <value>ExceptIfSentTo (csv email)</value>
+  </data>
+  <data name="MailFlow.ExceptIfSenderDomainIsCsvDomain" xml:space="preserve">
+    <value>ExceptIfSenderDomainIs (csv domain)</value>
+  </data>
+  <data name="MailFlow.ExceptIfRecipientDomainIsCsvDomain" xml:space="preserve">
+    <value>ExceptIfRecipientDomainIs (csv domain)</value>
+  </data>
+  <data name="MailFlow.ExceptIfSubjectContainsWordsCsv" xml:space="preserve">
+    <value>ExceptIfSubjectContainsWords (csv)</value>
+  </data>
+  <data name="MailFlow.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="MailFlow.PrependSubject" xml:space="preserve">
+    <value>PrependSubject</value>
+  </data>
+  <data name="MailFlow.RedirectMessageToCsvEmail" xml:space="preserve">
+    <value>RedirectMessageTo (csv email)</value>
+  </data>
+  <data name="MailFlow.BlindCopyToCsvEmail" xml:space="preserve">
+    <value>BlindCopyTo (csv email)</value>
+  </data>
+  <data name="MailFlow.AddToRecipientsCsvEmail" xml:space="preserve">
+    <value>AddToRecipients (csv email)</value>
+  </data>
+  <data name="MailFlow.StopRuleProcessing" xml:space="preserve">
+    <value>StopRuleProcessing</value>
+  </data>
+  <data name="MailFlow.DeleteMessage" xml:space="preserve">
+    <value>DeleteMessage</value>
+  </data>
+  <data name="MailFlow.SaveRule" xml:space="preserve">
+    <value>Save Rule</value>
+  </data>
+  <data name="MailFlow.TestTransportRules" xml:space="preserve">
+    <value>Test Transport Rules</value>
+  </data>
+  <data name="MailFlow.Sender" xml:space="preserve">
+    <value>Sender</value>
+  </data>
+  <data name="MailFlow.Recipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="MailFlow.Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="MailFlow.Test" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="MailFlow.Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="MailFlow.CreateEditConnector" xml:space="preserve">
+    <value>Create / Edit Connector</value>
+  </data>
+  <data name="MailFlow.SenderDomainsCsv" xml:space="preserve">
+    <value>SenderDomains (csv)</value>
+  </data>
+  <data name="MailFlow.RecipientDomainsCsv" xml:space="preserve">
+    <value>RecipientDomains (csv)</value>
+  </data>
+  <data name="MailFlow.SaveConnector" xml:space="preserve">
+    <value>Save Connector</value>
+  </data>
+  <data name="MailFlow.CreateEditAcceptedDomain" xml:space="preserve">
+    <value>Create / Edit Accepted Domain</value>
+  </data>
+  <data name="MailFlow.DomainFQDN" xml:space="preserve">
+    <value>Domain FQDN</value>
+  </data>
+  <data name="MailFlow.DomainType" xml:space="preserve">
+    <value>Domain Type</value>
+  </data>
+  <data name="MailFlow.MakeDefault" xml:space="preserve">
+    <value>Make Default</value>
+  </data>
+  <data name="MailFlow.SaveDomain" xml:space="preserve">
+    <value>Save Domain</value>
+  </data>
+  <data name="MailFlow.CreateEditRemoteDomain" xml:space="preserve">
+    <value>Create / Edit Remote Domain</value>
+  </data>
+  <data name="MailFlow.DefaultRemoteDomain" xml:space="preserve">
+    <value>Default remote domain</value>
+  </data>
+  <data name="MailFlow.DomainWildcard" xml:space="preserve">
+    <value>Domain / wildcard</value>
+  </data>
+  <data name="MailFlow.AllowedOOFType" xml:space="preserve">
+    <value>Allowed OOF Type</value>
+  </data>
+  <data name="MailFlow.AutoReplyEnabled" xml:space="preserve">
+    <value>AutoReplyEnabled</value>
+  </data>
+  <data name="MailFlow.AutoForwardEnabled" xml:space="preserve">
+    <value>AutoForwardEnabled</value>
+  </data>
+  <data name="MailFlow.DeliveryReportEnabled" xml:space="preserve">
+    <value>DeliveryReportEnabled</value>
+  </data>
+  <data name="MailFlow.NDREnabled" xml:space="preserve">
+    <value>NDREnabled</value>
+  </data>
+  <data name="MailFlow.MeetingForwardNotificationEnabled" xml:space="preserve">
+    <value>MeetingForwardNotificationEnabled</value>
+  </data>
+  <data name="MailFlow.TNEFEnabled" xml:space="preserve">
+    <value>TNEFEnabled</value>
+  </data>
+  <data name="MailFlow.TrustedMailOutboundEnabled" xml:space="preserve">
+    <value>TrustedMailOutboundEnabled</value>
+  </data>
+  <data name="MailFlow.SaveRemoteDomain" xml:space="preserve">
+    <value>Save Remote Domain</value>
+  </data>
+  <data name="MailFlow.CreateEditOrganizationRelationship" xml:space="preserve">
+    <value>Create / Edit Organization Relationship</value>
+  </data>
+  <data name="MailFlow.DomainNamesCsv" xml:space="preserve">
+    <value>DomainNames (csv)</value>
+  </data>
+  <data name="MailFlow.FreeBusyAccessEnabled" xml:space="preserve">
+    <value>FreeBusyAccessEnabled</value>
+  </data>
+  <data name="MailFlow.FreeBusyAccessLevel" xml:space="preserve">
+    <value>FreeBusyAccessLevel</value>
+  </data>
+  <data name="MailFlow.MailTipsAccessEnabled" xml:space="preserve">
+    <value>MailTipsAccessEnabled</value>
+  </data>
+  <data name="MailFlow.MailTipsAccessLevel" xml:space="preserve">
+    <value>MailTipsAccessLevel</value>
+  </data>
+  <data name="MailFlow.TargetApplicationUri" xml:space="preserve">
+    <value>TargetApplicationUri</value>
+  </data>
+  <data name="MailFlow.TargetAutodiscoverEpr" xml:space="preserve">
+    <value>TargetAutodiscoverEpr</value>
+  </data>
+  <data name="MailFlow.ArchiveAccessEnabled" xml:space="preserve">
+    <value>ArchiveAccessEnabled</value>
+  </data>
+  <data name="MailFlow.MailboxMoveEnabled" xml:space="preserve">
+    <value>MailboxMoveEnabled</value>
+  </data>
+  <data name="MailFlow.PhotosEnabled" xml:space="preserve">
+    <value>PhotosEnabled</value>
+  </data>
+  <data name="MailFlow.SaveOrganizationRelationship" xml:space="preserve">
+    <value>Save Organization Relationship</value>
+  </data>
+  <data name="MailFlow.CreateEditAddressList" xml:space="preserve">
+    <value>Create / Edit Address List</value>
+  </data>
+  <data name="MailFlow.DisplayName" xml:space="preserve">
+    <value>DisplayName</value>
+  </data>
+  <data name="MailFlow.RecipientFilterCustom" xml:space="preserve">
+    <value>RecipientFilter (custom)</value>
+  </data>
+  <data name="MailFlow.RecipientContainer" xml:space="preserve">
+    <value>RecipientContainer</value>
+  </data>
+  <data name="MailFlow.IncludedRecipientsCsv" xml:space="preserve">
+    <value>IncludedRecipients (csv)</value>
+  </data>
+  <data name="MailFlow.ConditionalCompanyCsv" xml:space="preserve">
+    <value>ConditionalCompany (csv)</value>
+  </data>
+  <data name="MailFlow.ConditionalDepartmentCsv" xml:space="preserve">
+    <value>ConditionalDepartment (csv)</value>
+  </data>
+  <data name="MailFlow.ConditionalStateOrProvinceCsv" xml:space="preserve">
+    <value>ConditionalStateOrProvince (csv)</value>
+  </data>
+  <data name="MailFlow.ConditionalCustomAttribute1Csv" xml:space="preserve">
+    <value>ConditionalCustomAttribute1 (csv)</value>
+  </data>
+  <data name="MailFlow.SaveAddressList" xml:space="preserve">
+    <value>Save Address List</value>
+  </data>
+  <data name="MailFlow.CreateEditAddressBookPolicy" xml:space="preserve">
+    <value>Create / Edit Address Book Policy</value>
+  </data>
+  <data name="MailFlow.AddressListsCsvIdentities" xml:space="preserve">
+    <value>AddressLists (csv identities)</value>
+  </data>
+  <data name="MailFlow.GlobalAddressList" xml:space="preserve">
+    <value>GlobalAddressList</value>
+  </data>
+  <data name="MailFlow.OfflineAddressBook" xml:space="preserve">
+    <value>OfflineAddressBook</value>
+  </data>
+  <data name="MailFlow.RoomListOptional" xml:space="preserve">
+    <value>RoomList (optional)</value>
+  </data>
+  <data name="MailFlow.SaveAddressBookPolicy" xml:space="preserve">
+    <value>Save Address Book Policy</value>
+  </data>
+  <data name="MailFlow.CreateEditOfflineAddressBook" xml:space="preserve">
+    <value>Create / Edit Offline Address Book</value>
+  </data>
+  <data name="MailFlow.DefaultOfflineAddressBook" xml:space="preserve">
+    <value>Default offline address book</value>
+  </data>
+  <data name="MailFlow.DiffRetentionPeriodOptionalInteger" xml:space="preserve">
+    <value>DiffRetentionPeriod (optional integer)</value>
+  </data>
+  <data name="MailFlow.SaveOfflineAddressBook" xml:space="preserve">
+    <value>Save Offline Address Book</value>
+  </data>
+  <data name="MailFlow.CreateEditSharingPolicy" xml:space="preserve">
+    <value>Create / Edit Sharing Policy</value>
+  </data>
+  <data name="MailFlow.DefaultSharingPolicy" xml:space="preserve">
+    <value>Default sharing policy</value>
+  </data>
+  <data name="MailFlow.DomainsCsvExContosoComCalendarSharingFreeBusyDetail" xml:space="preserve">
+    <value>Domains (csv, ex. contoso.com: CalendarSharingFreeBusyDetail)</value>
+  </data>
+  <data name="MailFlow.SaveSharingPolicy" xml:space="preserve">
+    <value>Save Sharing Policy</value>
+  </data>
+  <data name="MailSecurity.DKIM" xml:space="preserve">
+    <value>DKIM</value>
+  </data>
+  <data name="MailSecurity.Domain" xml:space="preserve">
+    <value>Domain</value>
+  </data>
+  <data name="MailSecurity.Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="MailSecurity.Selector1" xml:space="preserve">
+    <value>Selector 1</value>
+  </data>
+  <data name="MailSecurity.Selector2" xml:space="preserve">
+    <value>Selector 2</value>
+  </data>
+  <data name="MailSecurity.SelectedDKIMConfig" xml:space="preserve">
+    <value>Selected DKIM config</value>
+  </data>
+  <data name="MailSecurity.SaveDKIM" xml:space="preserve">
+    <value>Save DKIM</value>
+  </data>
+  <data name="MailSecurity.AntiSpam" xml:space="preserve">
+    <value>Anti-Spam</value>
+  </data>
+  <data name="MailSecurity.Policy" xml:space="preserve">
+    <value>Policy</value>
+  </data>
+  <data name="MailSecurity.RuleState" xml:space="preserve">
+    <value>Rule State</value>
+  </data>
+  <data name="MailSecurity.Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="MailSecurity.Bulk" xml:space="preserve">
+    <value>Bulk</value>
+  </data>
+  <data name="MailSecurity.SpamAction" xml:space="preserve">
+    <value>Spam Action</value>
+  </data>
+  <data name="MailSecurity.SelectedAntiSpamPolicy" xml:space="preserve">
+    <value>Selected anti-spam policy</value>
+  </data>
+  <data name="MailSecurity.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MailSecurity.RuleEnabled" xml:space="preserve">
+    <value>Rule enabled</value>
+  </data>
+  <data name="MailSecurity.BulkThreshold" xml:space="preserve">
+    <value>Bulk threshold</value>
+  </data>
+  <data name="MailSecurity.HighConfidenceSpamAction" xml:space="preserve">
+    <value>High confidence spam action</value>
+  </data>
+  <data name="MailSecurity.PhishSpamAction" xml:space="preserve">
+    <value>Phish spam action</value>
+  </data>
+  <data name="MailSecurity.SaveAntiSpamPolicy" xml:space="preserve">
+    <value>Save Anti-Spam Policy</value>
+  </data>
+  <data name="MailSecurity.AntiPhish" xml:space="preserve">
+    <value>Anti-Phish</value>
+  </data>
+  <data name="MailSecurity.Threshold" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="MailSecurity.AuthFail" xml:space="preserve">
+    <value>Auth Fail</value>
+  </data>
+  <data name="MailSecurity.SelectedAntiPhishPolicy" xml:space="preserve">
+    <value>Selected anti-phish policy</value>
+  </data>
+  <data name="MailSecurity.EnableSpoofIntelligence" xml:space="preserve">
+    <value>Enable spoof intelligence</value>
+  </data>
+  <data name="MailSecurity.EnableMailboxIntelligence" xml:space="preserve">
+    <value>Enable mailbox intelligence</value>
+  </data>
+  <data name="MailSecurity.EnableTargetedUserProtection" xml:space="preserve">
+    <value>Enable targeted user protection</value>
+  </data>
+  <data name="MailSecurity.HonorDMARCPolicy" xml:space="preserve">
+    <value>Honor DMARC policy</value>
+  </data>
+  <data name="MailSecurity.PhishThresholdLevel" xml:space="preserve">
+    <value>Phish threshold level</value>
+  </data>
+  <data name="MailSecurity.MailboxIntelligenceAction" xml:space="preserve">
+    <value>Mailbox intelligence action</value>
+  </data>
+  <data name="MailSecurity.TargetedUserAction" xml:space="preserve">
+    <value>Targeted user action</value>
+  </data>
+  <data name="MailSecurity.AuthenticationFailAction" xml:space="preserve">
+    <value>Authentication fail action</value>
+  </data>
+  <data name="MailSecurity.DMARCRejectAction" xml:space="preserve">
+    <value>DMARC reject action</value>
+  </data>
+  <data name="MailSecurity.DMARCQuarantineAction" xml:space="preserve">
+    <value>DMARC quarantine action</value>
+  </data>
+  <data name="MailSecurity.SaveAntiPhishPolicy" xml:space="preserve">
+    <value>Save Anti-Phish Policy</value>
+  </data>
+  <data name="MailSecurity.AntiMalware" xml:space="preserve">
+    <value>Anti-Malware</value>
+  </data>
+  <data name="MailSecurity.FileFilter" xml:space="preserve">
+    <value>File Filter</value>
+  </data>
+  <data name="MailSecurity.ZAP" xml:space="preserve">
+    <value>ZAP</value>
+  </data>
+  <data name="MailSecurity.SelectedAntiMalwarePolicy" xml:space="preserve">
+    <value>Selected anti-malware policy</value>
+  </data>
+  <data name="MailSecurity.EnableFileFilter" xml:space="preserve">
+    <value>Enable file filter</value>
+  </data>
+  <data name="MailSecurity.EnableZAP" xml:space="preserve">
+    <value>Enable ZAP</value>
+  </data>
+  <data name="MailSecurity.FileTypeAction" xml:space="preserve">
+    <value>File type action</value>
+  </data>
+  <data name="MailSecurity.SaveAntiMalwarePolicy" xml:space="preserve">
+    <value>Save Anti-Malware Policy</value>
+  </data>
+  <data name="MailSecurity.Quarantine" xml:space="preserve">
+    <value>Quarantine</value>
+  </data>
+  <data name="MailSecurity.Permissions" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <data name="MailSecurity.ESN" xml:space="preserve">
+    <value>ESN</value>
+  </data>
+  <data name="MailSecurity.Retention" xml:space="preserve">
+    <value>Retention</value>
+  </data>
+  <data name="MailSecurity.SelectedQuarantinePolicy" xml:space="preserve">
+    <value>Selected quarantine policy</value>
+  </data>
+  <data name="MailSecurity.EndUserPermissions" xml:space="preserve">
+    <value>End user permissions</value>
+  </data>
+  <data name="MailSecurity.EnableEndUserSpamNotifications" xml:space="preserve">
+    <value>Enable end user spam notifications</value>
+  </data>
+  <data name="MailSecurity.NotificationFrequencyDays" xml:space="preserve">
+    <value>Notification frequency (days)</value>
+  </data>
+  <data name="MailSecurity.RetentionDays" xml:space="preserve">
+    <value>Retention days</value>
+  </data>
+  <data name="MailSecurity.OrganizationBrandingEnabled" xml:space="preserve">
+    <value>Organization branding enabled</value>
+  </data>
+  <data name="MailSecurity.SaveQuarantinePolicy" xml:space="preserve">
+    <value>Save Quarantine Policy</value>
+  </data>
+  <data name="MailSecurity.OutboundSpam" xml:space="preserve">
+    <value>Outbound Spam</value>
+  </data>
+  <data name="MailSecurity.ExtH" xml:space="preserve">
+    <value>Ext / h</value>
+  </data>
+  <data name="MailSecurity.IntH" xml:space="preserve">
+    <value>Int / h</value>
+  </data>
+  <data name="MailSecurity.Day" xml:space="preserve">
+    <value>Day</value>
+  </data>
+  <data name="MailSecurity.Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="MailSecurity.SelectedOutboundSpamPolicy" xml:space="preserve">
+    <value>Selected outbound spam policy</value>
+  </data>
+  <data name="MailSecurity.RecipientLimitExternalHour" xml:space="preserve">
+    <value>Recipient limit external / hour</value>
+  </data>
+  <data name="MailSecurity.RecipientLimitInternalHour" xml:space="preserve">
+    <value>Recipient limit internal / hour</value>
+  </data>
+  <data name="MailSecurity.RecipientLimitPerDay" xml:space="preserve">
+    <value>Recipient limit per day</value>
+  </data>
+  <data name="MailSecurity.ActionWhenThresholdReached" xml:space="preserve">
+    <value>Action when threshold reached</value>
+  </data>
+  <data name="MailSecurity.AutoForwardingMode" xml:space="preserve">
+    <value>Auto forwarding mode</value>
+  </data>
+  <data name="MailSecurity.SaveOutboundSpamPolicy" xml:space="preserve">
+    <value>Save Outbound Spam Policy</value>
+  </data>
+  <data name="MailboxSettings.UpdateHiddenFromAddressListsEnabledOnTheMailbox" xml:space="preserve">
+    <value>Update HiddenFromAddressListsEnabled on the mailbox</value>
+  </data>
+  <data name="MailboxSettings.UpdateOWAEnabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update OWAEnabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.AllowsAccessThroughOutlookOnTheWebForTheSelectedMailbox" xml:space="preserve">
+    <value>Allows access through Outlook on the web for the selected mailbox.</value>
+  </data>
+  <data name="MailboxSettings.UpdateActiveSyncEnabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update ActiveSyncEnabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.ControlsSynchronizationForExchangeActiveSyncMobileClients" xml:space="preserve">
+    <value>Controls synchronization for Exchange ActiveSync mobile clients.</value>
+  </data>
+  <data name="MailboxSettings.UpdateMAPIEnabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update MAPIEnabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.AllowsOrBlocksOutlookDesktopAndMAPIOverHTTPAccessForTheMailbox" xml:space="preserve">
+    <value>Allows or blocks Outlook desktop and MAPI over HTTP access for the mailbox.</value>
+  </data>
+  <data name="MailboxSettings.POP" xml:space="preserve">
+    <value>POP</value>
+  </data>
+  <data name="MailboxSettings.UpdatePopEnabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update PopEnabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.AllowsMessageDownloadThroughPOP" xml:space="preserve">
+    <value>Allows message download through POP.</value>
+  </data>
+  <data name="MailboxSettings.IMAP" xml:space="preserve">
+    <value>IMAP</value>
+  </data>
+  <data name="MailboxSettings.UpdateImapEnabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update ImapEnabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.AllowsAccessToMessagesThroughIMAP" xml:space="preserve">
+    <value>Allows access to messages through IMAP.</value>
+  </data>
+  <data name="MailboxSettings.UpdateSmtpClientAuthenticationDisabledThroughSetCASMailbox" xml:space="preserve">
+    <value>Update SmtpClientAuthenticationDisabled through Set-CASMailbox</value>
+  </data>
+  <data name="MailboxSettings.IfEnabledBlocksSMTPClientAuthenticationForTheSelectedMailbox" xml:space="preserve">
+    <value>If enabled, blocks SMTP client authentication for the selected mailbox.</value>
+  </data>
+  <data name="MailboxSettings.OptionsThatCannotBeEditedDependOnTheCapabilitiesDetectedInTheCur" xml:space="preserve">
+    <value>Options that cannot be edited depend on the capabilities detected in the current Exchange session.</value>
+  </data>
+  <data name="MailboxSettings.EnableOrDisableTheMailboxArchive" xml:space="preserve">
+    <value>Enable or disable the mailbox archive</value>
+  </data>
+  <data name="MailboxSettings.ArchiveStatus" xml:space="preserve">
+    <value>Archive status:</value>
+  </data>
+  <data name="MailboxSettings.ArchiveGUID" xml:space="preserve">
+    <value>Archive GUID:</value>
+  </data>
+  <data name="MailboxSettings.PreserveAllContentForLegalHoldPurposes" xml:space="preserve">
+    <value>Preserve all content for legal hold purposes</value>
+  </data>
+  <data name="MailboxSettings.RecordMailboxAccessAndUpdateActivity" xml:space="preserve">
+    <value>Record mailbox access and update activity</value>
+  </data>
+  <data name="MailboxSettings.AllowsDeletedItemRecoveryBeyondTheRetentionPeriod" xml:space="preserve">
+    <value>Allows deleted item recovery beyond the retention period</value>
+  </data>
+  <data name="MailboxSettings.PauseRetentionPolicyProcessing" xml:space="preserve">
+    <value>Pause retention policy processing</value>
+  </data>
+  <data name="MailboxSettings.PolicyAssigned" xml:space="preserve">
+    <value>Policy assigned:</value>
+  </data>
+  <data name="MailboxSettings.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="MailboxSettings.ReloadTheRetentionPolicyList" xml:space="preserve">
+    <value>Reload the retention policy list</value>
+  </data>
+  <data name="MailboxSettings.TheArchiveIsNotRequiredToAssignARetentionPolicyButItIsRequiredTo" xml:space="preserve">
+    <value>The archive is not required to assign a retention policy, but it is required to apply tags that use the 'MoveToArchive' action.</value>
+  </data>
+  <data name="MailboxSettings.TheMailboxDoesNotHaveAnEnabledArchiveSomeTagsInThisPolicyRequire" xml:space="preserve">
+    <value>âš  The mailbox does not have an enabled archive: some tags in this policy require the archive mailbox.</value>
+  </data>
+  <data name="MailboxSettings.WarningQuota" xml:space="preserve">
+    <value>Warning quota:</value>
+  </data>
+  <data name="MailboxSettings.SupportedFormat49GB512MBUnlimited" xml:space="preserve">
+    <value>Supported format: 49 GB, 512 MB, Unlimited</value>
+  </data>
+  <data name="MailboxSettings.SendProhibitQuota" xml:space="preserve">
+    <value>Send prohibit quota:</value>
+  </data>
+  <data name="MailboxSettings.SupportedFormat50GB1TBUnlimited" xml:space="preserve">
+    <value>Supported format: 50 GB, 1 TB, Unlimited</value>
+  </data>
+  <data name="MailboxSettings.SendReceiveProhibitQuota" xml:space="preserve">
+    <value>Send/receive prohibit quota:</value>
+  </data>
+  <data name="MailboxSettings.SupportedFormat51GB1TBUnlimited" xml:space="preserve">
+    <value>Supported format: 51 GB, 1 TB, Unlimited</value>
+  </data>
+  <data name="MailboxSettings.UsedSpace" xml:space="preserve">
+    <value>Used space:</value>
+  </data>
+  <data name="MailboxSettings.ExchangeOnlineAppliesTheFinalQuotaFormatValidationWhenSaving" xml:space="preserve">
+    <value>Exchange Online applies the final quota format validation when saving.</value>
+  </data>
+  <data name="MailboxSettings.Status" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="MailboxSettings.EnableOrDisableAutomaticRepliesForThisMailbox" xml:space="preserve">
+    <value>Enable or disable automatic replies for this mailbox</value>
+  </data>
+  <data name="MailboxSettings.SetAScheduledActivationPeriod" xml:space="preserve">
+    <value>Set a scheduled activation period</value>
+  </data>
+  <data name="MailboxSettings.Start" xml:space="preserve">
+    <value>Start:</value>
+  </data>
+  <data name="MailboxSettings.TimeFormatHHMm" xml:space="preserve">
+    <value>Time format: HH:mm</value>
+  </data>
+  <data name="MailboxSettings.End" xml:space="preserve">
+    <value>End:</value>
+  </data>
+  <data name="MailboxSettings.InternalMessage" xml:space="preserve">
+    <value>Internal message:</value>
+  </data>
+  <data name="MailboxSettings.ExternalMessage" xml:space="preserve">
+    <value>External message:</value>
+  </data>
+  <data name="MailboxSettings.ExternalRecipients" xml:space="preserve">
+    <value>External recipients:</value>
+  </data>
+  <data name="Migration.RefreshBatches" xml:space="preserve">
+    <value>Refresh batches</value>
+  </data>
+  <data name="Migration.Batches" xml:space="preserve">
+    <value>Batches</value>
+  </data>
+  <data name="Migration.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Migration.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Migration.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Migration.Endpoint" xml:space="preserve">
+    <value>Endpoint</value>
+  </data>
+  <data name="Migration.Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Migration.Synced" xml:space="preserve">
+    <value>Synced</value>
+  </data>
+  <data name="Migration.Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Migration.Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="Migration.LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="Migration.BatchDetails" xml:space="preserve">
+    <value>Batch details</value>
+  </data>
+  <data name="Migration.LoadDetails" xml:space="preserve">
+    <value>Load details</value>
+  </data>
+  <data name="Migration.Identity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="Migration.StatusDetail" xml:space="preserve">
+    <value>Status detail</value>
+  </data>
+  <data name="Migration.Endpoints" xml:space="preserve">
+    <value>Endpoints</value>
+  </data>
+  <data name="Migration.Counters" xml:space="preserve">
+    <value>Counters</value>
+  </data>
+  <data name="Migration.TargetEndpoint" xml:space="preserve">
+    <value>Target endpoint</value>
+  </data>
+  <data name="Migration.NotificationEmails" xml:space="preserve">
+    <value>Notification emails</value>
+  </data>
+  <data name="Migration.CreatedStartedCompleted" xml:space="preserve">
+    <value>Created / Started / Completed</value>
+  </data>
+  <data name="Migration.Flags" xml:space="preserve">
+    <value>Flags</value>
+  </data>
+  <data name="Migration.Report" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="Migration.BatchActions" xml:space="preserve">
+    <value>Batch actions</value>
+  </data>
+  <data name="Migration.Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Migration.Complete" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="Migration.Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Migration.LoadingMigrationBatchDetails" xml:space="preserve">
+    <value>Loading migration batch details...</value>
+  </data>
+  <data name="Migration.EndpointsAndBatchCreation" xml:space="preserve">
+    <value>Endpoints &amp; Batch Creation</value>
+  </data>
+  <data name="Migration.RefreshEndpoints" xml:space="preserve">
+    <value>Refresh Endpoints</value>
+  </data>
+  <data name="Migration.NewEndpoint" xml:space="preserve">
+    <value>New Endpoint</value>
+  </data>
+  <data name="Migration.SaveEndpoint" xml:space="preserve">
+    <value>Save Endpoint</value>
+  </data>
+  <data name="Migration.TestEndpoint" xml:space="preserve">
+    <value>Test Endpoint</value>
+  </data>
+  <data name="Migration.RemoteServer" xml:space="preserve">
+    <value>Remote server</value>
+  </data>
+  <data name="Migration.RPCProxy" xml:space="preserve">
+    <value>RPC proxy</value>
+  </data>
+  <data name="Migration.EndpointEditor" xml:space="preserve">
+    <value>Endpoint editor</value>
+  </data>
+  <data name="Migration.EmailAddress" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="Migration.RPCProxyServer" xml:space="preserve">
+    <value>RPC proxy server</value>
+  </data>
+  <data name="Migration.ExchangeServer" xml:space="preserve">
+    <value>Exchange server</value>
+  </data>
+  <data name="Migration.RemoteTenant" xml:space="preserve">
+    <value>Remote tenant</value>
+  </data>
+  <data name="Migration.Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Migration.Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Migration.Authentication" xml:space="preserve">
+    <value>Authentication</value>
+  </data>
+  <data name="Migration.CredentialsAndLimits" xml:space="preserve">
+    <value>Credentials and limits</value>
+  </data>
+  <data name="Migration.Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Migration.Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Migration.MaxConcurrentMigrations" xml:space="preserve">
+    <value>Max concurrent migrations</value>
+  </data>
+  <data name="Migration.MaxIncrementalSyncs" xml:space="preserve">
+    <value>Max incremental syncs</value>
+  </data>
+  <data name="Migration.SkipVerification" xml:space="preserve">
+    <value>Skip verification</value>
+  </data>
+  <data name="Migration.AcceptUntrustedCertificates" xml:space="preserve">
+    <value>Accept untrusted certificates</value>
+  </data>
+  <data name="Migration.CreateMigrationBatch" xml:space="preserve">
+    <value>Create migration batch</value>
+  </data>
+  <data name="Migration.BatchName" xml:space="preserve">
+    <value>Batch name</value>
+  </data>
+  <data name="Migration.BatchType" xml:space="preserve">
+    <value>Batch type</value>
+  </data>
+  <data name="Migration.EndpointIdentity" xml:space="preserve">
+    <value>Endpoint identity</value>
+  </data>
+  <data name="Migration.CSVFilePath" xml:space="preserve">
+    <value>CSV file path</value>
+  </data>
+  <data name="Migration.TargetDeliveryDomain" xml:space="preserve">
+    <value>Target delivery domain</value>
+  </data>
+  <data name="Migration.AutoStart" xml:space="preserve">
+    <value>Auto start</value>
+  </data>
+  <data name="Migration.AutoComplete" xml:space="preserve">
+    <value>Auto complete</value>
+  </data>
+  <data name="Migration.RunPreflight" xml:space="preserve">
+    <value>Run Preflight</value>
+  </data>
+  <data name="Migration.CreateBatch" xml:space="preserve">
+    <value>Create Batch</value>
+  </data>
+  <data name="Resources.New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Resources.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Resources.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Resources.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Resources.PrimaryEmail" xml:space="preserve">
+    <value>Primary email</value>
+  </data>
+  <data name="Resources.Alias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="Resources.HideFromGAL" xml:space="preserve">
+    <value>Hide from GAL</value>
+  </data>
+  <data name="Resources.LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="Resources.ResourceMailboxDetails" xml:space="preserve">
+    <value>Resource mailbox details</value>
+  </data>
+  <data name="Resources.DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Resources.PrimarySMTP" xml:space="preserve">
+    <value>Primary SMTP</value>
+  </data>
+  <data name="Resources.AutomateProcessing" xml:space="preserve">
+    <value>Automate processing</value>
+  </data>
+  <data name="Resources.Identity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="Resources.HideFromAddressLists" xml:space="preserve">
+    <value>Hide from address lists</value>
+  </data>
+  <data name="Resources.BookingSettings" xml:space="preserve">
+    <value>Booking settings</value>
+  </data>
+  <data name="Resources.AllowConflicts" xml:space="preserve">
+    <value>Allow conflicts</value>
+  </data>
+  <data name="Resources.AllBookInPolicy" xml:space="preserve">
+    <value>All book in policy</value>
+  </data>
+  <data name="Resources.AllRequestInPolicy" xml:space="preserve">
+    <value>All request in policy</value>
+  </data>
+  <data name="Resources.AllRequestOutOfPolicy" xml:space="preserve">
+    <value>All request out of policy</value>
+  </data>
+  <data name="Resources.DeleteSubject" xml:space="preserve">
+    <value>Delete subject</value>
+  </data>
+  <data name="Resources.AddOrganizerToSubject" xml:space="preserve">
+    <value>Add organizer to subject</value>
+  </data>
+  <data name="Resources.RemovePrivateProperty" xml:space="preserve">
+    <value>Remove private property</value>
+  </data>
+  <data name="Resources.EnforceSchedulingHorizon" xml:space="preserve">
+    <value>Enforce scheduling horizon</value>
+  </data>
+  <data name="Resources.BookingWindowDays" xml:space="preserve">
+    <value>Booking window (days)</value>
+  </data>
+  <data name="Resources.MaximumDurationMinutes" xml:space="preserve">
+    <value>Maximum duration (minutes)</value>
+  </data>
+  <data name="Resources.BookInPolicyCSV" xml:space="preserve">
+    <value>Book in policy (CSV)</value>
+  </data>
+  <data name="Resources.RequestInPolicyCSV" xml:space="preserve">
+    <value>Request in policy (CSV)</value>
+  </data>
+  <data name="Resources.RequestOutOfPolicyCSV" xml:space="preserve">
+    <value>Request out of policy (CSV)</value>
+  </data>
+  <data name="Resources.ResourceDelegatesCSV" xml:space="preserve">
+    <value>Resource delegates (CSV)</value>
+  </data>
+  <data name="Resources.MailboxDelegation" xml:space="preserve">
+    <value>Mailbox delegation</value>
+  </data>
+  <data name="Resources.FullAccessCSV" xml:space="preserve">
+    <value>Full access (CSV)</value>
+  </data>
+  <data name="Resources.SendAsCSV" xml:space="preserve">
+    <value>Send as (CSV)</value>
+  </data>
+  <data name="Resources.SendOnBehalfCSV" xml:space="preserve">
+    <value>Send on behalf (CSV)</value>
+  </data>
+  <data name="Resources.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Tools.ExchangeOnlineConnectionsAreDisabledByPolicyONLYEXO365DISABLE" xml:space="preserve">
+    <value>Exchange Online connections are disabled by policy (ONLYEXO365_DISABLE_EXO=1).</value>
+  </data>
+  <data name="Tools.ConnectionInformation" xml:space="preserve">
+    <value>Connection Information</value>
+  </data>
+  <data name="Tools.Status" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="Tools.User" xml:space="preserve">
+    <value>User:</value>
+  </data>
+  <data name="Tools.Organization" xml:space="preserve">
+    <value>Organization:</value>
+  </data>
+  <data name="Tools.Capabilities" xml:space="preserve">
+    <value>Capabilities:</value>
+  </data>
+  <data name="Tools.WorkerStatus" xml:space="preserve">
+    <value>Worker Status</value>
+  </data>
+  <data name="Tools.WorkerState" xml:space="preserve">
+    <value>Worker State:</value>
+  </data>
+  <data name="Tools.WorkerRunning" xml:space="preserve">
+    <value>Worker Running:</value>
+  </data>
+  <data name="Tools.WorkerConsole" xml:space="preserve">
+    <value>Worker Console:</value>
+  </data>
+  <data name="Tools.WorkerConsoleToggle" xml:space="preserve">
+    <value>Show worker console</value>
+  </data>
+  <data name="Tools.WorkerConsoleVisible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="Tools.WorkerConsoleHidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="Tools.LicenseCatalog" xml:space="preserve">
+    <value>License Catalog</value>
+  </data>
+  <data name="Tools.UpdateNow" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+  <data name="Tools.OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Tools.Version" xml:space="preserve">
+    <value>Version:</value>
+  </data>
+  <data name="Tools.Entries" xml:space="preserve">
+    <value>Entries:</value>
+  </data>
+  <data name="Tools.LastChecked" xml:space="preserve">
+    <value>Last checked:</value>
+  </data>
+  <data name="Tools.LastUpdated" xml:space="preserve">
+    <value>Last updated:</value>
+  </data>
+  <data name="Tools.AutoUpdate" xml:space="preserve">
+    <value>Auto-update:</value>
+  </data>
+  <data name="Tools.LeastPrivilegeMatrix" xml:space="preserve">
+    <value>Least-Privilege Matrix</value>
+  </data>
+  <data name="Tools.TheMatrixValidatesAuthenticationModesGraphScopesAndDetectedCmdle" xml:space="preserve">
+    <value>The matrix validates authentication modes, Graph scopes, and detected cmdlets. Exchange, Purview, and Defender roles still need to be verified in the tenant.</value>
+  </data>
+  <data name="Tools.ModuleManagement" xml:space="preserve">
+    <value>Module Management</value>
+  </data>
+  <data name="Tools.CheckPrerequisites" xml:space="preserve">
+    <value>Check prerequisites</value>
+  </data>
+  <data name="Tools.PowerShell7" xml:space="preserve">
+    <value>PowerShell 7 </value>
+  </data>
+  <data name="Tools.Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Tools.GitHub" xml:space="preserve">
+    <value>GitHub</value>
+  </data>
+  <data name="Tools.ExchangeOnlineManagement" xml:space="preserve">
+    <value>ExchangeOnlineManagement </value>
+  </data>
+  <data name="Tools.MicrosoftGraphBundle" xml:space="preserve">
+    <value>Microsoft Graph bundle </value>
+  </data>
+  <data name="MobileDevices.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="MobileDevices.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="MobileDevices.DeviceID" xml:space="preserve">
+    <value>Device ID</value>
+  </data>
+  <data name="MobileDevices.FriendlyName" xml:space="preserve">
+    <value>Friendly name</value>
+  </data>
+  <data name="MobileDevices.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="MobileDevices.Access" xml:space="preserve">
+    <value>Access</value>
+  </data>
+  <data name="MobileDevices.Mailbox" xml:space="preserve">
+    <value>Mailbox</value>
+  </data>
+  <data name="MobileDevices.LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="MobileDevices.DeviceDetails" xml:space="preserve">
+    <value>Device details</value>
+  </data>
+  <data name="MobileDevices.UPN" xml:space="preserve">
+    <value>UPN</value>
+  </data>
+  <data name="MobileDevices.ModelOS" xml:space="preserve">
+    <value>Model / OS</value>
+  </data>
+  <data name="MobileDevices.StatusReason" xml:space="preserve">
+    <value>Status / Reason</value>
+  </data>
+  <data name="MobileDevices.LastSuccessSync" xml:space="preserve">
+    <value>Last success sync</value>
+  </data>
+  <data name="MobileDevices.LastPolicyUpdate" xml:space="preserve">
+    <value>Last policy update</value>
+  </data>
+  <data name="MobileDevices.MailboxPolicy" xml:space="preserve">
+    <value>Mailbox policy</value>
+  </data>
+  <data name="MobileDevices.PoliciesAreAppliedToTheMailboxAssociatedWithTheSelectedDevice" xml:space="preserve">
+    <value>Policies are applied to the mailbox associated with the selected device.</value>
+  </data>
+  <data name="MobileDevices.AssignPolicy" xml:space="preserve">
+    <value>Assign policy</value>
+  </data>
+  <data name="MobileDevices.DeviceActions" xml:space="preserve">
+    <value>Device actions</value>
+  </data>
+  <data name="MobileDevices.Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="MobileDevices.Block" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="MobileDevices.Quarantine" xml:space="preserve">
+    <value>Quarantine</value>
+  </data>
+  <data name="MobileDevices.RemoteWipe" xml:space="preserve">
+    <value>Remote wipe</value>
+  </data>
+  <data name="PublicFolders.New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="PublicFolders.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="PublicFolders.Path" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="PublicFolders.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="PublicFolders.Mail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="PublicFolders.SMTP" xml:space="preserve">
+    <value>SMTP</value>
+  </data>
+  <data name="PublicFolders.Subfolder" xml:space="preserve">
+    <value>Subfolder</value>
+  </data>
+  <data name="PublicFolders.LoadMore" xml:space="preserve">
+    <value>Load More</value>
+  </data>
+  <data name="PublicFolders.PublicFolderDetails" xml:space="preserve">
+    <value>Public folder details</value>
+  </data>
+  <data name="PublicFolders.ParentPath" xml:space="preserve">
+    <value>Parent path</value>
+  </data>
+  <data name="PublicFolders.MailEnabled" xml:space="preserve">
+    <value>Mail-enabled</value>
+  </data>
+  <data name="PublicFolders.HiddenFromAddressLists" xml:space="preserve">
+    <value>Hidden from address lists</value>
+  </data>
+  <data name="PublicFolders.Alias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+  <data name="PublicFolders.PrimarySMTP" xml:space="preserve">
+    <value>Primary SMTP</value>
+  </data>
+  <data name="PublicFolders.Items" xml:space="preserve">
+    <value>Items: </value>
+  </data>
+  <data name="PublicFolders.Size" xml:space="preserve">
+    <value>Size: </value>
+  </data>
+  <data name="PublicFolders.HasSubfolders" xml:space="preserve">
+    <value>Has subfolders</value>
+  </data>
+  <data name="PublicFolders.NoteSavingUpdatesTheNameParentPathMailEnabledStatusAndEmailPrope" xml:space="preserve">
+    <value>Note: saving updates the name, parent path, mail-enabled status, and email properties of the selected public folder.</value>
+  </data>
+  <data name="PublicFolders.ClientPermissions" xml:space="preserve">
+    <value>Client permissions</value>
+  </data>
+  <data name="PublicFolders.UserOrGroupThatShouldReceiveTheRole" xml:space="preserve">
+    <value>User or group that should receive the role</value>
+  </data>
+  <data name="PublicFolders.GrantUpdate" xml:space="preserve">
+    <value>Grant / update</value>
+  </data>
+  <data name="PublicFolders.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="PublicFolders.Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="PublicFolders.CurrentRights" xml:space="preserve">
+    <value>Current rights</value>
+  </data>
+  <data name="PublicFolders.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="PublicFolders.Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="PublicFolders.Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="PublicFolders.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="PublicFolders.Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Shell.ConnectedPrefix" xml:space="preserve">
+    <value>Connected: </value>
+  </data>
+  <data name="Dashboard.SkuPrefix" xml:space="preserve">
+    <value>SKU: </value>
+  </data>
+  <data name="Contact.IdentityFormat" xml:space="preserve">
+    <value>Identity: {0}</value>
+  </data>
+  <data name="Compliance.AuditNoJobsQueued" xml:space="preserve">
+    <value>No audit job queued</value>
+  </data>
+  <data name="Compliance.AuditJobCount" xml:space="preserve">
+    <value>{0} audit job</value>
+  </data>
+  <data name="Compliance.AuditStatusFormat" xml:space="preserve">
+    <value>{0} | {1} | {2} audit records</value>
+  </data>
+  <data name="Compliance.AuditTotal" xml:space="preserve">
+    <value>{0} total</value>
+  </data>
+  <data name="Compliance.AuditRunning" xml:space="preserve">
+    <value>{0} running</value>
+  </data>
+  <data name="Compliance.AuditQueued" xml:space="preserve">
+    <value>{0} queued</value>
+  </data>
+  <data name="Compliance.AuditCompleted" xml:space="preserve">
+    <value>{0} completed</value>
+  </data>
+  <data name="Compliance.AuditFailed" xml:space="preserve">
+    <value>{0} failed</value>
+  </data>
+  <data name="Resources.IdentityPrefix" xml:space="preserve">
+    <value>Identity: </value>
+  </data>
+  <data name="PublicFolders.IdentityPrefix" xml:space="preserve">
+    <value>Identity: </value>
+  </data>
+  <data name="Mailbox.List.WillCreateFormat" xml:space="preserve">
+    <value>Creates mailbox</value>
+  </data>
+  <data name="MailboxRestore.ProgressHeading" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="Common.True" xml:space="preserve">
+    <value>True</value>
+  </data>
+  <data name="Common.False" xml:space="preserve">
+    <value>False</value>
+  </data>
+  <data name="Btn.ExportXlsx" xml:space="preserve">
+    <value>Export XLSX</value>
+  </data>
+  <data name="Btn.ExportExcel" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+  <data name="Btn.Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="DeletedMailbox.LoadList" xml:space="preserve">
+    <value>Load list</value>
+  </data>
+  <data name="DeletedMailbox.UpnPlaceholder" xml:space="preserve">
+    <value>Enter the UPN to check...</value>
+  </data>
+  <data name="DeletedMailbox.CheckUpn" xml:space="preserve">
+    <value>Check UPN</value>
+  </data>
+  <data name="DeletedMailbox.IncludeSoftDeleted" xml:space="preserve">
+    <value>Include soft-deleted</value>
+  </data>
+  <data name="DeletedMailbox.IncludeInactive" xml:space="preserve">
+    <value>Include inactive</value>
+  </data>
+  <data name="DeletedMailbox.ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="MailboxAccess.StartAnalysis" xml:space="preserve">
+    <value>Start analysis</value>
+  </data>
+  <data name="MailboxAccess.ColUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="MailboxAccess.ColMailbox" xml:space="preserve">
+    <value>Mailbox</value>
+  </data>
+  <data name="MailboxAccess.ColFullAccess" xml:space="preserve">
+    <value>FullAccess</value>
+  </data>
+  <data name="MailboxAccess.ColSendAs" xml:space="preserve">
+    <value>SendAs</value>
+  </data>
+  <data name="MailboxAccess.ColSendOnBehalf" xml:space="preserve">
+    <value>SendOnBehalf</value>
+  </data>
+  <data name="MailboxSpace.SortedByFreeSpace" xml:space="preserve">
+    <value>Sorted by % free space</value>
+  </data>
+  <data name="MailboxSpace.StartScan" xml:space="preserve">
+    <value>Start scan</value>
+  </data>
+  <data name="MailboxSpace.WarningBanner" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="MailboxSpace.ErrorBanner" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="MailboxSpace.ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MailboxSpace.ColEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="MailboxSpace.ColUsed" xml:space="preserve">
+    <value>Used</value>
+  </data>
+  <data name="MailboxSpace.ColQuota" xml:space="preserve">
+    <value>Quota</value>
+  </data>
+  <data name="MailboxSpace.ColRemaining" xml:space="preserve">
+    <value>% Remaining</value>
+  </data>
+  <data name="MessageTrace.FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="MessageTrace.FilterDelivered" xml:space="preserve">
+    <value>Delivered</value>
+  </data>
+  <data name="MessageTrace.FilterFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="MessageTrace.FilterPending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="MessageTrace.MessageDetails" xml:space="preserve">
+    <value>Message details</value>
+  </data>
+  <data name="MessageTrace.WarningBanner" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="MessageTrace.ErrorBanner" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="MessageTrace.ColReceived" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="MessageTrace.ColSender" xml:space="preserve">
+    <value>Sender</value>
+  </data>
+  <data name="MessageTrace.ColRecipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="MessageTrace.ColSubject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="MessageTrace.ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="MessageTrace.ColSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="MessageTrace.ColDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="MessageTrace.ColEvent" xml:space="preserve">
+    <value>Event</value>
+  </data>
+  <data name="MessageTrace.ColAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="MessageTrace.ColDetail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
+  <data name="MessageTrace.ColData" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="MessageTrace.Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="MessageTrace.Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="MessageTrace.PagePrefix" xml:space="preserve">
+    <value>Page </value>
+  </data>
+  <data name="Mailbox.Overview.BasicInformation" xml:space="preserve">
+    <value>Basic information</value>
+  </data>
+  <data name="Mailbox.Overview.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Mailbox.Overview.ConvertToShared" xml:space="preserve">
+    <value>Convert to shared mailbox</value>
+  </data>
+  <data name="Mailbox.Overview.ConvertToSharedTooltip" xml:space="preserve">
+    <value>Convert the user mailbox to a shared mailbox</value>
+  </data>
+  <data name="Mailbox.Overview.RestoreUserMailbox" xml:space="preserve">
+    <value>Restore user mailbox</value>
+  </data>
+  <data name="Mailbox.Overview.RestoreUserMailboxTooltip" xml:space="preserve">
+    <value>Convert the shared mailbox back to a user mailbox</value>
+  </data>
+  <data name="Mailbox.Overview.RestoreDurationHint" xml:space="preserve">
+    <value>The restore can take a few minutes.</value>
+  </data>
+  <data name="Mailbox.Overview.Statistics" xml:space="preserve">
+    <value>Statistics</value>
+  </data>
+  <data name="Mailbox.Overview.TotalSize" xml:space="preserve">
+    <value>Total size:</value>
+  </data>
+  <data name="Mailbox.Overview.ItemCount" xml:space="preserve">
+    <value>Item count:</value>
+  </data>
+  <data name="Mailbox.Overview.DeletedItems" xml:space="preserve">
+    <value>Deleted items:</value>
+  </data>
+  <data name="Mailbox.Overview.LastAccess" xml:space="preserve">
+    <value>Last access:</value>
+  </data>
+  <data name="Mailbox.Overview.InboxRules" xml:space="preserve">
+    <value>Inbox rules</value>
+  </data>
+  <data name="Mailbox.Overview.NoRulesConfigured" xml:space="preserve">
+    <value>No rules configured</value>
+  </data>
+  <data name="Mailbox.Overview.ForwardingRuleDetected" xml:space="preserve">
+    <value>Forwarding rule detected</value>
+  </data>
+  <data name="Mailbox.Overview.RedirectRuleDetected" xml:space="preserve">
+    <value>Redirect rule detected</value>
+  </data>
+  <data name="Mailbox.Overview.RuleEnabled" xml:space="preserve">
+    <value> (Enabled)</value>
+  </data>
+  <data name="Mailbox.Overview.RuleDisabled" xml:space="preserve">
+    <value> (Disabled)</value>
+  </data>
+  <data name="Mailbox.Overview.ForwardsTo" xml:space="preserve">
+    <value>Forwards to: </value>
+  </data>
+  <data name="Mailbox.Overview.RedirectsTo" xml:space="preserve">
+    <value>Redirects to: </value>
+  </data>
+  <data name="MailboxRestore.SourceMailbox" xml:space="preserve">
+    <value>Source mailbox (UPN/GUID):</value>
+  </data>
+  <data name="MailboxRestore.SourceMailboxTooltip" xml:space="preserve">
+    <value>Enter the UPN or GUID of the mailbox to restore</value>
+  </data>
+  <data name="MailboxRestore.TargetMailbox" xml:space="preserve">
+    <value>Target mailbox:</value>
+  </data>
+  <data name="MailboxRestore.TargetMailboxTooltip" xml:space="preserve">
+    <value>Required for inactive mailboxes or when restoring to another mailbox</value>
+  </data>
+  <data name="MailboxRestore.AllowLegacyDnTooltip" xml:space="preserve">
+    <value>When enabled, allows restore even with a different LegacyDN</value>
+  </data>
+  <data name="MailboxRestore.Scenario" xml:space="preserve">
+    <value>Scenario:</value>
+  </data>
+  <data name="MailboxRestore.Action" xml:space="preserve">
+    <value>Action:</value>
+  </data>
+  <data name="MailboxRestore.Status" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="MailboxRestore.StatusDetails" xml:space="preserve">
+    <value>Status details:</value>
+  </data>
+  <data name="MailboxRestore.RequestGuid" xml:space="preserve">
+    <value>Request GUID:</value>
+  </data>
+  <data name="MailboxRestore.ErrorCode" xml:space="preserve">
+    <value>Error code:</value>
+  </data>
+  <data name="MailboxPerms.UserTooltip" xml:space="preserve">
+    <value>Enter the user's email address or display name</value>
+  </data>
+  <data name="MailboxPerms.PermissionTypeTooltip" xml:space="preserve">
+    <value>Select the permission type to grant</value>
+  </data>
+  <data name="MailboxPerms.PermissionFullAccess" xml:space="preserve">
+    <value>Full access</value>
+  </data>
+  <data name="MailboxPerms.PermissionSendAs" xml:space="preserve">
+    <value>Send as</value>
+  </data>
+  <data name="MailboxPerms.PermissionSendOnBehalf" xml:space="preserve">
+    <value>Send on behalf</value>
+  </data>
+  <data name="MailboxPerms.AutoMapTooltipFullAccess" xml:space="preserve">
+    <value>AutoMapping automatically adds the mailbox to Outlook for FullAccess only</value>
+  </data>
+  <data name="MailboxPerms.AddPermissionTooltip" xml:space="preserve">
+    <value>Add the permission to pending changes</value>
+  </data>
+  <data name="MailboxPerms.AutoMapTooltip" xml:space="preserve">
+    <value>AutoMapping automatically adds the mailbox to Outlook</value>
+  </data>
+  <data name="MailboxPerms.ApplyAutoMapTooltip" xml:space="preserve">
+    <value>Apply the AutoMapping update</value>
+  </data>
+  <data name="MailboxPerms.RemovePermissionTooltip" xml:space="preserve">
+    <value>Remove this permission</value>
+  </data>
+  <data name="MailboxPerms.FolderPathTooltip" xml:space="preserve">
+    <value>Mailbox-relative path, for example Calendar or Inbox\Subfolder</value>
+  </data>
+  <data name="MailboxPerms.ReloadFolderTooltip" xml:space="preserve">
+    <value>Reload permissions for the selected folder</value>
+  </data>
+  <data name="MailboxPerms.FolderUserTooltip" xml:space="preserve">
+    <value>User or group to assign the role to for the folder</value>
+  </data>
+  <data name="MailboxPerms.GrantUpdateTooltip" xml:space="preserve">
+    <value>Add the permission or update the role if the user already exists</value>
+  </data>
+  <data name="Mailbox.Licenses.GroupHeader" xml:space="preserve">
+    <value>Licenses</value>
+  </data>
+  <data name="Mailbox.Licenses.UsageLocationTooltip" xml:space="preserve">
+    <value>Select the UsageLocation country or region code to apply to the user</value>
+  </data>
+  <data name="Mailbox.Licenses.UsageLocationActionTooltip" xml:space="preserve">
+    <value>Refresh the selected user's UsageLocation and, if needed, retry the license assignment</value>
+  </data>
+  <data name="Mailbox.Licenses.SelectLicenseTooltip" xml:space="preserve">
+    <value>Select a license to assign</value>
+  </data>
+  <data name="Mailbox.Licenses.RefreshTooltip" xml:space="preserve">
+    <value>Reload licenses</value>
+  </data>
+  <data name="Mailbox.Licenses.AvailableSuffix" xml:space="preserve">
+    <value> available)</value>
+  </data>
+  <data name="Mailbox.List.ColEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Mailbox.List.ColLicensed" xml:space="preserve">
+    <value>Licensed</value>
+  </data>
+  <data name="Distribution.EmailAddressesGroup" xml:space="preserve">
+    <value>Email addresses</value>
+  </data>
+  <data name="Distribution.DeliverySettingsGroup" xml:space="preserve">
+    <value>Delivery settings</value>
+  </data>
+  <data name="Distribution.AllowExternalSenders" xml:space="preserve">
+    <value>Allow external senders</value>
+  </data>
+  <data name="Distribution.MembersGroup" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="Distribution.DynamicGroupMembersCalculated" xml:space="preserve">
+    <value>Dynamic group: the member list below is calculated from the group's current filter.</value>
+  </data>
+  <data name="Distribution.MemberPreviewHint" xml:space="preserve">
+    <value>Use Member Preview to recalculate membership immediately without leaving the details pane.</value>
+  </data>
+  <data name="Distribution.MemberPreview" xml:space="preserve">
+    <value>Member Preview</value>
+  </data>
+  <data name="Distribution.AddMember" xml:space="preserve">
+    <value>Add member</value>
+  </data>
+  <data name="Distribution.LoadMoreMembers" xml:space="preserve">
+    <value>Load More Members</value>
+  </data>
+  <data name="DeletedMailbox.UpnLabel" xml:space="preserve">
+    <value>Mailbox UPN</value>
+  </data>
+  <data name="DeletedMailbox.UpnTooltip" xml:space="preserve">
+    <value>Enter the deleted mailbox UPN to check whether it can be recovered.</value>
+  </data>
+  <data name="DeletedMailbox.CheckUpnTooltip" xml:space="preserve">
+    <value>Check the typed UPN without reloading the full deleted mailbox list.</value>
+  </data>
+  <data name="Logs.SearchLabel" xml:space="preserve">
+    <value>Search logs</value>
+  </data>
+  <data name="Logs.SearchTooltip" xml:space="preserve">
+    <value>Filter the current log list by text as you type.</value>
+  </data>
+  <data name="Logs.LevelFilterLabel" xml:space="preserve">
+    <value>Minimum level</value>
+  </data>
+  <data name="Logs.FilterTooltip" xml:space="preserve">
+    <value>Filter logs by minimum level</value>
+  </data>
+  <data name="Permissions.OwnersPrefix" xml:space="preserve">
+    <value>Owners: </value>
+  </data>
+  <data name="Permissions.CreatedPrefix" xml:space="preserve">
+    <value>Created: </value>
+  </data>
+  <data name="Permissions.ChangedPrefix" xml:space="preserve">
+    <value>Changed: </value>
+  </data>
+  <data name="Migration.CreatedPrefix" xml:space="preserve">
+    <value>Created: </value>
+  </data>
+  <data name="Migration.StartedPrefix" xml:space="preserve">
+    <value>Started: </value>
+  </data>
+  <data name="Migration.CompletedPrefix" xml:space="preserve">
+    <value>Completed: </value>
+  </data>
+  <data name="Migration.AutoStartPrefix" xml:space="preserve">
+    <value>AutoStart: </value>
+  </data>
+  <data name="Migration.AutoCompletePrefix" xml:space="preserve">
+    <value>AutoComplete: </value>
+  </data>
+  <data name="Migration.BadItemLimitPrefix" xml:space="preserve">
+    <value>BadItemLimit: </value>
+  </data>
+  <data name="Migration.LargeItemLimitPrefix" xml:space="preserve">
+    <value>LargeItemLimit: </value>
+  </data>
+  <data name="Tools.ModulePrefix" xml:space="preserve">
+    <value>Module: </value>
+  </data>
+  <data name="Tools.AuthModesPrefix" xml:space="preserve">
+    <value>Auth modes: </value>
+  </data>
+  <data name="Tools.CmdletsPrefix" xml:space="preserve">
+    <value>Cmdlets: </value>
+  </data>
+  <data name="Tools.ExchangeRolesPrefix" xml:space="preserve">
+    <value>Exchange roles: </value>
+  </data>
+  <data name="Tools.GraphScopesPrefix" xml:space="preserve">
+    <value>Graph scopes: </value>
+  </data>
+  <data name="Tools.PurviewRolesPrefix" xml:space="preserve">
+    <value>Purview roles: </value>
+  </data>
+  <data name="Tools.DefenderRolesPrefix" xml:space="preserve">
+    <value>Defender roles: </value>
+  </data>
+  <data name="Tools.DependenciesPrefix" xml:space="preserve">
+    <value>Dependencies: </value>
+  </data>
+  <data name="Tools.NotesPrefix" xml:space="preserve">
+    <value>Notes: </value>
+  </data>
+  <data name="Tools.ValidationPrefix" xml:space="preserve">
+    <value>Validation: </value>
+  </data>
+  <data name="Status.Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Status.Worker.NotStarted" xml:space="preserve">
+    <value>Not started</value>
+  </data>
+  <data name="Status.Worker.Starting" xml:space="preserve">
+    <value>Starting...</value>
+  </data>
+  <data name="Status.Worker.Initializing" xml:space="preserve">
+    <value>Initializing...</value>
+  </data>
+  <data name="Status.Worker.Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Status.Worker.Restarting" xml:space="preserve">
+    <value>Restarting...</value>
+  </data>
+  <data name="Status.Worker.Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Status.Worker.Crashed" xml:space="preserve">
+    <value>Crashed</value>
+  </data>
+  <data name="Status.Worker.Unresponsive" xml:space="preserve">
+    <value>Unresponsive</value>
+  </data>
+  <data name="Status.Connection.DisabledPolicy" xml:space="preserve">
+    <value>Disabled (policy)</value>
+  </data>
+  <data name="Status.Connection.Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Status.Connection.Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Status.Connection.Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="Status.Connection.Reconnecting" xml:space="preserve">
+    <value>Reconnecting...</value>
+  </data>
+  <data name="Status.Connection.Failed" xml:space="preserve">
+    <value>Connection failed</value>
+  </data>
+  <data name="Status.Connection.Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Status.Graph.ActiveTooltip" xml:space="preserve">
+    <value>Microsoft Graph session is active.</value>
+  </data>
+  <data name="Status.Graph.DisabledPolicyTooltip" xml:space="preserve">
+    <value>Microsoft Graph is not available while the Exchange connection is disabled by policy.</value>
+  </data>
+  <data name="Status.Graph.RetryTooltip" xml:space="preserve">
+    <value>Microsoft Graph is attempted during the initial connection. If the session is missing or expires, the worker retries only for operations that require it.</value>
+  </data>
+  <data name="Status.Graph.NotConnectedTooltip" xml:space="preserve">
+    <value>Microsoft Graph is not connected.</value>
+  </data>
+  <data name="Status.Module.Missing" xml:space="preserve">
+    <value>Missing</value>
+  </data>
+  <data name="Status.Module.OKVersion" xml:space="preserve">
+    <value>OK ({0})</value>
+  </data>
+  <data name="Status.Module.Drift" xml:space="preserve">
+    <value>Drift ({0} != {1})</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Common.Never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="Tools.Capabilities.NotDetected" xml:space="preserve">
+    <value>Not detected</value>
+  </data>
+  <data name="Tools.Capabilities.CmdletsDetected" xml:space="preserve">
+    <value>{0} cmdlets detected</value>
+  </data>
+  <data name="Tools.Catalog.UpdateFailedUsingLastValid" xml:space="preserve">
+    <value>Update failed - using last valid catalog</value>
+  </data>
+  <data name="Tools.Catalog.Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Tools.Catalog.UpToDateWithEntries" xml:space="preserve">
+    <value>Up to date ({0}, {1} entries)</value>
+  </data>
+  <data name="Tools.Catalog.LoadedVersion" xml:space="preserve">
+    <value>Loaded ({0})</value>
+  </data>
+  <data name="Tools.Catalog.LoadedEntries" xml:space="preserve">
+    <value>Loaded ({0} entries)</value>
+  </data>
+  <data name="Tools.Catalog.NoCatalogAvailable" xml:space="preserve">
+    <value>No catalog available</value>
+  </data>
+  <data name="Tools.AutoUpdate.Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Tools.AutoUpdate.Daily" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="Tools.AutoUpdate.Monthly" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
+  <data name="Tools.Prerequisites.Checking" xml:space="preserve">
+    <value>Checking prerequisites...</value>
+  </data>
+  <data name="Tools.Prerequisites.CheckFailed" xml:space="preserve">
+    <value>Unable to check prerequisites.</value>
+  </data>
+  <data name="Tools.Prerequisites.Summary" xml:space="preserve">
+    <value>PowerShell: {0} | ExecutionPolicy: {1} | Exchange module: {2} | Graph module: {3}</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestInstallPowerShell" xml:space="preserve">
+    <value>Install PowerShell 7 for the best compatibility.</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestExecutionPolicy" xml:space="preserve">
+    <value>Set a compatible CurrentUser execution policy manually.</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestInstallExchangeModule" xml:space="preserve">
+    <value>Install ExchangeOnlineManagement to the approved version {0}.</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestAlignExchangeModule" xml:space="preserve">
+    <value>Align ExchangeOnlineManagement to the approved version {0}.</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestInstallGraphModule" xml:space="preserve">
+    <value>Install the approved Microsoft Graph bundle to version {0}.</value>
+  </data>
+  <data name="Tools.Prerequisites.SuggestAlignGraphModule" xml:space="preserve">
+    <value>Align the approved Microsoft Graph bundle to version {0}.</value>
+  </data>
+  <data name="Tools.Prerequisites.AllSatisfied" xml:space="preserve">
+    <value>All prerequisites are satisfied. No action required.</value>
+  </data>
+  <data name="Tools.Prerequisites.InstallingPowerShell" xml:space="preserve">
+    <value>Attempting to install PowerShell 7 with winget...</value>
+  </data>
+  <data name="Tools.Prerequisites.PowerShellInstalled" xml:space="preserve">
+    <value>PowerShell 7 installed. Restart the application.</value>
+  </data>
+  <data name="Tools.Prerequisites.InstallError" xml:space="preserve">
+    <value>An error occurred during installation</value>
+  </data>
+  <data name="Tools.Prerequisites.PowerShellManualInstructions" xml:space="preserve">
+    <value>Run `winget install --id Microsoft.PowerShell --exact --source winget` or download the package from GitHub.</value>
+  </data>
+  <data name="Tools.Prerequisites.InstallingModule" xml:space="preserve">
+    <value>Installing {0}...</value>
+  </data>
+  <data name="Tools.Prerequisites.ApprovedVersion" xml:space="preserve">
+    <value>approved version</value>
+  </data>
+  <data name="Tools.Prerequisites.VersionFormat" xml:space="preserve">
+    <value>version {0}</value>
+  </data>
+  <data name="Tools.Prerequisites.ModuleInstalled" xml:space="preserve">
+    <value>{0} installed ({1}).</value>
+  </data>
+  <data name="Tools.Prerequisites.ModuleInstallFailed" xml:space="preserve">
+    <value>Installation failed for {0}</value>
+  </data>
+  <data name="Tools.Prerequisites.ManualInstallation" xml:space="preserve">
+    <value>{0}
+
+Manual installation:
+{1}</value>
+  </data>
+  <data name="Warn.ModuleMissing.Title" xml:space="preserve">
+    <value>Module not found</value>
+  </data>
+  <data name="Warn.ModuleMissing.Message" xml:space="preserve">
+    <value>ExchangeOnlineManagement is not available.
+
+To use this application:
+1. Open PowerShell 7 as Administrator.
+2. Run: Install-Module ExchangeOnlineManagement -Scope CurrentUser</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Title" xml:space="preserve">
+    <value>Connection disabled</value>
+  </data>
+  <data name="Warn.ConnectionDisabled.Message" xml:space="preserve">
+    <value>Exchange Online connections are disabled by policy.
+
+Unset ONLYEXO365_DISABLE_EXO and restart the application to enable connections.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Summary" xml:space="preserve">
+    <value>Ready: {0} | Blocked: {1} | Pending/session validation: {2}</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Module.DashboardMailboxes" xml:space="preserve">
+    <value>Dashboard / Mailboxes</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Status.Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Status.NeedsSession" xml:space="preserve">
+    <value>Needs session</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Status.Blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Status.Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Tools.LeastPrivilege.CurrentAuthModes" xml:space="preserve">
+    <value>Current auth modes</value>
+  </data>
+  <data name="Tools.LeastPrivilege.RequiredAll" xml:space="preserve">
+    <value>All: {0}</value>
+  </data>
+  <data name="Tools.LeastPrivilege.RequiredAny" xml:space="preserve">
+    <value>Any: {0}</value>
+  </data>
+  <data name="Tools.LeastPrivilege.DefaultNotes" xml:space="preserve">
+    <value>Exchange RBAC role membership is advisory and must be validated in the tenant.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Validation.Available" xml:space="preserve">
+    <value>Current configuration satisfies the validated least-privilege checks.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Validation.NeedsAdditionalSession" xml:space="preserve">
+    <value>This feature uses a secondary session. Validate again after the module connects to its dedicated endpoint.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Validation.Blocked" xml:space="preserve">
+    <value>Current configuration does not satisfy the validated least-privilege checks.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Validation.PendingSession" xml:space="preserve">
+    <value>Connect to Exchange and complete capability detection to validate cmdlets for this feature.</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.ExchangeSession" xml:space="preserve">
+    <value>Exchange Online session</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.EopTelemetry" xml:space="preserve">
+    <value>Exchange Online Protection telemetry</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.TransportConfiguration" xml:space="preserve">
+    <value>Exchange transport configuration</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.PurviewPowerShell" xml:space="preserve">
+    <value>Purview / Security &amp; Compliance PowerShell</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.ConnectIPPSSession" xml:space="preserve">
+    <value>Connect-IPPSSession during the initial connect flow</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.EopDefender" xml:space="preserve">
+    <value>Exchange Online Protection / Defender for Office 365</value>
+  </data>
+  <data name="Tools.LeastPrivilege.Dependency.GraphInitialSession" xml:space="preserve">
+    <value>Microsoft Graph initial session</value>
+  </data>
+</root>
+

@@ -1,0 +1,247 @@
+<UserControl x:Class="OnlyExo365.Shell.Views.PublicFoldersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
+             xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.1*"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="{loc:Loc Key=Nav.PublicFolders}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding PublicFolders.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="{loc:Loc Key=PublicFolders.New}" Command="{Binding PublicFolders.NewFolderCommand}"
+                            Style="{StaticResource InlineActionButton}"/>
+                    <Button Content="{loc:Loc Key=PublicFolders.Refresh}" Command="{Binding PublicFolders.RefreshCommand}" Style="{StaticResource InlinePrimaryActionButton}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Border Grid.Row="1" Style="{StaticResource ErrorBannerBorderStyle}"
+                    Margin="0,0,0,12"
+                    Visibility="{Binding PublicFolders.HasError, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding PublicFolders.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding PublicFolders.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding PublicFolders.MailEnabledFilters}"
+                          SelectedItem="{Binding PublicFolders.MailEnabledFilter}"/>
+            </Grid>
+
+            <DataGrid Grid.Row="3"
+                      ItemsSource="{Binding PublicFolders.Folders}"
+                      SelectedItem="{Binding PublicFolders.SelectedFolder}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      Background="{StaticResource SecondaryBackgroundBrush}"
+                      BorderBrush="{StaticResource BorderBrush}"
+                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.Path}" Binding="{Binding Identity}" Width="Auto" MinWidth="260"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="160"/>
+                    <DataGridCheckBoxColumn Header="{loc:Loc Key=PublicFolders.Mail}" Binding="{Binding MailEnabled}" Width="Auto" MinWidth="70"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.SMTP}" Binding="{Binding PrimarySmtpAddress}" Width="Auto" MinWidth="220"/>
+                    <DataGridCheckBoxColumn Header="{loc:Loc Key=PublicFolders.Subfolder}" Binding="{Binding HasSubFolders}" Width="Auto" MinWidth="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Button Grid.Row="4" Content="{loc:Loc Key=PublicFolders.LoadMore}" Command="{Binding PublicFolders.LoadMoreCommand}"
+                    HorizontalAlignment="Center" Margin="0,12,0,0"
+                    Style="{StaticResource InlineActionButton}"
+                    Visibility="{Binding PublicFolders.HasMore, Converter={StaticResource BoolToVisibility}}"/>
+
+            <Border Style="{StaticResource LoadingOverlayBackdropBorderStyle}"
+                    Visibility="{Binding PublicFolders.IsLoading, Converter={StaticResource BoolToVisibility}}">
+                <Border Style="{StaticResource CompactLoadingOverlayCardStyle}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding PublicFolders.LoadProgress.Status}"
+                                   Style="{StaticResource CompactLoadingOverlayStatusTextStyle}"/>
+                        <ProgressBar Style="{StaticResource CompactLoadingOverlayProgressBarStyle}"
+                                     Value="{Binding PublicFolders.LoadProgress.Progress, Mode=OneWay}"/>
+                        <StackPanel Style="{StaticResource CompactLoadingOverlayMetricsPanelStyle}">
+                            <TextBlock Text="{Binding PublicFolders.LoadProgress.PercentText}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding PublicFolders.LoadProgress.CountText}"
+                                       Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
+                                       Visibility="{Binding PublicFolders.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                </Border>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.PublicFolderDetails}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Name}" Margin="0,0,8,6"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.ParentPath}" Margin="0,0,8,6"/>
+                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding PublicFolders.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PublicFolders.ParentPath, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <CheckBox Grid.Row="2" Grid.Column="0" Content="{loc:Loc Key=PublicFolders.MailEnabled}"
+                                  IsChecked="{Binding PublicFolders.MailEnabled}" Margin="0,8,8,0"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" Content="{loc:Loc Key=PublicFolders.HiddenFromAddressLists}"
+                                  IsChecked="{Binding PublicFolders.HiddenFromAddressListsEnabled}" Margin="0,8,0,0"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Alias}" Margin="0,8,8,6"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.PrimarySMTP}" Margin="0,8,8,6"/>
+                        <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding PublicFolders.Alias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding PublicFolders.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Visibility="{Binding PublicFolders.IsEditingExistingFolder, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{loc:Loc Key=PublicFolders.IdentityPrefix}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding PublicFolders.Identity}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="{loc:Loc Key=PublicFolders.Items}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding PublicFolders.ItemCount}" Margin="0,0,10,0"/>
+                            <TextBlock Text="{loc:Loc Key=PublicFolders.Size}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding PublicFolders.TotalItemSize}"/>
+                        </StackPanel>
+
+                        <CheckBox Grid.Row="6" Grid.Column="0" Content="{loc:Loc Key=PublicFolders.HasSubfolders}"
+                                  IsChecked="{Binding PublicFolders.HasSubFolders, Mode=OneWay}" IsEnabled="False" Margin="0,8,0,0"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Text="{loc:Loc Key=PublicFolders.NoteSavingUpdatesTheNameParentPathMailEnabledStatusAndEmailPrope}"
+                                   Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                    </Grid>
+                </controls:SectionPanel>
+
+                <controls:SectionPanel Header="{loc:Loc Key=PublicFolders.ClientPermissions}" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding PublicFolders.NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,8,0"
+                                     ToolTip="{loc:Loc Key=PublicFolders.UserOrGroupThatShouldReceiveTheRole}"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding PublicFolders.PublicFolderPermissionRoles}"
+                                      SelectedItem="{Binding PublicFolders.NewPermissionRole}"
+                                      Margin="0,0,8,0"/>
+                            <Button Grid.Column="2"
+                                    Content="{loc:Loc Key=PublicFolders.GrantUpdate}"
+                                    Command="{Binding PublicFolders.AddPermissionCommand}"
+                                    Style="{StaticResource PrimaryButton}"/>
+                        </Grid>
+
+                        <DataGrid ItemsSource="{Binding PublicFolders.PermissionEntries}"
+                                  AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  Background="{StaticResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{StaticResource BorderBrush}"
+                                  MaxHeight="220"
+                                  Margin="0,0,0,12">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.User}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="220"/>
+                                <DataGridTemplateColumn Header="{loc:Loc Key=PublicFolders.Role}" Width="Auto" MinWidth="170">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.PublicFolders.PublicFolderPermissionRoles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                      SelectedItem="{Binding SelectedRole, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.CurrentRights}" Binding="{Binding AccessRightsSummary}" Width="Auto" MinWidth="180"/>
+                                <DataGridTemplateColumn Header="{loc:Loc Key=PublicFolders.Actions}" Width="Auto" MinWidth="160">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Content="{loc:Loc Key=PublicFolders.Apply}"
+                                                        Command="{Binding DataContext.PublicFolders.UpdatePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource PrimaryButton}"
+                                                        Padding="6,4"
+                                                        Margin="0,0,4,0"/>
+                                                <Button Content="{loc:Loc Key=PublicFolders.Remove}"
+                                                        Command="{Binding DataContext.PublicFolders.RemovePermissionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource DangerButton}"
+                                                        Padding="6,4"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBox Text="{Binding PublicFolders.PermissionsSummary, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="120"
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </controls:SectionPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="{loc:Loc Key=PublicFolders.Save}" Command="{Binding PublicFolders.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                    <Button Content="{loc:Loc Key=PublicFolders.New}" Command="{Binding PublicFolders.NewFolderCommand}"
+                            Style="{StaticResource InlineActionButton}"/>
+                    <Button Content="{loc:Loc Key=PublicFolders.Delete}" Command="{Binding PublicFolders.DeleteCommand}" Style="{StaticResource DangerButton}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

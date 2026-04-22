@@ -6,7 +6,7 @@
     <InformationalVersion>$(Version)</InformationalVersion>
     <Company>OnlyExo365</Company>
     <Product>OnlyExo365</Product>
-    <RuntimeIdentifiers Condition="'$(RuntimeIdentifiers)' == ''">win-x64;win-x86</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="'$(RuntimeIdentifiers)' == ''">win-x64</RuntimeIdentifiers>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>

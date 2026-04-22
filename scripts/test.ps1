@@ -42,7 +42,7 @@ $arguments = @(
     "-c",
     $Configuration,
     "--logger",
-    "trx;LogFileName=exchangeadmin-tests.trx",
+    "trx;LogFileName=onlyexo365-tests.trx",
     "--results-directory",
     $resolvedResultsDirectory,
     "--artifacts-path",

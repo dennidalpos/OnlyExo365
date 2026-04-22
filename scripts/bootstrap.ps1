@@ -6,7 +6,7 @@ param(
 
     [Alias("RuntimeIdentifier")]
     [ValidateNotNullOrEmpty()]
-    [string[]]$RuntimeIdentifiers = @("win-x64", "win-x86")
+    [string[]]$RuntimeIdentifiers = @("win-x64")
 )
 
 . (Join-Path $PSScriptRoot "helpers/common.ps1")
@@ -14,7 +14,7 @@ param(
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot
 $buildArtifactsPath = Get-BuildArtifactsPath -RepositoryRoot $repositoryRoot
-$resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64", "win-x86")
+$resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
 
 Write-Step "Bootstrapping repository prerequisites"
 Assert-WindowsPlatform

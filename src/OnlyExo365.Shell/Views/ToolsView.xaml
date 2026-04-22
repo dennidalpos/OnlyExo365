@@ -1,0 +1,447 @@
+<UserControl x:Class="OnlyExo365.Shell.Views.ToolsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
+             xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{loc:Loc Key=Nav.Tools}" Style="{StaticResource PageTitleTextStyle}"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Style="{StaticResource WarningBannerBorderStyle}"
+                        Visibility="{Binding IsExchangeConnectionDisabled, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{loc:Loc Key=Tools.ExchangeOnlineConnectionsAreDisabledByPolicyONLYEXO365DISABLE}"
+                               Style="{StaticResource WarningBannerTextStyle}"/>
+                </Border>
+
+                <!-- Connection Information -->
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.ConnectionInformation}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.Status}" Margin="0,0,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ExchangeStateDisplay}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsExchangeConnected}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.User}" Margin="0,4,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ConnectedUser, FallbackValue='-'}" Margin="0,4,0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.Organization}" Margin="0,4,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ConnectedOrganization, FallbackValue='-'}" Margin="0,4,0,4"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Tools.Capabilities}" Margin="0,4,12,0"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,4,0,0" Text="{Binding CapabilitiesDisplay}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </controls:SectionPanel>
+
+                <!-- Worker Status -->
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.WorkerStatus}" Margin="0,8,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerState}" Margin="0,0,12,4"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <Ellipse Style="{StaticResource StatusIndicator}" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{Binding WorkerStateColor}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock Text="{Binding WorkerStateDisplay}"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerRunning}" Margin="0,4,12,0"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,4,0,0" Text="{Binding WorkerRunningDisplay}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsWorkerRunning}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerConsole}" Margin="0,8,12,0"
+                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
+                            <CheckBox Content="{loc:Loc Key=Tools.WorkerConsoleToggle}"
+                                      IsChecked="{Binding IsWorkerConsoleVisible, Mode=OneWay}"
+                                      Checked="WorkerConsoleToggle_Changed"
+                                      Unchecked="WorkerConsoleToggle_Changed"
+                                      IsEnabled="{Binding CanToggleWorkerConsole}"/>
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding WorkerConsoleVisibilityDisplay}"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </controls:SectionPanel>
+
+                <!-- License Catalog -->
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.LicenseCatalog}" Margin="0,8,0,0">
+                    <StackPanel>
+                        <!-- Indeterminate progress during update -->
+                        <ProgressBar IsIndeterminate="True" Height="3"
+                                     Foreground="{StaticResource AccentBrush}"
+                                     Background="Transparent"
+                                     Visibility="{Binding Tools.Catalog.IsUpdating, Converter={StaticResource BoolToVisibility}}"
+                                     Margin="0,0,0,8"/>
+
+                        <!-- Error banner -->
+                        <Border Style="{StaticResource ErrorBannerBorderStyle}"
+                                Visibility="{Binding Tools.Catalog.HasError, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding Tools.Catalog.ErrorMessage}"
+                                       Style="{StaticResource ErrorBannerTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Status and action buttons -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{loc:Loc Key=Tools.Status}" Margin="0,0,12,0"
+                                       Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Tools.Catalog.StatusSummary}"
+                                       VerticalAlignment="Center" TextWrapping="Wrap"/>
+                            <Button Grid.Column="2"
+                                    Content="{loc:Loc Key=Tools.UpdateNow}"
+                                    Command="{Binding Tools.Catalog.UpdateNowCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                            <Button Grid.Column="3"
+                                    Content="{loc:Loc Key=Tools.OpenFolder}"
+                                    Command="{Binding Tools.Catalog.OpenCatalogFolderCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                        </Grid>
+
+                        <!-- Detail grid -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.Version}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding Tools.Catalog.CatalogVersion, FallbackValue='—'}"
+                                       Margin="0,0,24,4"/>
+
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Tools.Entries}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                            <TextBlock Grid.Row="0" Grid.Column="3"
+                                       Text="{Binding Tools.Catalog.EntryCount}"
+                                       Margin="0,0,0,4"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.LastChecked}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding Tools.Catalog.LastChecked, FallbackValue='Never'}"
+                                       Margin="0,0,24,4"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{loc:Loc Key=Tools.LastUpdated}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="3"
+                                       Text="{Binding Tools.Catalog.LastUpdated, FallbackValue='Never'}"
+                                       Margin="0,0,0,4"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.AutoUpdate}"
+                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,12,0"
+                                       VerticalAlignment="Center"/>
+                            <ComboBox Grid.Row="2" Grid.Column="1"
+                                      ItemsSource="{Binding Tools.Catalog.AutoUpdateModes}"
+                                      DisplayMemberPath="DisplayName"
+                                      SelectedValuePath="Mode"
+                                      SelectedValue="{Binding Tools.Catalog.SelectedAutoUpdateMode}"
+                                      HorizontalAlignment="Left" MinWidth="110" Margin="0,4,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </controls:SectionPanel>
+
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.LeastPrivilegeMatrix}" Margin="0,8,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Tools.LeastPrivilegeSummary}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{loc:Loc Key=Tools.TheMatrixValidatesAuthenticationModesGraphScopesAndDetectedCmdle}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Margin="0,0,0,12"/>
+
+                        <ItemsControl ItemsSource="{Binding Tools.LeastPrivilegeMatrix}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource SectionCardBorderStyle}"
+                                            Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                                    <TextBlock Text="{Binding FeatureName}" FontWeight="SemiBold"/>
+                                                    <TextBlock Foreground="{StaticResource SecondaryTextBrush}"
+                                                               Margin="0,2,0,0">
+                                                        <Run Text="{loc:Loc Key=Tools.ModulePrefix}"/>
+                                                        <Run Text="{Binding ModuleName, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Description}"
+                                                               TextWrapping="Wrap"
+                                                               Margin="0,4,0,0"/>
+                                                </StackPanel>
+
+                                                <Border Grid.Column="1"
+                                                        Style="{StaticResource StatusChipBorderStyle}"
+                                                        Background="{Binding StatusColor}"
+                                                        VerticalAlignment="Top">
+                                                    <TextBlock Text="{Binding StatusLabel}"
+                                                               Foreground="Black"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <UniformGrid Columns="2" Margin="0,10,0,0">
+                                                <TextBlock Margin="0,0,12,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.AuthModesPrefix}"/>
+                                                    <Run Text="{Binding AllowedAuthenticationModesDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Margin="0,0,0,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.CmdletsPrefix}"/>
+                                                    <Run Text="{Binding RequiredCmdletsDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Margin="0,0,12,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.ExchangeRolesPrefix}"/>
+                                                    <Run Text="{Binding ExchangeRolesDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Margin="0,0,0,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.GraphScopesPrefix}"/>
+                                                    <Run Text="{Binding GraphScopesDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Margin="0,0,12,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.PurviewRolesPrefix}"/>
+                                                    <Run Text="{Binding PurviewRolesDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Margin="0,0,0,6" TextWrapping="Wrap">
+                                                    <Run Text="{loc:Loc Key=Tools.DefenderRolesPrefix}"/>
+                                                    <Run Text="{Binding DefenderRolesDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </UniformGrid>
+
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="{loc:Loc Key=Tools.DependenciesPrefix}"/>
+                                                    <Run Text="{Binding DependenciesDisplay, Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <TextBlock Margin="0,6,0,0"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{StaticResource SecondaryTextBrush}">
+                                                <Run Text="{loc:Loc Key=Tools.NotesPrefix}"/>
+                                                <Run Text="{Binding NotesDisplay, Mode=OneWay}"/>
+                                            </TextBlock>
+
+                                            <Border Style="{StaticResource InsetPanelBorderStyle}"
+                                                    Margin="0,8,0,0"
+                                                    Visibility="{Binding HasMissingRequirements, Converter={StaticResource BoolToVisibility}}">
+                                                <TextBlock TextWrapping="Wrap"
+                                                           Style="{StaticResource WarningBannerTextStyle}">
+                                                    <Run Text="{loc:Loc Key=Tools.ValidationPrefix}"/>
+                                                    <Run Text="{Binding ValidationMessage, Mode=OneWay}"/>
+                                                    <Run Text=" "/>
+                                                    <Run Text="{Binding MissingRequirementsDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </controls:SectionPanel>
+
+                <!-- Module Management -->
+                <controls:SectionPanel Header="{loc:Loc Key=Tools.ModuleManagement}" Margin="0,8,0,0">
+                    <StackPanel>
+                        <!-- Progress bar for checking/installing -->
+                        <StackPanel Margin="0,0,0,8"
+                                    Visibility="{Binding Tools.IsChecking, Converter={StaticResource BoolToVisibility}}">
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Tools.InstallProgress, Mode=OneWay}"
+                                         Height="4" Foreground="{StaticResource AccentBrush}"
+                                         Background="{StaticResource TertiaryBackgroundBrush}"/>
+                            <TextBlock Text="{Binding Tools.InstallStatus}" HorizontalAlignment="Center" Margin="0,4,0,0"
+                                       Style="{StaticResource CaptionTextStyle}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,8"
+                                    Visibility="{Binding Tools.IsInstalling, Converter={StaticResource BoolToVisibility}}">
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Tools.InstallProgress, Mode=OneWay}"
+                                         Height="4" Foreground="{StaticResource AccentBrush}"
+                                         Background="{StaticResource TertiaryBackgroundBrush}"/>
+                            <TextBlock Text="{Binding Tools.InstallStatus}" HorizontalAlignment="Center" Margin="0,4,0,0"
+                                       Style="{StaticResource CaptionTextStyle}"/>
+                        </StackPanel>
+
+                        <!-- Error message -->
+                        <Border Style="{StaticResource ErrorBannerBorderStyle}"
+                                Visibility="{Binding Tools.HasError, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding Tools.ErrorMessage}" Style="{StaticResource ErrorBannerTextStyle}"/>
+                        </Border>
+
+                        <Button Content="{loc:Loc Key=Tools.CheckPrerequisites}" Command="{Binding Tools.CheckPrerequisitesCommand}"
+                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12"/>
+
+                        <Border Style="{StaticResource InsetPanelBorderStyle}" Margin="0,0,0,8"
+                                Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Tools.PrerequisiteSummary}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Tools.SuggestedActions}" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- PowerShell 7 -->
+                        <Grid Margin="0,0,0,8" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
+                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tools.IsPowerShell7}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{loc:Loc Key=Tools.PowerShell7}"/>
+                                <TextBlock Text="{Binding Tools.PowerShellVersion, Mode=OneWay, FallbackValue=''}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                            <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallPowerShellCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                            <Button Grid.Column="3" Content="{loc:Loc Key=Tools.GitHub}" Command="{Binding Tools.OpenPowerShellGitHubCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                        </Grid>
+
+                        <!-- ExchangeOnlineManagement -->
+                        <Grid Margin="0,0,0,8" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
+                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tools.ExchangeModuleInstalled}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{loc:Loc Key=Tools.ExchangeOnlineManagement}"/>
+                                <TextBlock Text="{Binding Tools.ExchangeModuleVersion, Mode=OneWay, FallbackValue=''}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                            <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallExchangeModuleCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                        </Grid>
+
+                        <!-- Microsoft Graph approved bundle -->
+                        <Grid Margin="0,0,0,0" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
+                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Tools.GraphModuleInstalled}" Value="True">
+                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{loc:Loc Key=Tools.MicrosoftGraphBundle}"/>
+                                <TextBlock Text="{Binding Tools.GraphModuleVersion, Mode=OneWay, FallbackValue=''}"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                            <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallGraphModuleCommand}"
+                                    Style="{StaticResource ActionGroupButton}"/>
+                        </Grid>
+                    </StackPanel>
+                </controls:SectionPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

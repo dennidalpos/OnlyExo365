@@ -12,7 +12,7 @@ function Get-RepositoryRoot {
 function Get-SolutionPath {
     param([string]$RepositoryRoot)
 
-    return (Join-Path $RepositoryRoot "ExchangeAdmin.sln")
+    return (Join-Path $RepositoryRoot "OnlyExo365.sln")
 }
 
 function Get-BuildArtifactsPath {
@@ -359,3 +359,4 @@ function Get-InnoSetupCompilerPath {
     $searched = ($candidateDirectories | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique) -join ", "
     throw "Inno Setup compiler not found: ISCC.exe. Configure INNOSETUP_BIN/INNOSETUP_HOME or install Inno Setup 6. Paths checked: $searched"
 }
+

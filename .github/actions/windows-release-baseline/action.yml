@@ -49,7 +49,7 @@ runs:
 
     - name: Scan NuGet vulnerabilities
       shell: pwsh
-      run: ./build/assert-no-vulnerable-packages.ps1 -SolutionPath ExchangeAdmin.sln -ReportPath artifacts/security/nuget-vulnerabilities.json
+      run: ./build/assert-no-vulnerable-packages.ps1 -SolutionPath OnlyExo365.sln -ReportPath artifacts/security/nuget-vulnerabilities.json
 
     - name: Scan repository secrets
       shell: pwsh
@@ -62,14 +62,14 @@ runs:
     - name: Collect core backend coverage
       shell: pwsh
       run: >
-        dotnet test tests/ExchangeAdmin.Tests/ExchangeAdmin.Tests.csproj
+        dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj
         -c Debug
         --no-build
         --no-restore
         --artifacts-path artifacts/build
         --collect:"XPlat Code Coverage"
         --results-directory artifacts/test-results
-        --filter "FullyQualifiedName~ExchangeAdmin.Tests.WorkerCommandTests|FullyQualifiedName~ExchangeAdmin.Tests.MailboxReportingCommandTests|FullyQualifiedName~ExchangeAdmin.Tests.IpcContractsTests|FullyQualifiedName~ExchangeAdmin.Tests.IpcSecretHandlingTests|FullyQualifiedName~ExchangeAdmin.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~ExchangeAdmin.Tests.PersistentLogWriterTests|FullyQualifiedName~ExchangeAdmin.Tests.OperationDispatcherInfrastructureTests"
+        --filter "FullyQualifiedName~OnlyExo365.Tests.WorkerCommandTests|FullyQualifiedName~OnlyExo365.Tests.MailboxReportingCommandTests|FullyQualifiedName~OnlyExo365.Tests.IpcContractsTests|FullyQualifiedName~OnlyExo365.Tests.IpcSecretHandlingTests|FullyQualifiedName~OnlyExo365.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~OnlyExo365.Tests.PersistentLogWriterTests|FullyQualifiedName~OnlyExo365.Tests.OperationDispatcherInfrastructureTests"
 
     - name: Enforce core coverage minimum
       shell: pwsh
@@ -80,7 +80,7 @@ runs:
         ./build/assert-code-coverage.ps1 `
           -CoveragePath $coveragePath `
           -MinimumLineCoveragePercent 20 `
-          -IncludePackage ExchangeAdmin.Worker,ExchangeAdmin.Contracts,ExchangeAdmin.Infrastructure
+          -IncludePackage OnlyExo365.Worker,OnlyExo365.Contracts,OnlyExo365.Shell
 
     - name: Enforce architecture constraints
       shell: pwsh
@@ -105,3 +105,4 @@ runs:
     - name: Validate artifact signing flow
       shell: pwsh
       run: ./build/validate-artifact-signing.ps1 -Path artifacts/publish,artifacts/packages
+

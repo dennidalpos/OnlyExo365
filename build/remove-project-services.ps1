@@ -1,7 +1,7 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [string[]]$NameFragment = @(
-        "ExchangeAdmin",
+        "OnlyExo365",
         "OnlyExo365"
     ),
 
@@ -211,7 +211,7 @@ function Stop-ServiceRobust {
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " ExchangeAdmin Service Cleanup" -ForegroundColor Cyan
+Write-Host " OnlyExo365 Service Cleanup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -225,7 +225,7 @@ $normalizedPathHints = @(
 $candidates = @(Get-ProjectServiceCandidates -NameFragments $NameFragment -NormalizedPathHints $normalizedPathHints)
 
 if ($candidates.Count -eq 0) {
-    Write-Success "No ExchangeAdmin / OnlyExo365 services found."
+    Write-Success "No OnlyExo365 / OnlyExo365 services found."
     exit 0
 }
 
@@ -279,3 +279,4 @@ foreach ($candidate in $candidates) {
 
 Write-Host ""
 exit 0
+

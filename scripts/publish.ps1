@@ -9,7 +9,7 @@ param(
     [string]$SetupExePath = "artifacts/packages/OnlyExo365.Setup.exe",
 
     [ValidateNotNullOrEmpty()]
-    [string]$RuntimeIdentifier = "multi-arch",
+    [string]$RuntimeIdentifier = "win-x64",
 
     [string]$OutputDirectory = "artifacts/publish/release-assets"
 )

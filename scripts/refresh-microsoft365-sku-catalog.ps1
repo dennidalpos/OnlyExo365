@@ -8,7 +8,7 @@ param(
     [string]$CsvDownloadUrl,
 
     [ValidateNotNullOrEmpty()]
-    [string]$OutputPath = "src/ExchangeAdmin.Worker/Data/Microsoft365SkuCatalog.json",
+    [string]$OutputPath = "src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json",
 
     [ValidateNotNullOrEmpty()]
     [string]$WorkingDirectory = "artifacts/tmp/licensing-catalog"
@@ -131,3 +131,4 @@ $catalogDocument | ConvertTo-Json -Depth 6 -Compress | Set-Content -Path $resolv
 
 Write-Success "Microsoft 365 SKU catalog refreshed: $resolvedOutputPath"
 Write-Info "Entries: $($catalogDocument.entries.Count)"
+

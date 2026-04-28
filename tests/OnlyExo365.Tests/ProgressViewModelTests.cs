@@ -257,7 +257,7 @@ public class ProgressViewModelTests
             MessageTraceResult = Result<GetMessageTraceResponse>.Success(new GetMessageTraceResponse
             {
                 CorrelationId = "message-trace-warning",
-                Warnings = ["Get-MessageTraceV2 is not available. Falling back to legacy Get-MessageTrace."],
+                Warnings = ["Message trace returned partial telemetry for the selected time range."],
                 HasPartialData = true,
                 Messages = new List<MessageTraceItemDto>()
             }, "message-trace-warning")
@@ -271,7 +271,7 @@ public class ProgressViewModelTests
 
         Assert.True(viewModel.HasWarnings);
         Assert.Equal("message-trace-warning", viewModel.DiagnosticCorrelationId);
-        Assert.Contains("Get-MessageTrace", viewModel.WarningsText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("partial telemetry", viewModel.WarningsText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

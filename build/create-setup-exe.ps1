@@ -28,7 +28,6 @@ $resolvedPublishPathX64 = Join-Path $resolvedPublishPath "win-x64"
 $resolvedOutputDirectory = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $OutputDirectory
 $resolvedOutputPath = Join-Path $resolvedOutputDirectory $OutputFileName
 $resolvedInstallerScriptPath = Join-Path $repositoryRoot "installer\OnlyExo365.iss"
-$resolvedCleanupScriptPath = Join-Path $repositoryRoot "build\remove-project-services.ps1"
 $resolvedIconPath = Join-Path $repositoryRoot "src\OnlyExo365.Shell\Assets\AppIcon.ico"
 $appVersion = Get-ApplicationVersion -RepositoryRoot $repositoryRoot
 $versionSegments = @($appVersion.Split('.'))
@@ -48,10 +47,6 @@ if (-not (Test-Path $resolvedPublishPathX64 -PathType Container)) {
 
 if (-not (Test-Path $resolvedInstallerScriptPath -PathType Leaf)) {
     throw "Installer authoring file not found: $resolvedInstallerScriptPath"
-}
-
-if (-not (Test-Path $resolvedCleanupScriptPath -PathType Leaf)) {
-    throw "Cleanup script not found: $resolvedCleanupScriptPath"
 }
 
 if (-not (Test-Path $resolvedIconPath -PathType Leaf)) {
@@ -90,7 +85,6 @@ $arguments = @(
     "/DOutputDir=$resolvedOutputDirectory",
     "/DOutputBaseFilename=$outputBaseName",
     "/DIconPath=$resolvedIconPath",
-    "/DCleanupScriptPath=$resolvedCleanupScriptPath",
     $resolvedInstallerScriptPath
 )
 

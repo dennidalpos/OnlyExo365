@@ -776,7 +776,7 @@ public partial class WorkerCommandTests
     }
 
     [Fact]
-    public void BuildGetMessageTraceScript_UsesLegacyPagingLoopWhenV2IsUnavailable()
+    public void BuildGetMessageTraceScript_RequiresV2Cmdlet()
     {
         var script = ExoMessageTraceCommands.BuildGetMessageTraceScript(new GetMessageTraceRequest
         {
@@ -786,9 +786,10 @@ public partial class WorkerCommandTests
             PageSize = 50
         });
 
-        Assert.Contains("Get-MessageTrace @params -Page $legacyPage -PageSize 5000 -ErrorAction Stop", script, StringComparison.Ordinal);
-        Assert.Contains("LegacyMessageTraceCmdlet", script, StringComparison.Ordinal);
-        Assert.Contains("$legacyPage++", script, StringComparison.Ordinal);
+        Assert.Contains("Get-MessageTraceV2 is required. Install/upgrade ExchangeOnlineManagement and reconnect.", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Get-MessageTrace @params", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("LegacyMessageTraceCmdlet", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("$legacyPage++", script, StringComparison.Ordinal);
     }
 
     [Fact]

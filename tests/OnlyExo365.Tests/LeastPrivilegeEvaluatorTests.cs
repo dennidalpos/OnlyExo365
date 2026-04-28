@@ -131,7 +131,7 @@ public sealed class LeastPrivilegeEvaluatorTests
     }
 
     [Fact]
-    public void EvaluateAll_AcceptsAlternativeCmdletFeatureWhenLegacyMessageTraceCmdletIsAvailable()
+    public void EvaluateAll_BlocksMessageTraceWhenV2CmdletIsUnavailable()
     {
         var evaluator = new LeastPrivilegeEvaluator(ExchangeOnlineConfiguration.CreateDefault());
         var capabilities = CreateCapabilitiesForCatalog();
@@ -141,17 +141,13 @@ public sealed class LeastPrivilegeEvaluatorTests
             IsAvailable = false,
             UnavailableReason = "Module version too old"
         };
-        capabilities.Cmdlets["Get-MessageTrace"] = new CmdletCapabilityDto
-        {
-            Name = "Get-MessageTrace",
-            IsAvailable = true
-        };
 
         var evaluation = evaluator.Evaluate(
             LeastPrivilegeCatalog.MessageTraceRead,
             capabilities);
 
-        Assert.Equal(LeastPrivilegeFeatureStatus.Available, evaluation.Status);
+        Assert.Equal(LeastPrivilegeFeatureStatus.Blocked, evaluation.Status);
+        Assert.Contains("Get-MessageTraceV2", evaluation.MissingRequirementsDisplay, StringComparison.Ordinal);
     }
 
     private static CapabilityMapDto CreateCapabilities(params (string Name, bool IsAvailable, string? Reason)[] cmdlets)

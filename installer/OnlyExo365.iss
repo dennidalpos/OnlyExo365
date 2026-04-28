@@ -22,9 +22,6 @@
 #ifndef IconPath
   #error "IconPath define is required."
 #endif
-#ifndef CleanupScriptPath
-  #error "CleanupScriptPath define is required."
-#endif
 
 [Setup]
 AppId={{B9E5A61C-8D6A-4B10-8F50-2BB72D7497F3}
@@ -57,7 +54,6 @@ ArchitecturesAllowed=x64compatible
 
 [Files]
 Source: "{#PublishDirX64}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs notimestamp; Check: Is64BitInstallMode
-Source: "{#CleanupScriptPath}"; DestDir: "{app}"; DestName: "OnlyExo365.ServiceCleanup.ps1"; Flags: ignoreversion notimestamp
 
 [Icons]
 Name: "{commonprograms}\{#ProductName}"; Filename: "{app}\OnlyExo365.Shell.exe"; WorkingDir: "{app}"
@@ -68,9 +64,6 @@ Root: HKLM; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "In
 Root: HKCU; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "LogDirectory"; ValueData: "{localappdata}\{#ProductName}\logs"; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "SecretDirectory"; ValueData: "{localappdata}\{#ProductName}\ipc-secrets"; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "ExportDirectory"; ValueData: "{localappdata}\{#ProductName}\exports"; Flags: uninsdeletekeyifempty
-
-[UninstallRun]
-Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File ""{app}\OnlyExo365.ServiceCleanup.ps1"" -PathHint ""{app}"""; Flags: runhidden waituntilterminated
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"

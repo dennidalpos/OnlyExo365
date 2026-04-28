@@ -300,10 +300,8 @@ $report = [ordered]@{
         installed_worker_process_id = $null
         uninstall_registry_confirmed = $false
         uninstall_cleanup_confirmed = $false
-        service_cleanup_confirmed = $false
         residual_cleanup_confirmed = $false
         residual_marker_paths = @()
-        remaining_services = @()
         local_data_backup_entries = @()
         local_data_restore_confirmed = $false
         skip_real_install = [bool]$SkipRealInstall
@@ -312,8 +310,8 @@ $report = [ordered]@{
 }
 
 $installerSmokeRoot = $null
-$projectDataBackupRoot = $null
-$projectDataBackupEntries = @()
+$productDataBackupRoot = $null
+$productDataBackupEntries = @()
 
 try {
     Write-Step "Validating runtime prerequisites"
@@ -321,21 +319,16 @@ try {
     Write-Success "Runtime prerequisites confirmed for packaged execution."
 
     if (-not $SkipRealInstall) {
-        $preExistingServices = @(Get-ProjectServiceEntries -PathHints @($resolvedPublishPath))
-        if ($preExistingServices.Count -gt 0) {
-            Stop-WithError "Existing OnlyExo365 / OnlyExo365 services detected. Installer smoke tests require a clean host to avoid altering operator services."
-        }
-
-        $projectDataBackup = Backup-ProjectDataRoots -Paths @(
+        $productDataBackup = Backup-ProductDataRoots -Paths @(
             $logDirectory,
             $secretDirectory,
             $exportDirectory
         )
-        $projectDataBackupRoot = $projectDataBackup.BackupRoot
-        $projectDataBackupEntries = @($projectDataBackup.Entries)
-        $report["installer"]["local_data_backup_entries"] = @($projectDataBackupEntries)
-        if ($projectDataBackupEntries.Count -gt 0) {
-            Write-Success "Backed up $($projectDataBackupEntries.Count) OnlyExo365 local data root(s) before installer validation."
+        $productDataBackupRoot = $productDataBackup.BackupRoot
+        $productDataBackupEntries = @($productDataBackup.Entries)
+        $report["installer"]["local_data_backup_entries"] = @($productDataBackupEntries)
+        if ($productDataBackupEntries.Count -gt 0) {
+            Write-Success "Backed up $($productDataBackupEntries.Count) OnlyExo365 local data root(s) before installer validation."
         }
     }
 
@@ -521,30 +514,23 @@ try {
             return $true
         } | Out-Null
 
-        $remainingServices = @(Get-ProjectServiceEntries -PathHints @($realInstallRoot, $resolvedPublishPath))
-        $report["installer"]["remaining_services"] = $remainingServices
-        if ($remainingServices.Count -gt 0) {
-            Stop-WithError "OnlyExo365 / OnlyExo365 services still present after setup uninstall."
-        }
-
         $report["installer"]["required_files"] = Get-RequiredPayloadFiles -RootPath $realInstallRoot
         $report["installer"]["uninstall_registry_confirmed"] = $true
         $report["installer"]["uninstall_cleanup_confirmed"] = $true
-        $report["installer"]["service_cleanup_confirmed"] = $true
         $report["installer"]["residual_cleanup_confirmed"] = $true
-        Write-Success "Setup uninstall removed the registered installation, residual files and project services."
+        Write-Success "Setup uninstall removed the registered installation and residual files."
     }
     else {
         Write-Info "Skipping real setup EXE install validation by request."
     }
 
-    if ($projectDataBackupEntries.Count -gt 0) {
-        $restoredCount = Restore-ProjectDataRoots -Entries $projectDataBackupEntries
-        if ($restoredCount -ne $projectDataBackupEntries.Count) {
+    if ($productDataBackupEntries.Count -gt 0) {
+        $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries
+        if ($restoredCount -ne $productDataBackupEntries.Count) {
             Stop-WithError "Unable to restore all pre-existing OnlyExo365 local data after installer validation."
         }
 
-        $projectDataBackupEntries = @()
+        $productDataBackupEntries = @()
         $report["installer"]["local_data_restore_confirmed"] = $true
         Write-Success "Restored pre-existing OnlyExo365 local data after installer validation."
     }
@@ -557,12 +543,12 @@ finally {
         Remove-Item -Path $installerSmokeRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    if ($projectDataBackupEntries.Count -gt 0) {
+    if ($productDataBackupEntries.Count -gt 0) {
         try {
-            $restoredCount = Restore-ProjectDataRoots -Entries $projectDataBackupEntries
-            if ($restoredCount -eq $projectDataBackupEntries.Count) {
+            $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries
+            if ($restoredCount -eq $productDataBackupEntries.Count) {
                 Write-Warn "Recovered pre-existing OnlyExo365 local data during final cleanup after an interrupted installer smoke test run."
-                $projectDataBackupEntries = @()
+                $productDataBackupEntries = @()
             }
             else {
                 Write-Warn "Smoke test cleanup could not restore all pre-existing OnlyExo365 local data automatically."
@@ -573,8 +559,8 @@ finally {
         }
     }
 
-    if (-not [string]::IsNullOrWhiteSpace($projectDataBackupRoot) -and (Test-Path $projectDataBackupRoot)) {
-        Remove-Item -Path $projectDataBackupRoot -Recurse -Force -ErrorAction SilentlyContinue
+    if (-not [string]::IsNullOrWhiteSpace($productDataBackupRoot) -and (Test-Path $productDataBackupRoot)) {
+        Remove-Item -Path $productDataBackupRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 

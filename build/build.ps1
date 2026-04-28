@@ -218,6 +218,7 @@ $ExportDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $Outp
 $ImportDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $OutputDir "imports" } else { Resolve-RepositoryPath -RepositoryRoot $RepositoryRoot -PathValue $ImportDirPath }
 $BuildStartTime = Get-Date
 $ResolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
+$PrimaryRuntimeIdentifier = @($ResolvedRuntimeIdentifiers)[0]
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -388,7 +389,7 @@ if ($Publish) {
     Write-Host "Published to: $PublishDir" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "To run the application:" -ForegroundColor Yellow
-    Write-Host "  cd `"$((Get-RuntimePublishPath -RepositoryRoot $RepositoryRoot -RuntimeIdentifier ($ResolvedRuntimeIdentifiers[0])))`""
+    Write-Host "  cd `"$((Get-RuntimePublishPath -RepositoryRoot $RepositoryRoot -RuntimeIdentifier $PrimaryRuntimeIdentifier))`""
     Write-Host "  .\OnlyExo365.Shell.exe"
     Write-Host ""
     Write-Host "Runtime prerequisites:" -ForegroundColor Yellow

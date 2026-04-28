@@ -199,35 +199,9 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("ValueName: \"LogDirectory\"", script, StringComparison.Ordinal);
         Assert.Contains("ValueName: \"SecretDirectory\"", script, StringComparison.Ordinal);
         Assert.Contains("ValueName: \"ExportDirectory\"", script, StringComparison.Ordinal);
-        Assert.Contains("[UninstallRun]", script, StringComparison.Ordinal);
-        Assert.Contains("OnlyExo365.ServiceCleanup.ps1", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("[UninstallRun]", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("OnlyExo365.ServiceCleanup.ps1", script, StringComparison.Ordinal);
         Assert.Contains("[UninstallDelete]", script, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void ServiceCleanupScript_UsesServiceEnumerationAndScDelete()
-    {
-        var scriptPath = GetRepositoryFilePath("build", "remove-project-services.ps1");
-        var script = File.ReadAllText(scriptPath);
-
-        Assert.Contains("SupportsShouldProcess", script, StringComparison.Ordinal);
-        Assert.Contains("Get-CimInstance Win32_Service", script, StringComparison.Ordinal);
-        Assert.Contains("HKLM:\\SYSTEM\\CurrentControlSet\\Services\\", script, StringComparison.Ordinal);
-        Assert.Contains("Stop-ServiceRobust", script, StringComparison.Ordinal);
-        Assert.Contains("& sc.exe delete $candidate.Name", script, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void ServiceCleanupScript_IsSelfContainedForInstallerUninstall()
-    {
-        var scriptPath = GetRepositoryFilePath("build", "remove-project-services.ps1");
-        var script = File.ReadAllText(scriptPath);
-
-        Assert.DoesNotContain("#Requires -Version 7", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("helpers\\common.ps1", script, StringComparison.Ordinal);
-        Assert.Contains("function Write-Info", script, StringComparison.Ordinal);
-        Assert.Contains("function Write-Success", script, StringComparison.Ordinal);
-        Assert.Contains("function Write-Warn", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -245,7 +219,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("Setup EXE installation failed", script, StringComparison.Ordinal);
         Assert.Contains("Setup EXE reinstall failed", script, StringComparison.Ordinal);
         Assert.Contains("Setup reinstall preserved a single uninstall registry entry.", script, StringComparison.Ordinal);
-        Assert.Contains("Setup uninstall removed the registered installation, residual files and project services.", script, StringComparison.Ordinal);
+        Assert.Contains("Setup uninstall removed the registered installation and residual files.", script, StringComparison.Ordinal);
         Assert.Contains("Moving it to temporary backup before installer uninstall validation", combined, StringComparison.Ordinal);
         Assert.Contains("Restored pre-existing OnlyExo365 local data after installer validation.", combined, StringComparison.Ordinal);
         Assert.Contains("Recovered pre-existing OnlyExo365 local data during final cleanup after an interrupted installer smoke test run.", combined, StringComparison.Ordinal);
@@ -376,7 +350,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("Get-InnoSetupCompilerPath -RepositoryRoot $repositoryRoot", script, StringComparison.Ordinal);
         Assert.Contains("/DPublishDirX64=$resolvedPublishPathX64", script, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishDirX86", script, StringComparison.Ordinal);
-        Assert.Contains("/DCleanupScriptPath=$resolvedCleanupScriptPath", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("CleanupScriptPath", script, StringComparison.Ordinal);
         Assert.DoesNotContain("iexpress.exe", script, StringComparison.Ordinal);
         Assert.DoesNotContain("msiexec.exe", script, StringComparison.Ordinal);
         Assert.DoesNotContain("MsiPath", script, StringComparison.Ordinal);
@@ -386,9 +360,11 @@ public sealed class BuildScriptSecurityTests
     public void CanonicalBuildAndPackScripts_UseSwitchFlagsForBooleanParameters()
     {
         var buildScriptPath = GetRepositoryFilePath("scripts", "build.ps1");
+        var canonicalBuildScriptPath = GetRepositoryFilePath("build", "build.ps1");
         var packScriptPath = GetRepositoryFilePath("scripts", "pack.ps1");
         var testScriptPath = GetRepositoryFilePath("scripts", "agents", "test.ps1");
         var buildScript = File.ReadAllText(buildScriptPath);
+        var canonicalBuildScript = File.ReadAllText(canonicalBuildScriptPath);
         var packScript = File.ReadAllText(packScriptPath);
         var testScript = File.ReadAllText(testScriptPath);
 
@@ -403,6 +379,8 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("\"-Clean:$([bool]$Clean)\"", packScript, StringComparison.Ordinal);
 
         Assert.Contains("\"--disable-build-servers\"", testScript, StringComparison.Ordinal);
+        Assert.Contains("$PrimaryRuntimeIdentifier = @($ResolvedRuntimeIdentifiers)[0]", canonicalBuildScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("$ResolvedRuntimeIdentifiers[0]", canonicalBuildScript, StringComparison.Ordinal);
     }
 
     [Fact]

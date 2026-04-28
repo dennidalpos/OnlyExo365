@@ -73,9 +73,7 @@ public class CapabilityDetector
         "Remove-MigrationBatch",
 
         "Get-MessageTraceV2",
-        "Get-MessageTrace",
         "Get-MessageTraceDetailV2",
-        "Get-MessageTraceDetail",
 
         "Get-TransportRule",
         "Get-InboundConnector",

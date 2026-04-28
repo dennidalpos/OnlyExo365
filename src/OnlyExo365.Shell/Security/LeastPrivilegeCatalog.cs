@@ -112,10 +112,9 @@ public static class LeastPrivilegeCatalog
             FeatureName = "Trace search and detail",
             Description = "Run message trace and inspect per-recipient detail.",
             AllowedAuthenticationModes = AllAuthenticationModes,
-            RequiredCmdletsAny =
+            RequiredCmdletsAll =
             [
-                "Get-MessageTraceV2",
-                "Get-MessageTrace"
+                "Get-MessageTraceV2"
             ],
             RecommendedExchangeRoles =
             [
@@ -125,7 +124,7 @@ public static class LeastPrivilegeCatalog
             [
                 "Exchange Online Protection telemetry"
             ],
-            Notes = "Get-MessageTraceDetailV2 or Get-MessageTraceDetail remains optional but is required for the detail drawer."
+            Notes = "Get-MessageTraceDetailV2 remains optional but is required for the detail drawer."
         },
         new LeastPrivilegeFeatureDefinition
         {

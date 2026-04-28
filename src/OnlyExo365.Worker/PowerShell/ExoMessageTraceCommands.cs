@@ -6,7 +6,6 @@ namespace OnlyExo365.Worker.PowerShell;
 internal sealed class ExoMessageTraceCommands : ExoCommandModuleBase
 {
     private const int MessageTraceV2BatchSize = 5000;
-    private const int LegacyMessageTraceBatchSize = 5000;
 
     public ExoMessageTraceCommands(PowerShellEngine engine)
         : base(engine)
@@ -180,35 +179,8 @@ if (Get-Command Get-MessageTraceV2 -ErrorAction SilentlyContinue) {{
         $cursorEndDate = $nextEndDate
         $cursorRecipientAddress = $nextRecipientAddress
     }}
-}} elseif (Get-Command Get-MessageTrace -ErrorAction SilentlyContinue) {{
-    $sourceCmdlet = 'Get-MessageTrace'
-    $warningPayload = @{{
-        Code = 'LegacyMessageTraceCmdlet'
-        Scope = 'MessageTrace'
-        Message = 'Get-MessageTraceV2 is not available. Falling back to legacy Get-MessageTrace.'
-        IsPartialData = $true
-    }} | ConvertTo-Json -Compress -Depth 3
-    Write-Warning '{StructuredWarningPrefix}' + $warningPayload
-
-    $legacyPage = 1
-    while ($true) {{
-        $batch = @(Get-MessageTrace @params -Page $legacyPage -PageSize {LegacyMessageTraceBatchSize} -ErrorAction Stop)
-        if ($batch.Count -eq 0) {{
-            break
-        }}
-
-        foreach ($trace in $batch) {{
-            Add-TraceItem -Trace $trace -CmdletName $sourceCmdlet
-        }}
-
-        if ($batch.Count -lt {LegacyMessageTraceBatchSize}) {{
-            break
-        }}
-
-        $legacyPage++
-    }}
 }} else {{
-    throw 'Neither Get-MessageTraceV2 nor Get-MessageTrace is available. Install/upgrade ExchangeOnlineManagement and reconnect.'
+    throw 'Get-MessageTraceV2 is required. Install/upgrade ExchangeOnlineManagement and reconnect.'
 }}
 
 $resultItems.Add((New-SummaryRecord)) | Out-Null
@@ -226,22 +198,12 @@ $resultItems";
 $messageTraceId = '{escapedMessageTraceId}'
 $recipientAddress = '{escapedRecipient}'
 
-if (Get-Command Get-MessageTraceDetailV2 -ErrorAction SilentlyContinue) {{
-    $sourceCmdlet = 'Get-MessageTraceDetailV2'
-    $details = Get-MessageTraceDetailV2 -MessageTraceId $messageTraceId -RecipientAddress $recipientAddress -ErrorAction Stop
-}} elseif (Get-Command Get-MessageTraceDetail -ErrorAction SilentlyContinue) {{
-    $sourceCmdlet = 'Get-MessageTraceDetail'
-    $warningPayload = @{{
-        Code = 'LegacyMessageTraceDetailCmdlet'
-        Scope = 'MessageTrace.Details'
-        Message = 'Get-MessageTraceDetailV2 is not available. Falling back to legacy Get-MessageTraceDetail.'
-        IsPartialData = $true
-    }} | ConvertTo-Json -Compress -Depth 3
-    Write-Warning '{StructuredWarningPrefix}' + $warningPayload
-    $details = Get-MessageTraceDetail -MessageTraceId $messageTraceId -RecipientAddress $recipientAddress -ErrorAction Stop
-}} else {{
-    throw 'Neither Get-MessageTraceDetailV2 nor Get-MessageTraceDetail is available.'
+if (-not (Get-Command Get-MessageTraceDetailV2 -ErrorAction SilentlyContinue)) {{
+    throw 'Get-MessageTraceDetailV2 is required.'
 }}
+
+$sourceCmdlet = 'Get-MessageTraceDetailV2'
+$details = Get-MessageTraceDetailV2 -MessageTraceId $messageTraceId -RecipientAddress $recipientAddress -ErrorAction Stop
 
 foreach ($d in $details) {{
     [PSCustomObject]@{{

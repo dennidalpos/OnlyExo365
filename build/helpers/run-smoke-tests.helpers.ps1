@@ -473,66 +473,7 @@ function Invoke-ApplicationSmokeTest {
     }
 }
 
-function Get-ProjectServiceEntries {
-    param([string[]]$PathHints)
-
-    $normalizedHints = @(
-        $PathHints |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-        ForEach-Object { Normalize-FileSystemPath -PathValue $_ } |
-        Select-Object -Unique
-    )
-
-    $services = @(Get-CimInstance Win32_Service -ErrorAction SilentlyContinue)
-    $matches = New-Object System.Collections.Generic.List[object]
-
-    foreach ($service in $services) {
-        $parametersPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)\Parameters"
-        $parameters = Get-ItemProperty -Path $parametersPath -ErrorAction SilentlyContinue
-
-        $searchValues = @(
-            $service.Name,
-            $service.DisplayName,
-            $service.PathName,
-            $parameters.Application,
-            $parameters.AppDirectory
-        ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-
-        $isProjectService = $false
-        foreach ($value in $searchValues) {
-            if ($value -match 'OnlyExo365|OnlyExo365') {
-                $isProjectService = $true
-                break
-            }
-
-            foreach ($hint in $normalizedHints) {
-                if ($value.IndexOf($hint, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
-                    $isProjectService = $true
-                    break
-                }
-            }
-
-            if ($isProjectService) {
-                break
-            }
-        }
-
-        if (-not $isProjectService) {
-            continue
-        }
-
-        $matches.Add([ordered]@{
-                name = $service.Name
-                display_name = $service.DisplayName
-                state = $service.State
-                path = $service.PathName
-            })
-    }
-
-    return @($matches.ToArray())
-}
-
-function Backup-ProjectDataRoots {
+function Backup-ProductDataRoots {
     param([string[]]$Paths)
 
     $normalizedPaths = @(
@@ -587,7 +528,7 @@ function Backup-ProjectDataRoots {
     }
 }
 
-function Restore-ProjectDataRoots {
+function Restore-ProductDataRoots {
     param([object[]]$Entries)
 
     $restoredCount = 0

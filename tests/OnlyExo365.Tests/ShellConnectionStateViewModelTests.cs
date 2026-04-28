@@ -53,6 +53,29 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task SetWorkerConsoleVisibilityCommand_AppliesRequestedStateImmediately()
+    {
+        var workerService = new WorkerConsoleConnectionWorkerServiceStub(initialConsoleVisibility: false);
+        var viewModel = CreateViewModel(workerService, out _);
+        var toggleCompletion = new TaskCompletionSource<Result<SetWorkerConsoleVisibilityResponse>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        workerService.SetToggleTask(toggleCompletion.Task);
+
+        viewModel.ApplyWorkerStateChange(WorkerConnectionState.Connected);
+        viewModel.SetWorkerConsoleVisibilityCommand.Execute(true);
+        await WaitForAsync(() => workerService.LastRequestedVisibility.HasValue);
+
+        Assert.True(viewModel.IsWorkerConsoleVisible);
+        Assert.True(viewModel.IsWorkerConsoleToggleBusy);
+
+        toggleCompletion.SetResult(Result<SetWorkerConsoleVisibilityResponse>.Success(new SetWorkerConsoleVisibilityResponse
+        {
+            IsVisible = true,
+            Message = "Worker console shown."
+        }));
+        await WaitForAsync(() => !viewModel.IsWorkerConsoleToggleBusy);
+    }
+
+    [Fact]
     public async Task ConnectExchange_InteractiveMode_PrimesInteractiveBootstrapBeforeWorkerConnect()
     {
         var workerService = new ConnectWorkerServiceStub();
@@ -234,6 +257,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     {
         private WorkerStatus _status;
         private Result<SetWorkerConsoleVisibilityResponse> _toggleResult;
+        private Task<Result<SetWorkerConsoleVisibilityResponse>>? _toggleTask;
         private bool _startWorkerResult = true;
 
         public WorkerConsoleConnectionWorkerServiceStub(bool initialConsoleVisibility = false)
@@ -258,6 +282,12 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         public void SetToggleResult(Result<SetWorkerConsoleVisibilityResponse> result)
         {
             _toggleResult = result;
+            _toggleTask = null;
+        }
+
+        public void SetToggleTask(Task<Result<SetWorkerConsoleVisibilityResponse>> task)
+        {
+            _toggleTask = task;
         }
 
         public void SetStartWorkerResult(bool success, string? lastError = null, WorkerConnectionState resultingState = WorkerConnectionState.Connected)
@@ -283,6 +313,11 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
             CancellationToken cancellationToken = default)
         {
             LastRequestedVisibility = isVisible;
+
+            if (_toggleTask != null)
+            {
+                return _toggleTask;
+            }
 
             if (_toggleResult.IsSuccess && _toggleResult.Value != null)
             {

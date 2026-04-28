@@ -38,6 +38,8 @@ Current setup behavior:
 - launch of `OnlyExo365.Shell.exe`
 - worker spawn from the expected path
 - UI, supervisor, and worker log creation
+- worker console toggle behavior from `Tools`
+- worker console close command protection
 - setup EXE install/reinstall/uninstall on a temporary root when real install validation is enabled
 
 ## Signing

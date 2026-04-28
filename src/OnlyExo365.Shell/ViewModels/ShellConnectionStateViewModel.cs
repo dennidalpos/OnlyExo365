@@ -505,8 +505,9 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
             return;
         }
 
-        var previousVisibility = _workerService.Status.IsConsoleVisible;
+        var previousVisibility = IsWorkerConsoleVisible;
         IsWorkerConsoleToggleBusy = true;
+        IsWorkerConsoleVisible = requestedVisibility.Value;
 
         try
         {

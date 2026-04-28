@@ -15,6 +15,14 @@
       "risk": "low",
       "priority": "low",
       "context": "Multiple ViewModel tests still use polling helpers or fixed Task.Delay intervals, including ComplianceViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxProvisioningCandidatesViewModelTests, MigrationViewModelTests, MobileDevicesViewModelTests, NavigationLoadingCoordinatorTests, and ShellConnectionStateViewModelTests. The direct stale-details sleep in ContactsViewModelTests has been replaced with a worker completion signal, but broader polling remains. Replace the remaining waits with deterministic completion signals incrementally; current behavior needs careful per-ViewModel synchronization to avoid broad test rewrites."
+    },
+    {
+      "id": "worker-console-toggle-history",
+      "type": "test",
+      "status": "done",
+      "risk": "medium",
+      "priority": "high",
+      "context": "Worker console visibility toggling now hides the console window without freeing the console, keeps console streams rebound for the worker lifetime, disables the console close button to avoid killing the worker, opens with immediate optimistic UI feedback, and replays retained worker persistent logs once in the background when the console is first shown. Regression tests cover repeated toggles, immediate UI state, close-button disabling, and malformed persisted log lines."
     }
   ]
 }

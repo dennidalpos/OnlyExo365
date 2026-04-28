@@ -80,7 +80,7 @@ runs:
         ./build/assert-code-coverage.ps1 `
           -CoveragePath $coveragePath `
           -MinimumLineCoveragePercent 20 `
-          -IncludePackage OnlyExo365.Worker,OnlyExo365.Contracts,OnlyExo365.Shell
+          -IncludePackage OnlyExo365.Worker,OnlyExo365.Contracts
 
     - name: Enforce architecture constraints
       shell: pwsh

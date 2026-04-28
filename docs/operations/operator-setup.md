@@ -34,6 +34,16 @@ The setup EXE is a per-machine Inno Setup installer:
 5. Connect to Exchange Online.
 6. Confirm coherent shell, worker, Exchange, and Graph state.
 
+## Worker Console Diagnostics
+
+The `Tools` page includes a Worker Status section with a worker console toggle.
+
+- Use the checkbox to show or hide the worker console.
+- The first show opens the console immediately and then replays retained worker log history from `%LocalAppData%\OnlyExo365\logs\worker-*.log`.
+- Later hide/show cycles preserve the same console buffer and do not replay the history again.
+- Do not close the worker console as a lifecycle action. The app disables the console close command so the worker is not terminated accidentally; use the checkbox to hide the console.
+- The `Logs` page remains the supported place to review and export persisted logs.
+
 ## Configuration Resolution
 
 Resolution order:

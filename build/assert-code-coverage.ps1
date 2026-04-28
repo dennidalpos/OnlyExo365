@@ -52,7 +52,12 @@ foreach ($packageNode in $packageNodes) {
             continue
         }
 
-        foreach ($lineNode in @($classNode.lines.line)) {
+        $lineNodes = @($classNode.SelectNodes('lines/line'))
+        if ($lineNodes.Count -eq 0) {
+            continue
+        }
+
+        foreach ($lineNode in $lineNodes) {
             $packageTotal++
             if ([int]$lineNode.hits -gt 0) {
                 $packageCovered++

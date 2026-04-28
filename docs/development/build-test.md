@@ -50,6 +50,9 @@ pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -
 pwsh ./build/assert-architecture-constraints.ps1
 pwsh ./build/assert-no-vulnerable-packages.ps1 -SolutionPath OnlyExo365.sln -ReportPath artifacts/security/nuget-vulnerabilities.json
 pwsh ./build/run-secret-scan.ps1 -SourcePath . -ReportPath artifacts/security/gitleaks.sarif
+dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --no-build --no-restore --artifacts-path artifacts/build --collect:"XPlat Code Coverage" --results-directory artifacts/test-results --filter "FullyQualifiedName~OnlyExo365.Tests.WorkerCommandTests|FullyQualifiedName~OnlyExo365.Tests.MailboxReportingCommandTests|FullyQualifiedName~OnlyExo365.Tests.IpcContractsTests|FullyQualifiedName~OnlyExo365.Tests.IpcSecretHandlingTests|FullyQualifiedName~OnlyExo365.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~OnlyExo365.Tests.PersistentLogWriterTests|FullyQualifiedName~OnlyExo365.Tests.OperationDispatcherMessagingTests"
+$coveragePath = Get-ChildItem artifacts/test-results -Recurse -Filter coverage.cobertura.xml | Sort-Object LastWriteTimeUtc | Select-Object -Last 1 -ExpandProperty FullName
+pwsh ./build/assert-code-coverage.ps1 -CoveragePath $coveragePath -MinimumLineCoveragePercent 20 -IncludePackage OnlyExo365.Worker,OnlyExo365.Contracts
 pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifiers win-x64
 ```
 

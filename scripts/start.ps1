@@ -15,6 +15,7 @@ param(
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $shellProjectPath = Join-Path $repositoryRoot "src/OnlyExo365.Shell/OnlyExo365.Shell.csproj"
+$buildArtifactsPath = Get-BuildArtifactsPath -RepositoryRoot $repositoryRoot
 
 if (-not (Test-Path $shellProjectPath -PathType Leaf)) {
     throw "Shell project not found: $shellProjectPath"
@@ -28,9 +29,13 @@ $arguments = @(
     $shellProjectPath,
     "--configuration",
     $Configuration,
-    "--runtime",
-    $RuntimeIdentifier
+    "--artifacts-path",
+    $buildArtifactsPath
 )
+
+if (-not $NoBuild) {
+    $arguments += "--runtime", $RuntimeIdentifier
+}
 
 if ($NoBuild) {
     $arguments += "--no-build"

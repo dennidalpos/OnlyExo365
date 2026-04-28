@@ -16,29 +16,51 @@ function Get-RequiredRuntimeEntries {
     }
 
     $frameworkEntries = New-Object System.Collections.Generic.List[object]
-    foreach ($framework in @($runtimeConfig.runtimeOptions.frameworks)) {
-        if ($null -eq $framework) {
-            continue
-        }
+    $frameworksProperty = $runtimeConfig.runtimeOptions.PSObject.Properties["frameworks"]
+    if ($null -ne $frameworksProperty -and $null -ne $frameworksProperty.Value) {
+        foreach ($framework in @($frameworksProperty.Value)) {
+            if ($null -eq $framework) {
+                continue
+            }
 
-        $frameworkEntries.Add([pscustomobject]@{
-                Component = $ComponentName
-                RuntimeConfigPath = $RuntimeConfigPath
-                Framework = [string]$framework.name
-                MinimumVersion = [string]$framework.version
-            })
+            $frameworkEntries.Add([pscustomobject]@{
+                    Component = $ComponentName
+                    RuntimeConfigPath = $RuntimeConfigPath
+                    Framework = [string]$framework.name
+                    MinimumVersion = [string]$framework.version
+                })
+        }
     }
 
-    if ($null -ne $runtimeConfig.runtimeOptions.framework) {
+    $frameworkProperty = $runtimeConfig.runtimeOptions.PSObject.Properties["framework"]
+    if ($null -ne $frameworkProperty -and $null -ne $frameworkProperty.Value) {
         $frameworkEntries.Add([pscustomobject]@{
                 Component = $ComponentName
                 RuntimeConfigPath = $RuntimeConfigPath
-                Framework = [string]$runtimeConfig.runtimeOptions.framework.name
-                MinimumVersion = [string]$runtimeConfig.runtimeOptions.framework.version
+                Framework = [string]$frameworkProperty.Value.name
+                MinimumVersion = [string]$frameworkProperty.Value.version
             })
     }
 
     return $frameworkEntries
+}
+
+function Get-ObjectPropertyValue {
+    param(
+        [object]$Object,
+        [string]$PropertyName
+    )
+
+    if ($null -eq $Object) {
+        return $null
+    }
+
+    $property = $Object.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
 }
 
 function Get-InstalledRuntimeCatalog {
@@ -183,13 +205,14 @@ function Get-UninstallEntries {
     )
 
     return @(Get-ItemProperty -Path $registryPaths -ErrorAction SilentlyContinue | Where-Object {
-            $actualDisplayName = [string]$_.DisplayName
+            $actualDisplayName = [string](Get-ObjectPropertyValue -Object $_ -PropertyName "DisplayName")
+            $actualPublisher = [string](Get-ObjectPropertyValue -Object $_ -PropertyName "Publisher")
             $displayNameMatches = -not [string]::IsNullOrWhiteSpace($actualDisplayName) -and (
                 $actualDisplayName -eq $DisplayName -or
                 $actualDisplayName.StartsWith("$DisplayName ", [System.StringComparison]::OrdinalIgnoreCase))
 
             $displayNameMatches -and
-            ([string]::IsNullOrWhiteSpace($Publisher) -or $_.Publisher -eq $Publisher)
+            ([string]::IsNullOrWhiteSpace($Publisher) -or $actualPublisher -eq $Publisher)
         })
 }
 
@@ -218,7 +241,7 @@ function Get-InstalledProductEntry {
     $expectedInstallLocation = Normalize-DirectoryPath -PathValue $InstallLocation
     $locationMatch = $entries | Where-Object {
         [string]::Equals(
-            (Normalize-DirectoryPath -PathValue $_.InstallLocation),
+            (Normalize-DirectoryPath -PathValue ([string](Get-ObjectPropertyValue -Object $_ -PropertyName "InstallLocation"))),
             $expectedInstallLocation,
             [System.StringComparison]::OrdinalIgnoreCase)
     } | Select-Object -First 1
@@ -245,7 +268,7 @@ function Get-InstalledProductEntriesForLocation {
     $expectedInstallLocation = Normalize-DirectoryPath -PathValue $InstallLocation
     return @($entries | Where-Object {
             [string]::Equals(
-                (Normalize-DirectoryPath -PathValue $_.InstallLocation),
+                (Normalize-DirectoryPath -PathValue ([string](Get-ObjectPropertyValue -Object $_ -PropertyName "InstallLocation"))),
                 $expectedInstallLocation,
                 [System.StringComparison]::OrdinalIgnoreCase)
         })

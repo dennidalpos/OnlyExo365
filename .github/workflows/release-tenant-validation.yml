@@ -30,7 +30,7 @@ jobs:
 
       - name: Run canonical doctor
         shell: pwsh
-        run: ./scripts/doctor.ps1
+        run: ./scripts/agents/doctor.ps1
 
       - name: Validate tenant-validation secrets
         shell: pwsh

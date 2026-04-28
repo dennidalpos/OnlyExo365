@@ -31,7 +31,7 @@ $buildScript = Join-Path $scriptDir "build.ps1"
 $presentationProject = Join-Path $repoRoot "src\OnlyExo365.Shell\OnlyExo365.Shell.csproj"
 $outputRootPath = if ([System.IO.Path]::IsPathRooted($OutputRoot)) { $OutputRoot } else { Join-Path $repoRoot $OutputRoot }
 
-. (Join-Path $scriptDir "helpers\common.ps1")
+. (Join-Path $repoRoot "scripts\internal\common.ps1")
 
 function Invoke-Native {
     param(

@@ -39,7 +39,7 @@ The setup EXE is a per-machine Inno Setup installer:
 Resolution order:
 
 1. `appsettings.json` in the application directory
-2. `%ProgramData%\OnlyExo365\appsettings.json`
+2. `%ProgramData%\OnlyExo365\OnlyExo365\appsettings.json`
 3. `ONLYEXO365_*` environment variables
 
 No legacy compatibility directory is part of the supported baseline.
@@ -60,6 +60,7 @@ No legacy compatibility directory is part of the supported baseline.
 - `ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES`
 - `ONLYEXO365_DEFAULT_USAGE_LOCATION`
 - `ONLYEXO365_ENABLE_GRAPH`
+- `ONLYEXO365_DISABLE_EXO`
 - `ONLYEXO365_EXPORT_DIR`
 - `ONLYEXO365_LOG_RETENTION_DAYS`
 

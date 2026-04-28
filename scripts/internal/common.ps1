@@ -6,7 +6,22 @@ $ErrorActionPreference = "Stop"
 function Get-RepositoryRoot {
     param([string]$ScriptRoot)
 
-    return (Split-Path -Parent $ScriptRoot)
+    if ([string]::IsNullOrWhiteSpace($ScriptRoot)) {
+        throw "ScriptRoot is required."
+    }
+
+    $currentDirectory = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($ScriptRoot))
+    while ($null -ne $currentDirectory) {
+        $solutionPath = Join-Path $currentDirectory.FullName "OnlyExo365.sln"
+        $globalJsonPath = Join-Path $currentDirectory.FullName "global.json"
+        if ((Test-Path $solutionPath -PathType Leaf) -and (Test-Path $globalJsonPath -PathType Leaf)) {
+            return $currentDirectory.FullName
+        }
+
+        $currentDirectory = $currentDirectory.Parent
+    }
+
+    throw "Repository root not found from script root: $ScriptRoot"
 }
 
 function Get-SolutionPath {

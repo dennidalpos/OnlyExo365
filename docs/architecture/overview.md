@@ -17,7 +17,7 @@ The shell owns the desktop process boundary. The worker owns PowerShell executio
 - `src/OnlyExo365.Worker`
 - `src/OnlyExo365.Contracts`
 - `tests/OnlyExo365.Tests`
-- `scripts/`: canonical local entrypoints
+- `scripts/`: canonical local entrypoints, agent automation scripts, and shared script helpers
 - `build/`: CI, release, security, smoke, signing, and validation helpers
 - `installer/`: Inno Setup authoring for `OnlyExo365.Setup.exe`
 - `.github/`: Windows release baseline action and release workflows
@@ -34,7 +34,7 @@ The shell owns the desktop process boundary. The worker owns PowerShell executio
 ## Configuration Ownership
 
 - versioned defaults: `src/OnlyExo365.Shell/appsettings.json`
-- shared machine override: `%ProgramData%\OnlyExo365\appsettings.json`
+- shared machine override: `%ProgramData%\OnlyExo365\OnlyExo365\appsettings.json`
 - environment overrides: `ONLYEXO365_*`
 
 Only the current configuration path is supported. Legacy compatibility directories are intentionally not part of the baseline.

@@ -14,7 +14,7 @@ param(
     [string]$OutputDirectory = "artifacts/publish/release-assets"
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "../internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $publishScriptPath = Join-Path $repositoryRoot "build\\publish-release-assets.ps1"

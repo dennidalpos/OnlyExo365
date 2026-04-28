@@ -17,7 +17,7 @@ It supports:
 ## Canonical Refresh Command
 
 ```powershell
-pwsh ./scripts/refresh-microsoft365-sku-catalog.ps1
+pwsh ./scripts/agents/refresh-microsoft365-sku-catalog.ps1
 ```
 
 The script:
@@ -48,7 +48,7 @@ The current versioned catalog reports:
 ## Minimum Verification After Refresh
 
 ```powershell
-pwsh ./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64
-pwsh ./scripts/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64
+pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64
+pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 ```
 

@@ -9,7 +9,7 @@ This document owns packaging, smoke validation, signing checks, and release asse
 - `artifacts/publish/win-x64/`
 - `artifacts/packages/OnlyExo365.Setup.exe`
 
-`pwsh ./scripts/publish.ps1 -ReleaseTag <tag> -RuntimeIdentifier win-x64` produces release assets under `artifacts/publish/release-assets`:
+`pwsh ./scripts/agents/publish.ps1 -ReleaseTag <tag> -RuntimeIdentifier win-x64` produces release assets under `artifacts/publish/release-assets`:
 
 - `OnlyExo365-<tag>-win-x64-publish.zip`
 - `OnlyExo365-<tag>-win-x64-setup.exe`

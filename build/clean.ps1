@@ -18,7 +18,7 @@ $BuildArtifactsDir = Join-Path $ArtifactsDir "build"
 $ExportsDir = if ([string]::IsNullOrWhiteSpace($ExportDirPath)) { Join-Path $ArtifactsDir "exports" } else { $ExportDirPath }
 $ImportsDir = if ([string]::IsNullOrWhiteSpace($ImportDirPath)) { Join-Path $ArtifactsDir "imports" } else { $ImportDirPath }
 
-. (Join-Path $ScriptDir "helpers\common.ps1")
+. (Join-Path $SolutionDir "scripts\internal\common.ps1")
 
 if (-not [System.IO.Path]::IsPathRooted($ExportsDir)) {
     $ExportsDir = Join-Path $SolutionDir $ExportsDir

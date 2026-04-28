@@ -8,7 +8,7 @@ param(
     [string]$PackageManager = "Auto"
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 

@@ -4,7 +4,7 @@ using OnlyExo365.Worker.Operations;
 
 namespace OnlyExo365.Tests;
 
-public class OperationDispatcherInfrastructureTests
+public class OperationDispatcherMessagingTests
 {
     [Fact]
     public async Task SendProgressAsync_PublishesProgressEnvelopeWithCounters()

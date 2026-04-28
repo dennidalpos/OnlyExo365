@@ -19,7 +19,7 @@ param(
     [switch]$NoRestore
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "../internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot
@@ -28,7 +28,7 @@ $buildArtifactsPath = Get-BuildArtifactsPath -RepositoryRoot $repositoryRoot
 
 if (-not $NoBootstrap) {
     Invoke-RepositoryPowerShellScript `
-        -ScriptPath (Join-Path $PSScriptRoot "bootstrap.ps1") `
+        -ScriptPath (Join-Path $repositoryRoot "scripts/bootstrap.ps1") `
         -Arguments @("-LockedMode:$LockedMode", "-RuntimeIdentifier", $RuntimeIdentifier) `
         -ErrorMessage "bootstrap failed"
 }

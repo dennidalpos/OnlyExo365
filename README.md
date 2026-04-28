@@ -21,10 +21,10 @@ OnlyExo365 is a Windows-only WPF desktop application for Exchange Online adminis
 Run from the repository root:
 
 ```powershell
-pwsh ./scripts/doctor.ps1
 pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64
-pwsh ./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
-pwsh ./scripts/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
+pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
+pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
+pwsh ./scripts/clean.ps1
 pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64
 ```
 

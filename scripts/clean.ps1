@@ -9,7 +9,7 @@ param(
     [string]$ImportDirPath
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $scriptPath = Join-Path $repositoryRoot "build\\clean.ps1"

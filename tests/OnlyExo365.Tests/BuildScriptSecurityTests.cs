@@ -63,7 +63,7 @@ public sealed class BuildScriptSecurityTests
         var scriptPath = GetRepositoryFilePath("build", "run-secret-scan.ps1");
         var script = File.ReadAllText(scriptPath);
 
-        Assert.Contains("helpers\\common.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\internal\\common.ps1", script, StringComparison.Ordinal);
         Assert.Contains("tool-manifest.json", script, StringComparison.Ordinal);
         Assert.Contains("Get-FileHash -Algorithm SHA256", script, StringComparison.Ordinal);
         Assert.Contains("archiveSha256", script, StringComparison.Ordinal);
@@ -77,7 +77,7 @@ public sealed class BuildScriptSecurityTests
         var scriptPath = GetRepositoryFilePath("build", "assert-no-vulnerable-packages.ps1");
         var script = File.ReadAllText(scriptPath);
 
-        Assert.Contains("helpers\\common.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\internal\\common.ps1", script, StringComparison.Ordinal);
         Assert.Contains("& dotnet sln $SolutionPath list", script, StringComparison.Ordinal);
         Assert.Contains("Invoke-SolutionRestoreForPackageInspection", script, StringComparison.Ordinal);
         Assert.Contains("foreach ($projectPath in $projectPaths)", script, StringComparison.Ordinal);
@@ -103,8 +103,8 @@ public sealed class BuildScriptSecurityTests
     [Fact]
     public void CommonAndDoctorScripts_ResolveInnoSetupCompilerInsteadOfWixOrIexpress()
     {
-        var commonPath = GetRepositoryFilePath("scripts", "helpers", "common.ps1");
-        var doctorPath = GetRepositoryFilePath("scripts", "doctor.ps1");
+        var commonPath = GetRepositoryFilePath("scripts", "internal", "common.ps1");
+        var doctorPath = GetRepositoryFilePath("scripts", "agents", "doctor.ps1");
         var commonScript = File.ReadAllText(commonPath);
         var doctorScript = File.ReadAllText(doctorPath);
 
@@ -126,7 +126,7 @@ public sealed class BuildScriptSecurityTests
         var scriptPath = GetRepositoryFilePath("scripts", "Install-InnoSetup.ps1");
         var script = File.ReadAllText(scriptPath);
 
-        Assert.Contains("helpers/common.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("internal/common.ps1", script, StringComparison.Ordinal);
         Assert.Contains("function Test-InnoSetupAvailable", script, StringComparison.Ordinal);
         Assert.Contains("Get-InnoSetupCompilerPath -RepositoryRoot $RepositoryRoot", script, StringComparison.Ordinal);
         Assert.Contains("[switch]$Install", script, StringComparison.Ordinal);
@@ -142,7 +142,7 @@ public sealed class BuildScriptSecurityTests
     public void PackAndPublishScripts_AreExeOnly()
     {
         var packPath = GetRepositoryFilePath("scripts", "pack.ps1");
-        var publishPath = GetRepositoryFilePath("scripts", "publish.ps1");
+        var publishPath = GetRepositoryFilePath("scripts", "agents", "publish.ps1");
         var packScript = File.ReadAllText(packPath);
         var publishScript = File.ReadAllText(publishPath);
 
@@ -307,7 +307,7 @@ public sealed class BuildScriptSecurityTests
         var scriptPath = GetRepositoryFilePath("build", "publish-release-assets.ps1");
         var script = File.ReadAllText(scriptPath);
 
-        Assert.Contains("helpers\\common.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\internal\\common.ps1", script, StringComparison.Ordinal);
         Assert.Contains("Compress-Archive", script, StringComparison.Ordinal);
         Assert.Contains("Get-FileHash -Algorithm SHA256", script, StringComparison.Ordinal);
         Assert.Contains("RELEASE_ASSET_ZIP=", script, StringComparison.Ordinal);
@@ -340,7 +340,7 @@ public sealed class BuildScriptSecurityTests
             var scriptPath = GetRepositoryFilePath(relativePath[0], relativePath[1]);
             var script = File.ReadAllText(scriptPath);
 
-            Assert.Contains("helpers\\common.ps1", script, StringComparison.Ordinal);
+            Assert.Contains("scripts\\internal\\common.ps1", script, StringComparison.Ordinal);
         }
     }
 
@@ -387,7 +387,7 @@ public sealed class BuildScriptSecurityTests
     {
         var buildScriptPath = GetRepositoryFilePath("scripts", "build.ps1");
         var packScriptPath = GetRepositoryFilePath("scripts", "pack.ps1");
-        var testScriptPath = GetRepositoryFilePath("scripts", "test.ps1");
+        var testScriptPath = GetRepositoryFilePath("scripts", "agents", "test.ps1");
         var buildScript = File.ReadAllText(buildScriptPath);
         var packScript = File.ReadAllText(packScriptPath);
         var testScript = File.ReadAllText(testScriptPath);
@@ -408,11 +408,11 @@ public sealed class BuildScriptSecurityTests
     [Fact]
     public void CanonicalScripts_EnforcePinnedDotNetSdkAndCanonicalArtifactPaths()
     {
-        var commonPath = GetRepositoryFilePath("scripts", "helpers", "common.ps1");
+        var commonPath = GetRepositoryFilePath("scripts", "internal", "common.ps1");
         var bootstrapPath = GetRepositoryFilePath("scripts", "bootstrap.ps1");
-        var doctorPath = GetRepositoryFilePath("scripts", "doctor.ps1");
+        var doctorPath = GetRepositoryFilePath("scripts", "agents", "doctor.ps1");
         var packPath = GetRepositoryFilePath("scripts", "pack.ps1");
-        var publishPath = GetRepositoryFilePath("scripts", "publish.ps1");
+        var publishPath = GetRepositoryFilePath("scripts", "agents", "publish.ps1");
         var smokePath = GetRepositoryFilePath("build", "run-smoke-tests.ps1");
 
         var commonScript = File.ReadAllText(commonPath);
@@ -463,7 +463,7 @@ public sealed class BuildScriptSecurityTests
 
         Assert.Contains("contents: write", workflow, StringComparison.Ordinal);
         Assert.Contains("uses: ./.github/actions/windows-release-baseline", workflow, StringComparison.Ordinal);
-        Assert.Contains("./scripts/publish.ps1", workflow, StringComparison.Ordinal);
+        Assert.Contains("./scripts/agents/publish.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("gh release upload", workflow, StringComparison.Ordinal);
         Assert.Contains("RELEASE_ASSET_SETUP_EXE", workflow, StringComparison.Ordinal);
         Assert.Contains("release-assets-signed", workflow, StringComparison.Ordinal);
@@ -489,12 +489,12 @@ public sealed class BuildScriptSecurityTests
 
         Assert.Contains("actions/setup-dotnet@v4", action, StringComparison.Ordinal);
         Assert.Contains("choco install innosetup", action, StringComparison.Ordinal);
-        Assert.Contains("./scripts/doctor.ps1 -CheckPackaging", action, StringComparison.Ordinal);
+        Assert.Contains("./scripts/agents/doctor.ps1 -CheckPackaging", action, StringComparison.Ordinal);
         Assert.Contains("./scripts/bootstrap.ps1 -RuntimeIdentifier ${{ inputs.runtime_identifier }}", action, StringComparison.Ordinal);
-        Assert.Contains("./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier ${{ inputs.runtime_identifier }} -NoBootstrap", action, StringComparison.Ordinal);
+        Assert.Contains("./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier ${{ inputs.runtime_identifier }} -NoBootstrap", action, StringComparison.Ordinal);
         Assert.Contains("./build/assert-no-vulnerable-packages.ps1 -SolutionPath OnlyExo365.sln -ReportPath artifacts/security/nuget-vulnerabilities.json", action, StringComparison.Ordinal);
         Assert.Contains("./build/run-secret-scan.ps1 -SourcePath . -ReportPath artifacts/security/gitleaks.sarif", action, StringComparison.Ordinal);
-        Assert.Contains("./scripts/test.ps1 -Configuration Debug -ResultsDirectory artifacts/test-results/unit -NoBootstrap -NoBuild -NoRestore", action, StringComparison.Ordinal);
+        Assert.Contains("./scripts/agents/test.ps1 -Configuration Debug -ResultsDirectory artifacts/test-results/unit -NoBootstrap -NoBuild -NoRestore", action, StringComparison.Ordinal);
         Assert.Contains("./build/assert-code-coverage.ps1", action, StringComparison.Ordinal);
         Assert.Contains("./build/assert-architecture-constraints.ps1", action, StringComparison.Ordinal);
         Assert.Contains("./scripts/pack.ps1 -Configuration Release -Clean:$false -LockedMode -RuntimeIdentifier ${{ inputs.runtime_identifier }}", action, StringComparison.Ordinal);

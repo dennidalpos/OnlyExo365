@@ -37,7 +37,7 @@ runs:
 
     - name: Run canonical doctor
       shell: pwsh
-      run: ./scripts/doctor.ps1 -CheckPackaging
+      run: ./scripts/agents/doctor.ps1 -CheckPackaging
 
     - name: Bootstrap repository
       shell: pwsh
@@ -45,7 +45,7 @@ runs:
 
     - name: Run static analysis build gate
       shell: pwsh
-      run: ./scripts/compile.ps1 -Configuration Debug -RuntimeIdentifier ${{ inputs.runtime_identifier }} -NoBootstrap
+      run: ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier ${{ inputs.runtime_identifier }} -NoBootstrap
 
     - name: Scan NuGet vulnerabilities
       shell: pwsh
@@ -57,7 +57,7 @@ runs:
 
     - name: Run tests
       shell: pwsh
-      run: ./scripts/test.ps1 -Configuration Debug -ResultsDirectory artifacts/test-results/unit -NoBootstrap -NoBuild -NoRestore
+      run: ./scripts/agents/test.ps1 -Configuration Debug -ResultsDirectory artifacts/test-results/unit -NoBootstrap -NoBuild -NoRestore
 
     - name: Collect core backend coverage
       shell: pwsh
@@ -69,7 +69,7 @@ runs:
         --artifacts-path artifacts/build
         --collect:"XPlat Code Coverage"
         --results-directory artifacts/test-results
-        --filter "FullyQualifiedName~OnlyExo365.Tests.WorkerCommandTests|FullyQualifiedName~OnlyExo365.Tests.MailboxReportingCommandTests|FullyQualifiedName~OnlyExo365.Tests.IpcContractsTests|FullyQualifiedName~OnlyExo365.Tests.IpcSecretHandlingTests|FullyQualifiedName~OnlyExo365.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~OnlyExo365.Tests.PersistentLogWriterTests|FullyQualifiedName~OnlyExo365.Tests.OperationDispatcherInfrastructureTests"
+        --filter "FullyQualifiedName~OnlyExo365.Tests.WorkerCommandTests|FullyQualifiedName~OnlyExo365.Tests.MailboxReportingCommandTests|FullyQualifiedName~OnlyExo365.Tests.IpcContractsTests|FullyQualifiedName~OnlyExo365.Tests.IpcSecretHandlingTests|FullyQualifiedName~OnlyExo365.Tests.PowerShellModuleBootstrapPolicyTests|FullyQualifiedName~OnlyExo365.Tests.PersistentLogWriterTests|FullyQualifiedName~OnlyExo365.Tests.OperationDispatcherMessagingTests"
 
     - name: Enforce core coverage minimum
       shell: pwsh

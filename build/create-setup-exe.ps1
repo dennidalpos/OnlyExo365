@@ -21,7 +21,7 @@ $ProgressPreference = "SilentlyContinue"
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repositoryRoot = Split-Path -Parent $scriptDirectory
 
-. (Join-Path $repositoryRoot "scripts\helpers\common.ps1")
+. (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
 $resolvedPublishPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $PublishPath
 $resolvedPublishPathX64 = Join-Path $resolvedPublishPath "win-x64"

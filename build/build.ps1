@@ -29,7 +29,7 @@ $ProgressPreference = "SilentlyContinue"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepositoryRoot = Split-Path -Parent $ScriptDir
 
-. (Join-Path $RepositoryRoot "scripts\helpers\common.ps1")
+. (Join-Path $RepositoryRoot "scripts\internal\common.ps1")
 
 function Test-IsCiBuild {
     $ciMarkers = @(

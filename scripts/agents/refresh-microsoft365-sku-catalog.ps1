@@ -14,7 +14,7 @@ param(
     [string]$WorkingDirectory = "artifacts/tmp/licensing-catalog"
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "../internal/common.ps1")
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"

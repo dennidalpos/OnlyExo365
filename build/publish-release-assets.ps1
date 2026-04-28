@@ -22,7 +22,7 @@ $ProgressPreference = "SilentlyContinue"
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repositoryRoot = Split-Path -Parent $scriptDirectory
 
-. (Join-Path $scriptDirectory "helpers\common.ps1")
+. (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
 function Resolve-AbsolutePath {
     param([string]$PathValue)

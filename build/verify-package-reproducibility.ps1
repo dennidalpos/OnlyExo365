@@ -29,7 +29,7 @@ else {
 }
 $snapshotRoot = Join-Path $artifactsRoot "reproducibility\snapshots"
 
-. (Join-Path $scriptDirectory "helpers\common.ps1")
+. (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
 function Get-ArtifactHashMap {
     param([string]$RootPath)

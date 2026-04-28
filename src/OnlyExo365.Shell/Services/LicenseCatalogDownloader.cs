@@ -8,7 +8,7 @@ namespace OnlyExo365.Shell.Services;
 /// <summary>
 /// Downloads and converts the Microsoft 365 SKU catalog from the official
 /// Microsoft Learn page. Mirrors the logic of
-/// <c>scripts/refresh-microsoft365-sku-catalog.ps1</c> in C#.
+/// <c>scripts/agents/refresh-microsoft365-sku-catalog.ps1</c> in C#.
 /// </summary>
 public sealed partial class LicenseCatalogDownloader : IDisposable
 {

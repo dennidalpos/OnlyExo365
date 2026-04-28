@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 
-. (Join-Path $PSScriptRoot "helpers\common.ps1")
+. (Join-Path (Split-Path -Parent $PSScriptRoot) "scripts\internal\common.ps1")
 
 function Resolve-TimestampUrl {
     param([string]$Url)

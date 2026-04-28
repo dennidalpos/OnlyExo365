@@ -9,7 +9,7 @@ param(
     [string[]]$RuntimeIdentifiers = @("win-x64")
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot

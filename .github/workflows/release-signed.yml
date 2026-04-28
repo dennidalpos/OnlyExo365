@@ -101,7 +101,7 @@ jobs:
       - name: Prepare durable release assets
         shell: pwsh
         run: >
-          ./scripts/publish.ps1
+          ./scripts/agents/publish.ps1
           -ReleaseTag "${{ steps.release_tag.outputs.value }}"
           -OutputDirectory artifacts/publish/release-assets
 

@@ -16,7 +16,7 @@ param(
     [switch]$SelfContained = $false
 )
 
-. (Join-Path $PSScriptRoot "helpers/common.ps1")
+. (Join-Path $PSScriptRoot "internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
 $buildScriptPath = Join-Path $repositoryRoot "build\\build.ps1"

@@ -155,6 +155,7 @@ public sealed class ContactsViewModelTests
     {
         var firstRequest = new TaskCompletionSource<ContactDetailsDto>(TaskCreationOptions.RunContinuationsAsynchronously);
         var secondRequest = new TaskCompletionSource<ContactDetailsDto>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var staleDetailsReturned = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var worker = new ContactsWorkerServiceStub
         {
             ContactDetailsFactory = request =>
@@ -165,6 +166,13 @@ public sealed class ContactsViewModelTests
                 }
 
                 return secondRequest.Task;
+            },
+            ContactDetailsReturned = request =>
+            {
+                if (request.Identity == "contact-01")
+                {
+                    staleDetailsReturned.SetResult();
+                }
             }
         };
         using var shell = new ShellViewModel(worker, new NavigationService());
@@ -214,7 +222,7 @@ public sealed class ContactsViewModelTests
             DisplayName = "Unexpected stale contact",
             PrimarySmtpAddress = first.PrimarySmtpAddress
         });
-        await Task.Delay(100);
+        await staleDetailsReturned.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal(second.Identity, viewModel.ContactIdentity);
         Assert.Equal(second.DisplayName, viewModel.DisplayName);
@@ -263,6 +271,7 @@ public sealed class ContactsViewModelTests
         public Queue<GetContactsResponse> ContactResponses { get; } = new();
         public List<GetContactDetailsRequest> ContactDetailRequests { get; } = [];
         public Func<GetContactDetailsRequest, Task<ContactDetailsDto>>? ContactDetailsFactory { get; set; }
+        public Action<GetContactDetailsRequest>? ContactDetailsReturned { get; set; }
 
         public override Task<Result> UpsertContactAsync(UpsertContactRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
@@ -303,7 +312,11 @@ public sealed class ContactsViewModelTests
             if (ContactDetailsFactory != null)
             {
                 return ContactDetailsFactory(request).ContinueWith(
-                    task => Result<ContactDetailsDto>.Success(task.Result),
+                    task =>
+                    {
+                        ContactDetailsReturned?.Invoke(request);
+                        return Result<ContactDetailsDto>.Success(task.Result);
+                    },
                     cancellationToken,
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);

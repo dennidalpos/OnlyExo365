@@ -1,20 +1,12 @@
 {
   "tasks": [
     {
-      "id": "delivery-release-baseline-divergence",
-      "type": "refactor",
-      "status": "todo",
-      "risk": "medium",
-      "priority": "medium",
-      "context": "build/release-baseline.ps1 is a tracked but undocumented release path that creates artifacts/release outputs and optional git tags, while CI and docs use scripts/pack.ps1 plus scripts/agents/publish.ps1. Decide whether to remove it or fold it into the supported delivery flow."
-    },
-    {
       "id": "large-orchestration-files",
       "type": "refactor",
       "status": "todo",
       "risk": "medium",
       "priority": "medium",
-      "context": "Several current orchestration files are large and high-blast-radius, including WorkerClient.cs, WorkerService.cs, IpcServer.cs, and multiple feature ViewModels/PowerShell command modules. Tests pass, so split incrementally by existing facets/use cases instead of broad rewrites."
+      "context": "Several current orchestration files remain large and high-blast-radius, including WorkerService.cs, WorkerClient.cs, WorkerSupervisor.cs, IpcServer.cs, MailboxSettingsEditorViewModel.cs, PublicFoldersViewModel.cs, MailSecurityViewModel.cs, MigrationViewModel.cs, ComplianceViewModel.cs, ShellConnectionStateViewModel.cs, MailboxListViewModel.cs, ContactsViewModel.cs, and large Exo* PowerShell command modules. Some service/dispatcher splitting has already happened, so continue only by narrow existing facets/use cases with characterization tests."
     },
     {
       "id": "timing-dependent-viewmodel-tests",
@@ -22,7 +14,7 @@
       "status": "todo",
       "risk": "low",
       "priority": "low",
-      "context": "Multiple ViewModel tests wait with fixed Task.Delay intervals. They are currently passing, but replacing fixed sleeps with deterministic completion signals would reduce flakiness."
+      "context": "Multiple ViewModel tests still use polling helpers or fixed Task.Delay intervals, including ComplianceViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxProvisioningCandidatesViewModelTests, MigrationViewModelTests, MobileDevicesViewModelTests, NavigationLoadingCoordinatorTests, and ShellConnectionStateViewModelTests. The direct stale-details sleep in ContactsViewModelTests has been replaced with a worker completion signal, but broader polling remains. Replace the remaining waits with deterministic completion signals incrementally; current behavior needs careful per-ViewModel synchronization to avoid broad test rewrites."
     }
   ]
 }

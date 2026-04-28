@@ -38,6 +38,7 @@ pwsh ./scripts/Install-InnoSetup.ps1
 - `scripts/Install-InnoSetup.ps1`: checks or installs the packaging prerequisite.
 - `scripts/agents/*.ps1`: CI, release, test, and maintenance automation entrypoints.
 - `scripts/internal/common.ps1`: shared PowerShell helpers for repository scripts.
+- `build/release-baseline.ps1`: manual clean-worktree release evidence path; it is not the CI publication path.
 
 ## Local CI-Equivalent Validation
 
@@ -71,3 +72,5 @@ There is no separate repository-level lint or standalone typecheck command beyon
 - release packaging
 - package reproducibility
 - signing-flow validation
+
+`build/release-baseline.ps1` is intentionally separate from this CI baseline. Use it only when a human needs a clean-worktree evidence bundle under `artifacts/release` and, optionally, an annotated baseline tag. CI release assets still come from `scripts/pack.ps1` plus `scripts/agents/publish.ps1`.

@@ -1,20 +1,76 @@
 {
   "tasks": [
     {
-      "id": "large-orchestration-files",
+      "id": "canonical-gate-doc-alignment",
+      "type": "docs",
+      "status": "todo",
+      "risk": "low",
+      "priority": "high",
+      "context": "Execution order 1. Align public developer docs after adding scripts/gate.ps1: README.md still lists bootstrap/build/start/clean/pack but not the new local gate, while docs/development/build-test.md already lists it. Update README canonical commands and ensure the gate description matches the implemented behavior: repo clean, user-local app data clean, prerequisite check/install, locked bootstrap, compile, tests, validation scans, publish, and setup EXE packaging. Verify with docs-only review plus existing BuildScriptSecurityTests coverage."
+    },
+    {
+      "id": "runtime-sku-catalog-schema-parity",
+      "type": "refactor",
+      "status": "todo",
+      "risk": "medium",
+      "priority": "high",
+      "context": "Execution order 2. Fix catalog schema drift: src/OnlyExo365.Shell/Services/LocalSkuCatalogDocument.cs says it mirrors the embedded Worker catalog, but LocalSkuCatalogEntry omits servicePlans while scripts/agents/refresh-microsoft365-sku-catalog.ps1 and src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json include servicePlans. Decide the fresh-only shape as full parity, add service-plan DTOs to the Shell local catalog model and source-generation context, update LicenseCatalogDownloader.ConvertCsvToDocument to preserve service plans, and extend LicenseCatalogDownloaderTests plus PresentationSkuNameResolverTests if resolver behavior must remain name-only."
+    },
+    {
+      "id": "dependency-baseline-refresh",
+      "type": "config",
+      "status": "todo",
+      "risk": "medium",
+      "priority": "high",
+      "context": "Execution order 3. Refresh maintained package baselines after schema parity is stable. Current NuGet inspection reports no vulnerable production packages and no deprecated production packages, but top-level packages are outdated: System.Security.Cryptography.ProtectedData 9.0.0 -> 10.0.7, CommunityToolkit.Mvvm 8.2.2 -> 8.4.2, DocumentFormat.OpenXml 3.2.0 -> 3.5.1, Microsoft.PowerShell.SDK 7.6.0 -> 7.6.1, System.Security.Cryptography.Xml 10.0.6 -> 10.0.7, Microsoft.NET.Test.Sdk 17.12.0 -> 18.4.0, coverlet.collector 6.0.2 -> 10.0.0, xunit.runner.visualstudio 2.8.2 -> 3.1.5. xunit 2.9.2 is marked deprecated/legacy by NuGet with xunit.v3 as replacement; migrate test stack deliberately instead of mixing v2/v3. Update packages.lock.json files only through restore/build commands and verify with the local gate."
+    },
+    {
+      "id": "architecture-hotspot-guardrails",
+      "type": "test",
+      "status": "todo",
+      "risk": "medium",
+      "priority": "high",
+      "context": "Execution order 4. Add guardrails before broad refactors. build/assert-architecture-constraints.ps1 currently protects only bootstrap file sizes and required packaging/security files, while known hotspots remain unguarded. Add focused constraints or characterization tests for IPC and orchestration boundaries before edits: WorkerService.cs, WorkerClient.cs, WorkerSupervisor.cs, IpcServer.cs, OperationDispatcher.* handlers, and large Exo* PowerShell command modules. Keep limits generous enough to prevent regression without forcing a mass rewrite."
+    },
+    {
+      "id": "ipc-and-worker-orchestration-split",
+      "type": "refactor",
+      "status": "todo",
+      "risk": "high",
+      "priority": "medium",
+      "context": "Execution order 5. Split large IPC/orchestration files after guardrails exist. Start with the narrowest seams already present: WorkerClient runtime/facet clients, WorkerSupervisor process lifecycle vs console/log replay responsibilities, IpcServer transport vs request dispatch, and WorkerService facet delegation. Do not change OperationType wire contracts or named-pipe protocol. Preserve existing behavior with characterization tests around connection lifecycle, worker restart, IPC timeout/cancellation, persistent log replay, and secret handling."
+    },
+    {
+      "id": "deterministic-viewmodel-test-signals",
+      "type": "test",
+      "status": "todo",
+      "risk": "low",
+      "priority": "medium",
+      "context": "Execution order 6. Replace timing-dependent ViewModel tests before refactoring those ViewModels. Confirmed remaining polling/Task.Delay patterns in ComplianceViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxProvisioningCandidatesViewModelTests, MigrationViewModelTests, MobileDevicesViewModelTests, NavigationLoadingCoordinatorTests, and ShellConnectionStateViewModelTests. Introduce deterministic worker/test completion signals per ViewModel facet and remove WaitFor polling incrementally."
+    },
+    {
+      "id": "large-viewmodel-facet-split",
       "type": "refactor",
       "status": "todo",
       "risk": "medium",
       "priority": "medium",
-      "context": "Several current orchestration files remain large and high-blast-radius, including WorkerService.cs, WorkerClient.cs, WorkerSupervisor.cs, IpcServer.cs, MailboxSettingsEditorViewModel.cs, PublicFoldersViewModel.cs, MailSecurityViewModel.cs, MigrationViewModel.cs, ComplianceViewModel.cs, ShellConnectionStateViewModel.cs, MailboxListViewModel.cs, ContactsViewModel.cs, and large Exo* PowerShell command modules. Some service/dispatcher splitting has already happened, so continue only by narrow existing facets/use cases with characterization tests."
+      "context": "Execution order 7. Split large presentation ViewModels only after deterministic tests exist. Work by feature facet, not generic helpers: MailboxSettingsEditorViewModel, PublicFoldersViewModel, MailSecurityViewModel, MigrationViewModel, ComplianceViewModel, ShellConnectionStateViewModel, MailboxListViewModel, ContactsViewModel, MailboxPermissionsEditorViewModel, MailboxLicensesViewModel, and MobileDevicesViewModel. Keep business decisions out of XAML/code-behind and preserve existing Worker client contracts."
     },
     {
-      "id": "timing-dependent-viewmodel-tests",
-      "type": "test",
+      "id": "exo-command-module-facet-split",
+      "type": "refactor",
       "status": "todo",
-      "risk": "low",
+      "risk": "medium",
+      "priority": "medium",
+      "context": "Execution order 8. Split large Worker PowerShell command modules after IPC/orchestration stabilization. Prioritize ExoMailboxScriptFactory.cs, ExoComplianceCommands.cs, ExoMailboxLicenseCommands.cs, ExoMobileDeviceCommands.cs, ExoMailboxReportingCommands.cs, ExoMigrationCommands.cs, ExoPermissionCommands.cs, ExoSupportCommands.cs, and ErrorClassifier.cs. Preserve generated command text and request sanitization exactly, using WorkerCommandTests and characterization tests to detect drift."
+    },
+    {
+      "id": "domain-architecture-alignment-decision",
+      "type": "docs",
+      "status": "todo",
+      "risk": "medium",
       "priority": "low",
-      "context": "Multiple ViewModel tests still use polling helpers or fixed Task.Delay intervals, including ComplianceViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxProvisioningCandidatesViewModelTests, MigrationViewModelTests, MobileDevicesViewModelTests, NavigationLoadingCoordinatorTests, and ShellConnectionStateViewModelTests. The direct stale-details sleep in ContactsViewModelTests has been replaced with a worker completion signal, but broader polling remains. Replace the remaining waits with deterministic completion signals incrementally; current behavior needs careful per-ViewModel synchronization to avoid broad test rewrites."
+      "context": "Execution order 9. Resolve architectural policy drift explicitly. Global rules ask for domain/application/infrastructure/presentation separation, while docs/architecture/overview.md states the production architecture intentionally has only Shell, Worker, and Contracts and no separate Domain/Application/Infrastructure projects. Decide and document the repo-local rule: either keep the consolidated architecture and define the internal boundaries that satisfy the intent, or introduce real projects in a planned architecture change. Do not partially create new layers without moving actual responsibilities."
     },
     {
       "id": "worker-console-toggle-history",
@@ -22,7 +78,15 @@
       "status": "done",
       "risk": "medium",
       "priority": "high",
-      "context": "Worker console visibility toggling now hides the console window without freeing the console, keeps console streams rebound for the worker lifetime, disables the console close button to avoid killing the worker, opens with immediate optimistic UI feedback, and replays retained worker persistent logs once in the background when the console is first shown. Regression tests cover repeated toggles, immediate UI state, close-button disabling, and malformed persisted log lines."
+      "context": "Completed. Worker console visibility toggling now hides the console window without freeing the console, keeps console streams rebound for the worker lifetime, disables the console close button to avoid killing the worker, opens with immediate optimistic UI feedback, and replays retained worker persistent logs once in the background when the console is first shown. Regression tests cover repeated toggles, immediate UI state, close-button disabling, and malformed persisted log lines."
+    },
+    {
+      "id": "local-gate-script",
+      "type": "config",
+      "status": "done",
+      "risk": "medium",
+      "priority": "high",
+      "context": "Completed. Added scripts/gate.ps1 as the local repository gate: canonical clean, user-local OnlyExo365 app data cleanup, optional per-machine app settings cleanup, prerequisite check or install path, locked bootstrap, compile, tests, repository validation, packaging, and opt-in reproducibility/signing validation. The first execution exposed and fixed build/clean.ps1 directory-size handling for empty directories."
     }
   ]
 }

@@ -19,6 +19,7 @@ pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64
 pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
 pwsh ./scripts/clean.ps1
+pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64
 ```
 
 Packaging prerequisites:
@@ -34,6 +35,7 @@ pwsh ./scripts/Install-InnoSetup.ps1
 - `scripts/build.ps1`: runs the canonical build without publishing.
 - `scripts/start.ps1`: starts the WPF shell from source.
 - `scripts/clean.ps1`: removes generated repository outputs.
+- `scripts/gate.ps1`: cleans repository outputs and user-local app state, checks prerequisites, compiles, tests, scans, and builds distributable artifacts. Use `-InstallPrerequisites` to install Inno Setup when missing, `-CleanPerMachineAppSettings` to also remove shared ProgramData app settings, and `-RunReproducibility` / `-RunSigningValidation` for release-adjacent checks.
 - `scripts/pack.ps1`: builds publish output and creates `OnlyExo365.Setup.exe`.
 - `scripts/Install-InnoSetup.ps1`: checks or installs the packaging prerequisite.
 - `scripts/agents/*.ps1`: CI, release, test, and maintenance automation entrypoints.

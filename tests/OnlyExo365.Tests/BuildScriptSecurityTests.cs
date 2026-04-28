@@ -175,7 +175,30 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("$_.Name -in @('bin', 'obj')", script, StringComparison.Ordinal);
         Assert.Contains("$_.FullName -notlike \"$ArtifactsDir\\*\"", script, StringComparison.Ordinal);
         Assert.Contains("$_.FullName -notlike \"$SolutionDir\\.git\\*\"", script, StringComparison.Ordinal);
+        Assert.Contains("$measurement.PSObject.Properties['Sum']", script, StringComparison.Ordinal);
         Assert.Contains("Write-Success \"Cleaned $cleanedBinObjDirectories bin/obj directorie(s)\"", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GateScript_CleansLocalAppStateAndRunsCanonicalArtifactBuild()
+    {
+        var scriptPath = GetRepositoryFilePath("scripts", "gate.ps1");
+        var script = File.ReadAllText(scriptPath);
+
+        Assert.Contains("scripts\\clean.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("SpecialFolder]::LocalApplicationData", script, StringComparison.Ordinal);
+        Assert.Contains("SpecialFolder]::ApplicationData", script, StringComparison.Ordinal);
+        Assert.Contains("SpecialFolder]::CommonApplicationData", script, StringComparison.Ordinal);
+        Assert.Contains("[switch]$CleanPerMachineAppSettings", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\Install-InnoSetup.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\agents\\doctor.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\agents\\compile.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\agents\\test.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("build\\assert-no-vulnerable-packages.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("build\\run-secret-scan.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("scripts\\pack.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("OnlyExo365.Setup.exe", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("OnlyExo365.msi", script, StringComparison.Ordinal);
     }
 
     [Fact]

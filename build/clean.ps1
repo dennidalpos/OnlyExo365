@@ -60,8 +60,14 @@ function Write-Skipped {
 function Get-DirectorySize {
     param([string]$Path)
     if (Test-Path $Path) {
-        return (Get-ChildItem -Path $Path -Recurse -File -ErrorAction SilentlyContinue |
-                Measure-Object -Property Length -Sum).Sum
+        $measurement = Get-ChildItem -Path $Path -Recurse -File -ErrorAction SilentlyContinue |
+            Measure-Object -Property Length -Sum
+
+        if ($null -eq $measurement -or $null -eq $measurement.PSObject.Properties['Sum'] -or $null -eq $measurement.Sum) {
+            return 0
+        }
+
+        return [long]$measurement.Sum
     }
     return 0
 }

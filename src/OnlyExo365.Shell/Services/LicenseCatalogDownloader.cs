@@ -122,9 +122,12 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         var colGuid = FindColumn(headers, "GUID");
         var colStringId = FindColumn(headers, "String_Id");
         var colProductName = FindColumn(headers, "Product_Display_Name");
+        var colServicePlanName = FindColumn(headers, "Service_Plan_Name");
+        var colServicePlanId = FindColumn(headers, "Service_Plan_Id");
+        var colFriendlyName = FindColumn(headers, "Service_Plans_Included_Friendly_Names");
 
         // Read all data rows.
-        var groups = new Dictionary<string, (string SkuId, string SkuPartNumber, string ProductName)>(
+        var groups = new Dictionary<string, LocalSkuCatalogEntry>(
             StringComparer.OrdinalIgnoreCase);
 
         string? line;
@@ -140,6 +143,9 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
             var skuId = GetColumn(cols, colGuid);
             var skuPartNumber = GetColumn(cols, colStringId);
             var productName = GetColumn(cols, colProductName);
+            var servicePlanName = GetColumn(cols, colServicePlanName);
+            var servicePlanId = GetColumn(cols, colServicePlanId);
+            var friendlyName = GetColumn(cols, colFriendlyName);
 
             if (string.IsNullOrWhiteSpace(skuId) && string.IsNullOrWhiteSpace(skuPartNumber))
             {
@@ -147,10 +153,30 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
             }
 
             var key = $"{skuPartNumber}|{skuId}";
-            if (!groups.ContainsKey(key))
+            if (!groups.TryGetValue(key, out var entry))
             {
-                groups[key] = (skuId, skuPartNumber, productName);
+                entry = new LocalSkuCatalogEntry
+                {
+                    SkuId = skuId,
+                    SkuPartNumber = skuPartNumber,
+                    ProductName = productName
+                };
+                groups[key] = entry;
             }
+
+            if (string.IsNullOrWhiteSpace(servicePlanName) &&
+                string.IsNullOrWhiteSpace(servicePlanId) &&
+                string.IsNullOrWhiteSpace(friendlyName))
+            {
+                continue;
+            }
+
+            entry.ServicePlans.Add(new LocalSkuCatalogServicePlan
+            {
+                ServicePlanName = servicePlanName,
+                ServicePlanId = servicePlanId,
+                FriendlyName = friendlyName
+            });
         }
 
         if (groups.Count == 0)
@@ -159,14 +185,16 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         }
 
         var entries = groups.Values
+            .Select(e =>
+            {
+                e.ServicePlans = e.ServicePlans
+                    .OrderBy(p => p.ServicePlanName, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(p => p.ServicePlanId, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                return e;
+            })
             .OrderBy(e => e.SkuPartNumber, StringComparer.OrdinalIgnoreCase)
             .ThenBy(e => e.SkuId, StringComparer.OrdinalIgnoreCase)
-            .Select(e => new LocalSkuCatalogEntry
-            {
-                SkuId = e.SkuId,
-                SkuPartNumber = e.SkuPartNumber,
-                ProductName = e.ProductName
-            })
             .ToList();
 
         return new LocalSkuCatalogDocument

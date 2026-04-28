@@ -25,8 +25,11 @@ pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64
 pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
 pwsh ./scripts/clean.ps1
+pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64
 pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64
 ```
+
+`scripts/gate.ps1` is the local repository gate. It cleans generated repository outputs and user-local OnlyExo365 app data, checks prerequisites, optionally installs packaging prerequisites, runs locked bootstrap, compiles, tests, runs validation scans, publishes, and creates the setup EXE package. Use `-CleanPerMachineAppSettings` only when shared ProgramData app settings should also be removed.
 
 ## Technical Documentation
 

@@ -54,6 +54,20 @@ public sealed class LicenseCatalogDownloaderTests
         return sb.ToString();
     }
 
+    private static string BuildCsvWithServicePlans(
+        params (string Guid, string StringId, string ProductName, string ServicePlanName, string ServicePlanId, string FriendlyName)[] rows)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Product_Display_Name,String_Id,GUID,Service_Plan_Name,Service_Plan_Id,Service_Plans_Included_Friendly_Names");
+        foreach (var row in rows)
+        {
+            sb.AppendLine(
+                $"{row.ProductName},{row.StringId},{row.Guid},{row.ServicePlanName},{row.ServicePlanId},{row.FriendlyName}");
+        }
+
+        return sb.ToString();
+    }
+
     [Fact]
     public void ConvertCsvToDocument_ProducesCorrectEntries()
     {
@@ -72,17 +86,44 @@ public sealed class LicenseCatalogDownloaderTests
     }
 
     [Fact]
-    public void ConvertCsvToDocument_DeduplicatesRowsWithSameSkuId()
+    public void ConvertCsvToDocument_GroupsServicePlansWithSameSkuId()
     {
-        // Two rows for the same SKU (different service plans in real CSV — only one entry needed).
-        var csv = BuildMinimalCsv(
-            ("guid-a", "SKU_A", "Product A"),
-            ("guid-a", "SKU_A", "Product A"));
+        var csv = BuildCsvWithServicePlans(
+            ("guid-a", "SKU_A", "Product A", "PLAN_B", "plan-id-b", "Plan B"),
+            ("guid-a", "SKU_A", "Product A", "PLAN_A", "plan-id-a", "Plan A"));
 
         var doc = LicenseCatalogDownloader.ConvertCsvToDocument(
             csv, "https://source.example", "https://csv.example");
 
-        Assert.Single(doc.Entries);
+        var entry = Assert.Single(doc.Entries);
+        Assert.Equal("SKU_A", entry.SkuPartNumber);
+        Assert.Collection(
+            entry.ServicePlans,
+            servicePlan =>
+            {
+                Assert.Equal("PLAN_A", servicePlan.ServicePlanName);
+                Assert.Equal("plan-id-a", servicePlan.ServicePlanId);
+                Assert.Equal("Plan A", servicePlan.FriendlyName);
+            },
+            servicePlan =>
+            {
+                Assert.Equal("PLAN_B", servicePlan.ServicePlanName);
+                Assert.Equal("plan-id-b", servicePlan.ServicePlanId);
+                Assert.Equal("Plan B", servicePlan.FriendlyName);
+            });
+    }
+
+    [Fact]
+    public void ConvertCsvToDocument_SkipsBlankServicePlanRows()
+    {
+        var csv = BuildCsvWithServicePlans(
+            ("guid-a", "SKU_A", "Product A", string.Empty, string.Empty, string.Empty));
+
+        var doc = LicenseCatalogDownloader.ConvertCsvToDocument(
+            csv, "https://source.example", "https://csv.example");
+
+        var entry = Assert.Single(doc.Entries);
+        Assert.Empty(entry.ServicePlans);
     }
 
     [Fact]

@@ -16,7 +16,16 @@ public sealed class PresentationSkuNameResolverTests
                 {
                     SkuId = e.SkuId,
                     SkuPartNumber = e.SkuPartNumber,
-                    ProductName = e.ProductName
+                    ProductName = e.ProductName,
+                    ServicePlans =
+                    [
+                        new LocalSkuCatalogServicePlan
+                        {
+                            ServicePlanName = "SERVICE_PLAN",
+                            ServicePlanId = "service-plan-id",
+                            FriendlyName = "Service Plan Friendly Name"
+                        }
+                    ]
                 })
                 .ToList()
         };
@@ -48,6 +57,15 @@ public sealed class PresentationSkuNameResolverTests
 
     [Fact]
     public void Resolve_ReturnsProductName_BySkuPartNumber_AfterReload()
+    {
+        var resolver = new PresentationSkuNameResolver();
+        resolver.Reload(BuildDocument(("abc-123", "ENTERPRISEPACK", "Microsoft 365 E3")));
+
+        Assert.Equal("Microsoft 365 E3", resolver.Resolve("ENTERPRISEPACK"));
+    }
+
+    [Fact]
+    public void Resolve_RemainsProductNameOnly_WhenServicePlansArePresent()
     {
         var resolver = new PresentationSkuNameResolver();
         resolver.Reload(BuildDocument(("abc-123", "ENTERPRISEPACK", "Microsoft 365 E3")));

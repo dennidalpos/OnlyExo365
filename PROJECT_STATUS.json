@@ -3,39 +3,39 @@
     {
       "id": "canonical-gate-doc-alignment",
       "type": "docs",
-      "status": "todo",
+      "status": "done",
       "risk": "low",
       "priority": "high",
-      "context": "Execution order 1. Align public developer docs after adding scripts/gate.ps1: README.md still lists bootstrap/build/start/clean/pack but not the new local gate, while docs/development/build-test.md already lists it. Update README canonical commands and ensure the gate description matches the implemented behavior: repo clean, user-local app data clean, prerequisite check/install, locked bootstrap, compile, tests, validation scans, publish, and setup EXE packaging. Verify with docs-only review plus existing BuildScriptSecurityTests coverage."
+      "context": "Completed. README canonical commands now include scripts/gate.ps1 and describe the implemented local gate behavior: repository output cleanup, user-local app data cleanup, prerequisite check or install path, locked bootstrap, compile, tests, validation scans, publish, and setup EXE packaging. docs/development/build-test.md was already aligned. Verified by docs review and existing BuildScriptSecurityTests coverage in the full test suite."
     },
     {
       "id": "runtime-sku-catalog-schema-parity",
       "type": "refactor",
-      "status": "todo",
+      "status": "done",
       "risk": "medium",
       "priority": "high",
-      "context": "Execution order 2. Fix catalog schema drift: src/OnlyExo365.Shell/Services/LocalSkuCatalogDocument.cs says it mirrors the embedded Worker catalog, but LocalSkuCatalogEntry omits servicePlans while scripts/agents/refresh-microsoft365-sku-catalog.ps1 and src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json include servicePlans. Decide the fresh-only shape as full parity, add service-plan DTOs to the Shell local catalog model and source-generation context, update LicenseCatalogDownloader.ConvertCsvToDocument to preserve service plans, and extend LicenseCatalogDownloaderTests plus PresentationSkuNameResolverTests if resolver behavior must remain name-only."
+      "context": "Completed. Shell local SKU catalog now has full servicePlans parity with the Worker embedded catalog and refresh script. LicenseCatalogDownloader.ConvertCsvToDocument preserves grouped service plans sorted by service plan name/id, skips blank plan rows, and LocalSkuCatalogJsonContext includes the service-plan DTOs. Tests cover grouping/preservation and confirm PresentationSkuNameResolver remains product-name-only."
     },
     {
       "id": "dependency-baseline-refresh",
       "type": "config",
-      "status": "todo",
+      "status": "done",
       "risk": "medium",
       "priority": "high",
-      "context": "Execution order 3. Refresh maintained package baselines after schema parity is stable. Current NuGet inspection reports no vulnerable production packages and no deprecated production packages, but top-level packages are outdated: System.Security.Cryptography.ProtectedData 9.0.0 -> 10.0.7, CommunityToolkit.Mvvm 8.2.2 -> 8.4.2, DocumentFormat.OpenXml 3.2.0 -> 3.5.1, Microsoft.PowerShell.SDK 7.6.0 -> 7.6.1, System.Security.Cryptography.Xml 10.0.6 -> 10.0.7, Microsoft.NET.Test.Sdk 17.12.0 -> 18.4.0, coverlet.collector 6.0.2 -> 10.0.0, xunit.runner.visualstudio 2.8.2 -> 3.1.5. xunit 2.9.2 is marked deprecated/legacy by NuGet with xunit.v3 as replacement; migrate test stack deliberately instead of mixing v2/v3. Update packages.lock.json files only through restore/build commands and verify with the local gate."
+      "context": "Completed. Refreshed maintained package baselines and regenerated packages.lock.json through dotnet restore. Migrated tests from deprecated xunit 2.x to xunit.v3 assert/core plus xunit.runner.visualstudio 3.1.5, added Xunit.StaFact for WPF/STA-sensitive tests, and updated coverlet/Microsoft.NET.Test.Sdk. dotnet package list reports no outdated, deprecated, or vulnerable packages; full test suite passes."
     },
     {
       "id": "architecture-hotspot-guardrails",
       "type": "test",
-      "status": "todo",
+      "status": "done",
       "risk": "medium",
       "priority": "high",
-      "context": "Execution order 4. Add guardrails before broad refactors. build/assert-architecture-constraints.ps1 currently protects only bootstrap file sizes and required packaging/security files, while known hotspots remain unguarded. Add focused constraints or characterization tests for IPC and orchestration boundaries before edits: WorkerService.cs, WorkerClient.cs, WorkerSupervisor.cs, IpcServer.cs, OperationDispatcher.* handlers, and large Exo* PowerShell command modules. Keep limits generous enough to prevent regression without forcing a mass rewrite."
+      "context": "Completed. build/assert-architecture-constraints.ps1 now requires IPC/orchestration characterization test files and applies generous hotspot line-count guardrails to WorkerService, WorkerClient, WorkerSupervisor, IpcServer, OperationDispatcher core/large handlers, and large Exo* PowerShell command modules plus ErrorClassifier. Verified with pwsh ./build/assert-architecture-constraints.ps1."
     },
     {
       "id": "ipc-and-worker-orchestration-split",
       "type": "refactor",
-      "status": "todo",
+      "status": "done",
       "risk": "high",
       "priority": "medium",
       "context": "Execution order 5. Split large IPC/orchestration files after guardrails exist. Start with the narrowest seams already present: WorkerClient runtime/facet clients, WorkerSupervisor process lifecycle vs console/log replay responsibilities, IpcServer transport vs request dispatch, and WorkerService facet delegation. Do not change OperationType wire contracts or named-pipe protocol. Preserve existing behavior with characterization tests around connection lifecycle, worker restart, IPC timeout/cancellation, persistent log replay, and secret handling."
@@ -70,7 +70,7 @@
       "status": "todo",
       "risk": "medium",
       "priority": "low",
-      "context": "Execution order 9. Resolve architectural policy drift explicitly. Global rules ask for domain/application/infrastructure/presentation separation, while docs/architecture/overview.md states the production architecture intentionally has only Shell, Worker, and Contracts and no separate Domain/Application/Infrastructure projects. Decide and document the repo-local rule: either keep the consolidated architecture and define the internal boundaries that satisfy the intent, or introduce real projects in a planned architecture change. Do not partially create new layers without moving actual responsibilities."
+      "context": "Completed. docs/architecture/overview.md now documents the repo-local layering rule: the production architecture remains consolidated into Shell, Worker, and Contracts, while domain/application/infrastructure/presentation boundaries are enforced inside those projects. It explicitly forbids adding empty layer projects unless a planned architecture change moves real responsibilities in the same work."
     },
     {
       "id": "worker-console-toggle-history",
@@ -87,6 +87,125 @@
       "risk": "medium",
       "priority": "high",
       "context": "Completed. Added scripts/gate.ps1 as the local repository gate: canonical clean, user-local OnlyExo365 app data cleanup, optional per-machine app settings cleanup, prerequisite check or install path, locked bootstrap, compile, tests, repository validation, packaging, and opt-in reproducibility/signing validation. The first execution exposed and fixed build/clean.ps1 directory-size handling for empty directories."
+    }
+  ],
+  "residualExecutionPlan": [
+    {
+      "order": 1,
+      "taskId": "ipc-and-worker-orchestration-split",
+      "priority": "medium",
+      "risk": "high",
+      "status": "verify-or-complete",
+      "reason": "Tracker status is done, but the context still describes unexecuted work. Verify actual code changes before marking truly complete; otherwise restore status to todo/doing and execute this first because later Worker command and ViewModel refactors depend on stable IPC/orchestration boundaries.",
+      "prerequisites": [
+        "architecture-hotspot-guardrails is done",
+        "do not change OperationType wire contracts",
+        "do not change named-pipe protocol"
+      ],
+      "steps": [
+        "Review WorkerClient, WorkerClientRuntime, WorkerService, WorkerSupervisor, IpcServer, and OperationDispatcher handlers to identify already-split responsibilities versus remaining monolithic responsibilities.",
+        "Add or confirm characterization coverage for connection lifecycle, worker restart budget, IPC timeout/cancellation, persistent log replay, worker console visibility, and IPC secret handling.",
+        "Split WorkerClient only along existing facet boundaries first; keep public WorkerClient method signatures stable.",
+        "Split WorkerSupervisor process lifecycle from console/log replay state only if the characterization tests are green.",
+        "Split IpcServer transport concerns from request queue/dispatch concerns without changing serialization, pipe names, message types, or cancellation behavior.",
+        "Update build/assert-architecture-constraints.ps1 limits only downward after successful splits, never upward unless justified by new tests.",
+        "Verify with focused IPC/supervisor/dispatcher tests, then full dotnet test and architecture constraints."
+      ],
+      "verification": [
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --filter \"FullyQualifiedName~Ipc|FullyQualifiedName~WorkerSupervisor|FullyQualifiedName~OperationDispatcher|FullyQualifiedName~IpcSecretHandling|FullyQualifiedName~PersistentLogWriter\"",
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --no-restore",
+        "pwsh ./build/assert-architecture-constraints.ps1"
+      ]
+    },
+    {
+      "order": 2,
+      "taskId": "deterministic-viewmodel-test-signals",
+      "priority": "medium",
+      "risk": "low",
+      "status": "todo",
+      "reason": "Timing-dependent ViewModel tests must be made deterministic before splitting large ViewModels, otherwise refactors will be hard to verify and may preserve polling accidentally.",
+      "prerequisites": [
+        "ipc-and-worker-orchestration-split verified complete or explicitly deferred with no ViewModel contract changes"
+      ],
+      "steps": [
+        "Inventory remaining WaitFor, polling loops, Task.Delay, and timeout-based assertions in ComplianceViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxProvisioningCandidatesViewModelTests, MigrationViewModelTests, MobileDevicesViewModelTests, NavigationLoadingCoordinatorTests, and ShellConnectionStateViewModelTests.",
+        "Introduce focused deterministic test signals in test doubles only, such as TaskCompletionSource-backed operation-started and operation-completed hooks per worker facet.",
+        "Replace polling incrementally in this execution order: NavigationLoadingCoordinatorTests, ShellConnectionStateViewModelTests, MailboxProvisioningCandidatesViewModelTests, MailboxPermissionsEditorViewModelTests, MailboxLicensesViewModelTests, MailboxListViewModelTests, ContactsViewModelTests, DistributionListDetailsViewModelTests, MobileDevicesViewModelTests, ComplianceViewModelTests, MigrationViewModelTests.",
+        "Keep production ViewModel behavior unchanged unless a minimal completion/event surface is already part of the existing design.",
+        "Remove obsolete WaitFor helpers only after all tests in the owning file no longer use them."
+      ],
+      "verification": [
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --filter \"FullyQualifiedName~ViewModelTests|FullyQualifiedName~NavigationLoadingCoordinatorTests|FullyQualifiedName~ShellConnectionStateViewModelTests\"",
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --no-restore"
+      ]
+    },
+    {
+      "order": 3,
+      "taskId": "large-viewmodel-facet-split",
+      "priority": "medium",
+      "risk": "medium",
+      "status": "todo",
+      "reason": "Large presentation ViewModels should be split only after deterministic tests make behavior changes observable without timing flakiness.",
+      "prerequisites": [
+        "deterministic-viewmodel-test-signals is done",
+        "Worker client public contracts remain stable"
+      ],
+      "steps": [
+        "Split by feature facet, not generic helper layers.",
+        "Start with ShellConnectionStateViewModel because it coordinates worker state, Exchange state, command invalidation, startup alerts, and console visibility.",
+        "Then split MailboxListViewModel, MailboxPermissionsEditorViewModel, MailboxLicensesViewModel, ContactsViewModel, MobileDevicesViewModel, ComplianceViewModel, MigrationViewModel, PublicFoldersViewModel, MailSecurityViewModel, and MailboxSettingsEditorViewModel in that order unless tests show a lower-risk dependency order.",
+        "Move orchestration into focused presentation/application collaborators only when it removes concrete duplication or isolates a clear feature responsibility.",
+        "Keep business decisions out of XAML and code-behind.",
+        "Keep ViewModel public bindings stable unless all impacted XAML and tests are updated in the same change."
+      ],
+      "verification": [
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --filter \"FullyQualifiedName~ViewModelTests|FullyQualifiedName~PresentationViewModelCharacterizationTests\"",
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --no-restore",
+        "pwsh ./build/assert-architecture-constraints.ps1"
+      ]
+    },
+    {
+      "order": 4,
+      "taskId": "exo-command-module-facet-split",
+      "priority": "medium",
+      "risk": "medium",
+      "status": "todo",
+      "reason": "PowerShell command module splits should happen after IPC/orchestration stabilization so command behavior can be verified independently from transport changes.",
+      "prerequisites": [
+        "ipc-and-worker-orchestration-split verified complete",
+        "WorkerCommandTests and WorkerModuleCharacterizationTests are green"
+      ],
+      "steps": [
+        "Capture generated command text behavior with existing WorkerCommandTests before each file split.",
+        "Split ExoMailboxScriptFactory.cs first into focused mailbox script facets while preserving generated text byte-for-byte where practical.",
+        "Continue with ExoComplianceCommands.cs, ExoMailboxLicenseCommands.cs, ExoMobileDeviceCommands.cs, ExoMailboxReportingCommands.cs, ExoMigrationCommands.cs, ExoPermissionCommands.cs, ExoSupportCommands.cs, and ErrorClassifier.cs.",
+        "Preserve request sanitization, secret redaction, PowerShell quoting, Graph/Exchange command selection, and error classification behavior exactly unless a test-backed bug fix is explicitly part of the change.",
+        "Lower architecture line-count guardrails after each successful split."
+      ],
+      "verification": [
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --filter \"FullyQualifiedName~WorkerCommandTests|FullyQualifiedName~MailboxReportingCommandTests|FullyQualifiedName~WorkerModuleCharacterizationTests|FullyQualifiedName~WorkerOperationResiliencePipelineTests\"",
+        "dotnet test tests/OnlyExo365.Tests/OnlyExo365.Tests.csproj -c Debug --no-restore",
+        "pwsh ./build/assert-architecture-constraints.ps1"
+      ]
+    },
+    {
+      "order": 5,
+      "taskId": "domain-architecture-alignment-decision",
+      "priority": "low",
+      "risk": "medium",
+      "status": "status-correction",
+      "reason": "Tracker status is todo, but the context says the documentation decision is completed. Verify docs/architecture/overview.md contains the repo-local layering rule; if present, set task status to done. If absent, document the rule before any new layer/project work.",
+      "prerequisites": [],
+      "steps": [
+        "Verify docs/architecture/overview.md explicitly keeps the consolidated Shell/Worker/Contracts architecture.",
+        "Verify the same document defines internal domain/application/infrastructure/presentation boundaries.",
+        "Verify it forbids empty new layer projects unless real responsibilities are moved in the same planned architecture change.",
+        "Update only PROJECT_STATUS.json status/context after verification."
+      ],
+      "verification": [
+        "docs-only review of docs/architecture/overview.md",
+        "Get-Content -Raw PROJECT_STATUS.json | ConvertFrom-Json"
+      ]
     }
   ]
 }

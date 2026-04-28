@@ -14,7 +14,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
 {
     private readonly string _tempDirectory = Path.Combine(Path.GetTempPath(), "OnlyExo365.Tests", Guid.NewGuid().ToString("N"));
 
-    [Fact]
+    [WpfFact]
     public async Task SetWorkerConsoleVisibilityCommand_UpdatesStateAndLogsOnSuccess()
     {
         var workerService = new WorkerConsoleConnectionWorkerServiceStub();
@@ -35,7 +35,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         Assert.Contains(logState.LogEntries, entry => entry.Message.Contains("Worker console shown", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [WpfFact]
     public async Task SetWorkerConsoleVisibilityCommand_RestoresPreviousStateOnFailure()
     {
         var workerService = new WorkerConsoleConnectionWorkerServiceStub(initialConsoleVisibility: false);
@@ -52,7 +52,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         Assert.Contains(logState.LogEntries, entry => entry.Message.Contains("Failed to change worker console visibility", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [WpfFact]
     public async Task SetWorkerConsoleVisibilityCommand_AppliesRequestedStateImmediately()
     {
         var workerService = new WorkerConsoleConnectionWorkerServiceStub(initialConsoleVisibility: false);
@@ -75,7 +75,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         await WaitForAsync(() => !viewModel.IsWorkerConsoleToggleBusy);
     }
 
-    [Fact]
+    [WpfFact]
     public async Task ConnectExchange_InteractiveMode_PrimesInteractiveBootstrapBeforeWorkerConnect()
     {
         var workerService = new ConnectWorkerServiceStub();
@@ -95,7 +95,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         Assert.True(workerService.ConnectInvoked);
     }
 
-    [Fact]
+    [WpfFact]
     public async Task ConnectExchange_DoesNotCallWorkerWhenInteractiveBootstrapFails()
     {
         var workerService = new ConnectWorkerServiceStub();
@@ -119,7 +119,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         Assert.Contains(logState.LogEntries, entry => entry.Message.Contains("Interactive sign-in failed", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [WpfFact]
     public void BuildWorkerStartupErrorDetails_UsesHandshakeGuidanceForHandshakeFailures()
     {
         var previousLocale = LocalizationService.Instance.CurrentLocale;
@@ -141,7 +141,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         }
     }
 
-    [Fact]
+    [WpfFact]
     public async Task StartWorkerOnStartupAsync_CapturesInlineStartupAlertDetails()
     {
         var previousLocale = LocalizationService.Instance.CurrentLocale;
@@ -169,7 +169,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         }
     }
 
-    [Fact]
+    [WpfFact]
     public async Task StartWorkerCommand_WhenFailureOccurs_DoesNotReuseStartupBannerFeedback()
     {
         var workerService = new WorkerConsoleConnectionWorkerServiceStub();
@@ -185,7 +185,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         Assert.False(viewModel.HasWorkerStartupAlert);
     }
 
-    [Fact]
+    [WpfFact]
     public void NavigationTooltips_FollowSelectedLocale()
     {
         var previousLocale = LocalizationService.Instance.CurrentLocale;
@@ -204,7 +204,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         }
     }
 
-    [Fact]
+    [WpfFact]
     public void CanToggleWorkerConsole_IsFalseWhenWorkerIsStopped()
     {
         var viewModel = CreateViewModel(new WorkerConsoleConnectionWorkerServiceStub(), out _);

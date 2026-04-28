@@ -11,6 +11,17 @@ This repository is consolidated around a single Windows/x64 runtime model.
 
 The shell owns the desktop process boundary. The worker owns PowerShell execution. No separate `Application`, `Infrastructure`, or `Domain` projects remain in the production architecture.
 
+## Repo-Local Layering Rule
+
+OnlyExo365 intentionally keeps the production architecture consolidated into Shell, Worker, and Contracts. The clean-architecture rule is enforced inside those projects rather than through separate project names:
+
+- domain rules are pure evaluators, request/response decisions, capability rules, and error/result models with no UI, storage, installer, or PowerShell process ownership
+- application use cases orchestrate domain rules and worker calls without owning WPF controls, named-pipe transport, files, installers, or command text generation
+- infrastructure code owns named pipes, DPAPI-backed secret files, persistent logs, configuration file access, package/install scripts, catalog download/storage, and PowerShell execution
+- presentation code owns WPF views, view models, localization display text, commands, dialogs, and navigation state
+
+New code should strengthen these internal boundaries first. Do not add `Domain`, `Application`, or `Infrastructure` projects unless a planned architecture change also moves real responsibilities into them in the same work.
+
 ## Source Layout
 
 - `src/OnlyExo365.Shell`

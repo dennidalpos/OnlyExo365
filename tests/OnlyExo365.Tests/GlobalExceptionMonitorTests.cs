@@ -14,7 +14,7 @@ public sealed class GlobalExceptionMonitorTests : IDisposable
         Directory.CreateDirectory(_tempDirectory);
     }
 
-    [Fact]
+    [WpfFact]
     public void HandleDispatcherUnhandledException_LogsFatalError_ShowsDialog_AndRequestsShutdown()
     {
         var writer = new PersistentLogWriter("ui", _tempDirectory);
@@ -40,7 +40,7 @@ public sealed class GlobalExceptionMonitorTests : IDisposable
         Assert.Equal(-1, shutdownCodes[0]);
     }
 
-    [Fact]
+    [WpfFact]
     public void HandleCurrentDomainUnhandledException_LogsFatalErrorWithoutDialog()
     {
         var writer = new PersistentLogWriter("ui", _tempDirectory);
@@ -60,7 +60,7 @@ public sealed class GlobalExceptionMonitorTests : IDisposable
         Assert.Empty(dialogs);
     }
 
-    [Fact]
+    [WpfFact]
     public void HandleUnobservedTaskException_LogsAndDoesNotRequestShutdown()
     {
         var writer = new PersistentLogWriter("ui", _tempDirectory);

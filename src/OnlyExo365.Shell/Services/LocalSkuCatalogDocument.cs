@@ -33,9 +33,26 @@ public sealed class LocalSkuCatalogEntry
 
     [JsonPropertyName("productName")]
     public string ProductName { get; set; } = string.Empty;
+
+    [JsonPropertyName("servicePlans")]
+    public List<LocalSkuCatalogServicePlan> ServicePlans { get; set; } = [];
+}
+
+public sealed class LocalSkuCatalogServicePlan
+{
+    [JsonPropertyName("servicePlanName")]
+    public string ServicePlanName { get; set; } = string.Empty;
+
+    [JsonPropertyName("servicePlanId")]
+    public string ServicePlanId { get; set; } = string.Empty;
+
+    [JsonPropertyName("friendlyName")]
+    public string FriendlyName { get; set; } = string.Empty;
 }
 
 [JsonSerializable(typeof(LocalSkuCatalogDocument))]
+[JsonSerializable(typeof(LocalSkuCatalogEntry))]
+[JsonSerializable(typeof(LocalSkuCatalogServicePlan))]
 internal sealed partial class LocalSkuCatalogJsonContext : JsonSerializerContext
 {
 }

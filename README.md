@@ -1,4 +1,4 @@
-![OnlyExo365 app icon](src/OnlyExo365.Shell/Assets/AppIcon.png)
+![OnlyExo365 app icon](src/OnlyExo365.Shell/Assets/Generated/AppIcon.png)
 
 # OnlyExo365
 

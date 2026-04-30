@@ -326,7 +326,6 @@ public sealed class BuildScriptSecurityTests
                      new[] { "build", "assert-no-vulnerable-packages.ps1" },
                      new[] { "build", "run-secret-scan.ps1" },
                      new[] { "build", "publish-release-assets.ps1" },
-                     new[] { "build", "release-baseline.ps1" },
                      new[] { "build", "signing-helpers.ps1" },
                      new[] { "build", "clean.ps1" },
                      new[] { "build", "run-smoke-tests.ps1" },
@@ -339,6 +338,39 @@ public sealed class BuildScriptSecurityTests
 
             Assert.Contains("scripts\\internal\\common.ps1", script, StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public void LegacyManualReleaseBaselineEntryPoint_HasBeenRemovedFromRepository()
+    {
+        var legacyPath = GetRepositoryFilePath("build", "release-baseline.ps1");
+
+        Assert.False(File.Exists(legacyPath));
+    }
+
+    [Fact]
+    public void AppIconGeneration_UsesSourceSpecAndGeneratedAssetFolder()
+    {
+        var scriptPath = GetRepositoryFilePath("build", "generate-app-icon.ps1");
+        var setupScriptPath = GetRepositoryFilePath("build", "create-setup-exe.ps1");
+        var projectPath = GetRepositoryFilePath("src", "OnlyExo365.Shell", "OnlyExo365.Shell.csproj");
+        var sourceSpecPath = GetRepositoryFilePath("src", "OnlyExo365.Shell", "Assets", "Source", "app-icon.spec.json");
+        var generatedIcoPath = GetRepositoryFilePath("src", "OnlyExo365.Shell", "Assets", "Generated", "AppIcon.ico");
+        var generatedPngPath = GetRepositoryFilePath("src", "OnlyExo365.Shell", "Assets", "Generated", "AppIcon.png");
+
+        var script = File.ReadAllText(scriptPath);
+        var setupScript = File.ReadAllText(setupScriptPath);
+        var project = File.ReadAllText(projectPath);
+
+        Assert.True(File.Exists(sourceSpecPath));
+        Assert.True(File.Exists(generatedIcoPath));
+        Assert.True(File.Exists(generatedPngPath));
+        Assert.Contains("Source/app-icon.spec.json", script, StringComparison.Ordinal);
+        Assert.Contains("Assets/Generated/AppIcon.ico", script, StringComparison.Ordinal);
+        Assert.Contains("Assets/Generated/AppIcon.png", script, StringComparison.Ordinal);
+        Assert.Contains("ConvertFrom-Json", script, StringComparison.Ordinal);
+        Assert.Contains("Assets\\Generated\\AppIcon.ico", setupScript, StringComparison.Ordinal);
+        Assert.Contains("<ApplicationIcon>Assets\\Generated\\AppIcon.ico</ApplicationIcon>", project, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -384,17 +416,28 @@ public sealed class BuildScriptSecurityTests
     {
         var buildScriptPath = GetRepositoryFilePath("scripts", "build.ps1");
         var canonicalBuildScriptPath = GetRepositoryFilePath("build", "build.ps1");
+        var compileScriptPath = GetRepositoryFilePath("scripts", "agents", "compile.ps1");
         var packScriptPath = GetRepositoryFilePath("scripts", "pack.ps1");
         var testScriptPath = GetRepositoryFilePath("scripts", "agents", "test.ps1");
         var buildScript = File.ReadAllText(buildScriptPath);
         var canonicalBuildScript = File.ReadAllText(canonicalBuildScriptPath);
+        var compileScript = File.ReadAllText(compileScriptPath);
         var packScript = File.ReadAllText(packScriptPath);
         var testScript = File.ReadAllText(testScriptPath);
 
         Assert.Contains("[switch]$Clean = $true", buildScript, StringComparison.Ordinal);
         Assert.Contains("[switch]$LockedMode = $false", buildScript, StringComparison.Ordinal);
+        Assert.Contains("[switch]$NoRestore = $false", buildScript, StringComparison.Ordinal);
         Assert.Contains("[switch]$SelfContained = $false", buildScript, StringComparison.Ordinal);
         Assert.Contains("\"-LockedMode:$([bool]$LockedMode)\"", buildScript, StringComparison.Ordinal);
+        Assert.Contains("\"-NoRestore:$([bool]$NoRestore)\"", buildScript, StringComparison.Ordinal);
+
+        Assert.Contains("[switch]$NoRestore = $false", canonicalBuildScript, StringComparison.Ordinal);
+        Assert.Contains("Restore skipped by -NoRestore", canonicalBuildScript, StringComparison.Ordinal);
+        Assert.Contains("scripts/build.ps1", compileScript, StringComparison.Ordinal);
+        Assert.Contains("\"-NoRestore:$true\"", compileScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("Invoke-DotNetCommand -Arguments $arguments -ErrorMessage \"dotnet build failed\"", compileScript, StringComparison.Ordinal);
+        Assert.Contains("Invoke-RepositoryBootstrap", compileScript, StringComparison.Ordinal);
 
         Assert.Contains("[switch]$LockedMode = $true", packScript, StringComparison.Ordinal);
         Assert.Contains("[switch]$Clean = $false", packScript, StringComparison.Ordinal);
@@ -402,6 +445,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("\"-Clean:$([bool]$Clean)\"", packScript, StringComparison.Ordinal);
 
         Assert.Contains("\"--disable-build-servers\"", testScript, StringComparison.Ordinal);
+        Assert.Contains("Invoke-RepositoryBootstrap", testScript, StringComparison.Ordinal);
         Assert.Contains("$PrimaryRuntimeIdentifier = @($ResolvedRuntimeIdentifiers)[0]", canonicalBuildScript, StringComparison.Ordinal);
         Assert.DoesNotContain("$ResolvedRuntimeIdentifiers[0]", canonicalBuildScript, StringComparison.Ordinal);
     }
@@ -425,6 +469,8 @@ public sealed class BuildScriptSecurityTests
 
         Assert.Contains("function Assert-DotNetSdkPinnedVersion", commonScript, StringComparison.Ordinal);
         Assert.Contains("function Get-InnoSetupCompilerPath", commonScript, StringComparison.Ordinal);
+        Assert.Contains("function Invoke-RepositoryBootstrap", commonScript, StringComparison.Ordinal);
+        Assert.Contains("scripts/bootstrap.ps1", commonScript, StringComparison.Ordinal);
         Assert.Contains("global.json pins SDK version", commonScript, StringComparison.Ordinal);
         Assert.Contains("Assert-DotNetSdkPinnedVersion -RepositoryRoot $repositoryRoot", bootstrapScript, StringComparison.Ordinal);
         Assert.Contains("Assert-DotNetSdkPinnedVersion -RepositoryRoot $repositoryRoot", doctorScript, StringComparison.Ordinal);

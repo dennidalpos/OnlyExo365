@@ -37,7 +37,7 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
         var viewModel = new MailboxProvisioningCandidatesViewModel(worker, shell);
 
         await viewModel.LoadAsync();
-        await WaitForConditionAsync(() => worker.UserLicenseRequests.Count == 1);
+        await worker.UserLicensesRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("mario.rossi@contoso.com", worker.UserLicenseRequests[0].UserPrincipalName);
         Assert.Empty(viewModel.Licenses.AssignedLicenses);
@@ -55,37 +55,21 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
         try
         {
             await viewModel.LoadAsync();
-            await WaitForConditionAsync(() => worker.UserLicenseRequests.Count == 1);
+            await worker.UserLicensesRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
             viewModel.Licenses.SelectedLicenseToAdd = viewModel.Licenses.AvailableLicenses[0];
             viewModel.Licenses.AddLicenseCommand.Execute(null);
 
-            await WaitForConditionAsync(() =>
-                worker.SetUserLicenseCalls == 1 &&
-                worker.ProvisioningRequests.Count >= 2 &&
-                viewModel.Candidates[0].HasAssignedLicense);
+            await worker.UserLicenseSet.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            await worker.ProvisioningRefreshed.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
             Assert.Equal("mario.rossi@contoso.com", worker.LastSetUserLicenseRequest?.UserPrincipalName);
+            Assert.True(viewModel.Candidates[0].HasAssignedLicense);
         }
         finally
         {
             ErrorDialogService.ConfirmationHandlerOverride = null;
         }
-    }
-
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 40; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -104,6 +88,9 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
         public int GetAvailableLicensesCalls { get; private set; }
         public int SetUserLicenseCalls { get; private set; }
         public SetUserLicenseRequest? LastSetUserLicenseRequest { get; private set; }
+        public TaskCompletionSource UserLicensesRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource UserLicenseSet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ProvisioningRefreshed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<GetMailboxProvisioningCandidatesResponse>> GetMailboxProvisioningCandidatesAsync(GetMailboxProvisioningCandidatesRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
@@ -117,6 +104,11 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
             });
 
             var hasLicense = SetUserLicenseCalls > 0;
+            if (hasLicense && ProvisioningRequests.Count >= 2)
+            {
+                ProvisioningRefreshed.TrySetResult();
+            }
+
             return Task.FromResult(Result<GetMailboxProvisioningCandidatesResponse>.Success(new GetMailboxProvisioningCandidatesResponse
             {
                 Candidates =
@@ -144,6 +136,7 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
             {
                 UserPrincipalName = request.UserPrincipalName
             });
+            UserLicensesRequested.TrySetResult();
 
             List<UserLicenseDto> licenses = SetUserLicenseCalls > 0
                 ? [new UserLicenseDto { SkuId = "sku-01", SkuPartNumber = "ENTERPRISEPACK", DisplayName = "Office 365 E3" }]
@@ -177,6 +170,7 @@ public sealed class MailboxProvisioningCandidatesViewModelTests
         {
             SetUserLicenseCalls++;
             LastSetUserLicenseRequest = request;
+            UserLicenseSet.TrySetResult();
             return Task.FromResult(Result.Success());
         }
     }

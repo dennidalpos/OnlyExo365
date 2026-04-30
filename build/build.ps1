@@ -17,6 +17,8 @@ param(
 
     [switch]$LockedMode = $false,
 
+    [switch]$NoRestore = $false,
+
     [string]$ExportDirPath,
 
     [string]$ImportDirPath
@@ -235,6 +237,7 @@ Write-Host "Publish       : $($Publish.IsPresent)"
 Write-Host "Self-contained: $SelfContainedMode"
 Write-Host "Runtimes      : $($ResolvedRuntimeIdentifiers -join ', ')"
 Write-Host "Locked mode   : $($LockedMode.IsPresent)"
+Write-Host "Restore       : $(-not $NoRestore.IsPresent)"
 Write-Host "CI            : $IsCiBuild"
 Write-Host "Started at    : $($BuildStartTime.ToString('HH:mm:ss'))"
 
@@ -271,21 +274,26 @@ Initialize-ArtifactsLayout -RepositoryRoot $RepositoryRoot | Out-Null
 
 Write-Step "Restoring NuGet packages"
 
-$restoreArgs = @(
-    $SolutionFile,
-    "--verbosity", "minimal",
-    "--artifacts-path", $BuildArtifactsDir
-)
+if (-not $NoRestore) {
+    $restoreArgs = @(
+        $SolutionFile,
+        "--verbosity", "minimal",
+        "--artifacts-path", $BuildArtifactsDir
+    )
 
-if ($LockedMode) {
-    $restoreArgs += "--locked-mode"
-    Write-Info "NuGet restore locked mode enabled"
+    if ($LockedMode) {
+        $restoreArgs += "--locked-mode"
+        Write-Info "NuGet restore locked mode enabled"
+    }
+
+    Write-Info "Restoring with project runtime graph: $($ResolvedRuntimeIdentifiers -join ', ')"
+    Invoke-DotNet -Command "restore" -Arguments $restoreArgs -ErrorMessage "Package restore failed"
+
+    Write-Success "Packages restored"
 }
-
-Write-Info "Restoring with project runtime graph: $($ResolvedRuntimeIdentifiers -join ', ')"
-Invoke-DotNet -Command "restore" -Arguments $restoreArgs -ErrorMessage "Package restore failed"
-
-Write-Success "Packages restored"
+else {
+    Write-Info "Restore skipped by -NoRestore"
+}
 
 Write-Step "Building solution"
 

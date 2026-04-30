@@ -39,9 +39,9 @@ public sealed class MobileDevicesViewModelTests
 
         viewModel.SelectedDevice = viewModel.Devices[0];
 
-        await WaitForConditionAsync(() =>
-            worker.GetMobileDeviceDetailsCalls == 1 &&
-            worker.GetMobileDeviceMailboxPoliciesCalls == 1);
+        await Task.WhenAll(
+            worker.MobileDeviceDetailsRequested.Task.WaitAsync(TimeSpan.FromSeconds(2)),
+            worker.MobileDevicePoliciesRequested.Task.WaitAsync(TimeSpan.FromSeconds(2)));
 
         Assert.Equal("Default Mobile Policy", viewModel.SelectedDevice?.CurrentMailboxPolicy);
         Assert.Equal("user@contoso.com", viewModel.SelectedDevice?.UserPrincipalName);
@@ -76,27 +76,12 @@ public sealed class MobileDevicesViewModelTests
 
         await viewModel.LoadAsync();
         viewModel.LoadMoreCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.MobileDeviceRequests.Count == 2);
+        await worker.SecondMobileDeviceRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
         viewModel.RefreshCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.MobileDeviceRequests.Count == 3);
+        await worker.ThirdMobileDeviceRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal([250, 250, 500], worker.MobileDeviceRequests.Select(request => request.PageSize));
         Assert.Equal(500, viewModel.Devices.Count);
-    }
-
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 20; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -115,6 +100,10 @@ public sealed class MobileDevicesViewModelTests
         public int GetMobileDeviceMailboxPoliciesCalls { get; private set; }
         public List<GetMobileDevicesRequest> MobileDeviceRequests { get; } = [];
         public Queue<GetMobileDevicesResponse> DeviceResponses { get; } = new();
+        public TaskCompletionSource MobileDeviceDetailsRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource MobileDevicePoliciesRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource SecondMobileDeviceRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ThirdMobileDeviceRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<CapabilityMapDto>> DetectCapabilitiesAsync(bool forceRefresh = false, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
@@ -143,6 +132,14 @@ public sealed class MobileDevicesViewModelTests
                 SortBy = request.SortBy,
                 SortDescending = request.SortDescending
             });
+            if (MobileDeviceRequests.Count == 2)
+            {
+                SecondMobileDeviceRequestReceived.TrySetResult();
+            }
+            else if (MobileDeviceRequests.Count == 3)
+            {
+                ThirdMobileDeviceRequestReceived.TrySetResult();
+            }
             var response = DeviceResponses.Count > 0
                 ? DeviceResponses.Dequeue()
                 : CreateDeviceResponse(request.PageSize, request.Skip, totalCount: 1, hasMore: false);
@@ -155,6 +152,7 @@ public sealed class MobileDevicesViewModelTests
         public override Task<Result<GetMobileDeviceDetailsResponse>> GetMobileDeviceDetailsAsync(GetMobileDeviceDetailsRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetMobileDeviceDetailsCalls++;
+            MobileDeviceDetailsRequested.TrySetResult();
             eventHandler?.Invoke(new EventEnvelope
             {
                 CorrelationId = "mobile-device-detail",
@@ -189,6 +187,7 @@ public sealed class MobileDevicesViewModelTests
         public override Task<Result<GetMobileDeviceMailboxPoliciesResponse>> GetMobileDeviceMailboxPoliciesAsync(GetMobileDeviceMailboxPoliciesRequest? request = null, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetMobileDeviceMailboxPoliciesCalls++;
+            MobileDevicePoliciesRequested.TrySetResult();
             return Task.FromResult(Result<GetMobileDeviceMailboxPoliciesResponse>.Success(new GetMobileDeviceMailboxPoliciesResponse
             {
                 Policies =

@@ -9,7 +9,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>OnlyExo365.Shell</RootNamespace>
     <AssemblyName>OnlyExo365.Shell</AssemblyName>
-    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Generated\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

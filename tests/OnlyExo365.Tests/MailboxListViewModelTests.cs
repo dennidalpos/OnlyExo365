@@ -27,7 +27,7 @@ public sealed class MailboxListViewModelTests
         viewModel.SetNewMailboxPassword("Sup3rSecret!");
 
         viewModel.CreateMailboxCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.CreateMailboxCalls == 1);
+        await worker.CreateMailboxRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("Sup3rSecret!", worker.LastCreateMailboxRequest?.Password);
         Assert.False(viewModel.HasNewMailboxPassword);
@@ -58,7 +58,7 @@ public sealed class MailboxListViewModelTests
         var viewModel = new MailboxListViewModel(worker, new NavigationService(), shell);
 
         viewModel.ShowProvisioningWorkspaceCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.GetMailboxProvisioningCandidatesCalls == 1);
+        await worker.ProvisioningRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(viewModel.IsProvisioningWorkspace);
         Assert.Single(viewModel.Provisioning.Candidates);
@@ -109,28 +109,13 @@ public sealed class MailboxListViewModelTests
 
         await viewModel.LoadAsync();
         viewModel.LoadMoreCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.MailboxRequests.Count == 2);
+        await worker.SecondMailboxRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
         viewModel.RefreshCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.MailboxRequests.Count == 3);
+        await worker.ThirdMailboxRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal([250, 250, 500], worker.MailboxRequests.Select(request => request.PageSize));
         Assert.Equal(500, viewModel.Mailboxes.Count);
         Assert.Equal(500, worker.LastMailboxesRequest?.PageSize);
-    }
-
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 20; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -152,11 +137,16 @@ public sealed class MailboxListViewModelTests
         public int GetAcceptedDomainsCalls { get; private set; }
         public List<GetMailboxesRequest> MailboxRequests { get; } = [];
         public Queue<GetMailboxesResponse> MailboxResponses { get; } = new();
+        public TaskCompletionSource CreateMailboxRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ProvisioningRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource SecondMailboxRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ThirdMailboxRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<GetMailboxProvisioningCandidatesResponse>> GetMailboxProvisioningCandidatesAsync(GetMailboxProvisioningCandidatesRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetMailboxProvisioningCandidatesCalls++;
             LastProvisioningRequest = request;
+            ProvisioningRequested.TrySetResult();
             return Task.FromResult(Result<GetMailboxProvisioningCandidatesResponse>.Success(new GetMailboxProvisioningCandidatesResponse
             {
                 Candidates =
@@ -191,6 +181,14 @@ public sealed class MailboxListViewModelTests
                 SortDescending = request.SortDescending
             };
             MailboxRequests.Add(LastMailboxesRequest);
+            if (MailboxRequests.Count == 2)
+            {
+                SecondMailboxRequestReceived.TrySetResult();
+            }
+            else if (MailboxRequests.Count == 3)
+            {
+                ThirdMailboxRequestReceived.TrySetResult();
+            }
 
             var response = MailboxResponses.Count > 0
                 ? MailboxResponses.Dequeue()
@@ -205,6 +203,7 @@ public sealed class MailboxListViewModelTests
         {
             CreateMailboxCalls++;
             LastCreateMailboxRequest = request;
+            CreateMailboxRequested.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 

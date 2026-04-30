@@ -45,12 +45,16 @@ public sealed class ExcelExportServiceTests
                 ]);
 
             using var spreadsheet = SpreadsheetDocument.Open(tempFile, false);
-            var workbook = spreadsheet.WorkbookPart?.Workbook;
-            var sheet = Assert.Single(workbook?.Sheets?.Elements<DocumentFormat.OpenXml.Spreadsheet.Sheet>() ?? []);
+            var workbookPart = spreadsheet.WorkbookPart;
+            Assert.NotNull(workbookPart);
+            var workbook = workbookPart!.Workbook;
+            Assert.NotNull(workbook);
+            var sheet = Assert.Single(workbook!.Sheets?.Elements<DocumentFormat.OpenXml.Spreadsheet.Sheet>() ?? []);
             Assert.Equal("Mailbox-Access-Report-Export-20", sheet.Name?.Value);
 
-            var worksheetPart = (WorksheetPart)spreadsheet.WorkbookPart!.GetPartById(sheet.Id!);
-            var rows = worksheetPart.Worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().ToList();
+            var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id!);
+            Assert.NotNull(worksheetPart.Worksheet);
+            var rows = worksheetPart.Worksheet!.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().ToList();
 
             Assert.Equal(3, rows.Count);
             Assert.Equal("User", GetInlineText(rows[0].Elements<DocumentFormat.OpenXml.Spreadsheet.Cell>().ElementAt(0)));

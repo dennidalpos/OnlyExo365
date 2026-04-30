@@ -46,9 +46,8 @@ public sealed class MailboxPermissionsEditorViewModelTests
             Assert.True(viewModel.AddFolderPermissionCommand.CanExecute(null));
             viewModel.AddFolderPermissionCommand.Execute(null);
 
-            await WaitForConditionAsync(() =>
-                worker.SetFolderRequests.Count == 1 &&
-                worker.GetFolderRequests.Count == 2);
+            await worker.FolderPermissionSet.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            await worker.FolderPermissionsReloaded.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
             Assert.Null(errorMessage);
             Assert.Equal("Calendario", worker.SetFolderRequests[0].FolderPath);
@@ -62,25 +61,12 @@ public sealed class MailboxPermissionsEditorViewModelTests
         }
     }
 
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 20; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
-    }
-
     private sealed class MailboxPermissionsWorkerService : TestMailboxesWorkerServiceBase
     {
         public List<GetMailboxFolderPermissionsRequest> GetFolderRequests { get; } = [];
         public List<SetMailboxFolderPermissionRequest> SetFolderRequests { get; } = [];
+        public TaskCompletionSource FolderPermissionSet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource FolderPermissionsReloaded { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<GetMailboxFolderPermissionsResponse>> GetMailboxFolderPermissionsAsync(
             GetMailboxFolderPermissionsRequest request,
@@ -88,6 +74,10 @@ public sealed class MailboxPermissionsEditorViewModelTests
             CancellationToken cancellationToken = default)
         {
             GetFolderRequests.Add(Clone(request));
+            if (GetFolderRequests.Count >= 2)
+            {
+                FolderPermissionsReloaded.TrySetResult();
+            }
 
             var response = new GetMailboxFolderPermissionsResponse
             {
@@ -116,6 +106,7 @@ public sealed class MailboxPermissionsEditorViewModelTests
             CancellationToken cancellationToken = default)
         {
             SetFolderRequests.Add(Clone(request));
+            FolderPermissionSet.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 

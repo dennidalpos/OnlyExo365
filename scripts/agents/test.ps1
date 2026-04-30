@@ -26,12 +26,11 @@ $solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot
 $resolvedResultsDirectory = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ResultsDirectory
 $buildArtifactsPath = Get-BuildArtifactsPath -RepositoryRoot $repositoryRoot
 
-if (-not $NoBootstrap) {
-    Invoke-RepositoryPowerShellScript `
-        -ScriptPath (Join-Path $repositoryRoot "scripts/bootstrap.ps1") `
-        -Arguments @("-LockedMode:$LockedMode", "-RuntimeIdentifier", $RuntimeIdentifier) `
-        -ErrorMessage "bootstrap failed"
-}
+Invoke-RepositoryBootstrap `
+    -RepositoryRoot $repositoryRoot `
+    -LockedMode $LockedMode `
+    -RuntimeIdentifiers @($RuntimeIdentifier) `
+    -Skip:$NoBootstrap
 
 Write-Step "Running automated tests"
 New-Item -Path $resolvedResultsDirectory -ItemType Directory -Force | Out-Null

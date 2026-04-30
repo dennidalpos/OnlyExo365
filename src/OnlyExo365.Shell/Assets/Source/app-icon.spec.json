@@ -1,0 +1,14 @@
+{
+  "name": "OnlyExo365 App Icon",
+  "palette": {
+    "backgroundStart": "#143E75",
+    "backgroundEnd": "#077EA7",
+    "backgroundAccent": "#48FFFFFF",
+    "envelopeFill": "#F5FAFCFF",
+    "envelopeStroke": "#0D5480",
+    "shieldStart": "#21D2B7",
+    "shieldEnd": "#119A8E",
+    "shieldStroke": "#EBFFFA",
+    "checkStroke": "#FFFFFF"
+  }
+}

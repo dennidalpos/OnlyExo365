@@ -2,8 +2,9 @@
 
 [CmdletBinding()]
 param(
-    [string]$OutputIcoPath = "src/OnlyExo365.Shell/Assets/AppIcon.ico",
-    [string]$OutputPngPath = "src/OnlyExo365.Shell/Assets/AppIcon.png"
+    [string]$SourceSpecPath = "src/OnlyExo365.Shell/Assets/Source/app-icon.spec.json",
+    [string]$OutputIcoPath = "src/OnlyExo365.Shell/Assets/Generated/AppIcon.ico",
+    [string]$OutputPngPath = "src/OnlyExo365.Shell/Assets/Generated/AppIcon.png"
 )
 
 Set-StrictMode -Version Latest
@@ -34,6 +35,54 @@ function Resolve-RepoPath {
     return [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $PathValue))
 }
 
+function Convert-HexColor {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    $hex = $Value.Trim().TrimStart("#")
+    if ($hex.Length -eq 6) {
+        return [System.Drawing.Color]::FromArgb(
+            255,
+            [Convert]::ToInt32($hex.Substring(0, 2), 16),
+            [Convert]::ToInt32($hex.Substring(2, 2), 16),
+            [Convert]::ToInt32($hex.Substring(4, 2), 16))
+    }
+
+    if ($hex.Length -eq 8) {
+        return [System.Drawing.Color]::FromArgb(
+            [Convert]::ToInt32($hex.Substring(0, 2), 16),
+            [Convert]::ToInt32($hex.Substring(2, 2), 16),
+            [Convert]::ToInt32($hex.Substring(4, 2), 16),
+            [Convert]::ToInt32($hex.Substring(6, 2), 16))
+    }
+
+    throw "Invalid color value '$Value'. Expected #RRGGBB or #AARRGGBB."
+}
+
+function Read-IconPalette {
+    param([string]$Path)
+
+    if (-not (Test-Path $Path -PathType Leaf)) {
+        throw "Icon source spec not found: $Path"
+    }
+
+    $spec = Get-Content -Raw -Path $Path | ConvertFrom-Json
+    $palette = $spec.palette
+    return [pscustomobject]@{
+        BackgroundStart = Convert-HexColor -Value $palette.backgroundStart
+        BackgroundEnd = Convert-HexColor -Value $palette.backgroundEnd
+        BackgroundAccent = Convert-HexColor -Value $palette.backgroundAccent
+        EnvelopeFill = Convert-HexColor -Value $palette.envelopeFill
+        EnvelopeStroke = Convert-HexColor -Value $palette.envelopeStroke
+        ShieldStart = Convert-HexColor -Value $palette.shieldStart
+        ShieldEnd = Convert-HexColor -Value $palette.shieldEnd
+        ShieldStroke = Convert-HexColor -Value $palette.shieldStroke
+        CheckStroke = Convert-HexColor -Value $palette.checkStroke
+    }
+}
+
 function New-RoundedRectanglePath {
     param(
         [System.Drawing.RectangleF]$Bounds,
@@ -51,7 +100,11 @@ function New-RoundedRectanglePath {
 }
 
 function New-IconBitmap {
-    param([int]$Size)
+    param(
+        [int]$Size,
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Palette
+    )
 
     $bitmap = [System.Drawing.Bitmap]::new($Size, $Size, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
@@ -71,8 +124,8 @@ function New-IconBitmap {
             $backgroundBrush = [System.Drawing.Drawing2D.LinearGradientBrush]::new(
                 [System.Drawing.PointF]::new(0, 0),
                 [System.Drawing.PointF]::new($Size, $Size),
-                [System.Drawing.Color]::FromArgb(255, 20, 62, 117),
-                [System.Drawing.Color]::FromArgb(255, 7, 126, 167))
+                $Palette.BackgroundStart,
+                $Palette.BackgroundEnd)
             try {
                 $graphics.FillPath($backgroundBrush, $backgroundPath)
             }
@@ -80,7 +133,7 @@ function New-IconBitmap {
                 $backgroundBrush.Dispose()
             }
 
-            $accentBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(72, 255, 255, 255))
+            $accentBrush = [System.Drawing.SolidBrush]::new($Palette.BackgroundAccent)
             try {
                 $graphics.FillEllipse(
                     $accentBrush,
@@ -97,13 +150,13 @@ function New-IconBitmap {
         $envelopeBounds = [System.Drawing.RectangleF]::new($Size * 0.18, $Size * 0.28, $Size * 0.64, $Size * 0.43)
         $envelopePath = New-RoundedRectanglePath -Bounds $envelopeBounds -Radius ($Size * 0.05)
         try {
-            $envelopeBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(245, 250, 252, 255))
-            $envelopePen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 13, 84, 128), [Math]::Max(2, $Size * 0.028))
+            $envelopeBrush = [System.Drawing.SolidBrush]::new($Palette.EnvelopeFill)
+            $envelopePen = [System.Drawing.Pen]::new($Palette.EnvelopeStroke, [Math]::Max(2, $Size * 0.028))
             try {
                 $graphics.FillPath($envelopeBrush, $envelopePath)
                 $graphics.DrawPath($envelopePen, $envelopePath)
 
-                $flapPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 13, 84, 128), [Math]::Max(2, $Size * 0.028))
+                $flapPen = [System.Drawing.Pen]::new($Palette.EnvelopeStroke, [Math]::Max(2, $Size * 0.028))
                 try {
                     $left = $envelopeBounds.Left
                     $right = $envelopeBounds.Right
@@ -147,14 +200,14 @@ function New-IconBitmap {
             $shieldBrush = [System.Drawing.Drawing2D.LinearGradientBrush]::new(
                 [System.Drawing.PointF]::new($shieldLeft, $shieldTop),
                 [System.Drawing.PointF]::new($shieldLeft, $shieldTop + $shieldHeight),
-                [System.Drawing.Color]::FromArgb(255, 33, 210, 183),
-                [System.Drawing.Color]::FromArgb(255, 17, 154, 142))
-            $shieldPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 235, 255, 250), [Math]::Max(1.5, $Size * 0.02))
+                $Palette.ShieldStart,
+                $Palette.ShieldEnd)
+            $shieldPen = [System.Drawing.Pen]::new($Palette.ShieldStroke, [Math]::Max(1.5, $Size * 0.02))
             try {
                 $graphics.FillPath($shieldBrush, $shieldPath)
                 $graphics.DrawPath($shieldPen, $shieldPath)
 
-                $checkPen = [System.Drawing.Pen]::new([System.Drawing.Color]::White, [Math]::Max(2, $Size * 0.03))
+                $checkPen = [System.Drawing.Pen]::new($Palette.CheckStroke, [Math]::Max(2, $Size * 0.03))
                 $checkPen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
                 $checkPen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
                 try {
@@ -191,13 +244,15 @@ function New-IconBitmap {
     }
 }
 
+$resolvedSourceSpecPath = Resolve-RepoPath -PathValue $SourceSpecPath
 $resolvedIcoPath = Resolve-RepoPath -PathValue $OutputIcoPath
 $resolvedPngPath = Resolve-RepoPath -PathValue $OutputPngPath
+$iconPalette = Read-IconPalette -Path $resolvedSourceSpecPath
 
 New-Item -Path (Split-Path -Parent $resolvedIcoPath) -ItemType Directory -Force | Out-Null
 New-Item -Path (Split-Path -Parent $resolvedPngPath) -ItemType Directory -Force | Out-Null
 
-$bitmap = New-IconBitmap -Size 256
+$bitmap = New-IconBitmap -Size 256 -Palette $iconPalette
 try {
     $bitmap.Save($resolvedPngPath, [System.Drawing.Imaging.ImageFormat]::Png)
 
@@ -226,6 +281,7 @@ finally {
 }
 
 Write-Host "Generated icon assets:" -ForegroundColor Cyan
+Write-Host "  Source: $resolvedSourceSpecPath" -ForegroundColor Green
 Write-Host "  ICO: $resolvedIcoPath" -ForegroundColor Green
 Write-Host "  PNG: $resolvedPngPath" -ForegroundColor Green
 

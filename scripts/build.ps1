@@ -12,6 +12,8 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]$RuntimeIdentifier = "win-x64",
 
+    [switch]$NoRestore = $false,
+
     [switch]$SelfContained = $false
 )
 
@@ -28,6 +30,7 @@ Invoke-RepositoryPowerShellScript `
         "-Clean:$([bool]$Clean)",
         "-Publish:$false",
         "-LockedMode:$([bool]$LockedMode)",
+        "-NoRestore:$([bool]$NoRestore)",
         "-RuntimeIdentifier", $RuntimeIdentifier,
         "-SelfContained:$([bool]$SelfContained)"
     ) `

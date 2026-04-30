@@ -144,7 +144,7 @@ public sealed class MailboxLicensesViewModelTests
 
         viewModel.AddLicenseCommand.Execute(null);
 
-        await WaitForConditionAsync(() => !string.IsNullOrWhiteSpace(viewModel.UsageLocationSuggestionMessage));
+        await worker.UsageLocationSuggestionRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.NotNull(viewModel.LicenseErrorMessage);
         Assert.Contains("DE", viewModel.UsageLocationSuggestionMessage, StringComparison.Ordinal);
@@ -183,12 +183,14 @@ public sealed class MailboxLicensesViewModelTests
         };
 
         viewModel.AddLicenseCommand.Execute(null);
-        await WaitForConditionAsync(() => !string.IsNullOrWhiteSpace(viewModel.UsageLocationSuggestionMessage));
+        await worker.UsageLocationSuggestionRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         worker.AllowLicenseAssignment = true;
         viewModel.ApplySuggestedUsageLocationCommand.Execute(null);
 
-        await WaitForConditionAsync(() => worker.SetUserUsageLocationCalls == 1 && worker.SetUserLicenseCalls >= 2);
+        await Task.WhenAll(
+            worker.UserUsageLocationSet.Task.WaitAsync(TimeSpan.FromSeconds(2)),
+            worker.UserLicenseAssignmentRetried.Task.WaitAsync(TimeSpan.FromSeconds(2)));
 
         Assert.Equal("DE", worker.LastSetUserUsageLocationRequest?.UsageLocation);
         Assert.Null(viewModel.UsageLocationSuggestionMessage);
@@ -221,7 +223,7 @@ public sealed class MailboxLicensesViewModelTests
         viewModel.SelectedUsageLocation = Assert.Single(viewModel.UsageLocations, option => option.Code == "IT");
         viewModel.ApplySuggestedUsageLocationCommand.Execute(null);
 
-        await WaitForConditionAsync(() => worker.SetUserUsageLocationCalls == 1);
+        await worker.UserUsageLocationSet.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("IT", worker.LastSetUserUsageLocationRequest?.UsageLocation);
         Assert.Null(viewModel.LicenseErrorMessage);
@@ -258,26 +260,11 @@ public sealed class MailboxLicensesViewModelTests
 
         viewModel.RemoveLicenseCommand.Execute(assignedLicense);
 
-        await WaitForConditionAsync(() => worker.SetUserLicenseCalls == 1);
+        await worker.UserLicenseSet.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("user@contoso.com", worker.LastSetUserLicenseRequest?.UserPrincipalName);
         Assert.Equal("sku-01", Assert.Single(worker.LastSetUserLicenseRequest?.RemoveLicenseSkuIds ?? []));
         Assert.Null(viewModel.LicenseErrorMessage);
-    }
-
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 80; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -309,12 +296,16 @@ public sealed class MailboxLicensesViewModelTests
         public int SetUserLicenseCalls { get; private set; }
         public int SetUserUsageLocationCalls { get; private set; }
         public SetUserUsageLocationRequest? LastSetUserUsageLocationRequest { get; private set; }
+        public TaskCompletionSource UsageLocationSuggestionRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource UserUsageLocationSet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource UserLicenseAssignmentRetried { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result> SetUserLicenseAsync(SetUserLicenseRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             SetUserLicenseCalls++;
             if (AllowLicenseAssignment)
             {
+                UserLicenseAssignmentRetried.TrySetResult();
                 return Task.FromResult(Result.Success());
             }
 
@@ -326,6 +317,7 @@ public sealed class MailboxLicensesViewModelTests
         public override Task<Result<GetUsageLocationSuggestionResponse>> GetUsageLocationSuggestionAsync(GetUsageLocationSuggestionRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetUsageLocationSuggestionCalls++;
+            UsageLocationSuggestionRequested.TrySetResult();
             return Task.FromResult(Result<GetUsageLocationSuggestionResponse>.Success(new GetUsageLocationSuggestionResponse
             {
                 UserPrincipalName = request.UserPrincipalName,
@@ -339,6 +331,7 @@ public sealed class MailboxLicensesViewModelTests
         {
             SetUserUsageLocationCalls++;
             LastSetUserUsageLocationRequest = request;
+            UserUsageLocationSet.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 
@@ -353,11 +346,13 @@ public sealed class MailboxLicensesViewModelTests
     {
         public int SetUserLicenseCalls { get; private set; }
         public SetUserLicenseRequest? LastSetUserLicenseRequest { get; private set; }
+        public TaskCompletionSource UserLicenseSet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result> SetUserLicenseAsync(SetUserLicenseRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             SetUserLicenseCalls++;
             LastSetUserLicenseRequest = request;
+            UserLicenseSet.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 
@@ -372,11 +367,13 @@ public sealed class MailboxLicensesViewModelTests
     {
         public int SetUserUsageLocationCalls { get; private set; }
         public SetUserUsageLocationRequest? LastSetUserUsageLocationRequest { get; private set; }
+        public TaskCompletionSource UserUsageLocationSet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result> SetUserUsageLocationAsync(SetUserUsageLocationRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             SetUserUsageLocationCalls++;
             LastSetUserUsageLocationRequest = request;
+            UserUsageLocationSet.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 

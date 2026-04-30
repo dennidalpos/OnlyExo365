@@ -31,7 +31,7 @@ public sealed class ContactsViewModelTests
         try
         {
             viewModel.SaveCommand.Execute(null);
-            await WaitForConditionAsync(() => worker.UpsertContactCalls == 1);
+            await worker.ContactUpserted.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
             Assert.Equal("Sup3rSecret!", worker.LastUpsertContactRequest?.Password);
             Assert.False(viewModel.HasMailUserPassword);
@@ -94,9 +94,9 @@ public sealed class ContactsViewModelTests
 
         await viewModel.LoadAsync();
         viewModel.LoadMoreCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.ContactRequests.Count == 2);
+        await worker.SecondContactRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
         viewModel.RefreshCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.ContactRequests.Count == 3);
+        await worker.ThirdContactRequestReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal([250, 250, 500], worker.ContactRequests.Select(request => request.PageSize));
         Assert.Equal(500, viewModel.Contacts.Count);
@@ -137,7 +137,7 @@ public sealed class ContactsViewModelTests
 
         viewModel.SelectedContact = selected;
 
-        await WaitForConditionAsync(() => worker.ContactDetailRequests.Count == 1);
+        await worker.ContactDetailsRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal(selected.Identity, viewModel.ContactIdentity);
         Assert.Equal(selected.ContactKind, viewModel.ContactKind);
@@ -200,7 +200,7 @@ public sealed class ContactsViewModelTests
         viewModel.SelectedContact = first;
         viewModel.SelectedContact = second;
 
-        await WaitForConditionAsync(() => worker.ContactDetailRequests.Count == 2);
+        await worker.SecondContactDetailsRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         secondRequest.SetResult(new ContactDetailsDto
         {
@@ -213,7 +213,10 @@ public sealed class ContactsViewModelTests
             ExternalEmailAddress = second.ExternalEmailAddress,
             UserPrincipalName = second.UserPrincipalName
         });
-        await WaitForConditionAsync(() => viewModel.ContactIdentity == second.Identity);
+        await WaitForPropertyAsync(
+            viewModel,
+            nameof(viewModel.DisplayName),
+            () => viewModel.ContactIdentity == second.Identity && viewModel.DisplayName == second.DisplayName);
 
         firstRequest.SetResult(new ContactDetailsDto
         {
@@ -229,19 +232,26 @@ public sealed class ContactsViewModelTests
         Assert.Equal(second.PrimarySmtpAddress, viewModel.PrimarySmtpAddress);
     }
 
-    private static async Task WaitForConditionAsync(Func<bool> condition)
+    private static Task WaitForPropertyAsync(ViewModelBase viewModel, string propertyName, Func<bool> condition)
     {
-        for (var attempt = 0; attempt < 20; attempt++)
+        if (condition())
         {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
+            return Task.CompletedTask;
         }
 
-        Assert.True(condition(), "Condition not reached in time.");
+        var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        System.ComponentModel.PropertyChangedEventHandler? handler = null;
+        handler = (_, args) =>
+        {
+            if (args.PropertyName == propertyName && condition())
+            {
+                viewModel.PropertyChanged -= handler;
+                changed.TrySetResult();
+            }
+        };
+
+        viewModel.PropertyChanged += handler;
+        return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -272,11 +282,17 @@ public sealed class ContactsViewModelTests
         public List<GetContactDetailsRequest> ContactDetailRequests { get; } = [];
         public Func<GetContactDetailsRequest, Task<ContactDetailsDto>>? ContactDetailsFactory { get; set; }
         public Action<GetContactDetailsRequest>? ContactDetailsReturned { get; set; }
+        public TaskCompletionSource ContactUpserted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource SecondContactRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ThirdContactRequestReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ContactDetailsRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource SecondContactDetailsRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result> UpsertContactAsync(UpsertContactRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             UpsertContactCalls++;
             LastUpsertContactRequest = request;
+            ContactUpserted.TrySetResult();
             return Task.FromResult(Result.Success());
         }
 
@@ -296,6 +312,15 @@ public sealed class ContactsViewModelTests
                 ? ContactResponses.Dequeue()
                 : CreateContactsResponse(request.PageSize, request.Skip, totalCount: 1, hasMore: false);
 
+            if (ContactRequests.Count == 2)
+            {
+                SecondContactRequestReceived.TrySetResult();
+            }
+            else if (ContactRequests.Count == 3)
+            {
+                ThirdContactRequestReceived.TrySetResult();
+            }
+
             response.PageSize = request.PageSize;
             response.Skip = request.Skip;
             return Task.FromResult(Result<GetContactsResponse>.Success(response));
@@ -308,6 +333,11 @@ public sealed class ContactsViewModelTests
                 Identity = request.Identity,
                 ContactKind = request.ContactKind
             });
+            ContactDetailsRequested.TrySetResult();
+            if (ContactDetailRequests.Count >= 2)
+            {
+                SecondContactDetailsRequested.TrySetResult();
+            }
 
             if (ContactDetailsFactory != null)
             {

@@ -7,6 +7,7 @@ using OnlyExo365.Contracts;
 using OnlyExo365.Shell.Ipc;
 using OnlyExo365.Shell.ViewModels;
 using OnlyExo365.Shell.Localization;
+using System.ComponentModel;
 
 namespace OnlyExo365.Tests;
 
@@ -28,7 +29,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         }));
 
         viewModel.SetWorkerConsoleVisibilityCommand.Execute(true);
-        await WaitForAsync(() => workerService.LastRequestedVisibility.HasValue);
+        await workerService.VisibilityRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(viewModel.IsWorkerConsoleVisible);
         Assert.Equal(true, workerService.LastRequestedVisibility);
@@ -46,7 +47,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
             NormalizedError.Create(ErrorCode.Unknown, "Boom")));
 
         viewModel.SetWorkerConsoleVisibilityCommand.Execute(true);
-        await WaitForAsync(() => workerService.LastRequestedVisibility.HasValue);
+        await workerService.VisibilityRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.False(viewModel.IsWorkerConsoleVisible);
         Assert.Contains(logState.LogEntries, entry => entry.Message.Contains("Failed to change worker console visibility", StringComparison.Ordinal));
@@ -62,17 +63,18 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
 
         viewModel.ApplyWorkerStateChange(WorkerConnectionState.Connected);
         viewModel.SetWorkerConsoleVisibilityCommand.Execute(true);
-        await WaitForAsync(() => workerService.LastRequestedVisibility.HasValue);
+        await workerService.VisibilityRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(viewModel.IsWorkerConsoleVisible);
         Assert.True(viewModel.IsWorkerConsoleToggleBusy);
 
+        var toggleIdle = WaitForPropertyAsync(viewModel, nameof(viewModel.IsWorkerConsoleToggleBusy), () => !viewModel.IsWorkerConsoleToggleBusy);
         toggleCompletion.SetResult(Result<SetWorkerConsoleVisibilityResponse>.Success(new SetWorkerConsoleVisibilityResponse
         {
             IsVisible = true,
             Message = "Worker console shown."
         }));
-        await WaitForAsync(() => !viewModel.IsWorkerConsoleToggleBusy);
+        await toggleIdle;
     }
 
     [WpfFact]
@@ -89,7 +91,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         viewModel.ApplyWorkerStateChange(WorkerConnectionState.Connected);
         viewModel.ConnectExchangeCommand.Execute(null);
 
-        await WaitForAsync(() => workerService.ConnectInvoked);
+        await workerService.ConnectInvokedSignal.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(bootstrapService.WasInvoked);
         Assert.True(workerService.ConnectInvoked);
@@ -112,7 +114,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         viewModel.ApplyWorkerStateChange(WorkerConnectionState.Connected);
         viewModel.ConnectExchangeCommand.Execute(null);
 
-        await WaitForAsync(() => bootstrapService.WasInvoked);
+        await bootstrapService.Invoked.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.False(workerService.ConnectInvoked);
         Assert.Equal(ConnectionState.Failed, viewModel.ExchangeState);
@@ -180,7 +182,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         var viewModel = CreateViewModel(workerService, out var logState);
 
         viewModel.StartWorkerCommand.Execute(null);
-        await WaitForAsync(() => logState.LogEntries.Any(entry => entry.Message.Contains("Failed to start worker", StringComparison.Ordinal)));
+        await WaitForLogEntryAsync(logState, entry => entry.Message.Contains("Failed to start worker", StringComparison.Ordinal));
 
         Assert.False(viewModel.HasWorkerStartupAlert);
     }
@@ -239,18 +241,48 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         return new ShellConnectionStateViewModel(workerService, logState, configuration, bootstrapService);
     }
 
-    private static async Task WaitForAsync(Func<bool> condition, int timeoutMs = 1000)
+    private static Task WaitForPropertyAsync(INotifyPropertyChanged source, string propertyName, Func<bool> condition)
     {
-        var startedAt = Environment.TickCount64;
-        while (!condition())
+        if (condition())
         {
-            if (Environment.TickCount64 - startedAt > timeoutMs)
-            {
-                throw new TimeoutException("Condition not met in time.");
-            }
-
-            await Task.Delay(20);
+            return Task.CompletedTask;
         }
+
+        var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        PropertyChangedEventHandler? handler = null;
+        handler = (_, args) =>
+        {
+            if (args.PropertyName == propertyName && condition())
+            {
+                source.PropertyChanged -= handler;
+                changed.TrySetResult();
+            }
+        };
+
+        source.PropertyChanged += handler;
+        return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+    }
+
+    private static Task WaitForLogEntryAsync(ShellLogViewModel logState, Func<LogEntry, bool> predicate)
+    {
+        if (logState.LogEntries.Any(predicate))
+        {
+            return Task.CompletedTask;
+        }
+
+        var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        System.Collections.Specialized.NotifyCollectionChangedEventHandler? handler = null;
+        handler = (_, _) =>
+        {
+            if (logState.LogEntries.Any(predicate))
+            {
+                logState.LogEntries.CollectionChanged -= handler;
+                changed.TrySetResult();
+            }
+        };
+
+        logState.LogEntries.CollectionChanged += handler;
+        return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
     }
 
     private class WorkerConsoleConnectionWorkerServiceStub : TestConnectionWorkerServiceBase
@@ -276,6 +308,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
         }
 
         public bool? LastRequestedVisibility { get; private set; }
+        public TaskCompletionSource VisibilityRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override WorkerStatus Status => _status;
 
@@ -313,6 +346,7 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
             CancellationToken cancellationToken = default)
         {
             LastRequestedVisibility = isVisible;
+            VisibilityRequested.TrySetResult();
 
             if (_toggleTask != null)
             {
@@ -336,10 +370,12 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     private sealed class ConnectWorkerServiceStub : WorkerConsoleConnectionWorkerServiceStub
     {
         public bool ConnectInvoked { get; private set; }
+        public TaskCompletionSource ConnectInvokedSignal { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<ConnectionStatusDto>> ConnectExchangeAsync(Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             ConnectInvoked = true;
+            ConnectInvokedSignal.TrySetResult();
 
             return Task.FromResult(Result<ConnectionStatusDto>.Success(new ConnectionStatusDto
             {
@@ -355,10 +391,12 @@ public sealed class ShellConnectionStateViewModelTests : IDisposable
     {
         public bool WasInvoked { get; private set; }
         public Result Result { get; set; } = Result.Success();
+        public TaskCompletionSource Invoked { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public Task<Result> EnsureReadyAsync(Action<LogLevel, string>? onLog = null, CancellationToken cancellationToken = default)
         {
             WasInvoked = true;
+            Invoked.TrySetResult();
             return Task.FromResult(Result);
         }
     }

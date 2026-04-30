@@ -62,8 +62,6 @@ Unsigned local packaging is not a signed release.
 
 Tenant validation requires real certificate material and tenant credentials; it is not locally reproducible without them.
 
-## Manual Baseline Evidence
+## Release Asset Preparation
 
-`build/release-baseline.ps1` is a supported manual path for a clean-worktree release evidence bundle. It creates a versioned directory under `artifacts/release`, writes a manifest and summary, archives the publish output, and can create an annotated `baseline/v<version>` git tag when called with `-CreateTag`.
-
-This script does not replace the CI publication flow. Durable GitHub release assets are produced by `scripts/pack.ps1` and `scripts/agents/publish.ps1`.
+Durable GitHub release assets are produced by `scripts/pack.ps1` and `scripts/agents/publish.ps1`.

@@ -17,31 +17,23 @@ param(
 . (Join-Path $PSScriptRoot "../internal/common.ps1")
 
 $repositoryRoot = Get-RepositoryRoot -ScriptRoot $PSScriptRoot
-$solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot
-$buildArtifactsPath = Get-BuildArtifactsPath -RepositoryRoot $repositoryRoot
 $resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
 
-if (-not $NoBootstrap) {
-    $bootstrapArguments = @("-LockedMode:$LockedMode", "-RuntimeIdentifiers", ($resolvedRuntimeIdentifiers -join ','))
-    Invoke-RepositoryPowerShellScript `
-        -ScriptPath (Join-Path $repositoryRoot "scripts/bootstrap.ps1") `
-        -Arguments $bootstrapArguments `
-        -ErrorMessage "bootstrap failed"
-}
+Invoke-RepositoryBootstrap `
+    -RepositoryRoot $repositoryRoot `
+    -LockedMode $LockedMode `
+    -RuntimeIdentifiers $resolvedRuntimeIdentifiers `
+    -Skip:$NoBootstrap
 
 Write-Step "Compiling solution"
-Initialize-ArtifactsLayout -RepositoryRoot $repositoryRoot | Out-Null
-
-$arguments = @(
-    "build",
-    $solutionPath,
-    "-c",
-    $Configuration,
-    "--no-restore",
-    "--artifacts-path",
-    $buildArtifactsPath,
-    "/warnaserror"
-)
-
-Invoke-DotNetCommand -Arguments $arguments -ErrorMessage "dotnet build failed"
+Invoke-RepositoryPowerShellScript `
+    -ScriptPath (Join-Path $repositoryRoot "scripts/build.ps1") `
+    -Arguments @(
+        "-Configuration", $Configuration,
+        "-Clean:$false",
+        "-LockedMode:$false",
+        "-RuntimeIdentifier", (@($resolvedRuntimeIdentifiers)[0]),
+        "-NoRestore:$true"
+    ) `
+    -ErrorMessage "canonical build failed"
 Write-Success "Compilation completed"

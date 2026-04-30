@@ -311,6 +311,25 @@ function Invoke-RepositoryPowerShellScript {
     }
 }
 
+function Invoke-RepositoryBootstrap {
+    param(
+        [string]$RepositoryRoot,
+        [bool]$LockedMode,
+        [string[]]$RuntimeIdentifiers,
+        [switch]$Skip
+    )
+
+    if ($Skip) {
+        return
+    }
+
+    $resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
+    Invoke-RepositoryPowerShellScript `
+        -ScriptPath (Join-Path $RepositoryRoot "scripts/bootstrap.ps1") `
+        -Arguments @("-LockedMode:$LockedMode", "-RuntimeIdentifiers", ($resolvedRuntimeIdentifiers -join ',')) `
+        -ErrorMessage "bootstrap failed"
+}
+
 function Get-ExecutablePath {
     param(
         [string]$CommandName,

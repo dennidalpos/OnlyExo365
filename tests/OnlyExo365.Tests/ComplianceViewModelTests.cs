@@ -126,7 +126,7 @@ public sealed class ComplianceViewModelTests
         viewModel.SearchAuditLogCommand.Execute(null);
         viewModel.SearchAuditLogCommand.Execute(null);
 
-        await WaitForConditionAsync(() =>
+        await WaitForAuditTasksAsync(viewModel, () =>
             viewModel.AuditSearchTasks.Count == 2 &&
             viewModel.AuditSearchTasks[0].IsRunning &&
             viewModel.AuditSearchTasks[1].IsQueued);
@@ -138,7 +138,7 @@ public sealed class ComplianceViewModelTests
 
         firstSearchGate.SetResult();
 
-        await WaitForConditionAsync(() => viewModel.AuditSearchTasks.All(task => task.IsCompleted));
+        await WaitForAuditTasksAsync(viewModel, () => viewModel.AuditSearchTasks.All(task => task.IsCompleted));
 
         Assert.Equal(2, viewModel.AuditSearchTasks.Count);
         Assert.Equal("second-record", viewModel.AuditResults.Single().Identity);
@@ -174,7 +174,9 @@ public sealed class ComplianceViewModelTests
         viewModel.SearchAuditLogCommand.Execute(null);
         viewModel.SearchAuditLogCommand.Execute(null);
 
-        await WaitForConditionAsync(() => viewModel.AuditSearchTasks.Count == 2 && viewModel.AuditSearchTasks.All(task => task.IsCompleted));
+        await WaitForAuditTasksAsync(
+            viewModel,
+            () => viewModel.AuditSearchTasks.Count == 2 && viewModel.AuditSearchTasks.All(task => task.IsCompleted));
 
         viewModel.SelectedAuditSearchTask = viewModel.AuditSearchTasks[0];
         Assert.Equal("record-1", viewModel.AuditResults.Single().Identity);
@@ -206,19 +208,48 @@ public sealed class ComplianceViewModelTests
         property!.SetValue(shell, ConnectionState.Connected);
     }
 
-    private static async Task WaitForConditionAsync(Func<bool> predicate)
+    private static Task WaitForAuditTasksAsync(ComplianceViewModel viewModel, Func<bool> predicate)
     {
-        for (var attempt = 0; attempt < 100; attempt++)
+        if (predicate())
         {
-            if (predicate())
+            return Task.CompletedTask;
+        }
+
+        var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var observedTasks = new HashSet<ComplianceAuditSearchTaskViewModel>();
+        System.Collections.Specialized.NotifyCollectionChangedEventHandler? collectionHandler = null;
+        System.ComponentModel.PropertyChangedEventHandler? taskHandler = null;
+
+        void CompleteIfReady()
+        {
+            foreach (var task in viewModel.AuditSearchTasks)
+            {
+                if (observedTasks.Add(task))
+                {
+                    task.PropertyChanged += taskHandler;
+                }
+            }
+
+            if (!predicate())
             {
                 return;
             }
 
-            await Task.Delay(20);
+            viewModel.AuditSearchTasks.CollectionChanged -= collectionHandler;
+            foreach (var task in observedTasks)
+            {
+                task.PropertyChanged -= taskHandler;
+            }
+
+            changed.TrySetResult();
         }
 
-        Assert.True(predicate(), "Condition was not reached within the timeout.");
+        taskHandler = (_, _) => CompleteIfReady();
+        collectionHandler = (_, _) => CompleteIfReady();
+        viewModel.AuditSearchTasks.CollectionChanged += collectionHandler;
+        CompleteIfReady();
+
+        return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
     }
 
     private sealed class ComplianceTestWorkerService : TestComplianceWorkerServiceBase

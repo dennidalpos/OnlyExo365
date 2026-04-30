@@ -42,7 +42,7 @@ public sealed class MigrationViewModelTests
         await viewModel.LoadAsync();
 
         viewModel.LoadBatchDetailsCommand.Execute(null);
-        await WaitForConditionAsync(() => viewModel.SelectedDetails != null);
+        await worker.MigrationBatchDetailsRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal(1, worker.GetMigrationBatchDetailsCalls);
         Assert.Equal("batch-01", viewModel.SelectedDetails?.Identity);
@@ -84,7 +84,7 @@ public sealed class MigrationViewModelTests
         viewModel.NewBatchCsvFilePath = "C:\\temp\\migration.csv";
 
         viewModel.RunBatchPreflightCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.GetMigrationBatchPreflightCalls == 1);
+        await worker.MigrationBatchPreflightRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(viewModel.IsBatchPreflightReady);
         Assert.Contains("Ready: True", viewModel.BatchPreflightSummary, StringComparison.Ordinal);
@@ -106,7 +106,7 @@ public sealed class MigrationViewModelTests
         viewModel.NewBatchCsvFilePath = "C:\\temp\\migration.csv";
 
         viewModel.RunBatchPreflightCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.GetMigrationBatchPreflightCalls == 1);
+        await worker.MigrationBatchPreflightRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("Unable to run migration preflight.", viewModel.ErrorMessage);
         Assert.DoesNotContain("eseguire", viewModel.ErrorMessage, StringComparison.OrdinalIgnoreCase);
@@ -127,7 +127,7 @@ public sealed class MigrationViewModelTests
         viewModel.SetEndpointPassword("Sup3rSecret!");
 
         viewModel.TestEndpointCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.TestMigrationEndpointCalls == 1);
+        await worker.MigrationEndpointTestRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.Equal("Sup3rSecret!", worker.LastTestMigrationEndpointRequest?.Password);
         Assert.False(viewModel.HasEndpointPassword);
@@ -151,21 +151,6 @@ public sealed class MigrationViewModelTests
         Assert.True(viewModel.EndpointPasswordClearTrigger > 0);
     }
 
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 20; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
-    }
-
     private static void SetExchangeConnected(ShellViewModel shell)
     {
         var property = typeof(ShellViewModel)
@@ -185,6 +170,9 @@ public sealed class MigrationViewModelTests
         public bool ReturnPreflightFailureWithoutMessage { get; init; }
         public TestMigrationEndpointRequest? LastTestMigrationEndpointRequest { get; private set; }
         public GetMigrationBatchesRequest? LastGetMigrationBatchesRequest { get; private set; }
+        public TaskCompletionSource MigrationBatchDetailsRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource MigrationBatchPreflightRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource MigrationEndpointTestRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public override Task<Result<GetMigrationBatchesResponse>> GetMigrationBatchesAsync(GetMigrationBatchesRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
@@ -242,6 +230,7 @@ public sealed class MigrationViewModelTests
         public override Task<Result<MigrationBatchDetailsDto>> GetMigrationBatchDetailsAsync(GetMigrationBatchDetailsRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetMigrationBatchDetailsCalls++;
+            MigrationBatchDetailsRequested.TrySetResult();
             return Task.FromResult(Result<MigrationBatchDetailsDto>.Success(new MigrationBatchDetailsDto
             {
                 Identity = request.Identity,
@@ -258,12 +247,14 @@ public sealed class MigrationViewModelTests
         {
             TestMigrationEndpointCalls++;
             LastTestMigrationEndpointRequest = request;
+            MigrationEndpointTestRequested.TrySetResult();
             return Task.FromResult(Result<TestMigrationEndpointResponse>.Success(new TestMigrationEndpointResponse { Summary = "Endpoint test ok." }));
         }
 
         public override Task<Result<GetMigrationBatchPreflightResponse>> GetMigrationBatchPreflightAsync(GetMigrationBatchPreflightRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             GetMigrationBatchPreflightCalls++;
+            MigrationBatchPreflightRequested.TrySetResult();
             if (ReturnPreflightFailureWithoutMessage)
             {
                 return Task.FromResult(Result<GetMigrationBatchPreflightResponse>.Failure(

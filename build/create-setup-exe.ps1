@@ -28,7 +28,7 @@ $resolvedPublishPathX64 = Join-Path $resolvedPublishPath "win-x64"
 $resolvedOutputDirectory = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $OutputDirectory
 $resolvedOutputPath = Join-Path $resolvedOutputDirectory $OutputFileName
 $resolvedInstallerScriptPath = Join-Path $repositoryRoot "installer\OnlyExo365.iss"
-$resolvedIconPath = Join-Path $repositoryRoot "src\OnlyExo365.Shell\Assets\AppIcon.ico"
+$resolvedIconPath = Join-Path $repositoryRoot "src\OnlyExo365.Shell\Assets\Generated\AppIcon.ico"
 $appVersion = Get-ApplicationVersion -RepositoryRoot $repositoryRoot
 $versionSegments = @($appVersion.Split('.'))
 while ($versionSegments.Count -lt 4) {

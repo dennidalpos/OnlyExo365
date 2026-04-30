@@ -29,6 +29,7 @@ public sealed class NavigationLoadingCoordinatorTests
         using var shell = new ShellViewModel(new ConnectedConnectionWorkerServiceStub(), new NavigationService());
         var loaderStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var loaderGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var loaderCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var coordinator = CreateCoordinator(
             shell,
             shell.NavigationService,
@@ -37,7 +38,14 @@ public sealed class NavigationLoadingCoordinatorTests
                 [NavigationPage.Contacts] = async () =>
                 {
                     loaderStarted.SetResult();
-                    await loaderGate.Task;
+                    try
+                    {
+                        await loaderGate.Task;
+                    }
+                    finally
+                    {
+                        loaderCompleted.SetResult();
+                    }
                 }
             });
 
@@ -53,23 +61,37 @@ public sealed class NavigationLoadingCoordinatorTests
         Assert.Equal(NavigationPage.Contacts, shell.CurrentPage);
         Assert.Equal(NavigationPage.Contacts, shell.NavigationService.PendingPage);
 
+        var navigationCompleted = WaitForNavigationPendingAsync(shell.NavigationService, expectedPending: false);
         loaderGate.SetResult();
-        await AssertPendingStateAsync(shell.NavigationService, expectedPending: false);
+        await Task.WhenAll(
+            loaderCompleted.Task.WaitAsync(TimeSpan.FromSeconds(2)),
+            navigationCompleted);
 
         Assert.False(shell.IsNavigationLocked);
         Assert.True(shell.CanNavigate);
         Assert.Null(shell.NavigationService.PendingPage);
     }
 
-    private static async Task AssertPendingStateAsync(NavigationService navigationService, bool expectedPending)
+    private static Task WaitForNavigationPendingAsync(NavigationService navigationService, bool expectedPending)
     {
-        var timeoutAt = DateTime.UtcNow.AddSeconds(2);
-        while (navigationService.IsNavigationPending != expectedPending && DateTime.UtcNow < timeoutAt)
+        if (navigationService.IsNavigationPending == expectedPending)
         {
-            await Task.Delay(20);
+            return Task.CompletedTask;
         }
 
-        Assert.Equal(expectedPending, navigationService.IsNavigationPending);
+        var changed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        EventHandler? handler = null;
+        handler = (_, _) =>
+        {
+            if (navigationService.IsNavigationPending == expectedPending)
+            {
+                navigationService.NavigationStateChanged -= handler;
+                changed.TrySetResult();
+            }
+        };
+
+        navigationService.NavigationStateChanged += handler;
+        return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
     }
 
     private static IDisposable CreateCoordinator(

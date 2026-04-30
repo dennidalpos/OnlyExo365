@@ -101,25 +101,12 @@ public sealed class DistributionListDetailsViewModelTests
         Assert.True(viewModel.PreviewDynamicMembersCommand.CanExecute(null));
 
         viewModel.PreviewDynamicMembersCommand.Execute(null);
-        await WaitForConditionAsync(() => worker.PreviewCalls == 1 && viewModel.Members.Count == 2 && viewModel.Members[0].Name == "Preview 1");
+        await worker.PreviewRequested.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
         Assert.True(viewModel.MembersHasMore);
+        Assert.Equal(2, viewModel.Members.Count);
+        Assert.Equal("Preview 1", viewModel.Members[0].Name);
         Assert.Equal("2 of 5 members", viewModel.MembersStatusText);
-    }
-
-    private static async Task WaitForConditionAsync(Func<bool> condition)
-    {
-        for (var attempt = 0; attempt < 80; attempt++)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(25);
-        }
-
-        Assert.True(condition(), "Condition not reached in time.");
     }
 
     private static void SetExchangeConnected(ShellViewModel shell)
@@ -144,6 +131,7 @@ public sealed class DistributionListDetailsViewModelTests
     {
         public GetDistributionListDetailsRequest? LastDetailsRequest { get; private set; }
         public int PreviewCalls { get; private set; }
+        public TaskCompletionSource PreviewRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public PreviewDynamicGroupMembersResponse PreviewResponse { get; set; } = new()
         {
             Identity = "dynamic@contoso.com",
@@ -182,6 +170,7 @@ public sealed class DistributionListDetailsViewModelTests
         public override Task<Result<PreviewDynamicGroupMembersResponse>> PreviewDynamicGroupMembersAsync(PreviewDynamicGroupMembersRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
             PreviewCalls++;
+            PreviewRequested.TrySetResult();
             return Task.FromResult(Result<PreviewDynamicGroupMembersResponse>.Success(PreviewResponse));
         }
     }

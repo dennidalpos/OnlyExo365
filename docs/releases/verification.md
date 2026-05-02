@@ -4,10 +4,12 @@ This document owns packaging, smoke validation, signing checks, and release asse
 
 ## Release Outputs
 
-`pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64` produces:
+`pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64` produces framework-dependent release outputs:
 
 - `artifacts/publish/win-x64/`
 - `artifacts/packages/OnlyExo365.Setup.exe`
+
+Pass `-SelfContained` to `scripts/pack.ps1` only when the release needs to carry the .NET runtime instead of requiring .NET 10 Desktop Runtime on the target machine.
 
 `pwsh ./scripts/agents/publish.ps1 -ReleaseTag <tag> -RuntimeIdentifier win-x64` produces release assets under `artifacts/publish/release-assets`:
 
@@ -27,6 +29,7 @@ Current setup behavior:
 - privileges: administrator
 - default install directory: `C:\Program Files\OnlyExo365`
 - shortcuts: common Start Menu and common Desktop
+- license page: repository `LICENSE`
 - uninstall cleanup: install directory plus default logs, IPC secrets, and exports
 
 ## Smoke Validation

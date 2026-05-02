@@ -48,11 +48,6 @@
           "xunit.v3.core.mtp-v1": "[3.2.2]"
         }
       },
-      "CommunityToolkit.Mvvm": {
-        "type": "Transitive",
-        "resolved": "8.4.2",
-        "contentHash": "WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg=="
-      },
       "DocumentFormat.OpenXml": {
         "type": "Transitive",
         "resolved": "3.5.1",
@@ -855,7 +850,6 @@
       "onlyexo365.shell": {
         "type": "Project",
         "dependencies": {
-          "CommunityToolkit.Mvvm": "[8.4.2, )",
           "DocumentFormat.OpenXml": "[3.5.1, )",
           "OnlyExo365.Contracts": "[1.0.1, )"
         }

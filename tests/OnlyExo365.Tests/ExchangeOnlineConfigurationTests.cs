@@ -110,6 +110,21 @@ public class ExchangeOnlineConfigurationTests
     }
 
     [Fact]
+    public void FromEnvironmentVariables_ThrowsWhenEnableGraphFlagIsInvalid()
+    {
+        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            [ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect] = "maybe"
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ExchangeOnlineConfiguration.FromEnvironmentVariables(key =>
+                values.TryGetValue(key, out var value) ? value : null));
+
+        Assert.Contains($"{ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect} must be one of:", exception.Message);
+    }
+
+    [Fact]
     public void GetGraphScopesForLicenseWrite_AppendsConfiguredWriteScopesToReadOnlyDefaults()
     {
         var configuration = new ExchangeOnlineConfiguration

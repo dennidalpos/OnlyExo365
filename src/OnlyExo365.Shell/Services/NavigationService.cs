@@ -88,18 +88,9 @@ public class NavigationService
 
     public void NavigateTo(NavigationPage page)
     {
-        var args = new NavigatingEventArgs(page);
-        Navigating?.Invoke(this, args);
-
-        if (args.Cancel)
+        if (!TryPrepareNavigation(page))
         {
             return;
-        }
-
-        var requiresPageTransition = CurrentPage != page;
-        if (requiresPageTransition)
-        {
-            BeginNavigation(page);
         }
 
         SelectedIdentity = null;
@@ -109,17 +100,9 @@ public class NavigationService
 
     public void NavigateToDetails(NavigationPage parentPage, string identity, object? item = null)
     {
-        var args = new NavigatingEventArgs(parentPage);
-        Navigating?.Invoke(this, args);
-
-        if (args.Cancel)
+        if (!TryPrepareNavigation(parentPage))
         {
             return;
-        }
-
-        if (CurrentPage != parentPage)
-        {
-            BeginNavigation(parentPage);
         }
 
         CurrentPage = parentPage;
@@ -150,6 +133,24 @@ public class NavigationService
     {
         _pendingPage = page;
         IsNavigationPending = true;
+    }
+
+    private bool TryPrepareNavigation(NavigationPage page)
+    {
+        var args = new NavigatingEventArgs(page);
+        Navigating?.Invoke(this, args);
+
+        if (args.Cancel)
+        {
+            return false;
+        }
+
+        if (CurrentPage != page)
+        {
+            BeginNavigation(page);
+        }
+
+        return true;
     }
 }
 

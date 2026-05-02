@@ -40,7 +40,8 @@ public static class ProtectedSecretStore
 
     public static string? Consume(ProtectedSecretReference? reference)
     {
-        if (reference == null || string.IsNullOrWhiteSpace(reference.Id))
+        var path = TryGetSecretPath(reference);
+        if (path == null)
         {
             return null;
         }
@@ -49,7 +50,7 @@ public static class ProtectedSecretStore
         {
             throw new PlatformNotSupportedException("ProtectedSecretStore requires Windows DPAPI support.");
         }
-        var path = GetSecretPath(reference.Id);
+
         if (!File.Exists(path))
         {
             return null;
@@ -82,12 +83,12 @@ public static class ProtectedSecretStore
 
     public static void TryDelete(ProtectedSecretReference? reference)
     {
-        if (reference == null || string.IsNullOrWhiteSpace(reference.Id))
+        var path = TryGetSecretPath(reference);
+        if (path == null)
         {
             return;
         }
 
-        var path = GetSecretPath(reference.Id);
         try
         {
             if (File.Exists(path))
@@ -102,12 +103,8 @@ public static class ProtectedSecretStore
 
     public static bool Exists(ProtectedSecretReference? reference)
     {
-        if (reference == null || string.IsNullOrWhiteSpace(reference.Id))
-        {
-            return false;
-        }
-
-        return File.Exists(GetSecretPath(reference.Id));
+        var path = TryGetSecretPath(reference);
+        return path != null && File.Exists(path);
     }
 
     private static string GetSecretPath(string id)
@@ -116,6 +113,19 @@ public static class ProtectedSecretStore
             "OnlyExo365",
             "ipc-secrets",
             $"{id}.bin");
+
+    private static string? TryGetSecretPath(ProtectedSecretReference? reference)
+    {
+        if (reference == null || string.IsNullOrWhiteSpace(reference.Id))
+        {
+            return null;
+        }
+
+        var trimmedId = reference.Id.Trim();
+        return Guid.TryParseExact(trimmedId, "N", out var parsedId)
+            ? GetSecretPath(parsedId.ToString("N"))
+            : null;
+    }
 
     private static void CleanupExpiredSecrets()
     {

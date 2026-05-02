@@ -49,6 +49,7 @@
                               HorizontalAlignment="Right"
                               VerticalAlignment="Center"
                               Style="{StaticResource HeaderComboBox}"
+                              AutomationProperties.Name="{loc:Loc Key=Shell.LanguageSelectorLabel}"
                               ToolTip="{loc:Loc Key=Shell.LanguageSelectorLabel}"/>
                 </Grid>
 
@@ -616,7 +617,9 @@
                                   SelectedItem="{Binding Compliance.SelectedAuditSearchTask}"
                                   DisplayMemberPath="TaskSummary"
                                   Width="320"
-                                  Margin="8,0,0,0"/>
+                                  Margin="8,0,0,0"
+                                  AutomationProperties.Name="{loc:Loc Key=Shell.AuditTaskSelectorLabel}"
+                                  ToolTip="{loc:Loc Key=Shell.AuditTaskSelectorLabel}"/>
                         <Button Content="{loc:Loc Key=Btn.OpenCompliance}"
                                 Command="{Binding NavigateToComplianceCommand}"
                                 Style="{StaticResource InlineActionButton}"/>

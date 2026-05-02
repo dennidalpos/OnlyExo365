@@ -5,10 +5,12 @@ This guide covers installation, first-run checks, and runtime configuration.
 ## Minimum Requirements
 
 - Windows 10 or Windows 11 x64
-- .NET Desktop Runtime 10
-- PowerShell 7
+- .NET 10 Desktop Runtime for framework-dependent packages
+- PowerShell 7+ (`pwsh.exe` in `PATH`)
 - internet access to Microsoft 365 endpoints
 - an Exchange Online / Microsoft Graph identity with the permissions required for the selected workflows
+
+Self-contained packages are produced only when the packaging command is run with `-SelfContained`; the default `scripts/pack.ps1` output is framework-dependent.
 
 ## Installation
 
@@ -33,6 +35,11 @@ The setup EXE is a per-machine Inno Setup installer:
 4. Start the worker.
 5. Connect to Exchange Online.
 6. Confirm coherent shell, worker, Exchange, and Graph state.
+
+The Tools page can check and bootstrap the required PowerShell modules from PSGallery. The versioned bootstrap policy currently requires:
+
+- `ExchangeOnlineManagement` `3.9.2`
+- Microsoft Graph modules based on `Microsoft.Graph.Authentication` `2.35.1`
 
 ## Worker Console Diagnostics
 
@@ -73,6 +80,9 @@ No legacy compatibility directory is part of the supported baseline.
 - `ONLYEXO365_DISABLE_EXO`
 - `ONLYEXO365_EXPORT_DIR`
 - `ONLYEXO365_LOG_RETENTION_DAYS`
+
+`ONLYEXO365_AUTH_MODE` accepts `Interactive`, `DeviceCode`, `AppCertificate`, or `ManagedIdentity`. `ONLYEXO365_GRAPH_SCOPES` and `ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES` use semicolon-separated values. `ONLYEXO365_ENABLE_GRAPH` accepts `1`/`true` or `0`/`false`; any other non-empty value fails configuration loading.
+`ONLYEXO365_DISABLE_EXO=1` disables Exchange Online connection attempts in the shell and shows a warning instead of starting a connection.
 
 ## Runtime Data
 

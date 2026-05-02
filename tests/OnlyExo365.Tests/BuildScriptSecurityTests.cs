@@ -212,6 +212,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("PrivilegesRequired=admin", script, StringComparison.Ordinal);
         Assert.Contains("ArchitecturesInstallIn64BitMode=x64compatible", script, StringComparison.Ordinal);
         Assert.Contains("ArchitecturesAllowed=x64compatible", script, StringComparison.Ordinal);
+        Assert.Contains("LicenseFile={#LicensePath}", script, StringComparison.Ordinal);
         Assert.Contains("Source: \"{#PublishDirX64}\\*\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishDirX86", script, StringComparison.Ordinal);
         Assert.Contains("Check: Is64BitInstallMode", script, StringComparison.Ordinal);
@@ -404,6 +405,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("installer\\OnlyExo365.iss", script, StringComparison.Ordinal);
         Assert.Contains("Get-InnoSetupCompilerPath -RepositoryRoot $repositoryRoot", script, StringComparison.Ordinal);
         Assert.Contains("/DPublishDirX64=$resolvedPublishPathX64", script, StringComparison.Ordinal);
+        Assert.Contains("/DLicensePath=$resolvedLicensePath", script, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishDirX86", script, StringComparison.Ordinal);
         Assert.DoesNotContain("CleanupScriptPath", script, StringComparison.Ordinal);
         Assert.DoesNotContain("iexpress.exe", script, StringComparison.Ordinal);

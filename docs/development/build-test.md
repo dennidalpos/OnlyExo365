@@ -4,10 +4,11 @@ This document owns local development commands and CI gate mapping.
 
 ## Baseline
 
-- Windows
-- PowerShell 7
-- .NET SDK `10.0.203`
+- Windows x64
+- PowerShell 7+ (`pwsh`)
+- .NET SDK `10.0.203` exactly; `global.json` disables roll-forward
 - NuGet lockfiles enabled
+- runtime identifier `win-x64`
 - Inno Setup 6 only for packaging
 
 ## Canonical Commands
@@ -27,7 +28,10 @@ Packaging prerequisites:
 ```powershell
 pwsh ./scripts/agents/doctor.ps1 -CheckPackaging
 pwsh ./scripts/Install-InnoSetup.ps1
+pwsh ./scripts/Install-InnoSetup.ps1 -Install -PackageManager Auto
 ```
+
+`scripts/Install-InnoSetup.ps1` checks `INNOSETUP_BIN`, `INNOSETUP_HOME`, `C:\Program Files (x86)\Inno Setup 6`, and `C:\Program Files\Inno Setup 6`. With `-Install`, it tries winget first and Chocolatey second unless `-PackageManager` selects one explicitly.
 
 ## Scripts Layout
 
@@ -40,6 +44,17 @@ pwsh ./scripts/Install-InnoSetup.ps1
 - `scripts/Install-InnoSetup.ps1`: checks or installs the packaging prerequisite.
 - `scripts/agents/*.ps1`: CI, release, test, and maintenance automation entrypoints.
 - `scripts/internal/common.ps1`: shared PowerShell helpers for repository scripts.
+
+## Fresh-Install Development Flow
+
+1. Install PowerShell 7+.
+2. Install .NET SDK `10.0.203`; other SDK versions fail because `global.json` disables roll-forward.
+3. From the repository root, run `pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64`.
+4. Run `pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64`.
+5. Run `pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap`.
+6. For packaging only, install or configure Inno Setup 6, then run `pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64`.
+
+Framework-dependent publish output is the default and requires the .NET 10 Desktop Runtime on target machines. Self-contained publish output is available through `-SelfContained` on `scripts/pack.ps1`, `scripts/gate.ps1`, or `build/build.ps1`.
 
 ## Local CI-Equivalent Validation
 

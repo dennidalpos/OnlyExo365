@@ -29,6 +29,7 @@ $resolvedOutputDirectory = Resolve-RepositoryPath -RepositoryRoot $repositoryRoo
 $resolvedOutputPath = Join-Path $resolvedOutputDirectory $OutputFileName
 $resolvedInstallerScriptPath = Join-Path $repositoryRoot "installer\OnlyExo365.iss"
 $resolvedIconPath = Join-Path $repositoryRoot "src\OnlyExo365.Shell\Assets\Generated\AppIcon.ico"
+$resolvedLicensePath = Join-Path $repositoryRoot "LICENSE"
 $appVersion = Get-ApplicationVersion -RepositoryRoot $repositoryRoot
 $versionSegments = @($appVersion.Split('.'))
 while ($versionSegments.Count -lt 4) {
@@ -51,6 +52,10 @@ if (-not (Test-Path $resolvedInstallerScriptPath -PathType Leaf)) {
 
 if (-not (Test-Path $resolvedIconPath -PathType Leaf)) {
     throw "Application icon not found: $resolvedIconPath"
+}
+
+if (-not (Test-Path $resolvedLicensePath -PathType Leaf)) {
+    throw "License file not found: $resolvedLicensePath"
 }
 
 foreach ($path in @(
@@ -85,6 +90,7 @@ $arguments = @(
     "/DOutputDir=$resolvedOutputDirectory",
     "/DOutputBaseFilename=$outputBaseName",
     "/DIconPath=$resolvedIconPath",
+    "/DLicensePath=$resolvedLicensePath",
     $resolvedInstallerScriptPath
 )
 

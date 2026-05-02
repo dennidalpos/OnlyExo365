@@ -254,11 +254,21 @@ public static class ExchangeConfigurationLoader
         var enableGraph = getEnvironmentVariable(ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect);
         if (!string.IsNullOrWhiteSpace(enableGraph))
         {
-            configuration.EnableGraphAfterExchangeConnect =
-                string.Equals(enableGraph, "1", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(enableGraph, "true", StringComparison.OrdinalIgnoreCase);
-            overlay.HasEnableGraphAfterExchangeConnect = true;
-            hasAnyOverride = true;
+            try
+            {
+                configuration.EnableGraphAfterExchangeConnect = ExchangeOnlineConfiguration.ParseBooleanOrThrow(
+                    enableGraph,
+                    ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect);
+                overlay.HasEnableGraphAfterExchangeConnect = true;
+                hasAnyOverride = true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new ExchangeConfigurationLoadException(
+                    $"{ex.Message} Source: environment variable {ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect}.",
+                    configurationErrorPath,
+                    ex);
+            }
         }
 
         return hasAnyOverride ? overlay : null;

@@ -51,5 +51,19 @@ public sealed class IpcSecretHandlingTests
         Assert.Equal("Sup3rSecret!", secret);
         Assert.False(ProtectedSecretStore.Exists(reference));
     }
+
+    [Theory]
+    [InlineData("..\\outside")]
+    [InlineData("secret")]
+    [InlineData("11111111-1111-1111-1111-111111111111")]
+    public void ProtectedSecretStore_RejectsMalformedSecretReferenceIds(string id)
+    {
+        var reference = new ProtectedSecretReference { Id = id };
+
+        Assert.False(ProtectedSecretStore.Exists(reference));
+        Assert.Null(ProtectedSecretStore.Consume(reference));
+
+        ProtectedSecretStore.TryDelete(reference);
+    }
 }
 

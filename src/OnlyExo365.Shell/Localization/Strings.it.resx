@@ -68,6 +68,9 @@
   <data name="Shell.LanguageSelectorLabel" xml:space="preserve">
     <value>Lingua</value>
   </data>
+  <data name="Shell.AuditTaskSelectorLabel" xml:space="preserve">
+    <value>Task di ricerca audit</value>
+  </data>
   <!-- Status indicators -->
   <data name="Status.WorkerLabel" xml:space="preserve">
     <value>Worker:</value>

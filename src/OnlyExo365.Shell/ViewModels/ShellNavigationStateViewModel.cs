@@ -8,6 +8,28 @@ namespace OnlyExo365.Shell.ViewModels;
 
 public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
 {
+    private static readonly NavigationPageBinding[] PageBindings =
+    [
+        new(NavigationPage.Dashboard, nameof(IsDashboardPage)),
+        new(NavigationPage.Contacts, nameof(IsContactsPage)),
+        new(NavigationPage.Resources, nameof(IsResourcesPage)),
+        new(NavigationPage.PublicFolders, nameof(IsPublicFoldersPage)),
+        new(NavigationPage.MobileDevices, nameof(IsMobileDevicesPage)),
+        new(NavigationPage.Migration, nameof(IsMigrationPage)),
+        new(NavigationPage.Permissions, nameof(IsPermissionsPage)),
+        new(NavigationPage.Mailboxes, nameof(IsMailboxesPage)),
+        new(NavigationPage.DeletedMailboxes, nameof(IsDeletedMailboxesPage)),
+        new(NavigationPage.MailboxSpace, nameof(IsMailboxSpacePage)),
+        new(NavigationPage.MailboxAccessReport, nameof(IsMailboxAccessReportPage)),
+        new(NavigationPage.DistributionLists, nameof(IsDistributionListsPage)),
+        new(NavigationPage.MessageTrace, nameof(IsMessageTracePage)),
+        new(NavigationPage.Compliance, nameof(IsCompliancePage)),
+        new(NavigationPage.MailSecurity, nameof(IsMailSecurityPage)),
+        new(NavigationPage.MailFlow, nameof(IsMailFlowPage)),
+        new(NavigationPage.Tools, nameof(IsToolsPage)),
+        new(NavigationPage.Logs, nameof(IsLogsPage))
+    ];
+
     private readonly NavigationService _navigationService;
     private readonly ShellProgressViewModel _progressState;
     private readonly ShellPromptViewModel _promptState;
@@ -31,24 +53,24 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
         _navigationService.NavigationStateChanged += OnNavigationStateChanged;
         _progressState.PropertyChanged += OnProgressStatePropertyChanged;
 
-        NavigateToDashboardCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Dashboard));
-        NavigateToContactsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Contacts));
-        NavigateToResourcesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Resources));
-        NavigateToPublicFoldersCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.PublicFolders));
-        NavigateToMobileDevicesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MobileDevices));
-        NavigateToMigrationCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Migration));
-        NavigateToPermissionsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Permissions));
-        NavigateToMailboxesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Mailboxes));
-        NavigateToDeletedMailboxesCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.DeletedMailboxes));
-        NavigateToMailboxSpaceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailboxSpace));
-        NavigateToMailboxAccessReportCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailboxAccessReport));
-        NavigateToDistributionListsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.DistributionLists));
-        NavigateToMessageTraceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MessageTrace));
-        NavigateToComplianceCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Compliance));
-        NavigateToMailSecurityCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailSecurity));
-        NavigateToMailFlowCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.MailFlow));
-        NavigateToToolsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Tools));
-        NavigateToLogsCommand = new RelayCommand(() => _navigationService.NavigateTo(NavigationPage.Logs));
+        NavigateToDashboardCommand = CreateNavigateCommand(NavigationPage.Dashboard);
+        NavigateToContactsCommand = CreateNavigateCommand(NavigationPage.Contacts);
+        NavigateToResourcesCommand = CreateNavigateCommand(NavigationPage.Resources);
+        NavigateToPublicFoldersCommand = CreateNavigateCommand(NavigationPage.PublicFolders);
+        NavigateToMobileDevicesCommand = CreateNavigateCommand(NavigationPage.MobileDevices);
+        NavigateToMigrationCommand = CreateNavigateCommand(NavigationPage.Migration);
+        NavigateToPermissionsCommand = CreateNavigateCommand(NavigationPage.Permissions);
+        NavigateToMailboxesCommand = CreateNavigateCommand(NavigationPage.Mailboxes);
+        NavigateToDeletedMailboxesCommand = CreateNavigateCommand(NavigationPage.DeletedMailboxes);
+        NavigateToMailboxSpaceCommand = CreateNavigateCommand(NavigationPage.MailboxSpace);
+        NavigateToMailboxAccessReportCommand = CreateNavigateCommand(NavigationPage.MailboxAccessReport);
+        NavigateToDistributionListsCommand = CreateNavigateCommand(NavigationPage.DistributionLists);
+        NavigateToMessageTraceCommand = CreateNavigateCommand(NavigationPage.MessageTrace);
+        NavigateToComplianceCommand = CreateNavigateCommand(NavigationPage.Compliance);
+        NavigateToMailSecurityCommand = CreateNavigateCommand(NavigationPage.MailSecurity);
+        NavigateToMailFlowCommand = CreateNavigateCommand(NavigationPage.MailFlow);
+        NavigateToToolsCommand = CreateNavigateCommand(NavigationPage.Tools);
+        NavigateToLogsCommand = CreateNavigateCommand(NavigationPage.Logs);
     }
 
     public NavigationPage CurrentPage
@@ -63,29 +85,26 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public bool IsDashboardPage => CurrentPage == NavigationPage.Dashboard;
-    public bool IsContactsPage => CurrentPage == NavigationPage.Contacts;
-    public bool IsResourcesPage => CurrentPage == NavigationPage.Resources;
-    public bool IsPublicFoldersPage => CurrentPage == NavigationPage.PublicFolders;
-    public bool IsMobileDevicesPage => CurrentPage == NavigationPage.MobileDevices;
-    public bool IsMigrationPage => CurrentPage == NavigationPage.Migration;
-    public bool IsPermissionsPage => CurrentPage == NavigationPage.Permissions;
-    public bool IsMailboxesPage => CurrentPage == NavigationPage.Mailboxes;
-    public bool IsDeletedMailboxesPage => CurrentPage == NavigationPage.DeletedMailboxes;
-    public bool IsMailboxSpacePage => CurrentPage == NavigationPage.MailboxSpace;
-    public bool IsMailboxAccessReportPage => CurrentPage == NavigationPage.MailboxAccessReport;
-    public bool IsDistributionListsPage => CurrentPage == NavigationPage.DistributionLists;
-    public bool IsMessageTracePage => CurrentPage == NavigationPage.MessageTrace;
-    public bool IsCompliancePage => CurrentPage == NavigationPage.Compliance;
-    public bool IsMailSecurityPage => CurrentPage == NavigationPage.MailSecurity;
-    public bool IsMailFlowPage => CurrentPage == NavigationPage.MailFlow;
-    public bool IsToolsPage => CurrentPage == NavigationPage.Tools;
-    public bool IsLogsPage => CurrentPage == NavigationPage.Logs;
+    public bool IsDashboardPage => IsCurrentPage(NavigationPage.Dashboard);
+    public bool IsContactsPage => IsCurrentPage(NavigationPage.Contacts);
+    public bool IsResourcesPage => IsCurrentPage(NavigationPage.Resources);
+    public bool IsPublicFoldersPage => IsCurrentPage(NavigationPage.PublicFolders);
+    public bool IsMobileDevicesPage => IsCurrentPage(NavigationPage.MobileDevices);
+    public bool IsMigrationPage => IsCurrentPage(NavigationPage.Migration);
+    public bool IsPermissionsPage => IsCurrentPage(NavigationPage.Permissions);
+    public bool IsMailboxesPage => IsCurrentPage(NavigationPage.Mailboxes);
+    public bool IsDeletedMailboxesPage => IsCurrentPage(NavigationPage.DeletedMailboxes);
+    public bool IsMailboxSpacePage => IsCurrentPage(NavigationPage.MailboxSpace);
+    public bool IsMailboxAccessReportPage => IsCurrentPage(NavigationPage.MailboxAccessReport);
+    public bool IsDistributionListsPage => IsCurrentPage(NavigationPage.DistributionLists);
+    public bool IsMessageTracePage => IsCurrentPage(NavigationPage.MessageTrace);
+    public bool IsCompliancePage => IsCurrentPage(NavigationPage.Compliance);
+    public bool IsMailSecurityPage => IsCurrentPage(NavigationPage.MailSecurity);
+    public bool IsMailFlowPage => IsCurrentPage(NavigationPage.MailFlow);
+    public bool IsToolsPage => IsCurrentPage(NavigationPage.Tools);
+    public bool IsLogsPage => IsCurrentPage(NavigationPage.Logs);
 
-    public string CurrentPageTitle => CurrentPage switch
-    {
-        _ => UiTextCatalog.GetNavigationLabel(CurrentPage)
-    };
+    public string CurrentPageTitle => UiTextCatalog.GetNavigationLabel(CurrentPage);
 
     public bool IsNavigationLocked
     {
@@ -229,26 +248,21 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
 
     private void NotifyNavigationPropertiesChanged()
     {
-        OnPropertyChanged(nameof(IsDashboardPage));
-        OnPropertyChanged(nameof(IsContactsPage));
-        OnPropertyChanged(nameof(IsResourcesPage));
-        OnPropertyChanged(nameof(IsPublicFoldersPage));
-        OnPropertyChanged(nameof(IsMobileDevicesPage));
-        OnPropertyChanged(nameof(IsMigrationPage));
-        OnPropertyChanged(nameof(IsPermissionsPage));
-        OnPropertyChanged(nameof(IsMailboxesPage));
-        OnPropertyChanged(nameof(IsDeletedMailboxesPage));
-        OnPropertyChanged(nameof(IsMailboxSpacePage));
-        OnPropertyChanged(nameof(IsMailboxAccessReportPage));
-        OnPropertyChanged(nameof(IsDistributionListsPage));
-        OnPropertyChanged(nameof(IsMessageTracePage));
-        OnPropertyChanged(nameof(IsCompliancePage));
-        OnPropertyChanged(nameof(IsMailSecurityPage));
-        OnPropertyChanged(nameof(IsMailFlowPage));
-        OnPropertyChanged(nameof(IsToolsPage));
-        OnPropertyChanged(nameof(IsLogsPage));
+        foreach (var binding in PageBindings)
+        {
+            OnPropertyChanged(binding.IsCurrentPagePropertyName);
+        }
+
         OnPropertyChanged(nameof(CurrentPageTitle));
     }
+
+    private ICommand CreateNavigateCommand(NavigationPage page)
+        => new RelayCommand(() => _navigationService.NavigateTo(page));
+
+    private bool IsCurrentPage(NavigationPage page)
+        => CurrentPage == page;
+
+    private sealed record NavigationPageBinding(NavigationPage Page, string IsCurrentPagePropertyName);
 
     private sealed class NavigationBlockingRegistration
     {

@@ -22,6 +22,9 @@
 #ifndef IconPath
   #error "IconPath define is required."
 #endif
+#ifndef LicensePath
+  #error "LicensePath define is required."
+#endif
 
 [Setup]
 AppId={{B9E5A61C-8D6A-4B10-8F50-2BB72D7497F3}
@@ -38,6 +41,7 @@ WizardStyle=modern
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputBaseFilename}
 SetupIconFile={#IconPath}
+LicenseFile={#LicensePath}
 UninstallDisplayIcon={app}\OnlyExo365.Shell.exe
 Compression=lzma2/ultra64
 SolidCompression=yes

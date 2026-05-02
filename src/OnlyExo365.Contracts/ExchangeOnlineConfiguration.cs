@@ -336,9 +336,9 @@ public sealed class ExchangeOnlineConfiguration
         var enableGraphRaw = getEnvironmentVariable(ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect);
         if (!string.IsNullOrWhiteSpace(enableGraphRaw))
         {
-            configuration.EnableGraphAfterExchangeConnect =
-                string.Equals(enableGraphRaw, "1", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(enableGraphRaw, "true", StringComparison.OrdinalIgnoreCase);
+            configuration.EnableGraphAfterExchangeConnect = ParseBooleanOrThrow(
+                enableGraphRaw,
+                ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect);
         }
 
         configuration.GraphScopes = configuration.NormalizeGraphScopes().ToList();
@@ -363,6 +363,26 @@ public sealed class ExchangeOnlineConfiguration
 
         throw new InvalidOperationException(
             $"AuthenticationMode must be one of: {string.Join(", ", Enum.GetNames<ExchangeAuthenticationMode>())}.");
+    }
+
+    public static bool ParseBooleanOrThrow(string value, string fieldName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+
+        var normalized = value.Trim();
+        if (string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(normalized, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (string.Equals(normalized, "0", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(normalized, "false", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        throw new InvalidOperationException($"{fieldName} must be one of: 1, 0, true, false.");
     }
 
     private static string ReadOrDefault(string? value, string defaultValue)

@@ -201,6 +201,24 @@ public sealed class MainWindowLayoutTests
         Assert.NotNull(comboBox);
         Assert.Equal("{Binding Compliance.SelectedAuditSearchTask}", (string?)comboBox!.Attribute("SelectedItem"));
         Assert.Equal("TaskSummary", (string?)comboBox.Attribute("DisplayMemberPath"));
+        Assert.Equal("{loc:Loc Key=Shell.AuditTaskSelectorLabel}", (string?)comboBox.Attribute("AutomationProperties.Name"));
+        Assert.Equal("{loc:Loc Key=Shell.AuditTaskSelectorLabel}", (string?)comboBox.Attribute("ToolTip"));
+    }
+
+    [Fact]
+    public void HeaderLanguageSelector_HasAccessibleLocalizedName()
+    {
+        var document = LoadViewDocument("MainWindow.xaml");
+
+        var comboBox = document
+            .Descendants()
+            .FirstOrDefault(candidate =>
+                candidate.Name.LocalName == "ComboBox" &&
+                string.Equals((string?)candidate.Attribute("ItemsSource"), "{Binding LanguageSelection.AvailableLocales}", StringComparison.Ordinal));
+
+        Assert.NotNull(comboBox);
+        Assert.Equal("{loc:Loc Key=Shell.LanguageSelectorLabel}", (string?)comboBox!.Attribute("AutomationProperties.Name"));
+        Assert.Equal("{loc:Loc Key=Shell.LanguageSelectorLabel}", (string?)comboBox.Attribute("ToolTip"));
     }
 
     [Fact]

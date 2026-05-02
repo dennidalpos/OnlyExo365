@@ -37,6 +37,7 @@ The generated file contains:
 - `entries`
 
 Entries are normalized and ordered by `skuPartNumber` and `skuId`.
+Each entry includes `servicePlans` with `servicePlanName`, `servicePlanId`, and `friendlyName` when the source CSV provides plan rows.
 
 ## Current Versioned Snapshot
 

@@ -196,6 +196,24 @@ public sealed class ExchangeConfigurationLoaderTests : IDisposable
     }
 
     [Fact]
+    public void Load_ThrowsWhenEnvironmentEnableGraphFlagIsInvalid()
+    {
+        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            [ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect] = "maybe"
+        };
+
+        var exception = Assert.Throws<ExchangeConfigurationLoader.ExchangeConfigurationLoadException>(
+            () => ExchangeConfigurationLoader.Load(
+                _tempDirectory,
+                _sharedConfigurationDirectory,
+                key => values.TryGetValue(key, out var value) ? value : null));
+
+        Assert.Contains($"{ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect} must be one of:", exception.Message);
+        Assert.Contains($"environment variable {ExchangeConfigurationEnvironmentVariables.EnableGraphAfterExchangeConnect}", exception.Message);
+    }
+
+    [Fact]
     public void Load_ReportsFileSourceForInvalidExchangeOrganization()
     {
         File.WriteAllText(

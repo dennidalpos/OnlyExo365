@@ -35,9 +35,9 @@ New code should strengthen these internal boundaries first. Do not add `Domain`,
 
 ## Toolchain Baseline
 
-- Windows
-- PowerShell 7
-- .NET SDK `10.0.203`, pinned in `global.json`
+- Windows x64
+- PowerShell 7+ (`pwsh`)
+- .NET SDK `10.0.203`, pinned in `global.json` with roll-forward disabled
 - Inno Setup 6 for local packaging
 - solution/project baseline: `net10.0` or `net10.0-windows` only
 - supported runtime identifier: `win-x64`

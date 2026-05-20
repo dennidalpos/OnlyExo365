@@ -6,7 +6,7 @@ This document owns local development commands and CI gate mapping.
 
 - Windows x64
 - PowerShell 7+ (`pwsh`)
-- .NET SDK `10.0.203` exactly; `global.json` disables roll-forward
+- .NET SDK `10.0.204` exactly; `global.json` disables roll-forward
 - NuGet lockfiles enabled
 - runtime identifier `win-x64`
 - Inno Setup 6 only for packaging
@@ -48,7 +48,7 @@ pwsh ./scripts/Install-InnoSetup.ps1 -Install -PackageManager Auto
 ## Fresh-Install Development Flow
 
 1. Install PowerShell 7+.
-2. Install .NET SDK `10.0.203`; other SDK versions fail because `global.json` disables roll-forward.
+2. Install .NET SDK `10.0.204`; other SDK versions fail because `global.json` disables roll-forward.
 3. From the repository root, run `pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64`.
 4. Run `pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64`.
 5. Run `pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap`.

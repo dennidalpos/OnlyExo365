@@ -13,7 +13,7 @@ OnlyExo365 is a Windows-only WPF desktop application for Exchange Online adminis
 
 - Windows x64
 - PowerShell 7+ (`pwsh`)
-- .NET SDK `10.0.203` exactly, pinned by `global.json` with roll-forward disabled
+- .NET SDK `10.0.204` exactly, pinned by `global.json` with roll-forward disabled
 - NuGet lockfiles in each project
 - Runtime identifier `win-x64`
 - Inno Setup 6 only when creating `OnlyExo365.Setup.exe`

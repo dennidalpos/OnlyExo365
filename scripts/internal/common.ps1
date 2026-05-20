@@ -185,6 +185,33 @@ function Assert-CommandAvailable {
     }
 }
 
+function Get-DotNetInstalledSdkVersions {
+    Assert-CommandAvailable -CommandName "dotnet"
+
+    $output = @(& dotnet --list-sdks 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        $details = ($output | ForEach-Object { $_.ToString().Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join " "
+        if ([string]::IsNullOrWhiteSpace($details)) {
+            throw "Unable to list installed .NET SDK versions."
+        }
+
+        throw "Unable to list installed .NET SDK versions. $details"
+    }
+
+    $versions = @(
+        $output |
+            ForEach-Object {
+                $line = $_.ToString().Trim()
+                if ($line -match '^(?<version>\d+\.\d+\.\d+(?:[-a-zA-Z0-9.]+)?)\s+\[') {
+                    $Matches.version
+                }
+            } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+
+    return @($versions | Sort-Object -Unique)
+}
+
 function Assert-WindowsPlatform {
     if (-not [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)) {
         throw "This repository requires Windows."
@@ -194,9 +221,18 @@ function Assert-WindowsPlatform {
 function Get-DotNetSdkVersion {
     Assert-CommandAvailable -CommandName "dotnet"
 
-    $version = (& dotnet --version 2>&1 | Select-Object -Last 1).ToString().Trim()
+    $output = @(& dotnet --version 2>&1)
+    $lastOutput = $output | Select-Object -Last 1
+    $version = if ($null -eq $lastOutput) { "" } else { $lastOutput.ToString().Trim() }
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($version)) {
-        throw "Unable to resolve the installed .NET SDK version."
+        $installedVersions = @(Get-DotNetInstalledSdkVersions)
+        $details = ($output | ForEach-Object { $_.ToString().Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join " "
+        $installedMessage = if ($installedVersions.Count -gt 0) { " Installed SDKs: $($installedVersions -join ', ')." } else { "" }
+        if ([string]::IsNullOrWhiteSpace($details)) {
+            throw "Unable to resolve the active .NET SDK version.$installedMessage"
+        }
+
+        throw "Unable to resolve the active .NET SDK version. $details$installedMessage"
     }
 
     return $version
@@ -246,9 +282,9 @@ function Assert-DotNetSdkPinnedVersion {
     param([string]$RepositoryRoot)
 
     $sdkSpecification = Get-GlobalJsonSdkSpecification -RepositoryRoot $RepositoryRoot
-    $installedVersion = Get-DotNetSdkVersion
+    $installedVersions = @(Get-DotNetInstalledSdkVersions)
 
-    if (-not [string]::Equals($installedVersion, $sdkSpecification.Version, [System.StringComparison]::Ordinal)) {
+    if ($installedVersions -notcontains $sdkSpecification.Version) {
         $rollForwardMessage = if ([string]::IsNullOrWhiteSpace($sdkSpecification.RollForward)) {
             "global.json pins SDK version $($sdkSpecification.Version)."
         }
@@ -256,7 +292,14 @@ function Assert-DotNetSdkPinnedVersion {
             "global.json pins SDK version $($sdkSpecification.Version) with rollForward '$($sdkSpecification.RollForward)'."
         }
 
-        throw ".NET SDK version mismatch. $rollForwardMessage Installed: $installedVersion"
+        $installedMessage = if ($installedVersions.Count -gt 0) {
+            "Installed SDKs: $($installedVersions -join ', ')."
+        }
+        else {
+            "No .NET SDK versions were reported by 'dotnet --list-sdks'."
+        }
+
+        throw ".NET SDK version mismatch. $rollForwardMessage $installedMessage Install SDK $($sdkSpecification.Version) or update global.json to an installed SDK."
     }
 
     return $sdkSpecification

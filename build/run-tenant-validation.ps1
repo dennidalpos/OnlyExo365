@@ -377,61 +377,116 @@ function Ensure-RequiredModule {
     }
 }
 
+function Format-CommandPreviewValue {
+    param([object]$Value)
+
+    if ($Value -is [bool]) {
+        if ($Value) {
+            return "`$true"
+        }
+
+        return "`$false"
+    }
+
+    if ($Value -is [System.Collections.IEnumerable] -and $Value -isnot [string]) {
+        $items = @($Value | ForEach-Object { "'$(([string]$_).Replace("'", "''"))'" })
+        return "@($($items -join ', '))"
+    }
+
+    return "'$(([string]$Value).Replace("'", "''"))'"
+}
+
+function New-CommandInvocation {
+    param(
+        [string]$CommandName,
+        [hashtable]$Arguments
+    )
+
+    $previewParts = New-Object System.Collections.Generic.List[string]
+    $previewParts.Add($CommandName)
+
+    foreach ($entry in $Arguments.GetEnumerator()) {
+        if ($entry.Value -is [bool] -and $entry.Value) {
+            $previewParts.Add("-$($entry.Key)")
+            continue
+        }
+
+        $previewParts.Add("-$($entry.Key)")
+        $previewParts.Add((Format-CommandPreviewValue -Value $entry.Value))
+    }
+
+    return [pscustomobject]@{
+        CommandName = $CommandName
+        Arguments = $Arguments
+        Preview = $previewParts -join " "
+    }
+}
+
+function Add-OptionalCommandArgument {
+    param(
+        [hashtable]$Arguments,
+        [string]$Name,
+        [object]$Value
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$Value)) {
+        $Arguments[$Name] = $Value
+    }
+}
+
 function Get-ExchangeConnectCommand {
     param(
         [hashtable]$Configuration,
         [string]$AuthenticationMode
     )
 
-    $environmentPart = if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeEnvironmentName)) {
-        ""
-    }
-    else {
-        " -ExchangeEnvironmentName '$($Configuration.ExchangeEnvironmentName.Replace("'", "''"))'"
+    $arguments = [ordered]@{
+        ShowBanner = $false
     }
 
-    $delegatedPart = if ([string]::IsNullOrWhiteSpace($Configuration.DelegatedOrganization)) {
-        ""
-    }
-    else {
-        " -DelegatedOrganization '$($Configuration.DelegatedOrganization.Replace("'", "''"))'"
-    }
+    Add-OptionalCommandArgument -Arguments $arguments -Name "ExchangeEnvironmentName" -Value $Configuration.ExchangeEnvironmentName
+    Add-OptionalCommandArgument -Arguments $arguments -Name "DelegatedOrganization" -Value $Configuration.DelegatedOrganization
 
     switch ($AuthenticationMode.ToLowerInvariant()) {
         "interactive" {
-            $organizationPart = if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) { "" } else { " -Organization '$($Configuration.ExchangeOrganization.Replace("'", "''"))'" }
-            $upnHintPart = if ([string]::IsNullOrWhiteSpace($Configuration.UserPrincipalNameHint)) { "" } else { " -UserPrincipalName '$($Configuration.UserPrincipalNameHint.Replace("'", "''"))'" }
-            return "Connect-ExchangeOnline -ShowBanner:`$false$environmentPart$organizationPart$delegatedPart$upnHintPart"
+            Add-OptionalCommandArgument -Arguments $arguments -Name "Organization" -Value $Configuration.ExchangeOrganization
+            Add-OptionalCommandArgument -Arguments $arguments -Name "UserPrincipalName" -Value $Configuration.UserPrincipalNameHint
+            return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         "devicecode" {
-            $organizationPart = if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) { "" } else { " -Organization '$($Configuration.ExchangeOrganization.Replace("'", "''"))'" }
-            $upnHintPart = if ([string]::IsNullOrWhiteSpace($Configuration.UserPrincipalNameHint)) { "" } else { " -UserPrincipalName '$($Configuration.UserPrincipalNameHint.Replace("'", "''"))'" }
-            return "Connect-ExchangeOnline -ShowBanner:`$false$environmentPart$organizationPart$delegatedPart$upnHintPart -Device"
+            Add-OptionalCommandArgument -Arguments $arguments -Name "Organization" -Value $Configuration.ExchangeOrganization
+            Add-OptionalCommandArgument -Arguments $arguments -Name "UserPrincipalName" -Value $Configuration.UserPrincipalNameHint
+            $arguments.Device = $true
+            return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
                 Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_EXO_ORGANIZATION."
             }
 
-            $certPart = if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
-                " -CertificateThumbprint '$($Configuration.CertificateThumbprint.Replace("'", "''"))'"
+            $arguments.AppId = $Configuration.ApplicationId
+            $arguments.Organization = $Configuration.ExchangeOrganization
+            if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
+                $arguments.CertificateThumbprint = $Configuration.CertificateThumbprint
             }
             elseif (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateSubjectName)) {
-                " -CertificateSubjectName '$($Configuration.CertificateSubjectName.Replace("'", "''"))'"
+                $arguments.CertificateSubjectName = $Configuration.CertificateSubjectName
             }
             else {
                 Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT."
             }
 
-            return "Connect-ExchangeOnline -ShowBanner:`$false$environmentPart$delegatedPart -AppId '$($Configuration.ApplicationId.Replace("'", "''"))' -Organization '$($Configuration.ExchangeOrganization.Replace("'", "''"))'$certPart"
+            return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         "managedidentity" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
                 Stop-WithError "ManagedIdentity validation requires ONLYEXO365_EXO_ORGANIZATION."
             }
 
-            $accountIdPart = if ([string]::IsNullOrWhiteSpace($Configuration.ManagedIdentityAccountId)) { "" } else { " -ManagedIdentityAccountId '$($Configuration.ManagedIdentityAccountId.Replace("'", "''"))'" }
-            return "Connect-ExchangeOnline -ShowBanner:`$false$environmentPart$delegatedPart -ManagedIdentity -Organization '$($Configuration.ExchangeOrganization.Replace("'", "''"))'$accountIdPart"
+            $arguments.ManagedIdentity = $true
+            $arguments.Organization = $Configuration.ExchangeOrganization
+            Add-OptionalCommandArgument -Arguments $arguments -Name "ManagedIdentityAccountId" -Value $Configuration.ManagedIdentityAccountId
+            return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         default {
             Stop-WithError "Unsupported authentication mode for tenant validation: $($Configuration.AuthenticationMode)"
@@ -452,35 +507,55 @@ function Get-GraphConnectCommand {
 
     switch ($AuthenticationMode.ToLowerInvariant()) {
         "interactive" {
-            $tenantPart = if ([string]::IsNullOrWhiteSpace($Configuration.GraphTenantId)) { "" } else { " -TenantId '$($Configuration.GraphTenantId.Replace("'", "''"))'" }
-            $scopeArguments = $scopes | ForEach-Object { "'$($_.Replace("'", "''"))'" }
-            return "Connect-MgGraph -Scopes @($($scopeArguments -join ', '))$tenantPart -ContextScope Process -NoWelcome"
+            $arguments = [ordered]@{
+                Scopes = $scopes
+                ContextScope = "Process"
+                NoWelcome = $true
+            }
+            Add-OptionalCommandArgument -Arguments $arguments -Name "TenantId" -Value $Configuration.GraphTenantId
+            return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
         }
         "devicecode" {
-            $tenantPart = if ([string]::IsNullOrWhiteSpace($Configuration.GraphTenantId)) { "" } else { " -TenantId '$($Configuration.GraphTenantId.Replace("'", "''"))'" }
-            $scopeArguments = $scopes | ForEach-Object { "'$($_.Replace("'", "''"))'" }
-            return "Connect-MgGraph -Scopes @($($scopeArguments -join ', '))$tenantPart -ContextScope Process -UseDeviceCode -NoWelcome"
+            $arguments = [ordered]@{
+                Scopes = $scopes
+                ContextScope = "Process"
+                UseDeviceCode = $true
+                NoWelcome = $true
+            }
+            Add-OptionalCommandArgument -Arguments $arguments -Name "TenantId" -Value $Configuration.GraphTenantId
+            return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.GraphTenantId)) {
                 Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_GRAPH_TENANT_ID for Graph."
             }
 
-            $certPart = if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
-                " -CertificateThumbprint '$($Configuration.CertificateThumbprint.Replace("'", "''"))'"
+            $arguments = [ordered]@{
+                ClientId = $Configuration.ApplicationId
+                TenantId = $Configuration.GraphTenantId
+                ContextScope = "Process"
+                NoWelcome = $true
+            }
+            if (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint)) {
+                $arguments.CertificateThumbprint = $Configuration.CertificateThumbprint
             }
             elseif (-not [string]::IsNullOrWhiteSpace($Configuration.CertificateSubjectName)) {
-                " -CertificateSubjectName '$($Configuration.CertificateSubjectName.Replace("'", "''"))'"
+                $arguments.CertificateSubjectName = $Configuration.CertificateSubjectName
             }
             else {
                 Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT for Graph."
             }
 
-            return "Connect-MgGraph -ClientId '$($Configuration.ApplicationId.Replace("'", "''"))' -TenantId '$($Configuration.GraphTenantId.Replace("'", "''"))'$certPart -ContextScope Process -NoWelcome"
+            return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
         }
         "managedidentity" {
-            $clientIdPart = if ([string]::IsNullOrWhiteSpace($Configuration.ManagedIdentityAccountId)) { "" } else { " -ClientId '$($Configuration.ManagedIdentityAccountId.Replace("'", "''"))'" }
-            return "Connect-MgGraph -Identity$clientIdPart -ContextScope Process -NoWelcome"
+            $arguments = [ordered]@{
+                Identity = $true
+                ContextScope = "Process"
+                NoWelcome = $true
+            }
+            Add-OptionalCommandArgument -Arguments $arguments -Name "ClientId" -Value $Configuration.ManagedIdentityAccountId
+            return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
         }
         default {
             Stop-WithError "Unsupported authentication mode for Graph validation: $($Configuration.AuthenticationMode)"
@@ -654,8 +729,9 @@ try {
 
     Write-Step "Connecting to Exchange Online"
     $exchangeConnectCommand = Get-ExchangeConnectCommand -Configuration $configuration -AuthenticationMode $authResolution.effective_mode
-    Write-Info $exchangeConnectCommand
-    Invoke-Expression $exchangeConnectCommand | Out-Null
+    Write-Info $exchangeConnectCommand.Preview
+    $exchangeConnectArguments = $exchangeConnectCommand.Arguments
+    & $exchangeConnectCommand.CommandName @exchangeConnectArguments | Out-Null
     $report.exchange.connected = $true
     Write-Success "Exchange Online session established."
 
@@ -826,8 +902,9 @@ try {
     if (-not $SkipGraph) {
         Write-Step "Connecting to Microsoft Graph"
         $graphConnectCommand = Get-GraphConnectCommand -Configuration $configuration -AuthenticationMode $authResolution.effective_mode
-        Write-Info $graphConnectCommand
-        Invoke-Expression $graphConnectCommand | Out-Null
+        Write-Info $graphConnectCommand.Preview
+        $graphConnectArguments = $graphConnectCommand.Arguments
+        & $graphConnectCommand.CommandName @graphConnectArguments | Out-Null
         $report.graph.connected = $true
         Write-Success "Microsoft Graph session established."
 

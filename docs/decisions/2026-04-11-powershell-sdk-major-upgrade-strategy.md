@@ -8,7 +8,7 @@ The worker depends on `Microsoft.PowerShell.SDK` `7.6.1`, while the product ship
 
 The repository baseline is:
 
-- `.NET SDK` `10.0.203` pinned in `global.json`
+- `.NET SDK` `10.0.204` pinned in `global.json`
 - `OnlyExo365.Contracts`: `net10.0`
 - `OnlyExo365.Worker`: `net10.0`
 - `OnlyExo365.Shell`: `net10.0-windows`

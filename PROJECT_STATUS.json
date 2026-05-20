@@ -1,12 +1,62 @@
 {
-  "tasks": [
-    {
-      "id": "exo-mailbox-script-factory-settings-facet",
-      "type": "refactor",
-      "status": "todo",
-      "risk": "medium",
-      "priority": "medium",
-      "context": "ExoMailboxScriptFactory mixes mailbox listing/detail scripts with mailbox settings, CAS, retention, auto-reply, and create-mailbox command composition. Extract only the settings/CAS/retention/auto-reply builders into a focused internal facet, preserve generated command text and ExoRequestSanitizer usage, and verify with WorkerCommandTests.MailboxLicensing, WorkerCommandTests, MailboxReportingCommandTests, and WorkerModuleCharacterizationTests."
-    }
-  ]
+  "project_name": "OnlyExo365",
+  "status": "active",
+  "current_phase": "verification complete",
+  "last_updated": "2026-05-15T12:29:37+02:00",
+  "production_target": true,
+  "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
+  "active_objective": "Repository local gate completed without deleting user-local app data.",
+  "assumptions": [
+    "The local machine should use installed .NET SDK 10.0.204 while preserving explicit SDK pinning and disabled roll-forward."
+  ],
+  "decisions": [],
+  "current_tasks": [],
+  "next_tasks": [
+    "Run scripts/gate.ps1 without -KeepLocalAppData only when local app data cleanup is explicitly acceptable for the machine."
+  ],
+  "blockers": [],
+  "risks": [
+    "Local app data cleanup remains intentionally skipped unless -KeepLocalAppData is omitted.",
+    "Package reproducibility and artifact signing validation were not run because scripts/gate.ps1 only enables them with explicit switches.",
+    "PSScriptAnalyzer still reports existing style warnings, but no error-severity findings remain."
+  ],
+  "dependencies": {
+    "runtime": [
+      ".NET Desktop Runtime 10",
+      "PowerShell 7+"
+    ],
+    "development": [
+      ".NET SDK 10.0.204",
+      "Inno Setup 6 for packaging"
+    ],
+    "external_services": [
+      "Microsoft 365 tenant access for runtime Exchange and Graph operations"
+    ]
+  },
+  "quality_gates": {
+    "format": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "tests": "passed",
+    "build": "passed",
+    "security_review": "passed"
+  },
+  "commands": {
+    "install": "pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64",
+    "dev": "pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild",
+    "test": "pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64",
+    "lint": "",
+    "typecheck": "pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64",
+    "build": "pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64",
+    "start": "pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild"
+  },
+  "environment": {
+    "os_target": "Windows",
+    "shell": "PowerShell",
+    "required_env_vars": [],
+    "env_files": []
+  },
+  "last_completed_work": "Completed scripts/gate.ps1 -KeepLocalAppData: clean, prerequisites, bootstrap, Debug build, 733 tests, architecture validation, NuGet vulnerability scan, gitleaks scan, Release publish, and setup packaging passed.",
+  "open_questions": [],
+  "handoff_notes": "Verified commands: PowerShell parser for scripts/build, PSScriptAnalyzer error check, scripts/bootstrap.ps1, scripts/build.ps1 Debug, scripts/agents/test.ps1 Debug, scripts/agents/doctor.ps1, scripts/clean.ps1 -DryRun -SkipDotNetClean, scripts/Install-InnoSetup.ps1, scripts/pack.ps1 Release, and scripts/gate.ps1 -KeepLocalAppData."
 }

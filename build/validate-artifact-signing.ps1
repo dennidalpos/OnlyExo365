@@ -113,6 +113,7 @@ $temporaryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-signin
 $certificatePath = Join-Path $temporaryRoot "validation-signing.pfx"
 $clonedTargets = New-Object System.Collections.Generic.List[string]
 $certificateThumbprint = $null
+$certificatePassword = $null
 $TimestampUrl = Resolve-TimestampUrl -Url $TimestampUrl
 
 try {
@@ -140,7 +141,12 @@ try {
 
     Write-Step "Creating disposable code-signing certificate"
     $certificatePasswordPlain = [guid]::NewGuid().ToString("N") + "!"
-    $certificatePassword = ConvertTo-SecureString -String $certificatePasswordPlain -AsPlainText -Force
+    $certificatePassword = [System.Security.SecureString]::new()
+    foreach ($character in $certificatePasswordPlain.ToCharArray()) {
+        $certificatePassword.AppendChar($character)
+    }
+
+    $certificatePassword.MakeReadOnly()
 
     $certificate = New-SelfSignedCertificate `
         -Subject $SignerSubject `
@@ -188,6 +194,10 @@ try {
     Write-Success "Disposable artifact signing path validated successfully."
 }
 finally {
+    if ($null -ne $certificatePassword) {
+        $certificatePassword.Dispose()
+    }
+
     if (-not [string]::IsNullOrWhiteSpace($certificateThumbprint)) {
         Remove-CertificateFromStore -StorePath "Cert:\CurrentUser\My" -Thumbprint $certificateThumbprint -DeleteKey
     }

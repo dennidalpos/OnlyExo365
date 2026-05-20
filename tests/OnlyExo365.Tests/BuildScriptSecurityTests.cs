@@ -470,6 +470,8 @@ public sealed class BuildScriptSecurityTests
         var smokeScript = File.ReadAllText(smokePath);
 
         Assert.Contains("function Assert-DotNetSdkPinnedVersion", commonScript, StringComparison.Ordinal);
+        Assert.Contains("function Get-DotNetInstalledSdkVersions", commonScript, StringComparison.Ordinal);
+        Assert.Contains("dotnet --list-sdks", commonScript, StringComparison.Ordinal);
         Assert.Contains("function Get-InnoSetupCompilerPath", commonScript, StringComparison.Ordinal);
         Assert.Contains("function Invoke-RepositoryBootstrap", commonScript, StringComparison.Ordinal);
         Assert.Contains("scripts/bootstrap.ps1", commonScript, StringComparison.Ordinal);
@@ -592,6 +594,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("Get-MgOrganization", script, StringComparison.Ordinal);
         Assert.Contains("Get-MgSubscribedSku", script, StringComparison.Ordinal);
         Assert.Contains("failed_probe_count", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Invoke-Expression", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Set-Mailbox", script, StringComparison.Ordinal);
         Assert.DoesNotContain("New-Mailbox", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Set-MgUserLicense", script, StringComparison.Ordinal);

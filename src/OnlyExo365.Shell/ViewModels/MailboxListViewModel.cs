@@ -414,7 +414,7 @@ public class MailboxListViewModel : ViewModelBase
             {
                 await RunOnUiThreadAsync(() =>
                 {
-                    // Use ReplaceAll for smoother UI updates instead of Clear + Add
+                    // In-place collection update
                     Mailboxes.ReplaceAll(result.Value.Mailboxes);
                     TotalCount = result.Value.TotalCount;
                     IsTotalCountExact = result.Value.IsTotalCountExact;

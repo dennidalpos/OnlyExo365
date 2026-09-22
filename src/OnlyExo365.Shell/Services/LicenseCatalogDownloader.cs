@@ -5,17 +5,13 @@ using System.Text.RegularExpressions;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>
-/// Downloads and converts the Microsoft 365 SKU catalog from the official
-/// Microsoft Learn page. Mirrors the logic of
-/// <c>scripts/agents/refresh-microsoft365-sku-catalog.ps1</c> in C#.
-/// </summary>
+/// <summary>Downloads and converts the Microsoft 365 SKU catalog from Microsoft Learn.</summary>
 public sealed partial class LicenseCatalogDownloader : IDisposable
 {
     private readonly LicenseCatalogConfiguration _configuration;
     private readonly HttpClient _httpClient;
 
-    // Regex to find the CSV download link inside the Microsoft Learn documentation page.
+    // Extracts CSV download link from HTML page
     [GeneratedRegex(
         @"https://download\.microsoft\.com/download/[^""'\s<>]+licensing\.csv",
         RegexOptions.IgnoreCase)]
@@ -37,10 +33,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
             "OnlyExo365/1.0 (LicenseCatalogUpdater)");
     }
 
-    /// <summary>
-    /// Full pipeline: fetch documentation page → extract CSV URL → download
-    /// CSV → parse + group rows → serialise to catalog JSON string.
-    /// </summary>
+    /// <summary>Downloads CSV from documentation page and serializes catalog JSON.</summary>
     public async Task<string> DownloadCatalogJsonAsync(CancellationToken cancellationToken = default)
     {
         var csvUrl = await ResolveCsvUrlAsync(_configuration.RemoteSource, cancellationToken);
@@ -49,7 +42,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         return JsonSerializer.Serialize(document, LocalSkuCatalogJsonContext.Default.LocalSkuCatalogDocument);
     }
 
-    /// <summary>Exposes CSV URL resolution as a testable, internal method.</summary>
+    /// <summary>Resolves CSV URL from documentation HTML.</summary>
     internal async Task<string> ResolveCsvUrlAsync(string documentationUrl, CancellationToken cancellationToken)
     {
         string pageHtml;
@@ -99,11 +92,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         }
     }
 
-    /// <summary>
-    /// Parses the CSV and groups rows by SKU, producing a
-    /// <see cref="LocalSkuCatalogDocument"/>. Exposed as <c>internal</c>
-    /// for unit testing without network access.
-    /// </summary>
+    /// <summary>Parses CSV and groups rows by SKU into LocalSkuCatalogDocument.</summary>
     internal static LocalSkuCatalogDocument ConvertCsvToDocument(
         string csvContent,
         string sourceUrl,
@@ -111,7 +100,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
     {
         using var reader = new System.IO.StringReader(csvContent);
 
-        // Parse header row to resolve column indices by name.
+        // Map column indices from header row
         var headerLine = reader.ReadLine();
         if (string.IsNullOrWhiteSpace(headerLine))
         {
@@ -206,7 +195,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         };
     }
 
-    /// <summary>Minimal CSV row parser: handles quoted fields with embedded commas.</summary>
+    /// <summary>Parses CSV row handling quotes and embedded commas.</summary>
     internal static List<string> ParseCsvRow(string line)
     {
         var fields = new List<string>();

@@ -169,10 +169,9 @@ public static partial class ErrorClassifier
         var messageLower = message.ToLowerInvariant();
         var errorIdLower = fullErrorId.ToLowerInvariant();
 
-        // Check for deprecation warnings that should be ignored
+        // Ignore deprecation warnings (treated as warning, not error).
         if (IsDeprecationWarning(messageLower))
         {
-            // Return a special code that indicates this is just a warning, not an error
             return (ErrorCode.Unknown, false, null);
         }
 

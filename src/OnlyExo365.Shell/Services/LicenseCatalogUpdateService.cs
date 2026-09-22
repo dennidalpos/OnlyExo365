@@ -3,14 +3,10 @@ using System.Reflection;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>
-/// Orchestrates the lifecycle of the local Microsoft 365 SKU catalog:
-/// scheduling, download, validation, persistence, and in-memory reload.
-/// Runs entirely in the Presentation process (no IPC to Worker required).
-/// </summary>
+/// <summary>Manages lifecycle of local Microsoft 365 SKU catalog in Shell process.</summary>
 public sealed class LicenseCatalogUpdateService : IDisposable
 {
-    // The same embedded resource the Worker uses as its fallback.
+    // Embedded Worker fallback resource
     private const string EmbeddedWorkerCatalogResourceName =
         "OnlyExo365.Worker.Data.Microsoft365SkuCatalog.json";
 
@@ -25,10 +21,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
     private volatile bool _isUpdating;
     private bool _disposed;
 
-    /// <summary>
-    /// Raised on the thread-pool thread that completed the update.
-    /// Subscribers must marshal to the UI thread before touching UI state.
-    /// </summary>
+    /// <summary>Raised when catalog is updated; subscribers must marshal to UI thread.</summary>
     public event EventHandler<CatalogUpdatedEventArgs>? CatalogUpdated;
 
     public LicenseCatalogUpdateService(
@@ -54,17 +47,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
 
     public LicenseCatalogConfiguration Configuration => _configuration;
 
-    // -------------------------------------------------------------------------
-    // Startup
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Initialises the service: ensures directory, loads any existing local
-    /// catalog into the resolver (or falls back to the Worker embedded
-    /// resource), optionally starts the background check, and arms the timer.
-    /// Non-blocking: does not throw; errors are surfaced via
-    /// <see cref="CatalogUpdated"/>.
-    /// </summary>
+    /// <summary>Initializes service, loads local or embedded catalog, and arms update timer.</summary>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -77,20 +60,17 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             return;
         }
 
-        // Load persisted metadata (last check/update timestamps, update mode).
         var savedMetadata = await _fileStore.TryLoadMetadataAsync(cancellationToken);
         if (savedMetadata != null)
         {
             _metadata = savedMetadata;
 
-            // Honour the persisted update-mode preference.
             if (Enum.TryParse<CatalogAutoUpdateMode>(_metadata.AutoUpdateMode, out var persistedMode))
             {
                 _configuration.AutoUpdateMode = persistedMode;
             }
         }
 
-        // Load local catalog into the resolver.
         var localCatalog = await _fileStore.TryLoadCatalogAsync(cancellationToken);
         if (localCatalog != null)
         {
@@ -98,14 +78,12 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         else
         {
-            // Fallback: use the embedded Worker catalog so the resolver is never empty.
+            // Fallback to embedded Worker catalog
             TryLoadEmbeddedWorkerCatalog();
         }
 
-        // Emit initial state so UI shows correct version/counts before any network activity.
         RaiseCatalogUpdated(BuildSuccessArgs());
 
-        // Determine if a startup check is due.
         if (_configuration.CheckOnStartup && IsUpdateDue())
         {
             await TryCheckAndUpdateAsync(forceDownload: false, cancellationToken);
@@ -116,20 +94,12 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Update orchestration
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Checks whether a new catalog is available and, if so, downloads and
-    /// applies it.  When <paramref name="forceDownload"/> is <c>true</c>, the
-    /// download is performed regardless of the last update timestamp.
-    /// </summary>
+    /// <summary>Downloads and applies catalog if update is due or forceDownload is true.</summary>
     public async Task TryCheckAndUpdateAsync(
         bool forceDownload = false,
         CancellationToken cancellationToken = default)
     {
-        // Non-queuing: if an update is already running just skip.
+        // Skip if update is already in progress
         if (!await _updateLock.WaitAsync(TimeSpan.Zero, cancellationToken))
         {
             return;
@@ -150,13 +120,12 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             }
             else
             {
-                // Just persist the updated LastChecked timestamp.
                 await SaveMetadataAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
-            // Cancelled by shutdown; do not raise error event.
+            // Cancelled on shutdown
         }
         catch (Exception ex)
         {
@@ -172,10 +141,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Changes the auto-update mode at runtime (persists to metadata so the
-    /// selection survives restarts) and re-arms the scheduler.
-    /// </summary>
+    /// <summary>Updates auto-update mode preference and re-arms scheduler.</summary>
     public async Task ChangeAutoUpdateModeAsync(
         CatalogAutoUpdateMode mode,
         CancellationToken cancellationToken = default)
@@ -186,10 +152,6 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         await TrySaveMetadataAsync(cancellationToken);
         ArmTimer();
     }
-
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
 
     private async Task DownloadAndApplyCatalogAsync(CancellationToken cancellationToken)
     {
@@ -204,7 +166,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
                 "Catalog download failed: " + ex.Message, ex);
         }
 
-        // Parse so we can check the generatedOn date before committing.
+        // Validate before committing
         var incoming = System.Text.Json.JsonSerializer.Deserialize(
             json, LocalSkuCatalogJsonContext.Default.LocalSkuCatalogDocument);
 
@@ -213,12 +175,11 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             throw new InvalidOperationException("The downloaded catalog contains no entries.");
         }
 
-        // Skip write if the catalog version is not newer (avoids unnecessary I/O).
+        // Skip write if catalog is not newer
         if (!string.IsNullOrWhiteSpace(_metadata.CatalogVersion) &&
             !string.IsNullOrWhiteSpace(incoming.GeneratedOn) &&
             string.Compare(incoming.GeneratedOn, _metadata.CatalogVersion, StringComparison.Ordinal) <= 0)
         {
-            // Not newer — just update the check timestamp.
             await SaveMetadataAsync(cancellationToken);
             RaiseCatalogUpdated(BuildSuccessArgs());
             return;
@@ -283,8 +244,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
                 : TimeSpan.Zero;
         }
 
-        // Use Timeout.InfiniteTimeSpan for period; we re-arm inside the callback
-        // so each scheduled run is a fresh one-shot.
+        // One-shot timer re-armed inside callback
         _timer = new Timer(
             _ => _ = TimerCallbackAsync(),
             null,
@@ -306,10 +266,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
     {
         try
         {
-            // Attempt to load the Worker assembly's embedded catalog resource.
-            // The Worker assembly may not be loaded in the Presentation process,
-            // but it is referenced with ReferenceOutputAssembly=false, so the
-            // binary is co-located and can be loaded for resource extraction.
+            // Load Worker embedded catalog resource
             var workerAssembly = TryGetWorkerAssembly();
             if (workerAssembly == null)
             {
@@ -334,13 +291,12 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         catch
         {
-            // Embedded fallback is best-effort; silently ignore any error.
+            // Best-effort fallback
         }
     }
 
     private static Assembly? TryGetWorkerAssembly()
     {
-        // Check if the Worker assembly is already loaded (unlikely in practice).
         var loaded = AppDomain.CurrentDomain.GetAssemblies()
             .FirstOrDefault(a => a.GetName().Name == "OnlyExo365.Worker");
         if (loaded != null)
@@ -348,7 +304,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             return loaded;
         }
 
-        // Try to load from disk (it is a sibling of the Presentation executable).
+        // Load co-located assembly from disk if not already loaded
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var workerPath = Path.Combine(baseDir, "OnlyExo365.Worker.dll");
         if (!File.Exists(workerPath))
@@ -380,7 +336,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         catch
         {
-            // Best-effort; metadata write failure must not crash the app.
+            // Best-effort metadata write
         }
     }
 

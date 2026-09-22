@@ -2,21 +2,21 @@
   "project_name": "OnlyExo365",
   "status": "active",
   "current_phase": "verification complete",
-  "last_updated": "2026-05-15T12:29:37+02:00",
+  "last_updated": "2026-09-22T07:40:00+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
-  "active_objective": "Repository local gate completed without deleting user-local app data.",
+  "active_objective": "Repository local gate completed with full app data cleanup, SDK 10.0.401 alignment, and vulnerability remediation.",
   "assumptions": [
-    "The local machine should use installed .NET SDK 10.0.204 while preserving explicit SDK pinning and disabled roll-forward."
+    "The local machine uses installed .NET SDK 10.0.401 while preserving explicit SDK pinning and disabled roll-forward."
   ],
-  "decisions": [],
+  "decisions": [
+    "Aligned global.json from 10.0.204 to 10.0.401 to match installed toolchain.",
+    "Upgraded System.Security.Cryptography.Xml from 10.0.7 to 10.0.10 to remediate 5 High severity NuGet vulnerabilities."
+  ],
   "current_tasks": [],
-  "next_tasks": [
-    "Run scripts/gate.ps1 without -KeepLocalAppData only when local app data cleanup is explicitly acceptable for the machine."
-  ],
+  "next_tasks": [],
   "blockers": [],
   "risks": [
-    "Local app data cleanup remains intentionally skipped unless -KeepLocalAppData is omitted.",
     "Package reproducibility and artifact signing validation were not run because scripts/gate.ps1 only enables them with explicit switches.",
     "PSScriptAnalyzer still reports existing style warnings, but no error-severity findings remain."
   ],
@@ -26,7 +26,7 @@
       "PowerShell 7+"
     ],
     "development": [
-      ".NET SDK 10.0.204",
+      ".NET SDK 10.0.401",
       "Inno Setup 6 for packaging"
     ],
     "external_services": [
@@ -56,7 +56,7 @@
     "required_env_vars": [],
     "env_files": []
   },
-  "last_completed_work": "Completed scripts/gate.ps1 -KeepLocalAppData: clean, prerequisites, bootstrap, Debug build, 733 tests, architecture validation, NuGet vulnerability scan, gitleaks scan, Release publish, and setup packaging passed.",
+  "last_completed_work": "Completed full scripts/gate.ps1 without -KeepLocalAppData: local app data cleaned, prerequisites verified, locked bootstrap, Debug compile, 733 tests passed, architecture constraints passed, NuGet vulnerability scan passed (remediated System.Security.Cryptography.Xml 10.0.10), gitleaks secret scan passed, Release publish, and setup packaging passed. Completed modular reorganization of docs and source comment minimization.",
   "open_questions": [],
-  "handoff_notes": "Verified commands: PowerShell parser for scripts/build, PSScriptAnalyzer error check, scripts/bootstrap.ps1, scripts/build.ps1 Debug, scripts/agents/test.ps1 Debug, scripts/agents/doctor.ps1, scripts/clean.ps1 -DryRun -SkipDotNetClean, scripts/Install-InnoSetup.ps1, scripts/pack.ps1 Release, and scripts/gate.ps1 -KeepLocalAppData."
+  "handoff_notes": "Verified commands: pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64, pwsh ./scripts/bootstrap.ps1, pwsh ./scripts/agents/doctor.ps1, pwsh ./build/assert-architecture-constraints.ps1, pwsh ./build/assert-no-vulnerable-packages.ps1."
 }

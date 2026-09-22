@@ -1,51 +1,32 @@
 # Architecture Overview
 
-This repository is consolidated around a single Windows/x64 runtime model.
+OnlyExo365 is a Windows-only desktop administration tool for Microsoft Exchange Online and Microsoft Graph.
 
 ## Runtime Model
 
-- `OnlyExo365.Shell.exe`: WPF shell, configuration loading, persistent logging, license catalog cache handling, and worker supervision
-- `OnlyExo365.Worker.exe`: PowerShell-backed execution host, runspace lifecycle, operation dispatching, and Exchange/Graph command execution
-- `OnlyExo365.Contracts`: shared IPC constants, message contracts, DTOs, configuration types, result/error primitives, and diagnostics
-- IPC transport: named pipes plus a DPAPI-protected session token exposed through `ONLYEXO365_IPC_SESSION_TOKEN`
+The application operates across two dedicated processes communicating via Named Pipes:
 
-The shell owns the desktop process boundary. The worker owns PowerShell execution. No separate `Application`, `Infrastructure`, or `Domain` projects remain in the production architecture.
+- **`OnlyExo365.Shell` (`net10.0-windows`)**: WPF desktop presentation, configuration ingestion, local license catalog caching, and worker supervision.
+- **`OnlyExo365.Worker` (`net10.0`)**: Out-of-process execution host powered by `Microsoft.PowerShell.SDK 7.6.1`. Manages Exchange and Graph runspaces, command execution, and error classification.
+- **`OnlyExo365.Contracts` (`net10.0`)**: Shared binary contract defining IPC messages, DTOs, domain error taxonomy, and configuration contracts.
 
-## Repo-Local Layering Rule
+Details on pipe names, protocol framing, and session security are documented in [IPC Architecture](ipc.md).
 
-OnlyExo365 intentionally keeps the production architecture consolidated into Shell, Worker, and Contracts. The clean-architecture rule is enforced inside those projects rather than through separate project names:
+## Internal Layering Rules
 
-- domain rules are pure evaluators, request/response decisions, capability rules, and error/result models with no UI, storage, installer, or PowerShell process ownership
-- application use cases orchestrate domain rules and worker calls without owning WPF controls, named-pipe transport, files, installers, or command text generation
-- infrastructure code owns named pipes, DPAPI-backed secret files, persistent logs, configuration file access, package/install scripts, catalog download/storage, and PowerShell execution
-- presentation code owns WPF views, view models, localization display text, commands, dialogs, and navigation state
+Responsibilities are partitioned internally across projects:
 
-New code should strengthen these internal boundaries first. Do not add `Domain`, `Application`, or `Infrastructure` projects unless a planned architecture change also moves real responsibilities into them in the same work.
+- **Domain**: Pure evaluators, capability rules, validation, and error models. Free of UI, storage, or PowerShell process dependencies.
+- **Application**: Use-case orchestration and worker client interactions without direct WPF or PowerShell coupling.
+- **Infrastructure**: IPC transport, DPAPI secret storage, persistent logs (`PersistentLogWriter`), configuration file loaders, and PowerShell runspaces.
+- **Presentation**: WPF views, ViewModels, commands, and localized resources (`Loc`).
 
 ## Source Layout
 
-- `src/OnlyExo365.Shell`
-- `src/OnlyExo365.Worker`
-- `src/OnlyExo365.Contracts`
-- `tests/OnlyExo365.Tests`
-- `scripts/`: canonical local entrypoints, agent automation scripts, and shared script helpers
-- `build/`: CI, release, security, smoke, signing, and validation helpers
-- `installer/`: Inno Setup authoring for `OnlyExo365.Setup.exe`
-- `.github/`: Windows release baseline action and release workflows
-
-## Toolchain Baseline
-
-- Windows x64
-- PowerShell 7+ (`pwsh`)
-- .NET SDK `10.0.204`, pinned in `global.json` with roll-forward disabled
-- Inno Setup 6 for local packaging
-- solution/project baseline: `net10.0` or `net10.0-windows` only
-- supported runtime identifier: `win-x64`
-
-## Configuration Ownership
-
-- versioned defaults: `src/OnlyExo365.Shell/appsettings.json`
-- shared machine override: `%ProgramData%\OnlyExo365\OnlyExo365\appsettings.json`
-- environment overrides: `ONLYEXO365_*`
-
-Only the current configuration path is supported. Legacy compatibility directories are intentionally not part of the baseline.
+- `src/OnlyExo365.Shell`: WPF presentation application.
+- `src/OnlyExo365.Worker`: Out-of-process PowerShell execution engine.
+- `src/OnlyExo365.Contracts`: Shared contracts and IPC abstractions.
+- `tests/OnlyExo365.Tests`: Unit, characterization, and UI layout regression tests.
+- `scripts/`: Canonical local entrypoints and automation workflows.
+- `build/`: Architecture enforcement, coverage, security scans, and smoke test scripts.
+- `installer/`: Inno Setup script for `OnlyExo365.Setup.exe`.

@@ -21,9 +21,7 @@ internal sealed class AppRuntimeContext : IAsyncDisposable
     {
         await ShellViewModel.StartWorkerOnStartupAsync();
 
-        // Initialise the catalog service non-blocking in the background.
-        // The window is already visible at this point, so there is no startup
-        // degradation even if the network check takes a few seconds.
+        // Non-blocking background catalog initialization.
         _ = Task.Run(() => CatalogUpdateService.InitializeAsync());
     }
 

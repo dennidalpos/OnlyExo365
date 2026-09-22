@@ -3,12 +3,7 @@ using System.Text.Json;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>
-/// All file I/O for the local catalog directory.  Writes are atomic:
-/// data is written to a <c>.tmp</c> file, validated, then moved over
-/// the target with <c>overwrite: true</c>.  A corrupt or partial
-/// download can never replace a previously-valid file.
-/// </summary>
+/// <summary>Atomic file I/O for local catalog directory via validated temp files.</summary>
 public sealed class LicenseCatalogFileStore
 {
     private readonly string _cacheDirectory;
@@ -93,15 +88,12 @@ public sealed class LicenseCatalogFileStore
         }
     }
 
-    /// <summary>
-    /// Atomically writes a new catalog JSON.  Validates the content can be
-    /// deserialised and has at least one entry before replacing the existing file.
-    /// </summary>
+    /// <summary>Atomically writes validated catalog JSON replacing existing file.</summary>
     public async Task WriteCatalogAtomicAsync(string jsonContent, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jsonContent);
 
-        // Validate before touching the live file.
+        // Validate before write
         LocalSkuCatalogDocument? validated;
         try
         {

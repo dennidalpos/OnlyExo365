@@ -3,12 +3,7 @@ using System.Globalization;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>
-/// Thread-safe, hot-swappable resolver for Microsoft 365 SKU display names.
-/// Used by Presentation-layer ViewModels to normalize license names shown in
-/// the UI from the locally-cached catalog.  Reads are lock-free (immutable
-/// dictionary reference swap); <see cref="Reload"/> serialises writes.
-/// </summary>
+/// <summary>Thread-safe resolver for Microsoft 365 SKU display names with lock-free reads.</summary>
 public sealed class PresentationSkuNameResolver
 {
     private sealed record CatalogIndex(
@@ -32,10 +27,7 @@ public sealed class PresentationSkuNameResolver
 
     public int EntryCount => _index.EntryCount;
 
-    /// <summary>
-    /// Atomically replaces the active catalog index with data from
-    /// <paramref name="document"/>.  Safe to call from any thread.
-    /// </summary>
+    /// <summary>Atomically replaces active catalog index from document.</summary>
     public void Reload(LocalSkuCatalogDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -65,12 +57,7 @@ public sealed class PresentationSkuNameResolver
             document.Entries.Count);
     }
 
-    /// <summary>
-    /// Resolves a friendly product name for the given SKU identifiers.
-    /// Looks up by <paramref name="skuPartNumber"/> first, then
-    /// <paramref name="skuId"/>; falls back to a humanised form of the
-    /// raw identifiers when the catalog has no matching entry.
-    /// </summary>
+    /// <summary>Resolves product name by SKU part number or ID, with humanized fallback.</summary>
     public string Resolve(string? skuPartNumber, string? skuId = null)
     {
         var idx = _index;

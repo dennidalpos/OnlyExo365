@@ -520,16 +520,7 @@ public static class ExchangeConfigurationLoader
         }
     }
 
-    // -------------------------------------------------------------------------
-    // License Catalog configuration
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Loads the <c>licensingCatalog</c> section from the standard
-    /// appsettings resolution chain (install dir, then ProgramData shared
-    /// config).  Never throws — configuration errors produce safe defaults
-    /// so a missing or malformed section never blocks startup.
-    /// </summary>
+    /// <summary>Loads licensingCatalog section from appsettings hierarchy; falls back to defaults on error.</summary>
     public static LicenseCatalogConfiguration LoadLicenseCatalogConfiguration()
         => LoadLicenseCatalogConfiguration(
             AppDomain.CurrentDomain.BaseDirectory,
@@ -547,7 +538,7 @@ public static class ExchangeConfigurationLoader
     {
         var config = LicenseCatalogConfiguration.CreateDefault();
 
-        // Apply install-directory appsettings first, then ProgramData override.
+        // Apply appsettings: base dir first, then ProgramData override
         foreach (var dir in new[] { baseDirectory }.Concat(EnumerateSharedConfigurationDirectories(sharedConfigurationDirectory)))
         {
             var path = Path.Combine(dir, AppSettingsFileName);
@@ -575,7 +566,6 @@ public static class ExchangeConfigurationLoader
                     continue;
                 }
 
-                // Merge non-default values from the overlay.
                 config.AutoUpdateMode = overlay.AutoUpdateMode;
                 config.CheckOnStartup = overlay.CheckOnStartup;
 
@@ -596,7 +586,7 @@ public static class ExchangeConfigurationLoader
             }
             catch
             {
-                // Catalog config errors are non-fatal; continue with defaults.
+                // Non-fatal; continue with defaults.
             }
         }
 

@@ -13,7 +13,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     protected ViewModelBase()
     {
-        // All ViewModels are application-lifetime singletons; no memory leak concern.
+        // ViewModels are application-lifetime singletons
         LocalizationService.Instance.CultureChanged += OnCultureChanged;
     }
 

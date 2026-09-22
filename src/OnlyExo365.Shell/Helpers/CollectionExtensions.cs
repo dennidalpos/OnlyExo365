@@ -2,19 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace OnlyExo365.Shell.Helpers;
 
-/// <summary>
-/// Extension methods for ObservableCollection to optimize updates and reduce UI flickering.
-/// </summary>
+/// <summary>ObservableCollection extension methods optimized for UI stability.</summary>
 public static class CollectionExtensions
 {
-    /// <summary>
-    /// Synchronizes the ObservableCollection with a new set of items using minimal changes.
-    /// This avoids clearing and re-adding all items, which causes UI flickering.
-    /// </summary>
-    /// <typeparam name="T">The type of items in the collection.</typeparam>
-    /// <param name="collection">The observable collection to update.</param>
-    /// <param name="newItems">The new items to synchronize with.</param>
-    /// <param name="keySelector">Function to extract a unique key for comparison.</param>
+    /// <summary>Synchronizes collection with new items by key, minimizing UI flicker.</summary>
     public static void SyncWith<T, TKey>(
         this ObservableCollection<T> collection,
         IEnumerable<T> newItems,
@@ -24,7 +15,6 @@ public static class CollectionExtensions
         var newKeys = newItemsList.Select(keySelector).ToHashSet();
         var existingKeys = collection.Select(keySelector).ToHashSet();
 
-        // Remove items that are no longer present
         for (int i = collection.Count - 1; i >= 0; i--)
         {
             var key = keySelector(collection[i]);
@@ -34,7 +24,6 @@ public static class CollectionExtensions
             }
         }
 
-        // Add new items that don't exist
         var existingKeysAfterRemoval = collection.Select(keySelector).ToHashSet();
         foreach (var item in newItemsList)
         {
@@ -46,19 +35,11 @@ public static class CollectionExtensions
         }
     }
 
-    /// <summary>
-    /// Replaces all items in the collection efficiently.
-    /// If the new items are the same count and can be updated in place, it does so.
-    /// Otherwise performs a smart diff.
-    /// </summary>
-    /// <typeparam name="T">The type of items in the collection.</typeparam>
-    /// <param name="collection">The observable collection to update.</param>
-    /// <param name="newItems">The new items to replace with.</param>
+    /// <summary>Replaces items using count heuristic or in-place update.</summary>
     public static void ReplaceAll<T>(this ObservableCollection<T> collection, IEnumerable<T> newItems)
     {
         var newItemsList = newItems.ToList();
 
-        // If collection is empty, just add all
         if (collection.Count == 0)
         {
             foreach (var item in newItemsList)
@@ -68,14 +49,13 @@ public static class CollectionExtensions
             return;
         }
 
-        // If new items are empty, clear
         if (newItemsList.Count == 0)
         {
             collection.Clear();
             return;
         }
 
-        // If counts are very different, just clear and add (faster)
+        // Clear and add if counts differ significantly (faster than per-element update)
         if (Math.Abs(collection.Count - newItemsList.Count) > collection.Count / 2)
         {
             collection.Clear();
@@ -86,7 +66,7 @@ public static class CollectionExtensions
             return;
         }
 
-        // Smart update: remove extras, add missing
+        // In-place update and size alignment
         while (collection.Count > newItemsList.Count)
         {
             collection.RemoveAt(collection.Count - 1);
@@ -96,20 +76,16 @@ public static class CollectionExtensions
         {
             if (i < collection.Count)
             {
-                // Update existing position
                 collection[i] = newItemsList[i];
             }
             else
             {
-                // Add new item
                 collection.Add(newItemsList[i]);
             }
         }
     }
 
-    /// <summary>
-    /// Adds a range of items to the collection.
-    /// </summary>
+    /// <summary>Adds a sequence of items to the collection.</summary>
     public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
     {
         foreach (var item in items)
@@ -118,4 +94,3 @@ public static class CollectionExtensions
         }
     }
 }
-

@@ -2,9 +2,7 @@ using System.Collections.Concurrent;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>
-/// Simple in-memory cache service with TTL support for dashboard stats and retention policies.
-/// </summary>
+/// <summary>In-memory cache with TTL support for dashboard stats and policies.</summary>
 public sealed class CacheService
 {
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new();
@@ -17,9 +15,7 @@ public sealed class CacheService
         public const string RetentionPolicies = "retention_policies";
     }
 
-    /// <summary>
-    /// Gets a cached value if it exists and is not expired.
-    /// </summary>
+    /// <summary>Gets cached value if present and unexpired.</summary>
     public T? Get<T>(string key) where T : class
     {
         if (_cache.TryGetValue(key, out var entry) && !entry.IsExpired)
@@ -27,7 +23,6 @@ public sealed class CacheService
             return entry.Value as T;
         }
 
-        // Remove expired entry
         if (entry?.IsExpired == true)
         {
             _cache.TryRemove(key, out _);
@@ -36,34 +31,26 @@ public sealed class CacheService
         return null;
     }
 
-    /// <summary>
-    /// Sets a value in the cache with the specified TTL.
-    /// </summary>
+    /// <summary>Sets cached value with optional TTL.</summary>
     public void Set<T>(string key, T value, TimeSpan? ttl = null) where T : class
     {
         var expiration = DateTime.UtcNow + (ttl ?? DefaultTtl);
         _cache[key] = new CacheEntry(value, expiration);
     }
 
-    /// <summary>
-    /// Invalidates a specific cache entry.
-    /// </summary>
+    /// <summary>Invalidates specified cache key.</summary>
     public void Invalidate(string key)
     {
         _cache.TryRemove(key, out _);
     }
 
-    /// <summary>
-    /// Invalidates all cache entries.
-    /// </summary>
+    /// <summary>Invalidates all cached entries.</summary>
     public void InvalidateAll()
     {
         _cache.Clear();
     }
 
-    /// <summary>
-    /// Gets a cached value or fetches it using the provided factory function.
-    /// </summary>
+    /// <summary>Gets cached value or invokes fetch factory.</summary>
     public async Task<T?> GetOrFetchAsync<T>(
         string key,
         Func<Task<T?>> fetchFunc,
@@ -101,4 +88,3 @@ public sealed class CacheService
         }
     }
 }
-

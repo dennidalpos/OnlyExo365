@@ -45,10 +45,6 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
         LocalizationService.Instance.CultureChanged += OnCultureChanged;
     }
 
-    // -------------------------------------------------------------------------
-    // Bound properties
-    // -------------------------------------------------------------------------
-
     public string StatusSummary
     {
         get => _statusSummary;
@@ -128,10 +124,6 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
     public ICommand UpdateNowCommand { get; }
     public ICommand OpenCatalogFolderCommand { get; }
 
-    // -------------------------------------------------------------------------
-    // Event handler
-    // -------------------------------------------------------------------------
-
     private void OnCatalogUpdated(object? sender, CatalogUpdatedEventArgs args)
     {
         RunOnUiThread(() =>
@@ -165,10 +157,6 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Commands
-    // -------------------------------------------------------------------------
-
     private void OpenCatalogFolder()
     {
         try
@@ -190,10 +178,6 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
             _shellViewModel.AddLog(LogLevel.Error, $"[LicenseCatalog] Unable to open catalog folder: {ex.Message}");
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     private static string BuildStatusSummary(CatalogUpdatedEventArgs args)
     {
@@ -241,10 +225,6 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
                 : Loc.Get("Tools.Catalog.UpdateFailedUsingLastValid");
         }
     }
-
-    // -------------------------------------------------------------------------
-    // IDisposable
-    // -------------------------------------------------------------------------
 
     public void Dispose()
     {

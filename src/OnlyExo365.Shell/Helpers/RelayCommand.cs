@@ -119,7 +119,7 @@ public class AsyncRelayCommand : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Intentionally ignored.
+            // Ignored.
         }
         finally
         {
@@ -196,7 +196,7 @@ public class AsyncRelayCommand<T> : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Intentionally ignored.
+            // Ignored.
         }
         finally
         {

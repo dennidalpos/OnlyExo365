@@ -34,7 +34,7 @@ public sealed class IpcServer : IDisposable
     private Task? _requestProcessingTask;
     private Channel<RequestEnvelope>? _pendingRequests;
 
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeOperations = new();
+    private readonly ConcurrentDictionary<string, IpcRequestLifetime> _activeOperations = new();
     private readonly ConcurrentDictionary<string, Task> _backgroundRequests = new();
     private readonly ConcurrentDictionary<string, int> _eventCounts = new();
     private readonly SemaphoreSlim _requestWriteLock = new(1, 1);
@@ -129,7 +129,7 @@ public sealed class IpcServer : IDisposable
                                 
             }
         }
-        _activeOperations.Clear();
+
         _eventCounts.Clear();
         _handshakeCompleted = false;
 
@@ -167,6 +167,11 @@ public sealed class IpcServer : IDisposable
             }
         }
 
+        foreach (var lifetime in _activeOperations.Values)
+        {
+            lifetime.Dispose();
+        }
+        _activeOperations.Clear();
         Cleanup();
     }
 
@@ -357,14 +362,29 @@ public sealed class IpcServer : IDisposable
             throw new InvalidOperationException("Request queue is not initialized.");
         }
 
-        var queueDepth = _pendingRequests.Reader.Count;
-        if (queueDepth >= IpcConstants.MaxPendingRequests)
+        var lifetime = new IpcRequestLifetime(request.TimeoutMs, cancellationToken);
+        if (!_activeOperations.TryAdd(request.CorrelationId, lifetime))
         {
-            ConsoleLogger.Warning("IPC", $"Request queue full ({queueDepth}/{IpcConstants.MaxPendingRequests}), applying backpressure.");
+            lifetime.Dispose();
+            await SendOperationResponseAsync(request.CorrelationId, new ResponseEnvelope
+            {
+                Error = new NormalizedErrorDto { Code = ErrorCode.InvalidParameter, Message = "Duplicate request correlation id." }
+            }).ConfigureAwait(false);
+            return;
         }
 
-        await _pendingRequests.Writer.WriteAsync(request, cancellationToken).ConfigureAwait(false);
-        ConsoleLogger.Debug("IPC", $"Request queued: {request.Operation} (pending: {_pendingRequests.Reader.Count})");
+        if (!_pendingRequests.Writer.TryWrite(request))
+        {
+            _activeOperations.TryRemove(request.CorrelationId, out _);
+            lifetime.Dispose();
+            await SendOperationResponseAsync(request.CorrelationId, new ResponseEnvelope
+            {
+                Error = new NormalizedErrorDto
+                {
+                    Code = ErrorCode.ServiceUnavailable, Message = "Worker request queue is full.", IsTransient = true
+                }
+            }).ConfigureAwait(false);
+        }
     }
 
     private async Task ProcessRequestQueueAsync(CancellationToken cancellationToken)
@@ -380,11 +400,11 @@ public sealed class IpcServer : IDisposable
             {
                 if (CanProcessConcurrently(request.Operation))
                 {
-                    StartConcurrentRequest(request, cancellationToken);
+                    StartConcurrentRequest(request);
                     continue;
                 }
 
-                await HandleRequestAsync(request, cancellationToken).ConfigureAwait(false);
+                await HandleRequestAsync(request).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
@@ -418,11 +438,11 @@ public sealed class IpcServer : IDisposable
     internal static bool CanProcessConcurrently(OperationType operation)
         => operation == OperationType.SearchUnifiedAuditLog;
 
-    private void StartConcurrentRequest(RequestEnvelope request, CancellationToken cancellationToken)
+    private void StartConcurrentRequest(RequestEnvelope request)
     {
         ConsoleLogger.Debug("IPC", $"Dispatching concurrent request: {request.Operation} ({request.CorrelationId})");
 
-        var task = Task.Run(() => HandleRequestAsync(request, cancellationToken), CancellationToken.None);
+        var task = Task.Run(() => HandleRequestAsync(request), CancellationToken.None);
         _backgroundRequests[request.CorrelationId] = task;
         _ = ObserveConcurrentRequestAsync(request.CorrelationId, task);
     }
@@ -446,7 +466,7 @@ public sealed class IpcServer : IDisposable
         }
     }
 
-    private async Task HandleRequestAsync(RequestEnvelope request, CancellationToken serverCancellation)
+    private async Task HandleRequestAsync(RequestEnvelope request)
     {
         using var correlationScope = ConsoleLogger.BeginCorrelationScope(request.CorrelationId);
         ConsoleLogger.Info("IPC", $"Request: {request.Operation} (correlation: {request.CorrelationId})");
@@ -455,13 +475,19 @@ public sealed class IpcServer : IDisposable
         _eventCounts[request.CorrelationId] = 0;
 
                                                        
-        CancellationTokenSource? operationCts = null;
+        if (!_activeOperations.TryGetValue(request.CorrelationId, out var operationCts))
+        {
+            return;
+        }
         try
         {
-            operationCts = CancellationTokenSource.CreateLinkedTokenSource(serverCancellation);
-            _activeOperations[request.CorrelationId] = operationCts;
+            operationCts.Token.ThrowIfCancellationRequested();
 
             var response = await _dispatcher.DispatchAsync(request, operationCts.Token).ConfigureAwait(false);
+            if (operationCts.IsTimedOut)
+            {
+                response = operationCts.CreateCancellationResponse(request.CorrelationId);
+            }
             await SendOperationResponseAsync(request.CorrelationId, response).ConfigureAwait(false);
         }
         catch (ObjectDisposedException)
@@ -471,12 +497,7 @@ public sealed class IpcServer : IDisposable
         }
         catch (OperationCanceledException)
         {
-            var response = new ResponseEnvelope
-            {
-                CorrelationId = request.CorrelationId,
-                Success = false,
-                WasCancelled = true
-            };
+            var response = operationCts.CreateCancellationResponse(request.CorrelationId);
             await SendOperationResponseAsync(request.CorrelationId, response).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -502,19 +523,7 @@ public sealed class IpcServer : IDisposable
             _activeOperations.TryRemove(request.CorrelationId, out _);
             _eventCounts.TryRemove(request.CorrelationId, out _);
 
-            if (operationCts != null)
-            {
-                try
-                {
-                    operationCts.Dispose();
-                }
-                catch
-                {
-                                            
-                }
-
-                operationCts = null;
-            }
+            operationCts.Dispose();
         }
     }
 

@@ -136,7 +136,8 @@ internal sealed class InteractiveExchangeBootstrapService : IInteractiveExchange
         script.AppendLine("    $Payload | ConvertTo-Json -Depth 6 | Set-Content -Path $StatusPath -Encoding UTF8");
         script.AppendLine("}");
         script.AppendLine("try {");
-        script.AppendLine("    Import-Module ExchangeOnlineManagement -ErrorAction Stop");
+        script.AppendLine("    if ($PSVersionTable.PSVersion -lt [Version]'7.6') { throw 'PowerShell 7.6 or later is required for approved Exchange modules.' }");
+        script.AppendLine(PowerShellModuleBootstrapPolicy.Resolve("ExchangeOnlineManagement")!.BuildImportScript());
         script.AppendLine($"    {BuildConnectExchangeCommand(configuration)} -ErrorAction Stop | Out-Null");
         script.AppendLine("    try {");
         script.AppendLine("        $connection = Get-ConnectionInformation -ErrorAction Stop | Select-Object -First 1");
@@ -148,14 +149,8 @@ internal sealed class InteractiveExchangeBootstrapService : IInteractiveExchange
         script.AppendLine("    }");
         script.AppendLine();
         script.AppendLine("    try {");
-        script.AppendLine("        $graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | Select-Object -First 1");
-        script.AppendLine("        if ($graphModule) {");
-        script.AppendLine("            Import-Module Microsoft.Graph.Authentication -ErrorAction Stop");
-        script.AppendLine($"            {BuildConnectGraphCommand(configuration)} -ErrorAction Stop | Out-Null");
-        script.AppendLine("        }");
-        script.AppendLine("        else {");
-        script.AppendLine("            $status.GraphWarning = 'Microsoft Graph bootstrap skipped because Microsoft.Graph.Authentication is not installed.'");
-        script.AppendLine("        }");
+        script.AppendLine(PowerShellModuleBootstrapPolicy.Resolve("Microsoft.Graph")!.BuildImportScript());
+        script.AppendLine($"        {BuildConnectGraphCommand(configuration)} -ErrorAction Stop | Out-Null");
         script.AppendLine("    } catch {");
         script.AppendLine("        $status.GraphWarning = \"Interactive Microsoft Graph bootstrap failed: $($_.Exception.Message)\"");
         script.AppendLine("    }");

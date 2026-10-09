@@ -18,6 +18,18 @@ public class PowerShellInitResult
 
 public class PowerShellResult
 {
+    internal void ThrowIfFailed()
+    {
+        if (WasCancelled)
+        {
+            throw new OperationCanceledException();
+        }
+        if (!Success)
+        {
+            throw new InvalidOperationException(ErrorMessage ?? "PowerShell script execution failed");
+        }
+    }
+
     public bool Success { get; init; }
 
     public List<PSObject> Output { get; init; } = new();

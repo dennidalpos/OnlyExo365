@@ -1,3 +1,4 @@
+using OnlyExo365.Contracts;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -34,7 +35,8 @@ internal sealed class RunspaceLifecycleManager
             Debug.WriteLine($"[PowerShellEngine] PowerShell version: {_engine.PowerShellVersionValue}");
 
             ps.Commands.Clear();
-            ps.AddScript($"Get-Module -ListAvailable -Name {PowerShellEngine.ExchangeOnlineModuleName} | Select-Object -First 1");
+            var approvedVersion = PowerShellModuleBootstrapPolicy.Resolve(PowerShellEngine.ExchangeOnlineModuleName)!.RequiredVersion;
+            ps.AddScript($"Get-Module -ListAvailable -Name {PowerShellEngine.ExchangeOnlineModuleName} | Where-Object {{ $_.Version -eq [Version]'{approvedVersion}' }} | Select-Object -First 1");
 
             var moduleResult = await Task.Run(() => ps.Invoke()).ConfigureAwait(false);
             _engine.ModuleAvailable = moduleResult.Any();
@@ -49,7 +51,8 @@ internal sealed class RunspaceLifecycleManager
                     Debug.WriteLine("[PowerShellEngine] PackageManagement module was not explicitly loaded. Continuing with best-effort import.");
                 }
 
-                var imported = await ImportModuleAsync(runspace, PowerShellEngine.ExchangeOnlineModuleName, stopOnError: true).ConfigureAwait(false);
+                var imported = await ImportModuleAsync(runspace, PowerShellEngine.ExchangeOnlineModuleName).ConfigureAwait(false);
+                _engine.ModuleAvailable = imported;
                 if (!imported)
                 {
                     Debug.WriteLine($"[PowerShellEngine] Warning: {PowerShellEngine.ExchangeOnlineModuleName} import reported warnings/errors");
@@ -89,7 +92,7 @@ internal sealed class RunspaceLifecycleManager
 
         if (importExchangeModule)
         {
-            _ = await ImportModuleAsync(runspace, PowerShellEngine.ExchangeOnlineModuleName, stopOnError: false).ConfigureAwait(false);
+            _engine.ModuleAvailable = await ImportModuleAsync(runspace, PowerShellEngine.ExchangeOnlineModuleName).ConfigureAwait(false);
         }
 
         return true;
@@ -127,7 +130,7 @@ internal sealed class RunspaceLifecycleManager
         return runspace;
     }
 
-    private static async Task<bool> ImportModuleAsync(Runspace runspace, string moduleName, bool stopOnError)
+    private static async Task<bool> ImportModuleAsync(Runspace runspace, string moduleName)
     {
         if (string.IsNullOrWhiteSpace(moduleName))
         {
@@ -137,18 +140,9 @@ internal sealed class RunspaceLifecycleManager
         using var ps = System.Management.Automation.PowerShell.Create();
         ps.Runspace = runspace;
 
-        var safeModuleName = moduleName.Replace("'", "''", StringComparison.Ordinal);
-        var errorAction = stopOnError ? "Stop" : "SilentlyContinue";
-        ps.AddScript($@"
-$moduleName = '{safeModuleName}'
-$available = Get-Module -ListAvailable -Name $moduleName | Select-Object -First 1
-if (-not $available) {{
-    Write-Error ""Module '$moduleName' is not installed or not available in PSModulePath.""
-}}
-else {{
-    Import-Module -Name $moduleName -Global -ErrorAction {errorAction} | Out-Null
-}}
-");
+        var policy = PowerShellModuleBootstrapPolicy.Resolve(moduleName)
+            ?? throw new InvalidOperationException($"Module '{moduleName}' has no approved policy.");
+        ps.AddScript(policy.BuildImportScript());
 
         try
         {

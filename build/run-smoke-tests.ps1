@@ -302,6 +302,8 @@ $report = [ordered]@{
         uninstall_cleanup_confirmed = $false
         residual_cleanup_confirmed = $false
         residual_marker_paths = @()
+        preserved_marker_paths = @()
+        user_data_preservation_confirmed = $false
         local_data_backup_entries = @()
         local_data_restore_confirmed = $false
         skip_real_install = [bool]$SkipRealInstall
@@ -452,12 +454,15 @@ try {
         $report["installer"]["installed_worker_process_id"] = $installedLaunchReport.worker_process_id
 
         $residualMarkerPaths = @(
-            (New-ResidualMarkerFile -RootPath $realInstallRoot -RelativePath "residual\marker.txt"),
             (New-ResidualMarkerFile -RootPath $logDirectory -RelativePath "residual\marker.txt"),
-            (New-ResidualMarkerFile -RootPath $secretDirectory -RelativePath "residual\marker.txt"),
+            (New-ResidualMarkerFile -RootPath $secretDirectory -RelativePath "residual\marker.txt")
+        )
+        $preservedMarkerPaths = @(
+            (New-ResidualMarkerFile -RootPath $realInstallRoot -RelativePath "residual\marker.txt"),
             (New-ResidualMarkerFile -RootPath $exportDirectory -RelativePath "residual\marker.txt")
         )
         $report["installer"]["residual_marker_paths"] = $residualMarkerPaths
+        $report["installer"]["preserved_marker_paths"] = $preservedMarkerPaths
 
         Write-Step "Uninstalling setup EXE payload"
         $uninstallCommandLine = if (-not [string]::IsNullOrWhiteSpace($installedProduct.QuietUninstallString)) {
@@ -505,7 +510,7 @@ try {
                 }
             }
 
-            foreach ($root in @($realInstallRoot, $logDirectory, $secretDirectory, $exportDirectory)) {
+            foreach ($root in @($logDirectory, $secretDirectory)) {
                 if (Test-Path $root) {
                     return $null
                 }
@@ -514,11 +519,17 @@ try {
             return $true
         } | Out-Null
 
+        foreach ($path in $preservedMarkerPaths) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or (Get-Content -LiteralPath $path -Raw).Trim() -ne "residual-marker") {
+                Stop-WithError "Uninstall did not preserve user-owned file: $path"
+            }
+        }
+        $report["installer"]["user_data_preservation_confirmed"] = $true
         $report["installer"]["required_files"] = Get-RequiredPayloadFiles -RootPath $realInstallRoot
         $report["installer"]["uninstall_registry_confirmed"] = $true
         $report["installer"]["uninstall_cleanup_confirmed"] = $true
         $report["installer"]["residual_cleanup_confirmed"] = $true
-        Write-Success "Setup uninstall removed the registered installation and residual files."
+        Write-Success "Setup uninstall removed installed files and transient data, preserving exports and user-owned files."
     }
     else {
         Write-Info "Skipping real setup EXE install validation by request."

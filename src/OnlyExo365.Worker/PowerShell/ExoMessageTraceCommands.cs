@@ -76,6 +76,8 @@ internal sealed class ExoMessageTraceCommands : ExoCommandModuleBase
 
     internal static string BuildGetMessageTraceScript(GetMessageTraceRequest request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        request.Validate(DateTime.UtcNow);
         var escapedSenderAddress = EscapePs(request.SenderAddress);
         var escapedRecipientAddress = EscapePs(request.RecipientAddress);
 
@@ -89,7 +91,7 @@ $recipientAddress = '{escapedRecipientAddress}'
 $resultItems = New-Object 'System.Collections.Generic.List[object]'
 $totalCount = 0
 $sourceCmdlet = $null
-$isTotalCountExact = $true
+$isTotalCountExact = $false
 
 function Add-TraceItem {{
     param(
@@ -139,11 +141,12 @@ if (Get-Command Get-MessageTraceV2 -ErrorAction SilentlyContinue) {{
     $cursorEndDate = $params['EndDate']
     $cursorRecipientAddress = $null
 
-    while ($true) {{
+    while ($totalCount -le $requestedEndIndex) {{
+        $batchSize = [Math]::Min({MessageTraceV2BatchSize}, $requestedEndIndex + 1 - $totalCount)
         $batchParams = @{{
             StartDate = $params['StartDate']
             EndDate = $cursorEndDate
-            ResultSize = {MessageTraceV2BatchSize}
+            ResultSize = $batchSize
         }}
 
         if ($params.ContainsKey('SenderAddress')) {{ $batchParams['SenderAddress'] = $params['SenderAddress'] }}
@@ -154,6 +157,7 @@ if (Get-Command Get-MessageTraceV2 -ErrorAction SilentlyContinue) {{
 
         $batch = @(Get-MessageTraceV2 @batchParams -ErrorAction Stop)
         if ($batch.Count -eq 0) {{
+            $isTotalCountExact = $true
             break
         }}
 
@@ -161,9 +165,12 @@ if (Get-Command Get-MessageTraceV2 -ErrorAction SilentlyContinue) {{
             Add-TraceItem -Trace $trace -CmdletName $sourceCmdlet
         }}
 
-        if ($batch.Count -lt {MessageTraceV2BatchSize}) {{
+        if ($batch.Count -lt $batchSize) {{
+            $isTotalCountExact = $true
             break
         }}
+
+        if ($totalCount -gt $requestedEndIndex) {{ break }}
 
         $lastTrace = $batch[-1]
         if ($null -eq $lastTrace.Received) {{

@@ -753,12 +753,12 @@ public partial class WorkerCommandTests
     }
 
     [Fact]
-    public void BuildGetMessageTraceScript_EnumeratesAllV2PagesToCalculateExactTotal()
+    public void BuildGetMessageTraceScript_LoadsRequestedPageWithLookahead()
     {
         var script = ExoMessageTraceCommands.BuildGetMessageTraceScript(new GetMessageTraceRequest
         {
-            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-            EndDate = new DateTime(2026, 3, 14, 23, 59, 59, DateTimeKind.Utc),
+            StartDate = DateTime.UtcNow.AddDays(-7),
+            EndDate = DateTime.UtcNow.AddDays(-1),
             SenderAddress = "sender@contoso.com",
             RecipientAddress = "recipient@contoso.com",
             Page = 2,
@@ -767,7 +767,7 @@ public partial class WorkerCommandTests
 
         Assert.Contains("$requestedStartIndex = (($page - 1) * $pageSize)", script, StringComparison.Ordinal);
         Assert.Contains("Get-MessageTraceV2 @batchParams -ErrorAction Stop", script, StringComparison.Ordinal);
-        Assert.Contains("ResultSize = 5000", script, StringComparison.Ordinal);
+        Assert.Contains("ResultSize = $batchSize", script, StringComparison.Ordinal);
         Assert.Contains("$batchParams['StartingRecipientAddress'] = $cursorRecipientAddress", script, StringComparison.Ordinal);
         Assert.Contains("$script:totalCount++", script, StringComparison.Ordinal);
         Assert.Contains("RecordType = 'Summary'", script, StringComparison.Ordinal);
@@ -780,8 +780,8 @@ public partial class WorkerCommandTests
     {
         var script = ExoMessageTraceCommands.BuildGetMessageTraceScript(new GetMessageTraceRequest
         {
-            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-            EndDate = new DateTime(2026, 3, 14, 23, 59, 59, DateTimeKind.Utc),
+            StartDate = DateTime.UtcNow.AddDays(-7),
+            EndDate = DateTime.UtcNow.AddDays(-1),
             Page = 1,
             PageSize = 50
         });

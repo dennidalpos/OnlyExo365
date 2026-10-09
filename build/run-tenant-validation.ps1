@@ -1,4 +1,4 @@
-#Requires -Version 7.0
+#Requires -Version 7.6
 
 [CmdletBinding()]
 param(
@@ -651,7 +651,7 @@ function Get-ReportProbeResults {
 $resolvedConfigurationPath = if ([string]::IsNullOrWhiteSpace($ConfigurationPath)) { $null } else { Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ConfigurationPath }
 $resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
-$bootstrapPolicyPath = Join-Path $repositoryRoot "src\OnlyExo365.Worker\Data\PowerShellModuleBootstrapPolicy.json"
+$bootstrapPolicyPath = Join-Path $repositoryRoot "src\OnlyExo365.Contracts\Data\PowerShellModuleBootstrapPolicy.json"
 
 if (-not (Test-Path $reportDirectory)) {
     New-Item -Path $reportDirectory -ItemType Directory -Force | Out-Null
@@ -723,6 +723,7 @@ try {
         }
 
         $requiredModules.Add((Ensure-RequiredModule -ModuleName $moduleName -RequiredVersion $requiredVersion -InstallIfMissing ([bool]$InstallApprovedModules)))
+        Import-Module -FullyQualifiedName @{ ModuleName = $moduleName; RequiredVersion = $requiredVersion } -Global -ErrorAction Stop
     }
 
     $report.prerequisites.required_modules = $requiredModules.ToArray()

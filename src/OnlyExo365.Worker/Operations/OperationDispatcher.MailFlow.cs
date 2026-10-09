@@ -11,6 +11,15 @@ public partial class OperationDispatcher
         var traceRequest = JsonMessageSerializer.ExtractPayload<GetMessageTraceRequest>(request.Payload)
             ?? new GetMessageTraceRequest();
 
+        try
+        {
+            traceRequest.Validate(DateTime.UtcNow);
+        }
+        catch (ArgumentException ex)
+        {
+            return CreateErrorResponse(correlationId, ErrorCode.InvalidParameter, ex.Message);
+        }
+
         await SendLogAsync(correlationId, LogLevel.Information, "Fetching message trace...");
         await SendProgressAsync(correlationId, 0, "Starting message trace query...");
 

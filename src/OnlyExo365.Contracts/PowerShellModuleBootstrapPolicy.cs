@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace OnlyExo365.Worker.PowerShell;
+namespace OnlyExo365.Contracts;
 
-internal static class PowerShellModuleBootstrapPolicy
+public static class PowerShellModuleBootstrapPolicy
 {
-    private const string ResourceName = "OnlyExo365.Worker.Data.PowerShellModuleBootstrapPolicy.json";
+    private const string ResourceName = "OnlyExo365.Contracts.Data.PowerShellModuleBootstrapPolicy.json";
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -72,7 +72,7 @@ internal static class PowerShellModuleBootstrapPolicy
     }
 }
 
-internal sealed class PowerShellModuleDefinition
+public sealed class PowerShellModuleDefinition
 {
     public string RequestName { get; set; } = string.Empty;
 
@@ -83,6 +83,21 @@ internal sealed class PowerShellModuleDefinition
     public List<string> Aliases { get; set; } = [];
 
     public List<string> RequiredModules { get; set; } = [];
+
+    public string BuildImportScript()
+    {
+        var names = string.Join(", ", GetRequiredModules().Select(name => $"'{name.Replace("'", "''", StringComparison.Ordinal)}'"));
+        var version = RequiredVersion.Replace("'", "''", StringComparison.Ordinal);
+        return $@"
+$approvedModules = @({names})
+$approvedVersion = [Version]'{version}'
+foreach ($approvedModule in $approvedModules) {{
+    $available = Get-Module -ListAvailable -Name $approvedModule | Where-Object {{ $_.Version -eq $approvedVersion }} | Select-Object -First 1
+    if (-not $available) {{ throw ""Approved module '$approvedModule' version $approvedVersion is not installed. Install it from Tools and retry."" }}
+    Import-Module -FullyQualifiedName @{{ ModuleName = $approvedModule; RequiredVersion = $approvedVersion.ToString() }} -Global -ErrorAction Stop | Out-Null
+}}
+";
+    }
 
     public IReadOnlyList<string> GetRequiredModules()
     {

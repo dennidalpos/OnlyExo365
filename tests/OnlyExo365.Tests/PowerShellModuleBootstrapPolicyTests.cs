@@ -1,4 +1,4 @@
-using OnlyExo365.Worker.PowerShell;
+using OnlyExo365.Contracts;
 
 namespace OnlyExo365.Tests;
 
@@ -11,7 +11,7 @@ public sealed class PowerShellModuleBootstrapPolicyTests
 
         Assert.NotNull(definition);
         Assert.Equal("ExchangeOnlineManagement", definition!.ModuleName);
-        Assert.Equal("3.9.2", definition.RequiredVersion);
+        Assert.Equal("3.10.1", definition.RequiredVersion);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public sealed class PowerShellModuleBootstrapPolicyTests
 
         Assert.NotNull(definition);
         Assert.Equal("Microsoft.Graph.Authentication", definition!.ModuleName);
-        Assert.Equal("2.35.1", definition.RequiredVersion);
+        Assert.Equal("2.41.1", definition.RequiredVersion);
         Assert.Equal(
             [
                 "Microsoft.Graph.Authentication",

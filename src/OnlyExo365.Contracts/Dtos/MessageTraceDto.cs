@@ -4,6 +4,24 @@ namespace OnlyExo365.Contracts.Dtos;
 
 public class GetMessageTraceRequest
 {
+    public void Validate(DateTime utcNow)
+    {
+        var startUtc = StartDate.ToUniversalTime();
+        var endUtc = EndDate.ToUniversalTime();
+        if (Page < 1 || PageSize is < 1 or > 5000 || (long)Page * PageSize >= int.MaxValue)
+        {
+            throw new ArgumentException("Invalid message trace page or page size.");
+        }
+        if (startUtc >= endUtc || endUtc - startUtc > TimeSpan.FromDays(10))
+        {
+            throw new ArgumentException("Message trace requires an ordered date range of at most 10 days.");
+        }
+        if (startUtc < utcNow.AddDays(-90) || endUtc > utcNow)
+        {
+            throw new ArgumentException("Message trace dates must be within the last 90 days.");
+        }
+    }
+
     [JsonPropertyName("senderAddress")]
     public string? SenderAddress { get; set; }
 

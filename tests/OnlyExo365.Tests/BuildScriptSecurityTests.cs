@@ -180,16 +180,16 @@ public sealed class BuildScriptSecurityTests
     }
 
     [Fact]
-    public void GateScript_CleansLocalAppStateAndRunsCanonicalArtifactBuild()
+    public void GateScript_PreservesLocalAppStateAndRunsCanonicalArtifactBuild()
     {
         var scriptPath = GetRepositoryFilePath("scripts", "gate.ps1");
         var script = File.ReadAllText(scriptPath);
 
         Assert.Contains("scripts\\clean.ps1", script, StringComparison.Ordinal);
-        Assert.Contains("SpecialFolder]::LocalApplicationData", script, StringComparison.Ordinal);
-        Assert.Contains("SpecialFolder]::ApplicationData", script, StringComparison.Ordinal);
-        Assert.Contains("SpecialFolder]::CommonApplicationData", script, StringComparison.Ordinal);
-        Assert.Contains("[switch]$CleanPerMachineAppSettings", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("SpecialFolder]::LocalApplicationData", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("SpecialFolder]::ApplicationData", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("SpecialFolder]::CommonApplicationData", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("[switch]$CleanPerMachineAppSettings", script, StringComparison.Ordinal);
         Assert.Contains("scripts\\Install-InnoSetup.ps1", script, StringComparison.Ordinal);
         Assert.Contains("scripts\\agents\\doctor.ps1", script, StringComparison.Ordinal);
         Assert.Contains("scripts\\agents\\compile.ps1", script, StringComparison.Ordinal);
@@ -243,7 +243,7 @@ public sealed class BuildScriptSecurityTests
         Assert.Contains("Setup EXE installation failed", script, StringComparison.Ordinal);
         Assert.Contains("Setup EXE reinstall failed", script, StringComparison.Ordinal);
         Assert.Contains("Setup reinstall preserved a single uninstall registry entry.", script, StringComparison.Ordinal);
-        Assert.Contains("Setup uninstall removed the registered installation and residual files.", script, StringComparison.Ordinal);
+        Assert.Contains("Setup uninstall removed installed files and transient data, preserving exports and user-owned files.", script, StringComparison.Ordinal);
         Assert.Contains("Moving it to temporary backup before installer uninstall validation", combined, StringComparison.Ordinal);
         Assert.Contains("Restored pre-existing OnlyExo365 local data after installer validation.", combined, StringComparison.Ordinal);
         Assert.Contains("Recovered pre-existing OnlyExo365 local data during final cleanup after an interrupted installer smoke test run.", combined, StringComparison.Ordinal);
@@ -253,7 +253,7 @@ public sealed class BuildScriptSecurityTests
     [Fact]
     public void PowerShellBootstrapPolicy_PinsApprovedModuleVersions()
     {
-        var policyPath = GetRepositoryFilePath("src", "OnlyExo365.Worker", "Data", "PowerShellModuleBootstrapPolicy.json");
+        var policyPath = GetRepositoryFilePath("src", "OnlyExo365.Contracts", "Data", "PowerShellModuleBootstrapPolicy.json");
         using var document = JsonDocument.Parse(File.ReadAllText(policyPath));
 
         Assert.Equal("PSGallery", document.RootElement.GetProperty("repositoryName").GetString());
@@ -262,10 +262,10 @@ public sealed class BuildScriptSecurityTests
         var modules = document.RootElement.GetProperty("modules").EnumerateArray().ToArray();
         Assert.Contains(modules, module =>
             module.GetProperty("moduleName").GetString() == "ExchangeOnlineManagement" &&
-            module.GetProperty("requiredVersion").GetString() == "3.9.2");
+            module.GetProperty("requiredVersion").GetString() == "3.10.1");
         Assert.Contains(modules, module =>
             module.GetProperty("moduleName").GetString() == "Microsoft.Graph.Authentication" &&
-            module.GetProperty("requiredVersion").GetString() == "2.35.1");
+            module.GetProperty("requiredVersion").GetString() == "2.41.1");
         Assert.Contains(modules, module =>
             module.GetProperty("requestName").GetString() == "Microsoft.Graph" &&
             module.GetProperty("requiredModules").EnumerateArray().Select(item => item.GetString()).SequenceEqual(new[]
@@ -381,7 +381,7 @@ public sealed class BuildScriptSecurityTests
                  {
                      new[] { "src", "OnlyExo365.Shell", "ViewModels", "MigrationViewModel.BatchCreation.cs" },
                      new[] { "src", "OnlyExo365.Worker", "PowerShell", "ExoSupportCommands.cs" },
-                     new[] { "src", "OnlyExo365.Worker", "PowerShell", "PowerShellModuleBootstrapPolicy.cs" }
+                     new[] { "src", "OnlyExo365.Contracts", "PowerShellModuleBootstrapPolicy.cs" }
                  })
         {
             var content = File.ReadAllText(GetRepositoryFilePath(relativePath));

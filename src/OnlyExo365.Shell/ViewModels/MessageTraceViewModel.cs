@@ -351,12 +351,13 @@ public class MessageTraceViewModel : ViewModelBase
                 SenderAddress = string.IsNullOrWhiteSpace(SenderAddress) ? null : SenderAddress.Trim(),
                 RecipientAddress = string.IsNullOrWhiteSpace(RecipientAddress) ? null : RecipientAddress.Trim(),
                 StartDate = StartDate,
-                EndDate = EndDate.Date.AddDays(1).AddSeconds(-1),
+                EndDate = EndDate.Date == DateTime.Today ? DateTime.Now : EndDate.Date.AddDays(1).AddSeconds(-1),
                 PageSize = PageSize,
                 Page = CurrentPage
             };
 
             LoadingProgress = 30;
+            request.Validate(DateTime.UtcNow);
             LoadingStatus = "Querying Exchange...";
 
             var result = await _workerService.GetMessageTraceAsync(

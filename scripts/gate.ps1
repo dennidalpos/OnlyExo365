@@ -21,10 +21,6 @@ param(
     [ValidateSet("Auto", "Winget", "Chocolatey")]
     [string]$PackageManager = "Auto",
 
-    [switch]$CleanPerMachineAppSettings,
-
-    [switch]$KeepLocalAppData,
-
     [switch]$SkipTests,
 
     [switch]$SkipSecurityScans,
@@ -43,97 +39,6 @@ $solutionPath = Get-SolutionPath -RepositoryRoot $repositoryRoot
 $resolvedRuntimeIdentifiers = Resolve-RuntimeIdentifiers -RequestedRuntimeIdentifiers $RuntimeIdentifiers -DefaultRuntimeIdentifiers @("win-x64")
 $primaryRuntimeIdentifier = @($resolvedRuntimeIdentifiers)[0]
 $startedAt = Get-Date
-
-function Get-DirectorySize {
-    param([string]$Path)
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        return 0
-    }
-
-    $measurement = Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue |
-        Measure-Object -Property Length -Sum
-
-    if ($null -eq $measurement -or $null -eq $measurement.PSObject.Properties['Sum'] -or $null -eq $measurement.Sum) {
-        return 0
-    }
-
-    return [long]$measurement.Sum
-}
-
-function Assert-PathWithinBase {
-    param(
-        [string]$CandidatePath,
-        [string]$BasePath
-    )
-
-    if ([string]::IsNullOrWhiteSpace($CandidatePath) -or [string]::IsNullOrWhiteSpace($BasePath)) {
-        throw "Cannot validate an empty cleanup path."
-    }
-
-    $resolvedCandidate = [System.IO.Path]::GetFullPath($CandidatePath).TrimEnd('\')
-    $resolvedBase = [System.IO.Path]::GetFullPath($BasePath).TrimEnd('\')
-    $basePrefix = $resolvedBase + [System.IO.Path]::DirectorySeparatorChar
-
-    if (-not $resolvedCandidate.StartsWith($basePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw "Refusing to clean path outside expected base. Path: $resolvedCandidate Base: $resolvedBase"
-    }
-}
-
-function Remove-LocalDirectoryIfExists {
-    param(
-        [string]$Path,
-        [string]$BasePath,
-        [string]$Label
-    )
-
-    Assert-PathWithinBase -CandidatePath $Path -BasePath $BasePath
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        Write-Info "Local app data not found: $Label"
-        return
-    }
-
-    $size = Get-DirectorySize -Path $Path
-    Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
-    Write-Success ("Removed {0}: {1} ({2:N2} MB)" -f $Label, $Path, ($size / 1MB))
-}
-
-function Remove-OnlyExo365LocalAppData {
-    $localAppData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
-    $roamingAppData = [Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)
-    $commonAppData = [Environment]::GetFolderPath([Environment+SpecialFolder]::CommonApplicationData)
-
-    $targets = @(
-        [pscustomobject]@{
-            Path = Join-Path $localAppData "OnlyExo365"
-            BasePath = $localAppData
-            Label = "user local cache, logs, and IPC secret files"
-            RequiresPerMachineSwitch = $false
-        },
-        [pscustomobject]@{
-            Path = Join-Path (Join-Path $roamingAppData "OnlyExo365") "OnlyExo365"
-            BasePath = $roamingAppData
-            Label = "user roaming preferences"
-            RequiresPerMachineSwitch = $false
-        },
-        [pscustomobject]@{
-            Path = Join-Path (Join-Path $commonAppData "OnlyExo365") "OnlyExo365"
-            BasePath = $commonAppData
-            Label = "per-machine shared app configuration"
-            RequiresPerMachineSwitch = $true
-        }
-    )
-
-    foreach ($target in $targets) {
-        if ($target.RequiresPerMachineSwitch -and -not $CleanPerMachineAppSettings) {
-            Write-Info "Per-machine app settings skipped: $($target.Path)"
-            continue
-        }
-
-        Remove-LocalDirectoryIfExists -Path $target.Path -BasePath $target.BasePath -Label $target.Label
-    }
-}
 
 function Invoke-GateScript {
     param(
@@ -166,15 +71,6 @@ Invoke-GateScript `
     -RelativePath "scripts\clean.ps1" `
     -Arguments @("-All") `
     -ErrorMessage "repository clean failed"
-
-if ($KeepLocalAppData) {
-    Write-Step "Cleaning local app data"
-    Write-Info "Local app data clean skipped by -KeepLocalAppData"
-}
-else {
-    Write-Step "Cleaning local app data"
-    Remove-OnlyExo365LocalAppData
-}
 
 Write-Step "Checking prerequisites"
 Assert-WindowsPlatform

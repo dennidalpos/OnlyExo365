@@ -130,17 +130,14 @@ public partial class ExoGroupCommands
                 : "Previewing dynamic group members via Get-Recipient preview filter (may be slow for large groups)...");
 
         var result = await _engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
         var response = new PreviewDynamicGroupMembersResponse
         {
             Identity = request.Identity
         };
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
             response.IsLimited = response.TotalCount > request.MaxResults;

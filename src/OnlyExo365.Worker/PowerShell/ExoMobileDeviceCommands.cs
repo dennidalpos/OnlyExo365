@@ -59,12 +59,9 @@ internal sealed class ExoMobileDeviceCommands : ExoCommandModuleBase
 
         var result = await Engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
 
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
             response.HasMore = hash["HasMore"] is bool hasMore

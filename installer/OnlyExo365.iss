@@ -70,8 +70,6 @@ Root: HKCU; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "Se
 Root: HKCU; Subkey: "Software\{#ProductName}"; ValueType: string; ValueName: "ExportDirectory"; ValueData: "{localappdata}\{#ProductName}\exports"; Flags: uninsdeletekeyifempty
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}"
 Type: filesandordirs; Name: "{localappdata}\{#ProductName}\logs"
 Type: filesandordirs; Name: "{localappdata}\{#ProductName}\ipc-secrets"
-Type: filesandordirs; Name: "{localappdata}\{#ProductName}\exports"
 

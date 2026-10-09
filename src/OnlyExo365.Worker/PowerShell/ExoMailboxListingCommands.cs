@@ -67,12 +67,9 @@ internal sealed class ExoMailboxListingCommands : ExoCommandModuleBase
         onLog?.Invoke("Verbose", $"Fetching mailboxes (skip={request.Skip}, pageSize={request.PageSize}, mode=full)...");
 
         var result = await Engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
             response.IsTotalCountExact = hash["IsTotalCountExact"] as bool? ?? false;
@@ -110,12 +107,9 @@ internal sealed class ExoMailboxListingCommands : ExoCommandModuleBase
         onLog?.Invoke("Verbose", $"Fetching deleted mailboxes (skip={request.Skip}, pageSize={request.PageSize})...");
 
         var result = await Engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
 

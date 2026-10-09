@@ -5,7 +5,7 @@
 OnlyExo365 is a Windows desktop application for Microsoft Exchange Online and Microsoft Graph administration, architected around an out-of-process PowerShell host.
 
 - **`OnlyExo365.Shell`**: WPF desktop presentation, configuration loading, local SKU catalog cache, and worker supervision.
-- **`OnlyExo365.Worker`**: Out-of-process PowerShell 7.6.1 execution engine.
+- **`OnlyExo365.Worker`**: Out-of-process PowerShell 7.6.6 execution engine.
 - **`OnlyExo365.Contracts`**: Shared IPC contracts, DTOs, configuration schemas, and diagnostics.
 - **`OnlyExo365.Tests`**: Automated unit, characterization, and UI regression tests.
 
@@ -14,7 +14,7 @@ OnlyExo365 is a Windows desktop application for Microsoft Exchange Online and Mi
 ## Verified Baseline
 
 - **Platform**: Windows x64
-- **Runtime & Shell**: PowerShell 7+ (`pwsh`), .NET 10 Desktop Runtime
+- **Runtime & Shell**: Embedded PowerShell 7.6.6, .NET 10 Desktop Runtime; external PowerShell 7.6+ for Exchange bootstrap/tenant validation
 - **Build Toolchain**: .NET SDK `10.0.401` (pinned in `global.json`, roll-forward disabled)
 - **Installer**: Inno Setup 6 (required only for installer packaging)
 
@@ -59,6 +59,8 @@ pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier wi
   - [Operator Guide](docs/operations/operator-guide.md): Installation, first-run module bootstrap, and diagnostics console.
 - **Licensing**:
   - [SKU Catalog](docs/licensing/catalog.md): Embedded catalog, background caching, and refresh procedures.
+- **Audit**:
+  - [October 2026 Remediation](docs/audits/2026-10-10-critical-audit.md): Findings, offline evidence, dependency sources, and pending isolated/live validation.
 - **Releases**:
   - [Packaging & Verification](docs/releases/packaging.md): Inno Setup packaging, smoke testing, and code signing.
 - **Decisions**:

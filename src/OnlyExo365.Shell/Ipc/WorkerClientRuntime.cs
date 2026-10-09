@@ -78,30 +78,21 @@ internal sealed class WorkerClientRuntime
         using var preparedPayload = PreparedIpcPayload.Create(payload);
         var request = CreateRequestEnvelope(operation, preparedPayload.Payload);
 
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var correlationId = request.CorrelationId;
-
-        var registration = cancellationToken.Register(async () =>
-        {
-            await _supervisor.IpcClient.SendCancelAsync(correlationId);
-        });
-
         try
         {
-            return await _supervisor.IpcClient.SendRequestAsync(request, eventHandler, linkedCts.Token);
+            return await _supervisor.IpcClient.SendRequestAsync(request, eventHandler, cancellationToken);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return new ResponseEnvelope { CorrelationId = request.CorrelationId, WasCancelled = true };
+        }
+        catch (TimeoutException ex)
         {
             return new ResponseEnvelope
             {
-                CorrelationId = correlationId,
-                Success = false,
-                WasCancelled = true
+                CorrelationId = request.CorrelationId,
+                Error = new NormalizedErrorDto { Code = ErrorCode.Timeout, Message = ex.Message, IsTransient = true }
             };
-        }
-        finally
-        {
-            await registration.DisposeAsync();
         }
     }
 

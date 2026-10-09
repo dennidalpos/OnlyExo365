@@ -54,7 +54,7 @@ function Test-IsCiBuild {
 function Get-BootstrapModuleVersion {
     param([string]$ModuleName)
 
-    $bootstrapPolicyPath = Join-Path $RepositoryRoot "src\OnlyExo365.Worker\Data\PowerShellModuleBootstrapPolicy.json"
+    $bootstrapPolicyPath = Join-Path $RepositoryRoot "src\OnlyExo365.Contracts\Data\PowerShellModuleBootstrapPolicy.json"
 
     if (-not (Test-Path $bootstrapPolicyPath)) {
         return $null
@@ -401,7 +401,7 @@ if ($Publish) {
     Write-Host "  .\OnlyExo365.Shell.exe"
     Write-Host ""
     Write-Host "Runtime prerequisites:" -ForegroundColor Yellow
-    Write-Host "  1. PowerShell 7+ (pwsh.exe in PATH)"
+    Write-Host "  1. PowerShell 7.6+ (pwsh.exe in PATH) for interactive Exchange bootstrap"
     Write-Host "  2. ExchangeOnlineManagement module:"
     if ([string]::IsNullOrWhiteSpace($exchangeModuleRequiredVersion)) {
         Write-Host "     Install-Module ExchangeOnlineManagement -Repository PSGallery -Scope CurrentUser"

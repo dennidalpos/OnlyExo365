@@ -7,7 +7,7 @@ OnlyExo365 is a Windows-only desktop administration tool for Microsoft Exchange 
 The application operates across two dedicated processes communicating via Named Pipes:
 
 - **`OnlyExo365.Shell` (`net10.0-windows`)**: WPF desktop presentation, configuration ingestion, local license catalog caching, and worker supervision.
-- **`OnlyExo365.Worker` (`net10.0`)**: Out-of-process execution host powered by `Microsoft.PowerShell.SDK 7.6.1`. Manages Exchange and Graph runspaces, command execution, and error classification.
+- **`OnlyExo365.Worker` (`net10.0`)**: Out-of-process execution host powered by `Microsoft.PowerShell.SDK 7.6.6`. Manages Exchange and Graph runspaces, command execution, and error classification.
 - **`OnlyExo365.Contracts` (`net10.0`)**: Shared binary contract defining IPC messages, DTOs, domain error taxonomy, and configuration contracts.
 
 Details on pipe names, protocol framing, and session security are documented in [IPC Architecture](ipc.md).
@@ -30,3 +30,7 @@ Responsibilities are partitioned internally across projects:
 - `scripts/`: Canonical local entrypoints and automation workflows.
 - `build/`: Architecture enforcement, coverage, security scans, and smoke test scripts.
 - `installer/`: Inno Setup script for `OnlyExo365.Setup.exe`.
+
+## Module Policy
+
+`src/OnlyExo365.Contracts/Data/PowerShellModuleBootstrapPolicy.json` is the single approved module policy, embedded in Contracts. Discovery filters exact versions; imports use `FullyQualifiedName` with `RequiredVersion`. Both authentication hosts and licensing operations use the same policy. Bootstrap tools remain available when Exchange import fails.

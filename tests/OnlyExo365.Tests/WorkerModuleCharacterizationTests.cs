@@ -119,7 +119,7 @@ public sealed class WorkerModuleCharacterizationTests
         Assert.Contains("cancellationToken.Register(() =>", content, StringComparison.Ordinal);
         Assert.Contains("ps.Stop();", content, StringComparison.Ordinal);
         Assert.Contains("RunspaceCorrupted = true", content, StringComparison.Ordinal);
-        Assert.Contains("errorMessage.Contains(\"deprecat\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("errorMessage.Contains(\"deprecat\"", content, StringComparison.Ordinal);
     }
 
     [Fact]

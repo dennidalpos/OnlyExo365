@@ -46,8 +46,7 @@ internal sealed class ExoContactCommands : ExoCommandModuleBase
 $items = @()
 
 if ({(includeContacts ? "$true" : "$false")}) {{
-    try {{
-        $items += Get-MailContact -ResultSize Unlimited | ForEach-Object {{
+        $items += Get-MailContact -ResultSize Unlimited -ErrorAction Stop | ForEach-Object {{
             [PSCustomObject]@{{
                 Identity = $_.Identity.ToString()
                 Guid = if ($_.Guid) {{ $_.Guid.ToString() }} else {{ $null }}
@@ -63,15 +62,11 @@ if ({(includeContacts ? "$true" : "$false")}) {{
                 HiddenFromAddressListsEnabled = [bool]$_.HiddenFromAddressListsEnabled
             }}
         }}
-    }}
-    catch {{
-        Write-Warning ""Get-MailContact failed: $($_.Exception.Message)""
-    }}
+
 }}
 
 if ({(includeUsers ? "$true" : "$false")}) {{
-    try {{
-        $items += Get-MailUser -ResultSize Unlimited | ForEach-Object {{
+        $items += Get-MailUser -ResultSize Unlimited -ErrorAction Stop | ForEach-Object {{
             [PSCustomObject]@{{
                 Identity = $_.Identity.ToString()
                 Guid = if ($_.Guid) {{ $_.Guid.ToString() }} else {{ $null }}
@@ -87,10 +82,7 @@ if ({(includeUsers ? "$true" : "$false")}) {{
                 HiddenFromAddressListsEnabled = [bool]$_.HiddenFromAddressListsEnabled
             }}
         }}
-    }}
-    catch {{
-        Write-Warning ""Get-MailUser failed: $($_.Exception.Message)""
-    }}
+
 }}
 
 $searchQuery = '{escapedSearch}'
@@ -117,12 +109,9 @@ $pagedItems = $items | Select-Object -Skip {request.Skip} -First {request.PageSi
 
         var result = await Engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
 
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
 
@@ -258,6 +247,7 @@ if ($kind -eq 'MailUser') {{
         if (contactKind.Equals("MailUser", StringComparison.OrdinalIgnoreCase))
         {
             var mailUserScript = $@"
+param([string]$PlainTextPassword)
 $hidden = {hidden}
 if ('{identity}' -ne '') {{
     Set-MailUser -Identity '{identity}' `

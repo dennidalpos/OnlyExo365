@@ -591,6 +591,7 @@ $policies = Get-RetentionPolicy
             }
 
             var script = $@"
+param([string]$PlainTextPassword)
 $securePassword = ConvertTo-SecureString $PlainTextPassword -AsPlainText -Force
 New-Mailbox -Name '{escapedDisplayName}' -DisplayName '{escapedDisplayName}' -Alias '{escapedAlias}' -MicrosoftOnlineServicesID '{escapedPrimarySmtpAddress}' -UserPrincipalName '{escapedPrimarySmtpAddress}' -PrimarySmtpAddress '{escapedPrimarySmtpAddress}' -Password $securePassword
 ";

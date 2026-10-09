@@ -111,15 +111,6 @@ internal sealed class PowerShellExecutionPipeline
                 }
 
                 var record = ps.Streams.Error[e.Index];
-                var errorMessage = record.Exception?.Message ?? record.ToString();
-                if (errorMessage.Contains("deprecat", StringComparison.OrdinalIgnoreCase) ||
-                    errorMessage.Contains("will start deprecating", StringComparison.OrdinalIgnoreCase))
-                {
-                    warnings.Add(errorMessage);
-                    onWarning?.Invoke("Warning", errorMessage);
-                    return;
-                }
-
                 errors.Add(record);
                 onError?.Invoke(record);
             };

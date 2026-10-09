@@ -104,12 +104,9 @@ $pagedItems = $items | Select-Object -Skip {request.Skip} -First {request.PageSi
         onLog?.Invoke("Verbose", $"Fetching public folders (skip={request.Skip}, pageSize={request.PageSize})...");
 
         var result = await Engine.ExecuteAsync(script, onVerbose: onLog, cancellationToken: cancellationToken);
-        if (result.WasCancelled)
-        {
-            throw new OperationCanceledException();
-        }
+        result.ThrowIfFailed();
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             response.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
 

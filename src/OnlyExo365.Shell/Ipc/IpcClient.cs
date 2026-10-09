@@ -178,6 +178,18 @@ public class IpcClient : IAsyncDisposable
                 await registration.DisposeAsync().ConfigureAwait(false);
             }
         }
+        catch (OperationCanceledException)
+        {
+            using (var cancelTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+            {
+                await SendCancelAsync(request.CorrelationId, cancelTimeout.Token).ConfigureAwait(false);
+            }
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException("The worker request deadline expired. Any changes already submitted may have completed.");
+            }
+            throw;
+        }
         finally
         {
             _pendingRequests.TryRemove(request.CorrelationId, out _);

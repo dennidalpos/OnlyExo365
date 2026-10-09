@@ -9,7 +9,7 @@ internal static class MigrationCommandBuilder
         var endpointType = NormalizeEndpointType(request.EndpointType);
         var isUpdate = !string.IsNullOrWhiteSpace(request.Identity);
         var parameters = new Dictionary<string, object>();
-        var lines = new List<string>();
+        var lines = new List<string> { "param([string]$MigrationUserName, [string]$MigrationPassword)" };
 
         if (RequiresCredential(endpointType) &&
             !string.IsNullOrWhiteSpace(request.Username) &&
@@ -83,7 +83,7 @@ $result = Test-MigrationServerAvailability -Endpoint '{EscapePs(request.Identity
 
         var endpointType = NormalizeEndpointType(request.EndpointType);
         var parameters = new Dictionary<string, object>();
-        var lines = new List<string>();
+        var lines = new List<string> { "param([string]$MigrationUserName, [string]$MigrationPassword)" };
 
         if (RequiresCredential(endpointType))
         {

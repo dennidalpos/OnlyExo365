@@ -247,7 +247,19 @@ public class RetryPolicy
 
                 Debug.WriteLine($"[RetryPolicy] Waiting {delay.TotalMilliseconds:F0}ms before retry {attempt + 1}");
 
-                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return new RetryResult<T>
+                    {
+                        WasCancelled = true,
+                        Attempts = attempt,
+                        TotalDuration = _timeProvider.UtcNow - startTime
+                    };
+                }
             }
         }
 
@@ -349,7 +361,14 @@ public class RetryPolicy
 
                 var delay = CalculateDelay(attempt, error.RetryAfter, ref previousDelay);
                 Debug.WriteLine($"[RetryPolicy] Waiting {delay.TotalMilliseconds:F0}ms before retry after exception {attempt + 1}");
-                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return Result<T>.Cancelled();
+                }
             }
         }
 
@@ -415,10 +434,10 @@ public class RetryPolicy
         }
 
                                                                        
-        delayMs = Math.Max(delayMs, serverRetryAfterMs);
+        delayMs = Math.Min(delayMs, _options.MaxDelayMs);
 
                                                
-        delayMs = Math.Min(delayMs, _options.MaxDelayMs);
+        delayMs = Math.Max(delayMs, serverRetryAfterMs);
         delayMs = Math.Max(delayMs, 0);
 
         return TimeSpan.FromMilliseconds(delayMs);

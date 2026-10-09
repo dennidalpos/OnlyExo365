@@ -351,13 +351,14 @@ $pagedMembers = $allMembers | Select-Object -Skip {skip} -First {pageSize}
 
     private static GroupMembersPageDto ParseGroupMembersPage(PowerShellResult result, int skip, int pageSize)
     {
+        result.ThrowIfFailed();
         var page = new GroupMembersPageDto
         {
             Skip = skip,
             PageSize = pageSize
         };
 
-        if (result.Success && result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
+        if (result.Output.Any() && result.Output.First().BaseObject is Hashtable hash)
         {
             page.TotalCount = Convert.ToInt32(hash["TotalCount"] ?? 0);
             if (hash["Members"] is object[] members)

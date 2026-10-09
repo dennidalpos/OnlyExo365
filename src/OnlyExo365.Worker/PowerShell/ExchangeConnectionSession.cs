@@ -23,7 +23,7 @@ internal sealed class ExchangeConnectionSession
             return new PowerShellResult
             {
                 Success = false,
-                ErrorMessage = "ExchangeOnlineManagement module is not available. Please install it using: Install-Module ExchangeOnlineManagement"
+                ErrorMessage = $"Approved ExchangeOnlineManagement {PowerShellModuleBootstrapPolicy.Resolve("ExchangeOnlineManagement")!.RequiredVersion} is missing or failed to import. Install the approved module from Tools and retry."
             };
         }
 
@@ -244,13 +244,7 @@ internal sealed class ExchangeConnectionSession
         var graphConnectScript = string.Join(Environment.NewLine, new[]
         {
             "try {",
-            "    $graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | Select-Object -First 1",
-            "    if (-not $graphModule) {",
-            "        Write-Warning 'Microsoft.Graph.Authentication module not installed'",
-            "        return",
-            "    }",
-            string.Empty,
-            "    Import-Module Microsoft.Graph.Authentication -ErrorAction Stop",
+            PowerShellModuleBootstrapPolicy.Resolve("Microsoft.Graph")!.BuildImportScript(),
             "    Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null",
             string.Empty,
             $"    {GraphCommandBuilder.BuildConnectGraphCommand(_engine.ExchangeConfiguration, requiredDelegatedScopes)} -ErrorAction Stop",
@@ -262,7 +256,7 @@ internal sealed class ExchangeConnectionSession
             "        Write-Output 'Connected to Microsoft Graph'",
             "    }",
             "} catch {",
-            "    Write-Warning \"Connect-MgGraph failed: $($_.Exception.Message)\"",
+            "    throw",
             "}"
         });
 
@@ -310,7 +304,7 @@ internal sealed class ExchangeConnectionSession
             return new PowerShellResult
             {
                 Success = false,
-                ErrorMessage = "ExchangeOnlineManagement module is not available. Please install it using: Install-Module ExchangeOnlineManagement"
+                ErrorMessage = $"Approved ExchangeOnlineManagement {PowerShellModuleBootstrapPolicy.Resolve("ExchangeOnlineManagement")!.RequiredVersion} is missing or failed to import. Install the approved module from Tools and retry."
             };
         }
 

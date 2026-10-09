@@ -103,7 +103,7 @@ public partial class WorkerCommandTests
         Assert.Contains("Microsoft.Graph.Users", script, StringComparison.Ordinal);
         Assert.Contains("Microsoft.Graph.Users.Actions", script, StringComparison.Ordinal);
         Assert.Contains("Microsoft.Graph.Identity.DirectoryManagement", script, StringComparison.Ordinal);
-        Assert.Contains("Install the approved Graph bundle from Tools and retry.", script, StringComparison.Ordinal);
+        Assert.Contains("Install it from Tools and retry.", script, StringComparison.Ordinal);
     }
 
     [Fact]

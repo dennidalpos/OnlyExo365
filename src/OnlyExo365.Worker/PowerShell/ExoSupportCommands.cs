@@ -1,3 +1,4 @@
+using OnlyExo365.Contracts;
 using OnlyExo365.Contracts.Dtos;
 
 namespace OnlyExo365.Worker.PowerShell;
@@ -34,9 +35,9 @@ $exchangeModuleRequiredVersion = [Version]'" + escapedExchangeRequiredVersion + 
 $graphModuleRequiredVersion = [Version]'" + escapedGraphRequiredVersion + @"'
 $graphModuleNames = " + graphRequiredModulesLiteral + @"
 
-$exoModule = Get-Module -ListAvailable -Name ExchangeOnlineManagement | Sort-Object Version -Descending | Select-Object -First 1
+$exoModule = Get-Module -ListAvailable -Name ExchangeOnlineManagement | Where-Object { $_.Version -eq $exchangeModuleRequiredVersion } | Select-Object -First 1
 $graphModules = foreach ($graphModuleName in $graphModuleNames) {
-    Get-Module -ListAvailable -Name $graphModuleName | Sort-Object Version -Descending | Select-Object -First 1
+    Get-Module -ListAvailable -Name $graphModuleName | Where-Object { $_.Version -eq $graphModuleRequiredVersion } | Select-Object -First 1
 }
 $graphModuleMap = @{}
 foreach ($graphModuleName in $graphModuleNames) {

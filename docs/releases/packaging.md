@@ -21,7 +21,7 @@ Outputs produced:
 
 ## Smoke Testing
 
-Execute local end-to-end smoke verification:
+Execute end-to-end smoke verification only in a disposable Windows VM or equivalent isolated host:
 
 ```powershell
 pwsh ./build/run-smoke-tests.ps1
@@ -58,3 +58,9 @@ Creates under `artifacts/publish/release-assets/`:
 - `OnlyExo365-<tag>-win-x64-setup.exe`
 - `OnlyExo365-<tag>-win-x64.sha256`
 - `OnlyExo365-<tag>-win-x64-assets.json`
+
+## Uninstall Data Contract
+
+Inno Setup removes files recorded during installation. Uninstall preserves export files and unknown files in the installation directory; transient logs and IPC secrets are removed. The installer smoke script checks that installed payload files disappear and preserved marker contents survive, then restores its local-data backups. Do not run it against an operator profile.
+
+Compiling the installer does not verify installation or uninstall behavior. The October 2026 audit records isolated install/uninstall as pending. [Inno Setup advises against indiscriminate application-directory deletion](https://jrsoftware.org/ishelp/topic_uninstalldeletesection.htm).

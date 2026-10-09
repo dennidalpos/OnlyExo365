@@ -34,3 +34,11 @@ OnlyExo365 isolates UI presentation (`OnlyExo365.Shell`) from PowerShell executi
 - Spawns `OnlyExo365.Worker.exe` on startup.
 - Automatically handles reconnection and restart policies (up to 3 attempts).
 - Toggles console visibility via IPC handshake without terminating the background process.
+
+## Queue, Cancellation, and Deadlines
+
+The Worker registers each request before queue admission. A full queue rejects the request with transient `ServiceUnavailable`; the reader remains available for heartbeat and cancellation messages. Duplicate pending correlation IDs are rejected. Cancellation of queued work prevents dispatch.
+
+`TimeoutMs` covers queue wait and execution. Expired requests return `ErrorCode.Timeout` with `WasCancelled = false`; voluntary cancellation uses `WasCancelled = true`. The client sends cancellation when its local wait expires. Changes already submitted to Microsoft 365 may have completed, so writes are never retried automatically. The existing IPC envelopes are unchanged.
+
+`Retry-After` is a minimum wait supplied by the server. Only local exponential backoff is capped; cancellation interrupts the entire wait. See [Microsoft Graph throttling guidance](https://learn.microsoft.com/en-us/graph/throttling).

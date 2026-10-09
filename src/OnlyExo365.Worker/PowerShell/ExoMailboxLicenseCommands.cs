@@ -7,13 +7,6 @@ namespace OnlyExo365.Worker.PowerShell;
 internal sealed class ExoMailboxLicenseCommands : ExoCommandModuleBase
 {
     private const string LicenseWriteScope = "LicenseAssignment.ReadWrite.All";
-    private static readonly string[] RequiredGraphModules =
-    [
-        "Microsoft.Graph.Authentication",
-        "Microsoft.Graph.Users",
-        "Microsoft.Graph.Users.Actions",
-        "Microsoft.Graph.Identity.DirectoryManagement"
-    ];
     private readonly PowerShellEngine _engine;
 
     public ExoMailboxLicenseCommands(PowerShellEngine engine)
@@ -684,21 +677,7 @@ try {
         => value ? "$true" : "$false";
 
     internal static string BuildImportRequiredGraphModulesScript()
-    {
-        var moduleList = string.Join(", ", RequiredGraphModules.Select(module => $"'{EscapePs(module)}'"));
-        return $@"
-$requiredGraphModules = @({moduleList})
-foreach ($requiredGraphModule in $requiredGraphModules) {{
-    $availableModule = Get-Module -ListAvailable -Name $requiredGraphModule | Sort-Object Version -Descending | Select-Object -First 1
-    if (-not $availableModule) {{
-        throw ""Required Microsoft Graph module '$requiredGraphModule' is not installed. Install the approved Graph bundle from Tools and retry.""
-    }}
-
-    Import-Module $requiredGraphModule -ErrorAction Stop | Out-Null
-}}
-
-";
-    }
+        => PowerShellModuleBootstrapPolicy.Resolve("Microsoft.Graph")!.BuildImportScript();
 
     private async Task EnsureGraphConnectedAsync(bool requireLicenseWriteScope, CancellationToken cancellationToken)
     {

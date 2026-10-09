@@ -37,7 +37,7 @@ pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier wi
 ```
 
 > [!NOTE]
-> Pass `-KeepLocalAppData` to `scripts/gate.ps1` to preserve local testing logs and user state during gate execution.
+> `scripts/gate.ps1` cleans repository build outputs only. Personal logs, configuration, secrets, catalogs, and exports are preserved automatically. The former `KeepLocalAppData` and `CleanPerMachineAppSettings` flags were removed.
 
 ---
 
@@ -80,3 +80,14 @@ The repository enforces architectural and security boundaries:
   ```powershell
   pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64
   ```
+
+## Offline Audit Verification
+
+After locked restore, compile and run the offline suite without invoking the full gate:
+
+```powershell
+pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
+pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap -NoBuild -NoRestore
+```
+
+Use external PowerShell 7.6+ for `build/run-tenant-validation.ps1` and interactive Exchange bootstrap. The module policy is embedded from `src/OnlyExo365.Contracts/Data/PowerShellModuleBootstrapPolicy.json`; Shell, Worker, and validation scripts select exact approved versions. Regenerate NuGet lockfiles with `dotnet restore OnlyExo365.sln --force-evaluate --artifacts-path artifacts/build --runtime win-x64` when approved dependencies change.

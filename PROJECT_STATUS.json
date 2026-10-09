@@ -1,29 +1,70 @@
 {
   "project_name": "OnlyExo365",
   "status": "active",
-  "current_phase": "verification complete",
-  "last_updated": "2026-09-22T07:40:00+02:00",
+  "current_phase": "offline audit remediation completed; isolated and tenant qualification pending",
+  "last_updated": "2026-10-10T01:07:56+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
-  "active_objective": "Repository local gate completed with full app data cleanup, SDK 10.0.401 alignment, and vulnerability remediation.",
+  "active_objective": "Qualify the repaired installer in an isolated host and approved modules against a dedicated test tenant.",
   "assumptions": [
     "The local machine uses installed .NET SDK 10.0.401 while preserving explicit SDK pinning and disabled roll-forward."
   ],
   "decisions": [
-    "Aligned global.json from 10.0.204 to 10.0.401 to match installed toolchain.",
-    "Upgraded System.Security.Cryptography.Xml from 10.0.7 to 10.0.10 to remediate 5 High severity NuGet vulnerabilities."
+    "Preserve personal state during gate execution and exports/unknown files during uninstall.",
+    "Keep existing IPC envelopes: deadlines use ErrorCode.Timeout; voluntary cancellation uses WasCancelled; no automatic write retry.",
+    "Use progressive Message Trace with partial counts and a page-plus-one lookahead.",
+    "Keep .NET 10 and SDK 10.0.401; upgrade PowerShell SDK to 7.6.6, approved EXO to 3.10.1, four Graph modules to 2.41.1 and crypto packages to 10.0.12.",
+    "Share one approved module policy from Contracts and import exact approved versions.",
+    "No production tenant validation. The user explicitly authorized committing and pushing the completed audit work to main for session handoff."
   ],
-  "current_tasks": [],
-  "next_tasks": [],
+  "current_tasks": [
+    {
+      "id": "AUD-07",
+      "priority": "P1",
+      "status": "pending_isolated_environment",
+      "description": "Validate install/uninstall of the new package in a disposable Windows VM, including survival and unchanged contents of exports and unknown installation files."
+    },
+    {
+      "id": "AUD-08",
+      "priority": "P2",
+      "status": "pending_dedicated_test_tenant",
+      "description": "Qualify real approved module imports, authentication modes, progressive Message Trace and failure propagation using a dedicated test tenant."
+    }
+  ],
+  "next_tasks": [
+    {
+      "id": "IMP-01",
+      "priority": "P2",
+      "status": "proposal",
+      "description": "Extend generated PowerShell script execution tests beyond the repaired paths."
+    },
+    {
+      "id": "IMP-02",
+      "priority": "P2",
+      "status": "proposal",
+      "description": "Make exports atomic and preserve existing reports when generation fails."
+    },
+    {
+      "id": "IMP-03",
+      "priority": "P3",
+      "status": "proposal",
+      "description": "Adopt a standard CSV parser and finish localization of direct ViewModel messages; evaluate new dependencies separately."
+    }
+  ],
   "blockers": [],
   "risks": [
-    "Package reproducibility and artifact signing validation were not run because scripts/gate.ps1 only enables them with explicit switches.",
-    "PSScriptAnalyzer still reports existing style warnings, but no error-severity findings remain."
+    "Install/uninstall behavior is not verified interactively; no isolated Windows host was available.",
+    "Offline simulated cmdlets do not qualify real Microsoft 365 authentication or module execution.",
+    "Cancellation/deadline does not roll back writes already submitted to Microsoft 365.",
+    "Artifact signing and reproducibility checks were not executed."
   ],
   "dependencies": {
     "runtime": [
       ".NET Desktop Runtime 10",
-      "PowerShell 7+"
+      "Embedded PowerShell 7.6.6",
+      "External PowerShell 7.6+ for interactive Exchange bootstrap and tenant validation",
+      "ExchangeOnlineManagement 3.10.1",
+      "Four approved Microsoft Graph modules at 2.41.1"
     ],
     "development": [
       ".NET SDK 10.0.401",
@@ -34,12 +75,15 @@
     ]
   },
   "quality_gates": {
-    "format": "passed",
-    "lint": "passed",
-    "typecheck": "passed",
-    "tests": "passed",
-    "build": "passed",
-    "security_review": "passed"
+    "format": "git diff --check passed; no dedicated formatter configured",
+    "lint": "4 changed PowerShell scripts parsed successfully; project analyzers retained",
+    "typecheck": "Debug and Release compilation passed, 0 errors",
+    "tests": "768/768 passed, 0 failed, 0 skipped; one complete suite after targeted checks",
+    "build": "Release win-x64 publish and Inno Setup package creation passed",
+    "security_review": "NuGet: no known vulnerabilities across 4 projects; gitleaks: no secrets found",
+    "architecture": "passed; IPC server 684/760 non-empty lines",
+    "isolated_install_uninstall": "pending",
+    "tenant_validation": "pending"
   },
   "commands": {
     "install": "pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64",
@@ -56,7 +100,7 @@
     "required_env_vars": [],
     "env_files": []
   },
-  "last_completed_work": "Completed full scripts/gate.ps1 without -KeepLocalAppData: local app data cleaned, prerequisites verified, locked bootstrap, Debug compile, 733 tests passed, architecture constraints passed, NuGet vulnerability scan passed (remediated System.Security.Cryptography.Xml 10.0.10), gitleaks secret scan passed, Release publish, and setup packaging passed. Completed modular reorganization of docs and source comment minimization.",
+  "last_completed_work": "Implemented the approved data-protection, credential binding, error propagation, IPC lifetime, retry delay, Message Trace and exact module import fixes. Added 35 regressions; 768 tests pass. Native Debug/Release builds, architecture, locked NuGet scan, secret scan and Release installer packaging pass. Documentation and audit evidence updated. The user requested session handoff with commit and push on main.",
   "open_questions": [],
-  "handoff_notes": "Verified commands: pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64, pwsh ./scripts/bootstrap.ps1, pwsh ./scripts/agents/doctor.ps1, pwsh ./build/assert-architecture-constraints.ps1, pwsh ./build/assert-no-vulnerable-packages.ps1."
+  "handoff_notes": "Resume on main from this tracker and docs/audits/2026-10-10-critical-audit.md. Offline remediation is complete: 768/768 tests passed, Debug/Release builds, architecture, NuGet and secret scans, and installer packaging passed. Do not repeat the full suite unless source changes or problems justify it. Prioritize AUD-07 (isolated install/uninstall preserving exports and unknown files), then AUD-08 (dedicated test tenant; no production tenant). IMP-01/02/03 remain separate proposals. Artifacts are gitignored and retained locally; regenerate the Release package if absent in the next environment. Commit/push on main authorized by the user for this handoff; final Git/remote evidence is reported in the chat."
 }

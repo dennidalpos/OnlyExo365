@@ -974,7 +974,6 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Language selector ComboBox in the header bar -->
     <Style x:Key="HeaderComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
         <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>

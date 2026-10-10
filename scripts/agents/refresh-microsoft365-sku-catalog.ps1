@@ -67,6 +67,23 @@ function Normalize-String {
 function Convert-CsvRowsToCatalogEntries {
     param([object[]]$Rows)
 
+    if ($Rows.Count -eq 0) { throw 'Licensing CSV contains no entries.' }
+    $columns = @('String_Id', 'GUID', 'Product_Display_Name', 'Service_Plan_Name', 'Service_Plan_Id', 'Service_Plans_Included_Friendly_Names')
+    foreach ($row in $Rows) {
+        foreach ($column in $columns) {
+            if ($null -eq $row.PSObject.Properties[$column]) { throw "Licensing CSV missing column: $column" }
+        }
+        $identifier = [guid]::Empty
+        if (-not [guid]::TryParse([string]$row.GUID, [ref]$identifier) -or $identifier -eq [guid]::Empty -or
+            [string]::IsNullOrWhiteSpace($row.String_Id) -or [string]::IsNullOrWhiteSpace($row.Product_Display_Name)) {
+            throw 'Licensing CSV contains an invalid SKU identity or product name.'
+        }
+        if (-not [string]::IsNullOrWhiteSpace($row.Service_Plan_Id) -and
+            (-not [guid]::TryParse([string]$row.Service_Plan_Id, [ref]$identifier) -or $identifier -eq [guid]::Empty)) {
+            throw 'Licensing CSV contains an invalid service plan identity.'
+        }
+    }
+
     $groupedRows = $Rows |
         Group-Object {
             "{0}|{1}" -f (Normalize-String -Value $_.String_Id), (Normalize-String -Value $_.GUID)
@@ -123,11 +140,18 @@ $catalogDocument = [ordered]@{
     generatedOn = (Get-Date).ToString("yyyy-MM-dd")
     source = $DocumentationUrl
     csvDownload = $effectiveCsvDownloadUrl
-    entries = Convert-CsvRowsToCatalogEntries -Rows $rows
+    entries = @(Convert-CsvRowsToCatalogEntries -Rows $rows)
 }
 
 New-Item -Path (Split-Path -Parent $resolvedOutputPath) -ItemType Directory -Force | Out-Null
-$catalogDocument | ConvertTo-Json -Depth 6 -Compress | Set-Content -Path $resolvedOutputPath -Encoding utf8NoBOM
+$temporaryOutput = $resolvedOutputPath + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
+try {
+    $catalogDocument | ConvertTo-Json -Depth 6 -Compress | Set-Content -LiteralPath $temporaryOutput -Encoding utf8NoBOM
+    [IO.File]::Move($temporaryOutput, $resolvedOutputPath, $true)
+}
+finally {
+    if (Test-Path -LiteralPath $temporaryOutput) { Remove-Item -LiteralPath $temporaryOutput -ErrorAction Stop }
+}
 
 Write-Success "Microsoft 365 SKU catalog refreshed: $resolvedOutputPath"
 Write-Info "Entries: $($catalogDocument.entries.Count)"

@@ -20,7 +20,6 @@ public sealed class LicenseCatalogConfigurationTests : IDisposable
     [Fact]
     public void LoadLicenseCatalogConfiguration_ReturnsDefaults_WhenSectionAbsent()
     {
-        // appsettings.json with no licensingCatalog section.
         File.WriteAllText(
             Path.Combine(_tempDir, "appsettings.json"),
             """{ "ExchangeOnline": {} }""");
@@ -67,7 +66,7 @@ public sealed class LicenseCatalogConfigurationTests : IDisposable
     {
         File.WriteAllText(Path.Combine(_tempDir, "appsettings.json"), "{ invalid json");
 
-        // Must not throw even though the JSON is malformed.
+        // Malformed catalog settings retain defaults.
         var config = ExchangeConfigurationLoader.LoadLicenseCatalogConfiguration(
             _tempDir, _sharedDir);
 
@@ -101,7 +100,6 @@ public sealed class LicenseCatalogConfigurationTests : IDisposable
         var config = ExchangeConfigurationLoader.LoadLicenseCatalogConfiguration(
             _tempDir, _sharedDir);
 
-        // Shared dir wins.
         Assert.Equal(CatalogAutoUpdateMode.Disabled, config.AutoUpdateMode);
     }
 

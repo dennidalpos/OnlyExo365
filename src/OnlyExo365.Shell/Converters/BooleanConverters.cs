@@ -76,7 +76,7 @@ public class InverseBoolConverter : IValueConverter
     }
 }
 
-/// <summary>Converts string sequence to comma-separated text.</summary>
+/// <summary>Joins strings with commas.</summary>
 public class ListToStringConverter : IValueConverter
 {
     private static readonly string EmptyResult = "-";
@@ -86,7 +86,7 @@ public class ListToStringConverter : IValueConverter
         if (value is not IEnumerable<string> enumerable)
             return EmptyResult;
 
-        // Avoid allocation if already list/array
+        // Reuse lists/arrays.
         if (value is IList<string> list)
         {
             if (list.Count == 0)
@@ -101,7 +101,6 @@ public class ListToStringConverter : IValueConverter
             return string.Join(", ", array);
         }
 
-        // Iterator fallback
         using var enumerator = enumerable.GetEnumerator();
         if (!enumerator.MoveNext())
             return EmptyResult;
@@ -115,7 +114,7 @@ public class ListToStringConverter : IValueConverter
     }
 }
 
-/// <summary>Returns Collapsed for null, empty string, or empty collection.</summary>
+/// <summary>Collapses null, empty strings and collections.</summary>
 public class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -126,7 +125,7 @@ public class NullToVisibilityConverter : IValueConverter
         if (value is string str)
             return string.IsNullOrEmpty(str) ? Visibility.Collapsed : Visibility.Visible;
 
-        // Avoid Cast<object>().Any() allocation
+        // Avoid iterator allocations.
         if (value is System.Collections.ICollection collection)
             return collection.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 

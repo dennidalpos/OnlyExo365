@@ -118,6 +118,81 @@ function Resolve-RuntimeIdentifiers {
     return @($resolved.ToArray())
 }
 
+function Get-ObjectPropertyValue {
+    param([object]$Object, [string]$PropertyName)
+    if ($null -eq $Object) { return $null }
+    $property = $Object.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) { return $null }
+    return $property.Value
+}
+
+function Test-PathWithinRoot {
+    param([string]$CandidatePath, [string]$RootPath)
+    $candidate = [IO.Path]::GetFullPath($CandidatePath)
+    $root = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($RootPath))
+    return $candidate.Equals($root, [StringComparison]::OrdinalIgnoreCase) -or
+        $candidate.StartsWith($root + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Assert-RepositoryCleanupPath {
+    param([string]$RepositoryRoot, [string]$PathValue, [string[]]$TrackedPaths = @(), [switch]$AncestorsOnly)
+    $path = Resolve-RepositoryPath -RepositoryRoot $RepositoryRoot -PathValue $PathValue
+    $root = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($RepositoryRoot))
+    if ([string]::IsNullOrWhiteSpace($path) -or $path.Equals($root, [StringComparison]::OrdinalIgnoreCase) -or
+        -not (Test-PathWithinRoot -CandidatePath $path -RootPath $root)) {
+        throw "Cleanup target must be a child of the repository: $PathValue"
+    }
+    $ancestor = $path
+    while (Test-PathWithinRoot -CandidatePath $ancestor -RootPath $root) {
+        if ((Test-Path -LiteralPath $ancestor) -and
+            ((Get-Item -LiteralPath $ancestor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "Cleanup refuses reparse point: $ancestor"
+        }
+        if ($ancestor.Equals($root, [StringComparison]::OrdinalIgnoreCase)) { break }
+        $ancestor = [IO.Path]::GetDirectoryName($ancestor)
+    }
+    foreach ($tracked in $TrackedPaths) {
+        if (Test-PathWithinRoot -CandidatePath (Join-Path $root $tracked) -RootPath $path) {
+            throw "Cleanup target contains tracked file: $tracked"
+        }
+    }
+    if (-not $AncestorsOnly -and (Test-Path -LiteralPath $path)) {
+        $pending = [Collections.Generic.Stack[string]]::new()
+        $pending.Push($path)
+        while ($pending.Count) {
+            foreach ($entry in Get-ChildItem -LiteralPath $pending.Pop() -Force) {
+                if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Cleanup refuses reparse point: $($entry.FullName)" }
+                if ($entry.PSIsContainer) { $pending.Push($entry.FullName) }
+            }
+        }
+    }
+    return $path
+}
+
+function Get-TrackedRepositoryPaths {
+    param([string]$RepositoryRoot)
+    if (-not (Test-Path -LiteralPath (Join-Path $RepositoryRoot '.git'))) { return @() }
+    $output = @(& git -C $RepositoryRoot ls-files -z)
+    if ($LASTEXITCODE -ne 0) { throw "Unable to enumerate tracked files before cleanup (exit code: $LASTEXITCODE)." }
+    return (($output -join "`n") -split "`0" | Where-Object { $_.Length -gt 0 })
+}
+
+function Get-RepositoryCleanupTargets {
+    param([string]$RepositoryRoot)
+    foreach ($name in @('build', 'publish', 'packages')) { Join-Path $RepositoryRoot "artifacts/$name" }
+    foreach ($source in @('src', 'tests')) {
+        $sourcePath = Join-Path $RepositoryRoot $source
+        if (-not (Test-Path -LiteralPath $sourcePath)) { continue }
+        $null = Assert-RepositoryCleanupPath -RepositoryRoot $RepositoryRoot -PathValue $sourcePath -AncestorsOnly
+        foreach ($project in Get-ChildItem -LiteralPath $sourcePath -Directory) {
+            $null = Assert-RepositoryCleanupPath -RepositoryRoot $RepositoryRoot -PathValue $project.FullName -AncestorsOnly
+            if (@(Get-ChildItem -LiteralPath $project.FullName -File -Filter '*.csproj').Count -gt 0) {
+                foreach ($name in @('bin', 'obj')) { Join-Path $project.FullName $name }
+            }
+        }
+    }
+}
+
 function Get-PublishArtifactsPath {
     param([string]$RepositoryRoot)
 
@@ -218,26 +293,6 @@ function Assert-WindowsPlatform {
     }
 }
 
-function Get-DotNetSdkVersion {
-    Assert-CommandAvailable -CommandName "dotnet"
-
-    $output = @(& dotnet --version 2>&1)
-    $lastOutput = $output | Select-Object -Last 1
-    $version = if ($null -eq $lastOutput) { "" } else { $lastOutput.ToString().Trim() }
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($version)) {
-        $installedVersions = @(Get-DotNetInstalledSdkVersions)
-        $details = ($output | ForEach-Object { $_.ToString().Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join " "
-        $installedMessage = if ($installedVersions.Count -gt 0) { " Installed SDKs: $($installedVersions -join ', ')." } else { "" }
-        if ([string]::IsNullOrWhiteSpace($details)) {
-            throw "Unable to resolve the active .NET SDK version.$installedMessage"
-        }
-
-        throw "Unable to resolve the active .NET SDK version. $details$installedMessage"
-    }
-
-    return $version
-}
-
 function Get-GlobalJsonSdkSpecification {
     param([string]$RepositoryRoot)
 
@@ -263,19 +318,6 @@ function Get-GlobalJsonSdkSpecification {
         AllowPrerelease = [bool]$globalJson.sdk.allowPrerelease
         Path = $globalJsonPath
     }
-}
-
-function Assert-DotNetSdkMajorVersion {
-    param([int]$MinimumMajorVersion = 8)
-
-    $version = Get-DotNetSdkVersion
-    $majorVersion = [int]($version.Split('.')[0])
-
-    if ($majorVersion -lt $MinimumMajorVersion) {
-        throw ".NET SDK $MinimumMajorVersion or later is required. Found: $version"
-    }
-
-    return $version
 }
 
 function Assert-DotNetSdkPinnedVersion {

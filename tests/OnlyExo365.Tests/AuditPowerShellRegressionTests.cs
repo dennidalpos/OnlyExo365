@@ -13,7 +13,7 @@ public sealed class AuditPowerShellRegressionTests
     public async Task GeneratedCredentialCommands_BindNamedParameters(string kind)
     {
         using var fixture = new LocalPowerShellFixture();
-        // Local cmdlets validate binding without contacting Microsoft 365.
+        // Validate binding with offline cmdlets.
         await fixture.DefineCommandsAsync("""
             function New-Mailbox { param($Password) if ($null -eq $Password) { throw 'Password not bound' }; 'bound' }
             function New-MailUser { param($Password) if ($null -eq $Password) { throw 'Password not bound' }; 'bound' }

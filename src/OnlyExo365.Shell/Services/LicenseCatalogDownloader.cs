@@ -5,13 +5,12 @@ using System.Text.RegularExpressions;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>Downloads and converts the Microsoft 365 SKU catalog from Microsoft Learn.</summary>
+/// <summary>Downloads Microsoft Learn SKU mappings.</summary>
 public sealed partial class LicenseCatalogDownloader : IDisposable
 {
     private readonly LicenseCatalogConfiguration _configuration;
     private readonly HttpClient _httpClient;
 
-    // Extracts CSV download link from HTML page
     [GeneratedRegex(
         @"https://download\.microsoft\.com/download/[^""'\s<>]+licensing\.csv",
         RegexOptions.IgnoreCase)]
@@ -33,7 +32,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
             "OnlyExo365/1.0 (LicenseCatalogUpdater)");
     }
 
-    /// <summary>Downloads CSV from documentation page and serializes catalog JSON.</summary>
+    /// <summary>Downloads CSV and returns catalog JSON.</summary>
     public async Task<string> DownloadCatalogJsonAsync(CancellationToken cancellationToken = default)
     {
         var csvUrl = await ResolveCsvUrlAsync(_configuration.RemoteSource, cancellationToken);
@@ -42,7 +41,6 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         return JsonSerializer.Serialize(document, LocalSkuCatalogJsonContext.Default.LocalSkuCatalogDocument);
     }
 
-    /// <summary>Resolves CSV URL from documentation HTML.</summary>
     internal async Task<string> ResolveCsvUrlAsync(string documentationUrl, CancellationToken cancellationToken)
     {
         string pageHtml;
@@ -78,7 +76,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
                     $"The Microsoft 365 licensing CSV downloaded from '{csvUrl}' is empty.");
             }
 
-            // The CSV is UTF-8 with or without BOM.
+            // Accept UTF-8 with/without BOM.
             return Encoding.UTF8.GetString(bytes).TrimStart('\uFEFF');
         }
         catch (CatalogDownloadException)
@@ -92,7 +90,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         }
     }
 
-    /// <summary>Parses CSV and groups rows by SKU into LocalSkuCatalogDocument.</summary>
+    /// <summary>Groups CSV rows by SKU.</summary>
     internal static LocalSkuCatalogDocument ConvertCsvToDocument(
         string csvContent,
         string sourceUrl,
@@ -100,7 +98,6 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
     {
         using var reader = new System.IO.StringReader(csvContent);
 
-        // Map column indices from header row
         var headerLine = reader.ReadLine();
         if (string.IsNullOrWhiteSpace(headerLine))
         {
@@ -115,7 +112,6 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         var colServicePlanId = FindColumn(headers, "Service_Plan_Id");
         var colFriendlyName = FindColumn(headers, "Service_Plans_Included_Friendly_Names");
 
-        // Read all data rows.
         var groups = new Dictionary<string, LocalSkuCatalogEntry>(
             StringComparer.OrdinalIgnoreCase);
 
@@ -195,7 +191,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         };
     }
 
-    /// <summary>Parses CSV row handling quotes and embedded commas.</summary>
+    /// <summary>Handles quoted fields and embedded commas.</summary>
     internal static List<string> ParseCsvRow(string line)
     {
         var fields = new List<string>();
@@ -210,7 +206,7 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
             {
                 if (ch == '"')
                 {
-                    // Peek ahead for escaped quote ("").
+                    // Unescape doubled quotes.
                     if (i + 1 < line.Length && line[i + 1] == '"')
                     {
                         sb.Append('"');

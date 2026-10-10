@@ -8,7 +8,7 @@
         xmlns:ipc="clr-namespace:OnlyExo365.Shell.Ipc;assembly=OnlyExo365.Shell"
         xmlns:dtos="clr-namespace:OnlyExo365.Contracts.Dtos;assembly=OnlyExo365.Contracts"
         Title="{loc:Loc Key=Shell.WindowTitle}"
-        Language="{Binding LanguageSelection.SelectedLocale.Code}"
+        Language="{Binding LanguageSelection.SelectedLocale.Code, ConverterCulture=en-US}"
         Height="800" Width="1200"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen">

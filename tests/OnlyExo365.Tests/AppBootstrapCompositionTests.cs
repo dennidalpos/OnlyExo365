@@ -95,7 +95,7 @@ public sealed class AppBootstrapCompositionTests
         var exchangeConfiguration = new ExchangeOnlineConfiguration();
         var shellViewModel = new ShellViewModel(workerService, navigationService, exchangeConfiguration);
 
-        // Build a disabled catalog service (no network, no timer) for bootstrap tests.
+        // Disable catalog network/timer.
         var catalogConfig = new LicenseCatalogConfiguration
         {
             AutoUpdateMode = CatalogAutoUpdateMode.Disabled,
@@ -103,7 +103,7 @@ public sealed class AppBootstrapCompositionTests
             LocalCachePath = Path.Combine(Path.GetTempPath(), "OnlyExo365.Tests.Bootstrap", Guid.NewGuid().ToString("N"))
         };
         var catalogFileStore = new LicenseCatalogFileStore(catalogConfig);
-#pragma warning disable CA2000 // LicenseCatalogUpdateService owns and disposes the downloader.
+#pragma warning disable CA2000 // Catalog service owns the downloader.
         var catalogDownloader = new LicenseCatalogDownloader(catalogConfig);
         var skuNameResolver = new PresentationSkuNameResolver();
         LicenseCatalogUpdateService? catalogUpdateService = null;

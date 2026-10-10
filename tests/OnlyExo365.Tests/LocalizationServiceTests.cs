@@ -4,8 +4,7 @@ namespace OnlyExo365.Tests;
 
 public sealed class LocalizationServiceTests : IDisposable
 {
-    // Capture the locale that was active before each test and restore it after,
-    // so tests remain independent regardless of execution order.
+    // Restore locale for test isolation.
     private readonly string _originalLocale;
 
     public LocalizationServiceTests()
@@ -52,12 +51,10 @@ public sealed class LocalizationServiceTests : IDisposable
     [Fact]
     public void Get_ItalianKeyMissing_FallsBackToEnglishValue()
     {
-        // The ResourceManager falls back to the neutral (English) resource
-        // when a key is missing from the Italian satellite assembly.
+        // Missing Italian resources fall back to English.
         LocalizationService.Instance.SetLocale("it");
 
-        // Shell.WindowTitle is defined in English; if it is also defined in Italian
-        // the fallback path is still correct when the key exists in English only.
+        // The title may be translated or use English fallback.
         var result = LocalizationService.Instance.Get("Shell.WindowTitle");
 
         Assert.False(string.IsNullOrWhiteSpace(result));
@@ -71,7 +68,7 @@ public sealed class LocalizationServiceTests : IDisposable
         var firedCount = 0;
         LocalizationService.Instance.CultureChanged += (_, _) => firedCount++;
 
-        LocalizationService.Instance.SetLocale("en");   // same locale — must be a no-op
+        LocalizationService.Instance.SetLocale("en");
 
         Assert.Equal(0, firedCount);
     }

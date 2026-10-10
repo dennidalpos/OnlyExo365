@@ -17,19 +17,6 @@ $repositoryRoot = Split-Path -Parent $scriptDirectory
 
 . (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
-function Resolve-RepoPath {
-    param(
-        [string]$BaseDirectory,
-        [string]$PathValue
-    )
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return $PathValue
-    }
-
-    return Join-Path $BaseDirectory $PathValue
-}
-
 function Get-FileSha256 {
     param([string]$Path)
 
@@ -205,9 +192,9 @@ function Get-GitleaksExecutable {
     return $binaryPath
 }
 
-$resolvedSourcePath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $SourcePath
-$resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
-$resolvedToolManifestPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ToolManifestPath
+$resolvedSourcePath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $SourcePath
+$resolvedReportPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ReportPath
+$resolvedToolManifestPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ToolManifestPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
 $cacheDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "onlyexo365-security-tools"
 

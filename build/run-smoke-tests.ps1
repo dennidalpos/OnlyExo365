@@ -20,19 +20,6 @@ $repositoryRoot = Split-Path -Parent $scriptDirectory
 
 . (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
-function Resolve-RepoPath {
-    param(
-        [string]$BaseDirectory,
-        [string]$PathValue
-    )
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return $PathValue
-    }
-
-    return Join-Path $BaseDirectory $PathValue
-}
-
 function Normalize-FileSystemPath {
     param([string]$PathValue)
 
@@ -74,15 +61,6 @@ function Get-DefaultSecretDirectory {
 
 function Get-DefaultExportDirectory {
     return Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "OnlyExo365\exports"
-}
-
-function Get-LogFilePath {
-    param(
-        [string]$LogDirectory,
-        [string]$Component
-    )
-
-    return Join-Path $LogDirectory ("{0}-{1:yyyyMMdd}.log" -f $Component, (Get-Date))
 }
 
 function Get-LogFileCandidatePaths {
@@ -206,7 +184,7 @@ function Stop-ProcessIfRunning {
             return
         }
     }
-    catch {
+    catch [System.InvalidOperationException] {
         return
     }
 
@@ -217,13 +195,16 @@ function Stop-ProcessIfRunning {
         }
     }
     catch {
+        Write-Verbose "Graceful shutdown failed for owned process $($Process.Id): $($_.Exception.Message)"
     }
 
-    try {
-        Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
+    if ($Process.HasExited) { return }
+    try { $Process.Kill() }
+    catch [System.InvalidOperationException] {
+        if ($Process.HasExited) { return }
+        throw
     }
-    catch {
-    }
+    if (-not $Process.WaitForExit(5000)) { throw "Owned process $($Process.Id) did not exit during smoke cleanup." }
 }
 
 $smokeHelperPath = Join-Path $scriptDirectory "helpers\run-smoke-tests.helpers.ps1"
@@ -233,10 +214,10 @@ if (-not (Test-Path $smokeHelperPath -PathType Leaf)) {
 
 . $smokeHelperPath
 
-$resolvedPublishPath = Normalize-FileSystemPath -PathValue (Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $PublishPath)
-$resolvedSetupExePath = Normalize-FileSystemPath -PathValue (Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $SetupExePath)
-$resolvedReportPath = Normalize-FileSystemPath -PathValue (Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath)
-$resolvedPublishPath = Resolve-SmokePublishPath -PublishRootPath $resolvedPublishPath -Prefer64BitPayload ([Environment]::Is64BitOperatingSystem)
+$resolvedPublishPath = Normalize-FileSystemPath -PathValue (Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $PublishPath)
+$resolvedSetupExePath = Normalize-FileSystemPath -PathValue (Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $SetupExePath)
+$resolvedReportPath = Normalize-FileSystemPath -PathValue (Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ReportPath)
+$resolvedPublishPath = Resolve-SmokePublishPath -PublishRootPath $resolvedPublishPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
 $logDirectory = Get-DefaultLogDirectory
 $secretDirectory = Get-DefaultSecretDirectory
@@ -298,6 +279,8 @@ $report = [ordered]@{
         real_install_launch_confirmed = $false
         installed_presentation_process_id = $null
         installed_worker_process_id = $null
+        installed_payload_matches_publish = $false
+        installed_signatures_confirmed = $false
         uninstall_registry_confirmed = $false
         uninstall_cleanup_confirmed = $false
         residual_cleanup_confirmed = $false
@@ -312,8 +295,8 @@ $report = [ordered]@{
 }
 
 $installerSmokeRoot = $null
-$productDataBackupRoot = $null
 $productDataBackupEntries = @()
+$productDataBackup = @{ BackupRoot = $null; ManifestPath = $null; Entries = [Collections.Generic.List[object]]::new() }
 
 try {
     Write-Step "Validating runtime prerequisites"
@@ -321,12 +304,24 @@ try {
     Write-Success "Runtime prerequisites confirmed for packaged execution."
 
     if (-not $SkipRealInstall) {
-        $productDataBackup = Backup-ProductDataRoots -Paths @(
+        $preExistingInstall = Get-InstalledProductEntry `
+            -DisplayName $report["installer"]["product_name"] `
+            -Publisher $report["installer"]["manufacturer"] `
+            -InstallLocation $null
+        if ($null -ne $preExistingInstall) {
+            Stop-WithError "Existing installation detected for '$($report["installer"]["product_name"])'. Real installer smoke tests require a clean host to avoid altering an operator installation."
+        }
+
+        $installerSmokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-setup-smoke-" + [guid]::NewGuid().ToString("N"))
+        $realInstallRoot = Join-Path $installerSmokeRoot "installed\OnlyExo365"
+        New-Item -Path $realInstallRoot -ItemType Directory -Force | Out-Null
+        $report["installer"]["install_root"] = $realInstallRoot
+
+        $productDataBackup = Backup-ProductDataRoots -RecoveryState $productDataBackup -Paths @(
             $logDirectory,
             $secretDirectory,
             $exportDirectory
         )
-        $productDataBackupRoot = $productDataBackup.BackupRoot
         $productDataBackupEntries = @($productDataBackup.Entries)
         $report["installer"]["local_data_backup_entries"] = @($productDataBackupEntries)
         if ($productDataBackupEntries.Count -gt 0) {
@@ -357,26 +352,13 @@ try {
     }
 
     if (-not $SkipRealInstall) {
-        $preExistingInstall = Get-InstalledProductEntry `
-            -DisplayName $report["installer"]["product_name"] `
-            -Publisher $report["installer"]["manufacturer"] `
-            -InstallLocation $null
-        if ($null -ne $preExistingInstall) {
-            Stop-WithError "Existing installation detected for '$($report["installer"]["product_name"])'. Real installer smoke tests require a clean host to avoid altering an operator installation."
-        }
-
-        $installerSmokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-setup-smoke-" + [guid]::NewGuid().ToString("N"))
-        $realInstallRoot = Join-Path $installerSmokeRoot "installed\OnlyExo365"
-        New-Item -Path $realInstallRoot -ItemType Directory -Force | Out-Null
-        $report["installer"]["install_root"] = $realInstallRoot
-
         Write-Step "Installing setup EXE to temporary root"
         $installProcess = Start-Process -FilePath $resolvedSetupExePath -ArgumentList @(
                 "/VERYSILENT",
                 "/SUPPRESSMSGBOXES",
                 "/NORESTART",
                 "/DIR=$realInstallRoot"
-            ) -Wait -PassThru
+            ) -WindowStyle Hidden -Wait -PassThru
 
         $report["installer"]["install_exit_code"] = $installProcess.ExitCode
         if ($installProcess.ExitCode -ne 0) {
@@ -413,7 +395,7 @@ try {
                 "/SUPPRESSMSGBOXES",
                 "/NORESTART",
                 "/DIR=$realInstallRoot"
-            ) -Wait -PassThru
+            ) -WindowStyle Hidden -Wait -PassThru
 
         if ($reinstallProcess.ExitCode -ne 0) {
             Stop-WithError "Setup EXE reinstall failed (exit code: $($reinstallProcess.ExitCode))."
@@ -436,6 +418,9 @@ try {
             $installedProduct.UninstallString
         }
         Write-Success "Setup reinstall preserved a single uninstall registry entry."
+
+        $report['installer']['installed_signatures_confirmed'] = Assert-InstalledPayload -PublishRoot $resolvedPublishPath -InstallRoot $realInstallRoot -SetupPath $resolvedSetupExePath
+        $report['installer']['installed_payload_matches_publish'] = $true
 
         $installedPresentationExe = Join-Path $realInstallRoot "OnlyExo365.Shell.exe"
         $installedWorkerExe = Join-Path $realInstallRoot "OnlyExo365.Worker.exe"
@@ -536,12 +521,14 @@ try {
     }
 
     if ($productDataBackupEntries.Count -gt 0) {
-        $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries
+        $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries -RecoveryState $productDataBackup
         if ($restoredCount -ne $productDataBackupEntries.Count) {
             Stop-WithError "Unable to restore all pre-existing OnlyExo365 local data after installer validation."
         }
 
+        Complete-ProductDataRecovery -RecoveryState $productDataBackup
         $productDataBackupEntries = @()
+        $productDataBackup.Entries.Clear()
         $report["installer"]["local_data_restore_confirmed"] = $true
         Write-Success "Restored pre-existing OnlyExo365 local data after installer validation."
     }
@@ -550,28 +537,25 @@ try {
     Write-Info "Smoke report: $resolvedReportPath"
 }
 finally {
-    if ($null -ne $installerSmokeRoot -and (Test-Path $installerSmokeRoot)) {
-        Remove-Item -Path $installerSmokeRoot -Recurse -Force -ErrorAction SilentlyContinue
-    }
-
+    $productDataBackupEntries = @($productDataBackup.Entries)
     if ($productDataBackupEntries.Count -gt 0) {
         try {
-            $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries
+            $restoredCount = Restore-ProductDataRoots -Entries $productDataBackupEntries -RecoveryState $productDataBackup
             if ($restoredCount -eq $productDataBackupEntries.Count) {
                 Write-Warn "Recovered pre-existing OnlyExo365 local data during final cleanup after an interrupted installer smoke test run."
+                Complete-ProductDataRecovery -RecoveryState $productDataBackup
                 $productDataBackupEntries = @()
             }
             else {
-                Write-Warn "Smoke test cleanup could not restore all pre-existing OnlyExo365 local data automatically."
+                throw "Smoke test cleanup could not restore all pre-existing OnlyExo365 local data automatically."
             }
         }
         catch {
-            Write-Warn "Smoke test cleanup failed while restoring pre-existing OnlyExo365 local data: $($_.Exception.Message)"
+            throw "Smoke test cleanup failed while restoring pre-existing OnlyExo365 local data: $($_.Exception.Message). Backup retained at $($productDataBackup.BackupRoot); manifest: $($productDataBackup.ManifestPath)"
         }
     }
-
-    if (-not [string]::IsNullOrWhiteSpace($productDataBackupRoot) -and (Test-Path $productDataBackupRoot)) {
-        Remove-Item -Path $productDataBackupRoot -Recurse -Force -ErrorAction SilentlyContinue
+    if ($null -ne $installerSmokeRoot -and (Test-Path -LiteralPath $installerSmokeRoot)) {
+        Remove-Item -LiteralPath $installerSmokeRoot -Recurse -Force -ErrorAction Stop
     }
 }
 

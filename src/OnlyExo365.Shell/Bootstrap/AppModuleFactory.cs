@@ -10,7 +10,7 @@ internal static class AppModuleFactory
 {
     public static AppModuleCatalog Create(ExchangeOnlineConfiguration exchangeConfiguration)
     {
-        // Apply persisted locale before constructing ViewModels.
+        // Load locale before ViewModels.
         var preferencesService = new UserPreferencesService();
         var savedLocale = preferencesService.LoadLocale();
         if (!string.IsNullOrEmpty(savedLocale))
@@ -37,7 +37,7 @@ internal static class AppModuleFactory
             exchangeConfiguration,
             interactiveExchangeBootstrapService);
 
-        // In-process license catalog services (no IPC).
+        // Local SKU catalog; no IPC.
         var catalogConfig = ExchangeConfigurationLoader.LoadLicenseCatalogConfiguration();
         var catalogFileStore = new LicenseCatalogFileStore(catalogConfig);
         var catalogDownloader = new LicenseCatalogDownloader(catalogConfig);

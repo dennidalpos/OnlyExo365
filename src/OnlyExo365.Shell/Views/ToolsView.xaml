@@ -20,7 +20,6 @@
                                Style="{StaticResource WarningBannerTextStyle}"/>
                 </Border>
 
-                <!-- Connection Information -->
                 <controls:SectionPanel Header="{loc:Loc Key=Tools.ConnectionInformation}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -68,7 +67,6 @@
                     </Grid>
                 </controls:SectionPanel>
 
-                <!-- Worker Status -->
                 <controls:SectionPanel Header="{loc:Loc Key=Tools.WorkerStatus}" Margin="0,8,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -122,17 +120,14 @@
                     </Grid>
                 </controls:SectionPanel>
 
-                <!-- License Catalog -->
                 <controls:SectionPanel Header="{loc:Loc Key=Tools.LicenseCatalog}" Margin="0,8,0,0">
                     <StackPanel>
-                        <!-- Indeterminate progress during update -->
                         <ProgressBar IsIndeterminate="True" Height="3"
                                      Foreground="{DynamicResource AccentBrush}"
                                      Background="Transparent"
                                      Visibility="{Binding Tools.Catalog.IsUpdating, Converter={StaticResource BoolToVisibility}}"
                                      Margin="0,0,0,8"/>
 
-                        <!-- Error banner -->
                         <Border Style="{StaticResource ErrorBannerBorderStyle}"
                                 Visibility="{Binding Tools.Catalog.HasError, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{Binding Tools.Catalog.ErrorMessage}"
@@ -140,7 +135,6 @@
                                        TextWrapping="Wrap"/>
                         </Border>
 
-                        <!-- Status and action buttons -->
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -162,7 +156,6 @@
                                     Style="{StaticResource ActionGroupButton}"/>
                         </Grid>
 
-                        <!-- Detail grid -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -314,10 +307,8 @@
                     </StackPanel>
                 </controls:SectionPanel>
 
-                <!-- Module Management -->
                 <controls:SectionPanel Header="{loc:Loc Key=Tools.ModuleManagement}" Margin="0,8,0,0">
                     <StackPanel>
-                        <!-- Progress bar for checking/installing -->
                         <StackPanel Margin="0,0,0,8"
                                     Visibility="{Binding Tools.IsChecking, Converter={StaticResource BoolToVisibility}}">
                             <ProgressBar Minimum="0" Maximum="100" Value="{Binding Tools.InstallProgress, Mode=OneWay}"
@@ -335,7 +326,6 @@
                                        Style="{StaticResource CaptionTextStyle}"/>
                         </StackPanel>
 
-                        <!-- Error message -->
                         <Border Style="{StaticResource ErrorBannerBorderStyle}"
                                 Visibility="{Binding Tools.HasError, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{Binding Tools.ErrorMessage}" Style="{StaticResource ErrorBannerTextStyle}"/>
@@ -352,7 +342,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- PowerShell 7 -->
                         <Grid Margin="0,0,0,8" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -383,7 +372,6 @@
                                     Style="{StaticResource ActionGroupButton}"/>
                         </Grid>
 
-                        <!-- ExchangeOnlineManagement -->
                         <Grid Margin="0,0,0,8" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -411,7 +399,6 @@
                                     Style="{StaticResource ActionGroupButton}"/>
                         </Grid>
 
-                        <!-- Microsoft Graph approved bundle -->
                         <Grid Margin="0,0,0,0" Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

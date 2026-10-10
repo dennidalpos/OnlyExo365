@@ -520,7 +520,7 @@ public static class ExchangeConfigurationLoader
         }
     }
 
-    /// <summary>Loads licensingCatalog section from appsettings hierarchy; falls back to defaults on error.</summary>
+    /// <summary>Loads catalog overlays; invalid sections retain prior settings.</summary>
     public static LicenseCatalogConfiguration LoadLicenseCatalogConfiguration()
         => LoadLicenseCatalogConfiguration(
             AppDomain.CurrentDomain.BaseDirectory,
@@ -538,7 +538,7 @@ public static class ExchangeConfigurationLoader
     {
         var config = LicenseCatalogConfiguration.CreateDefault();
 
-        // Apply appsettings: base dir first, then ProgramData override
+        // Machine settings override application settings.
         foreach (var dir in new[] { baseDirectory }.Concat(EnumerateSharedConfigurationDirectories(sharedConfigurationDirectory)))
         {
             var path = Path.Combine(dir, AppSettingsFileName);
@@ -586,7 +586,7 @@ public static class ExchangeConfigurationLoader
             }
             catch
             {
-                // Non-fatal; continue with defaults.
+                // Keep prior catalog settings.
             }
         }
 

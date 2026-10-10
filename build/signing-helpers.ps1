@@ -28,19 +28,6 @@ function Resolve-TimestampUrl {
     return $normalizedUrl
 }
 
-function Resolve-RepoPath {
-    param(
-        [string]$BaseDirectory,
-        [string]$PathValue
-    )
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return $PathValue
-    }
-
-    return Join-Path $BaseDirectory $PathValue
-}
-
 function Get-SignableTargets {
     param(
         [string[]]$InputPaths,

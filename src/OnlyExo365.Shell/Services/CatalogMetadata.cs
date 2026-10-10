@@ -16,7 +16,7 @@ public sealed class CatalogMetadata
     [JsonPropertyName("lastError")]
     public string? LastError { get; set; }
 
-    /// <summary>The <c>generatedOn</c> field from the downloaded catalog JSON (e.g. "2026-04-13").</summary>
+    /// <summary>Downloaded catalog <c>generatedOn</c> date.</summary>
     [JsonPropertyName("catalogVersion")]
     public string? CatalogVersion { get; set; }
 

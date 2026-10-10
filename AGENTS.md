@@ -2,24 +2,25 @@
 
 Windows-only WPF Shell with an out-of-process PowerShell Worker. Never use the production tenant for offline audit validation.
 
-## Repository Quirks
+## Operational constraints
 
-- `global.json` requires .NET SDK `10.0.401` exactly, with roll-forward disabled.
-- Worker embeds PowerShell `7.6.6`; external interactive Exchange bootstrap and tenant validation require PowerShell `7.6+`.
-- The canonical approved module policy is embedded from `src/OnlyExo365.Contracts/Data/PowerShellModuleBootstrapPolicy.json`. Shell and Worker must import exact approved versions; bootstrap Tools remain available after import failure.
-- `build/assert-architecture-constraints.ps1` enforces hotspot line limits. Run it after edits; do not raise limits to accommodate changes.
-- IPC is authenticated, UTF-8 line-delimited JSON over named pipes. `ONLYEXO365_IPC_SESSION_TOKEN` contains the DPAPI-protected session token. Keep existing envelopes; deadlines use `ErrorCode.Timeout`, voluntary cancellation uses `WasCancelled`.
-- Persistent state is under `%LocalAppData%\OnlyExo365`. The gate preserves personal state automatically. Uninstall preserves exports and unknown installation files, removing only installed payload and transient logs/IPC secrets.
-- Installer smoke tests require an isolated disposable host. Packaging success does not verify install/uninstall.
+- Read `PROJECT_STATUS.json` for open work; audit counts describe their historical revisions. Source pins and commands are consolidated in `docs/development/workflow.md`.
+- Preserve pre-existing edits and ignored audit reports/inputs. Never commit/push without current authorization.
+- Keep approved exact-version module imports and bootstrap Tools available after import failure.
+- Keep IPC envelopes: deadlines use `ErrorCode.Timeout`; voluntary cancellation uses `WasCancelled`. Submitted writes cannot be rolled back by cancellation; never retry writes automatically.
+- Session token passes directly through the child environment. DPAPI protects separate password references, not that token.
+- Clean preserves reports/inputs and rejects tracked files/reparse points. Never stop operator processes to clear build locks.
+- Installer smoke requires a disposable Windows host without an existing installation; packaging/signature-copy success does not qualify uninstall or trusted installed payloads. Incomplete recovery retains backup/manifest.
+- eDiscovery validation requires delegated Interactive authentication and an interactive host. Offline dummy cmdlets do not qualify Microsoft 365 behavior.
+- `docs/audits/2026-10-10-retained-fixtures.md` lists earlier cleanup rejected twice by policy. Preserve those paths; do not retry under unchanged policy.
+- Run architecture constraints after edits; do not raise hotspot limits.
 
-## Commands Verified on 2026-10-10
+## Verified in this documentation review (2026-10-10)
 
 ```powershell
-pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
-pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap -NoBuild -NoRestore
-pwsh ./build/assert-architecture-constraints.ps1
-pwsh ./build/assert-no-vulnerable-packages.ps1 -SolutionPath OnlyExo365.sln -ReportPath artifacts/security/nuget-vulnerabilities.json
-pwsh ./scripts/pack.ps1 -Configuration Release -Clean:$false -LockedMode -RuntimeIdentifier win-x64
+pwsh -NoProfile ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
+pwsh -NoProfile ./build/assert-architecture-constraints.ps1
+git diff --check
 ```
 
-Current evidence and pending checks: `docs/audits/2026-10-10-critical-audit.md`, `docs/audits/2026-10-10-ui-ux-audit.md` and `PROJECT_STATUS.json`.
+Environment qualification: `docs/development/qualification.md`. Source/evidence reconciliation: `docs/audits/2026-10-10-documentation-review.md`.

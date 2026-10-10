@@ -1,42 +1,25 @@
-# Microsoft 365 SKU Catalog
+# Microsoft 365 SKU catalog
 
-OnlyExo365 provides human-readable names and service-plan mappings for Microsoft 365 licenses using a dual-tier catalog system.
+Worker embeds [Microsoft365SkuCatalog.json](../../src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json) as its baseline. Shell `LicenseCatalogUpdateService` loads the local catalog or falls back to that embedded resource; background downloads update presentation names without IPC. `PresentationSkuNameResolver` swaps immutable indexes, preferring part number over ID, then a humanized fallback.
 
-## Dual-Tier Architecture
+## Shell cache settings
 
-1. **Embedded Worker Catalog**:
-   - Located at `src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json`.
-   - Bundled directly into the worker binary as an embedded resource.
-   - Acts as the immutable baseline fallback whenever local caches are missing or corrupted.
-2. **Dynamic Presentation Cache**:
-   - Managed directly by `OnlyExo365.Shell` via `LicenseCatalogUpdateService`.
-   - Stored under `%LocalAppData%\OnlyExo365\LicenseCatalog\`.
-   - Periodically checks Microsoft documentation in the background and atomically updates the local cache without requiring worker interaction.
+`licensingCatalog` is loaded from binary-directory and machine appsettings. Invalid catalog sections retain the preceding/default configuration, unlike invalid Exchange configuration. Persisted metadata update mode overrides the configured mode. No catalog environment overlay exists.
 
----
+| Property | Default / behavior |
+| --- | --- |
+| `autoUpdateMode` | Daily; supported: Disabled, Daily, Monthly |
+| `checkOnStartup` | true; downloads only when due |
+| `remoteSource` | [Microsoft licensing reference](https://learn.microsoft.com/en-us/entra/identity/users/licensing-service-plan-reference) |
+| `downloadTimeoutSeconds` | 30 |
+| `localCachePath` | null → [default LocalAppData path](../configuration/storage.md); custom text is used literally, without `%VAR%` expansion |
 
-## Catalog Refresh Procedure
+Daily/Monthly timers use 24 hours/30 days; due checks use 23 hours/29 days. Disabled stops scheduling/startup refresh; manual forced refresh remains available. Catalog writes validate JSON then replace atomically. The application CSV parser remains manual (IMP-03).
 
-To regenerate the embedded baseline catalog from official Microsoft Learn data:
+## Embedded catalog maintenance
 
 ```powershell
 pwsh ./scripts/agents/refresh-microsoft365-sku-catalog.ps1
 ```
 
-### Script Actions
-
-1. Queries the Microsoft Learn Licensing and Service Plan Reference page.
-2. Downloads the official CSV mapping table.
-3. Parses, groups, and normalizes SKU entries and service plan definitions.
-4. Generates a formatted JSON snapshot at `src/OnlyExo365.Worker/Data/Microsoft365SkuCatalog.json`.
-
----
-
-## Verification After Refresh
-
-After updating the catalog snapshot, verify build integrity:
-
-```powershell
-pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64
-pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64
-```
+The script downloads Microsoft's CSV, validates required columns/GUIDs/product identities, groups SKUs/plans and atomically replaces the embedded JSON. Single-SKU output remains an array. Review generated changes; do not hand-edit the snapshot. For a concrete refresh problem, use the native script regressions and catalog tests described in [workflow](../development/workflow.md).

@@ -45,24 +45,6 @@ function Get-RequiredRuntimeEntries {
     return $frameworkEntries
 }
 
-function Get-ObjectPropertyValue {
-    param(
-        [object]$Object,
-        [string]$PropertyName
-    )
-
-    if ($null -eq $Object) {
-        return $null
-    }
-
-    $property = $Object.PSObject.Properties[$PropertyName]
-    if ($null -eq $property) {
-        return $null
-    }
-
-    return $property.Value
-}
-
 function Get-InstalledRuntimeCatalog {
     $rawLines = & dotnet --list-runtimes 2>&1
     if ($LASTEXITCODE -ne 0) {
@@ -276,8 +258,7 @@ function Get-InstalledProductEntriesForLocation {
 
 function Resolve-SmokePublishPath {
     param(
-        [string]$PublishRootPath,
-        [bool]$Prefer64BitPayload
+        [string]$PublishRootPath
     )
 
     $presentationExeAtRoot = Join-Path $PublishRootPath "OnlyExo365.Shell.exe"
@@ -339,6 +320,26 @@ function Assert-RequiredFilesExist {
             Stop-WithError "$Label missing expected file: $path"
         }
     }
+}
+
+function Assert-InstalledPayload {
+    param([string]$PublishRoot, [string]$InstallRoot, [string]$SetupPath)
+    foreach ($name in @('OnlyExo365.Shell.exe', 'OnlyExo365.Worker.exe')) {
+        $published = Get-FileHash -LiteralPath (Join-Path $PublishRoot $name) -Algorithm SHA256
+        $installed = Get-FileHash -LiteralPath (Join-Path $InstallRoot $name) -Algorithm SHA256
+        if ($published.Hash -ne $installed.Hash) { throw "Installed payload differs from publish: $name" }
+    }
+    $setupSignature = Get-AuthenticodeSignature -LiteralPath $SetupPath
+    if ($setupSignature.Status -eq 'NotSigned') { return $false }
+    if ($setupSignature.Status -ne 'Valid') { throw 'Setup Authenticode signature is invalid.' }
+    foreach ($file in Get-ChildItem -LiteralPath $InstallRoot -Recurse -File -Filter '*.exe') {
+        if ($file.Name -eq 'unins000.exe') { continue }
+        $signature = Get-AuthenticodeSignature -LiteralPath $file.FullName
+        if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $setupSignature.SignerCertificate.Thumbprint) {
+            throw "Installed payload signature does not match setup signer: $($file.FullName)"
+        }
+    }
+    return $true
 }
 
 function Invoke-ApplicationSmokeTest {
@@ -421,13 +422,13 @@ function Invoke-ApplicationSmokeTest {
 
         $uiLogEntries = Wait-Until -TimeoutSeconds $LogProbeTimeoutSeconds -FailureMessage "$Label UI log entries for the launched process were not found." -Condition {
             $entries = Read-JsonLinesFromCandidatePaths -LogDirectory $LogDirectory -Component "ui"
-            $matches = @($entries | Where-Object {
+            $matchingEntries = @($entries | Where-Object {
                     $_.ProcessId -eq $presentationProcess.Id -and
                     [datetime]$_.TimestampUtc -ge $launchUtc.AddSeconds(-5)
                 })
 
-            if ($matches.Count -gt 0) {
-                return $matches
+            if ($matchingEntries.Count -gt 0) {
+                return $matchingEntries
             }
 
             return $null
@@ -435,12 +436,12 @@ function Invoke-ApplicationSmokeTest {
 
         $supervisorLogEntries = Wait-Until -TimeoutSeconds $LogProbeTimeoutSeconds -FailureMessage "$Label supervisor log entries were not found." -Condition {
             $entries = Read-JsonLinesFromCandidatePaths -LogDirectory $LogDirectory -Component "supervisor"
-            $matches = @($entries | Where-Object {
+            $matchingEntries = @($entries | Where-Object {
                     [datetime]$_.TimestampUtc -ge $launchUtc.AddSeconds(-5)
                 })
 
-            if ($matches.Count -gt 0) {
-                return $matches
+            if ($matchingEntries.Count -gt 0) {
+                return $matchingEntries
             }
 
             return $null
@@ -448,13 +449,13 @@ function Invoke-ApplicationSmokeTest {
 
         $workerLogEntries = Wait-Until -TimeoutSeconds $LogProbeTimeoutSeconds -FailureMessage "$Label worker log entries were not found." -Condition {
             $entries = Read-JsonLinesFromCandidatePaths -LogDirectory $LogDirectory -Component "worker"
-            $matches = @($entries | Where-Object {
+            $matchingEntries = @($entries | Where-Object {
                     $_.ProcessId -eq $workerInfo.ProcessId -and
                     [datetime]$_.TimestampUtc -ge $launchUtc.AddSeconds(-5)
                 })
 
-            if ($matches.Count -gt 0) {
-                return $matches
+            if ($matchingEntries.Count -gt 0) {
+                return $matchingEntries
             }
 
             return $null
@@ -484,108 +485,111 @@ function Invoke-ApplicationSmokeTest {
         }
     }
     finally {
-        Stop-ProcessIfRunning -Process $presentationProcess
-
-        if ($null -ne $workerProcess) {
-            try {
-                Stop-Process -Id $workerProcess.Id -Force -ErrorAction SilentlyContinue
-            }
-            catch {
-            }
+        try {
+            Stop-ProcessIfRunning -Process $presentationProcess
         }
+        finally {
+            Stop-ProcessIfRunning -Process $workerProcess
+        }
+    }
+}
+
+function Get-ProductDataHashes {
+    param([string]$RootPath)
+    if ((Get-Item -LiteralPath $RootPath -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Recovery refuses reparse point: $RootPath" }
+    $hashes = [ordered]@{}
+    $pending = [Collections.Generic.Stack[string]]::new()
+    $pending.Push($RootPath)
+    while ($pending.Count) {
+        foreach ($item in Get-ChildItem -LiteralPath $pending.Pop() -Force | Sort-Object Name) {
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Backup refuses reparse point: $($item.FullName)" }
+            if ($item.PSIsContainer) { $pending.Push($item.FullName) }
+            else { $hashes[[IO.Path]::GetRelativePath($RootPath, $item.FullName)] = (Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash }
+        }
+    }
+    return $hashes
+}
+
+function Save-ProductDataRecoveryManifest {
+    param([hashtable]$RecoveryState)
+    $temporaryPath = $RecoveryState.ManifestPath + '.tmp'
+    try {
+        $RecoveryState | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $temporaryPath -Encoding utf8NoBOM
+        [IO.File]::Move($temporaryPath, $RecoveryState.ManifestPath, $true)
+    }
+    finally {
+        if (Test-Path -LiteralPath $temporaryPath) { Remove-Item -LiteralPath $temporaryPath -ErrorAction Stop }
     }
 }
 
 function Backup-ProductDataRoots {
-    param([string[]]$Paths)
-
-    $normalizedPaths = @(
-        $Paths |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-        ForEach-Object { Normalize-FileSystemPath -PathValue $_ } |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-        Select-Object -Unique
-    )
-
-    if ($normalizedPaths.Count -eq 0) {
-        return [ordered]@{
-            BackupRoot = $null
-            Entries = @()
-        }
-    }
-
-    $backupRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("onlyexo365-localdata-backup-" + [guid]::NewGuid().ToString("N"))
-    $entries = New-Object System.Collections.Generic.List[object]
-
+    param([string[]]$Paths, [hashtable]$RecoveryState = @{})
+    $RecoveryState.BackupRoot = Join-Path ([IO.Path]::GetTempPath()) ('onlyexo365-localdata-backup-' + [guid]::NewGuid().ToString('N'))
+    $RecoveryState.ManifestPath = Join-Path $RecoveryState.BackupRoot 'recovery.json'
+    $RecoveryState.Entries = [Collections.Generic.List[object]]::new()
+    $normalizedPaths = @($Paths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { Normalize-FileSystemPath $_ } | Sort-Object -Unique)
     foreach ($path in $normalizedPaths) {
-        if (-not (Test-Path $path)) {
-            continue
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        if ((Get-Item -LiteralPath $path -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Backup refuses reparse point: $path" }
+        $entry = [ordered]@{
+            original_path = $path
+            backup_path = Join-Path $RecoveryState.BackupRoot ([guid]::NewGuid().ToString('N'))
+            content_hashes = Get-ProductDataHashes -RootPath $path
+            created_data_path = $null
         }
-
-        if (-not (Test-Path $backupRoot)) {
-            New-Item -Path $backupRoot -ItemType Directory -Force | Out-Null
-        }
-
-        $backupPath = Join-Path $backupRoot ([guid]::NewGuid().ToString("N"))
-        $backupParent = Split-Path -Parent $backupPath
-        if (-not [string]::IsNullOrWhiteSpace($backupParent)) {
-            New-Item -Path $backupParent -ItemType Directory -Force | Out-Null
-        }
-
-        Write-Warn "Existing OnlyExo365 local data detected at '$path'. Moving it to temporary backup before installer uninstall validation."
-        Move-Item -Path $path -Destination $backupPath -Force
-        $entries.Add([ordered]@{
-                original_path = $path
-                backup_path = $backupPath
-            })
+        New-Item -Path $RecoveryState.BackupRoot -ItemType Directory -Force | Out-Null
+        $RecoveryState.Entries.Add($entry)
+        # Persist recovery before moving data.
+        Save-ProductDataRecoveryManifest -RecoveryState $RecoveryState
+        Write-Warn "Moving it to temporary backup before installer uninstall validation: $path. Recovery manifest: $($RecoveryState.ManifestPath)"
+        Move-Item -LiteralPath $path -Destination $entry.backup_path -ErrorAction Stop
     }
-
-    $resolvedBackupRoot = $null
-    if ($entries.Count -gt 0) {
-        $resolvedBackupRoot = $backupRoot
-    }
-
-    return [ordered]@{
-        BackupRoot = $resolvedBackupRoot
-        Entries = @($entries.ToArray())
-    }
+    return $RecoveryState
 }
 
 function Restore-ProductDataRoots {
-    param([object[]]$Entries)
-
+    param([object[]]$Entries, [hashtable]$RecoveryState)
     $restoredCount = 0
-
     foreach ($entry in @($Entries)) {
-        if ($null -eq $entry) {
-            continue
+        $originalPath = Normalize-FileSystemPath $entry.original_path
+        $backupPath = Normalize-FileSystemPath $entry.backup_path
+        if (Test-Path -LiteralPath $backupPath) {
+            $backupHashes = Get-ProductDataHashes -RootPath $backupPath
+            if ($backupHashes.Count -ne $entry.content_hashes.Count) { throw "Recovery backup is incomplete: $backupPath" }
+            foreach ($key in $entry.content_hashes.Keys) {
+                if (-not $backupHashes.Contains($key) -or $backupHashes[$key] -ne $entry.content_hashes[$key]) { throw "Recovery backup content differs: $backupPath/$key" }
+            }
+            if (Test-Path -LiteralPath $originalPath) {
+                $entry.created_data_path = Join-Path (Split-Path -Parent $backupPath) ('smoke-output-' + [guid]::NewGuid().ToString('N'))
+                if ($null -ne $RecoveryState) { Save-ProductDataRecoveryManifest -RecoveryState $RecoveryState }
+                Move-Item -LiteralPath $originalPath -Destination $entry.created_data_path -ErrorAction Stop
+            }
+            New-Item -Path (Split-Path -Parent $originalPath) -ItemType Directory -Force | Out-Null
+            Move-Item -LiteralPath $backupPath -Destination $originalPath -ErrorAction Stop
         }
-
-        $originalPath = Normalize-FileSystemPath -PathValue $entry.original_path
-        $backupPath = Normalize-FileSystemPath -PathValue $entry.backup_path
-
-        if ([string]::IsNullOrWhiteSpace($originalPath) -or [string]::IsNullOrWhiteSpace($backupPath)) {
-            continue
+        if (-not (Test-Path -LiteralPath $originalPath)) { throw "Recovery missing original and backup: $originalPath; backup: $backupPath" }
+        $actualHashes = Get-ProductDataHashes -RootPath $originalPath
+        if ($actualHashes.Count -ne $entry.content_hashes.Count) { throw "Recovery content count differs: $originalPath" }
+        foreach ($key in $entry.content_hashes.Keys) {
+            if (-not $actualHashes.Contains($key) -or $actualHashes[$key] -ne $entry.content_hashes[$key]) { throw "Recovery content differs: $originalPath/$key" }
         }
-
-        if (-not (Test-Path $backupPath)) {
-            continue
-        }
-
-        if (Test-Path $originalPath) {
-            Remove-Item -Path $originalPath -Recurse -Force -ErrorAction Stop
-        }
-
-        $originalParent = Split-Path -Parent $originalPath
-        if (-not [string]::IsNullOrWhiteSpace($originalParent) -and -not (Test-Path $originalParent)) {
-            New-Item -Path $originalParent -ItemType Directory -Force | Out-Null
-        }
-
-        Move-Item -Path $backupPath -Destination $originalPath -Force
         $restoredCount++
     }
-
     return $restoredCount
+}
+
+function Complete-ProductDataRecovery {
+    param([hashtable]$RecoveryState)
+    if (-not (Test-Path -LiteralPath $RecoveryState.BackupRoot)) { return }
+    if (@($RecoveryState.Entries | Where-Object { $null -ne $_.created_data_path }).Count -gt 0) {
+        Write-Info "Preserved smoke-created data and recovery manifest at $($RecoveryState.BackupRoot)"
+        return
+    }
+    $remaining = @(Get-ChildItem -LiteralPath $RecoveryState.BackupRoot -Force | Where-Object FullName -ne $RecoveryState.ManifestPath)
+    if ($remaining.Count -gt 0) { throw "Recovery retains unexpected files and manifest at $($RecoveryState.BackupRoot)" }
+    Remove-Item -LiteralPath $RecoveryState.ManifestPath -ErrorAction Stop
+    # Remove only an empty, recovered backup.
+    [IO.Directory]::Delete($RecoveryState.BackupRoot)
 }
 
 function New-ResidualMarkerFile {

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>Atomic file I/O for local catalog directory via validated temp files.</summary>
+/// <summary>Atomic catalog I/O through validated temp files.</summary>
 public sealed class LicenseCatalogFileStore
 {
     private readonly string _cacheDirectory;
@@ -88,12 +88,11 @@ public sealed class LicenseCatalogFileStore
         }
     }
 
-    /// <summary>Atomically writes validated catalog JSON replacing existing file.</summary>
+    /// <summary>Validates before atomic replacement.</summary>
     public async Task WriteCatalogAtomicAsync(string jsonContent, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jsonContent);
 
-        // Validate before write
         LocalSkuCatalogDocument? validated;
         try
         {

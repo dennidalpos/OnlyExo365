@@ -171,7 +171,6 @@
             </controls:SectionPanel>
         </Grid>
 
-        <!-- License counters with progress bars -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0"
                     Visibility="{Binding Dashboard.HasLicenses, Converter={StaticResource BoolToVisibility}}">
             <TextBlock Text="{loc:Loc Key=Dashboard.TenantLicenses}" Style="{StaticResource SectionHeadingTextStyle}"/>
@@ -234,7 +233,6 @@
             </ItemsControl>
         </StackPanel>
 
-        <!-- Admin users table -->
         <StackPanel Grid.Row="4" Margin="0,16,0,0"
                     Visibility="{Binding Dashboard.HasAdminUsers, Converter={StaticResource BoolToVisibility}}">
             <TextBlock Text="{loc:Loc Key=Dashboard.AdminUsers}" Style="{StaticResource SectionHeadingTextStyle}"/>

@@ -113,14 +113,12 @@ public sealed class LicenseCatalogFileStoreTests : IDisposable
         var store = CreateStore();
         store.EnsureDirectoryExists();
 
-        // Write a valid catalog first.
         await store.WriteCatalogAtomicAsync(MinimalCatalogJson("2026-01-01"));
 
-        // Attempt to overwrite with garbage; should throw and leave old file intact.
+        // Invalid replacement must preserve the catalog.
         await Assert.ThrowsAsync<CatalogStoreException>(
             () => store.WriteCatalogAtomicAsync("garbage"));
 
-        // Original file must still be readable.
         var loaded = await store.TryLoadCatalogAsync();
         Assert.NotNull(loaded);
         Assert.Equal("2026-01-01", loaded!.GeneratedOn);

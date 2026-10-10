@@ -16,23 +16,6 @@ $repositoryRoot = Split-Path -Parent $scriptDirectory
 
 . (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
-function Resolve-RepoPath {
-    param(
-        [string]$BaseDirectory,
-        [string]$PathValue
-    )
-
-    if ([string]::IsNullOrWhiteSpace($PathValue)) {
-        return $PathValue
-    }
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return [System.IO.Path]::GetFullPath($PathValue)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $BaseDirectory $PathValue))
-}
-
 function Read-OptionalValue {
     param($Value)
 
@@ -178,31 +161,31 @@ function Load-ExchangeConfiguration {
 
     if (-not [string]::IsNullOrWhiteSpace($Path)) {
         if (-not (Test-Path $Path -PathType Leaf)) {
-            Stop-WithError "Configuration file not found: $Path"
+            throw "Configuration file not found: $Path"
         }
 
         try {
             $document = Get-Content -Raw $Path | ConvertFrom-Json -Depth 20
         }
         catch {
-            Stop-WithError "Unable to parse configuration file '$Path': $($_.Exception.Message)"
+            throw "Unable to parse configuration file '$Path': $($_.Exception.Message)"
         }
 
-        $exchangeOnline = $document.ExchangeOnline
+        $exchangeOnline = Get-ObjectPropertyValue -Object $document -PropertyName 'ExchangeOnline'
         if ($null -ne $exchangeOnline) {
-            Merge-StringValue -Target $configuration -Key "AuthenticationMode" -Value $exchangeOnline.authenticationMode
-            Merge-StringValue -Target $configuration -Key "ExchangeEnvironmentName" -Value $exchangeOnline.exchangeEnvironmentName
-            Merge-StringValue -Target $configuration -Key "ExchangeOrganization" -Value $exchangeOnline.exchangeOrganization
-            Merge-StringValue -Target $configuration -Key "DelegatedOrganization" -Value $exchangeOnline.delegatedOrganization
-            Merge-StringValue -Target $configuration -Key "UserPrincipalNameHint" -Value $exchangeOnline.userPrincipalNameHint
-            Merge-StringValue -Target $configuration -Key "ApplicationId" -Value $exchangeOnline.applicationId
-            Merge-StringValue -Target $configuration -Key "CertificateThumbprint" -Value $exchangeOnline.certificateThumbprint
-            Merge-StringValue -Target $configuration -Key "CertificateSubjectName" -Value $exchangeOnline.certificateSubjectName
-            Merge-StringValue -Target $configuration -Key "ManagedIdentityAccountId" -Value $exchangeOnline.managedIdentityAccountId
-            Merge-StringValue -Target $configuration -Key "GraphTenantId" -Value $exchangeOnline.graphTenantId
-            Merge-StringListValue -Target $configuration -Key "GraphScopes" -Value $exchangeOnline.graphScopes
-            Merge-StringListValue -Target $configuration -Key "GraphLicenseWriteScopes" -Value $exchangeOnline.graphLicenseWriteScopes
-            $enableGraph = Read-OptionalBoolean $exchangeOnline.enableGraphAfterExchangeConnect
+            Merge-StringValue -Target $configuration -Key "AuthenticationMode" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'authenticationMode')
+            Merge-StringValue -Target $configuration -Key "ExchangeEnvironmentName" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'exchangeEnvironmentName')
+            Merge-StringValue -Target $configuration -Key "ExchangeOrganization" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'exchangeOrganization')
+            Merge-StringValue -Target $configuration -Key "DelegatedOrganization" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'delegatedOrganization')
+            Merge-StringValue -Target $configuration -Key "UserPrincipalNameHint" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'userPrincipalNameHint')
+            Merge-StringValue -Target $configuration -Key "ApplicationId" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'applicationId')
+            Merge-StringValue -Target $configuration -Key "CertificateThumbprint" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'certificateThumbprint')
+            Merge-StringValue -Target $configuration -Key "CertificateSubjectName" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'certificateSubjectName')
+            Merge-StringValue -Target $configuration -Key "ManagedIdentityAccountId" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'managedIdentityAccountId')
+            Merge-StringValue -Target $configuration -Key "GraphTenantId" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'graphTenantId')
+            Merge-StringListValue -Target $configuration -Key "GraphScopes" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'graphScopes')
+            Merge-StringListValue -Target $configuration -Key "GraphLicenseWriteScopes" -Value (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'graphLicenseWriteScopes')
+            $enableGraph = Read-OptionalBoolean (Get-ObjectPropertyValue -Object $exchangeOnline -PropertyName 'enableGraphAfterExchangeConnect')
             if ($null -ne $enableGraph) {
                 $configuration.EnableGraphAfterExchangeConnect = $enableGraph
             }
@@ -237,30 +220,32 @@ function Get-RequiredModulesFromPolicy {
     param([string]$PolicyPath)
 
     if (-not (Test-Path $PolicyPath -PathType Leaf)) {
-        Stop-WithError "Bootstrap policy not found: $PolicyPath"
+        throw "Bootstrap policy not found: $PolicyPath"
     }
 
     try {
         $policy = Get-Content -Raw $PolicyPath | ConvertFrom-Json -Depth 20
     }
     catch {
-        Stop-WithError "Unable to parse bootstrap policy '$PolicyPath': $($_.Exception.Message)"
+        throw "Unable to parse bootstrap policy '$PolicyPath': $($_.Exception.Message)"
     }
 
     $requiredModules = New-Object System.Collections.Generic.List[object]
-    foreach ($module in @($policy.modules)) {
-        $version = Read-OptionalValue $module.requiredVersion
+    $modules = @(Get-ObjectPropertyValue -Object $policy -PropertyName 'modules')
+    if ($modules.Count -eq 0 -or $null -eq $modules[0]) { throw 'Bootstrap policy contains no module requirements.' }
+    foreach ($module in $modules) {
+        $version = Read-OptionalValue (Get-ObjectPropertyValue -Object $module -PropertyName 'requiredVersion')
         if ([string]::IsNullOrWhiteSpace($version)) {
-            continue
+            throw 'Bootstrap policy module missing requiredVersion.'
         }
 
         $moduleNames = @()
-        $primaryModule = Read-OptionalValue $module.moduleName
+        $primaryModule = Read-OptionalValue (Get-ObjectPropertyValue -Object $module -PropertyName 'moduleName')
         if (-not [string]::IsNullOrWhiteSpace($primaryModule)) {
             $moduleNames += $primaryModule
         }
 
-        foreach ($requiredModule in @(Read-StringList $module.requiredModules)) {
+        foreach ($requiredModule in @(Read-StringList (Get-ObjectPropertyValue -Object $module -PropertyName 'requiredModules'))) {
             if ($moduleNames -notcontains $requiredModule) {
                 $moduleNames += $requiredModule
             }
@@ -272,6 +257,7 @@ function Get-RequiredModulesFromPolicy {
                 required_version = $version
             })
         }
+        if ($moduleNames.Count -eq 0) { throw 'Bootstrap policy module missing moduleName and requiredModules.' }
     }
 
     return @(
@@ -280,7 +266,7 @@ function Get-RequiredModulesFromPolicy {
             ForEach-Object {
                 $versions = @($_.Group.required_version | Select-Object -Unique)
                 if ($versions.Count -ne 1) {
-                    Stop-WithError "Bootstrap policy defines multiple versions for module $($_.Name): $($versions -join ', ')"
+                    throw "Bootstrap policy defines multiple versions for module $($_.Name): $($versions -join ', ')"
                 }
 
                 [pscustomobject]@{
@@ -314,7 +300,7 @@ function Ensure-RequiredModule {
     }
 
     if (-not $InstallIfMissing) {
-        Stop-WithError "Required module $ModuleName $RequiredVersion is not installed."
+        throw "Required module $ModuleName $RequiredVersion is not installed."
     }
 
     Write-Info "Installing approved module $ModuleName $RequiredVersion for CurrentUser."
@@ -365,7 +351,7 @@ function Ensure-RequiredModule {
         Select-Object -First 1
 
     if ($null -eq $installed) {
-        Stop-WithError "Module installation completed but $ModuleName $RequiredVersion is still unavailable."
+        throw "Module installation completed but $ModuleName $RequiredVersion is still unavailable."
     }
 
     Write-Success "$ModuleName $RequiredVersion installed."
@@ -399,7 +385,7 @@ function Format-CommandPreviewValue {
 function New-CommandInvocation {
     param(
         [string]$CommandName,
-        [hashtable]$Arguments
+        [System.Collections.IDictionary]$Arguments
     )
 
     $previewParts = New-Object System.Collections.Generic.List[string]
@@ -424,7 +410,7 @@ function New-CommandInvocation {
 
 function Add-OptionalCommandArgument {
     param(
-        [hashtable]$Arguments,
+        [System.Collections.IDictionary]$Arguments,
         [string]$Name,
         [object]$Value
     )
@@ -461,7 +447,7 @@ function Get-ExchangeConnectCommand {
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
-                Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_EXO_ORGANIZATION."
+                throw "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_EXO_ORGANIZATION."
             }
 
             $arguments.AppId = $Configuration.ApplicationId
@@ -473,14 +459,14 @@ function Get-ExchangeConnectCommand {
                 $arguments.CertificateSubjectName = $Configuration.CertificateSubjectName
             }
             else {
-                Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT."
+                throw "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT."
             }
 
             return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         "managedidentity" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ExchangeOrganization)) {
-                Stop-WithError "ManagedIdentity validation requires ONLYEXO365_EXO_ORGANIZATION."
+                throw "ManagedIdentity validation requires ONLYEXO365_EXO_ORGANIZATION."
             }
 
             $arguments.ManagedIdentity = $true
@@ -489,7 +475,7 @@ function Get-ExchangeConnectCommand {
             return New-CommandInvocation -CommandName "Connect-ExchangeOnline" -Arguments $arguments
         }
         default {
-            Stop-WithError "Unsupported authentication mode for tenant validation: $($Configuration.AuthenticationMode)"
+            throw "Unsupported authentication mode for tenant validation: $($Configuration.AuthenticationMode)"
         }
     }
 }
@@ -527,7 +513,7 @@ function Get-GraphConnectCommand {
         }
         "appcertificate" {
             if ([string]::IsNullOrWhiteSpace($Configuration.ApplicationId) -or [string]::IsNullOrWhiteSpace($Configuration.GraphTenantId)) {
-                Stop-WithError "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_GRAPH_TENANT_ID for Graph."
+                throw "AppCertificate validation requires ONLYEXO365_APP_ID and ONLYEXO365_GRAPH_TENANT_ID for Graph."
             }
 
             $arguments = [ordered]@{
@@ -543,7 +529,7 @@ function Get-GraphConnectCommand {
                 $arguments.CertificateSubjectName = $Configuration.CertificateSubjectName
             }
             else {
-                Stop-WithError "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT for Graph."
+                throw "AppCertificate validation requires ONLYEXO365_CERT_THUMBPRINT or ONLYEXO365_CERT_SUBJECT for Graph."
             }
 
             return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
@@ -558,9 +544,55 @@ function Get-GraphConnectCommand {
             return New-CommandInvocation -CommandName "Connect-MgGraph" -Arguments $arguments
         }
         default {
-            Stop-WithError "Unsupported authentication mode for Graph validation: $($Configuration.AuthenticationMode)"
+            throw "Unsupported authentication mode for Graph validation: $($Configuration.AuthenticationMode)"
         }
     }
+}
+
+function Get-ComplianceConnectCommand {
+    param([hashtable]$Configuration, [string]$AuthenticationMode, [switch]$SearchOnly)
+    $arguments = [ordered]@{ ShowBanner = $false }
+    $authority = 'https://login.microsoftonline.com'
+    switch ($Configuration.ExchangeEnvironmentName) {
+        'O365Default' { }
+        'O365USGovGCCHigh' {
+            $arguments.ConnectionUri = 'https://ps.compliance.protection.office365.us/powershell-liveid/'
+            $authority = 'https://login.microsoftonline.us'
+        }
+        'O365USGovDoD' {
+            $arguments.ConnectionUri = 'https://l5.ps.compliance.protection.office365.us/powershell-liveid/'
+            $authority = 'https://login.microsoftonline.us'
+        }
+        'O365China' {
+            $arguments.ConnectionUri = 'https://ps.compliance.protection.partner.outlook.cn/powershell-liveid'
+            $authority = 'https://login.chinacloudapi.cn'
+        }
+        default { throw "Unsupported Compliance cloud: $($Configuration.ExchangeEnvironmentName)" }
+    }
+    $tenant = if ([string]::IsNullOrWhiteSpace($Configuration.DelegatedOrganization)) { 'organizations' } else { [uri]::EscapeDataString($Configuration.DelegatedOrganization) }
+    $arguments.AzureADAuthorizationEndpointUri = "$authority/$tenant"
+    Add-OptionalCommandArgument -Arguments $arguments -Name 'DelegatedOrganization' -Value $Configuration.DelegatedOrganization
+    switch ($AuthenticationMode.ToLowerInvariant()) {
+        'interactive' {
+            Add-OptionalCommandArgument -Arguments $arguments -Name 'UserPrincipalName' -Value $Configuration.UserPrincipalNameHint
+        }
+        'appcertificate' {
+            if ($SearchOnly) { throw 'eDiscovery requires delegated interactive authentication; app-only authentication is unsupported.' }
+            $exchange = Get-ExchangeConnectCommand -Configuration $Configuration -AuthenticationMode $AuthenticationMode
+            foreach ($name in @('AppId', 'Organization', 'CertificateThumbprint', 'CertificateSubjectName')) {
+                if ($exchange.Arguments.Contains($name)) { $arguments[$name] = $exchange.Arguments[$name] }
+            }
+            if ($arguments.Contains('CertificateSubjectName')) {
+                $certificates = @(Get-ChildItem -LiteralPath 'Cert:\CurrentUser\My' | Where-Object Subject -eq $arguments.CertificateSubjectName)
+                if ($certificates.Count -ne 1) { throw 'Compliance certificate subject must identify exactly one certificate.' }
+                $arguments.Remove('CertificateSubjectName')
+                $arguments.CertificateThumbprint = $certificates[0].Thumbprint
+            }
+        }
+        default { throw "Security & Compliance does not support the configured authentication mode '$AuthenticationMode'. Use Interactive or AppCertificate; eDiscovery requires Interactive." }
+    }
+    if ($SearchOnly) { $arguments.EnableSearchOnlySession = $true }
+    return New-CommandInvocation -CommandName 'Connect-IPPSSession' -Arguments $arguments
 }
 
 function Invoke-Probe {
@@ -602,10 +634,12 @@ function Invoke-Probe {
 function Invoke-CommandAvailabilityProbe {
     param(
         [string]$CommandName,
-        [string[]]$RequiredParameters = @()
+        [string[]]$RequiredParameters = @(),
+        [bool]$SessionConnected = $true
     )
 
     return Invoke-Probe -Name "Get-Command $CommandName" -ScriptBlock {
+        if (-not $SessionConnected) { throw 'Required Security & Compliance session was not established.' }
         $command = Get-Command -Name $CommandName -ErrorAction Stop
         $parameters = @($command.Parameters.Keys | Sort-Object)
         $missingRequiredParameters = @($RequiredParameters | Where-Object { $parameters -notcontains $_ })
@@ -648,8 +682,8 @@ function Get-ReportProbeResults {
     return $results.ToArray()
 }
 
-$resolvedConfigurationPath = if ([string]::IsNullOrWhiteSpace($ConfigurationPath)) { $null } else { Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ConfigurationPath }
-$resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
+$resolvedConfigurationPath = if ([string]::IsNullOrWhiteSpace($ConfigurationPath)) { $null } else { Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ConfigurationPath }
+$resolvedReportPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ReportPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
 $bootstrapPolicyPath = Join-Path $repositoryRoot "src\OnlyExo365.Contracts\Data\PowerShellModuleBootstrapPolicy.json"
 
@@ -657,25 +691,9 @@ if (-not (Test-Path $reportDirectory)) {
     New-Item -Path $reportDirectory -ItemType Directory -Force | Out-Null
 }
 
-$configuration = Load-ExchangeConfiguration -Path $resolvedConfigurationPath
-$authResolution = Resolve-EffectiveAuthenticationMode -Configuration $configuration
-$requiredModulesFromPolicy = Get-RequiredModulesFromPolicy -PolicyPath $bootstrapPolicyPath
-
 $report = [ordered]@{
     generated_at_utc = (Get-Date).ToUniversalTime().ToString("O")
-    configuration = [ordered]@{
-        requested_authentication_mode = $authResolution.requested_mode
-        effective_authentication_mode = $authResolution.effective_mode
-        used_device_code_fallback = [bool]$authResolution.used_device_code_fallback
-        authentication_fallback_reason = $authResolution.fallback_reason
-        exchange_environment_name = $configuration.ExchangeEnvironmentName
-        exchange_organization = $configuration.ExchangeOrganization
-        delegated_organization = $configuration.DelegatedOrganization
-        graph_tenant_id = $configuration.GraphTenantId
-        enable_graph_after_exchange_connect = [bool]$configuration.EnableGraphAfterExchangeConnect
-        graph_validation_requested = -not [bool]$SkipGraph
-        graph_scopes = @($configuration.GraphScopes)
-    }
+    configuration = [ordered]@{}
     prerequisites = [ordered]@{
         pwsh_major_version = $PSVersionTable.PSVersion.Major
         required_modules = @()
@@ -687,6 +705,8 @@ $report = [ordered]@{
     compliance = [ordered]@{
         attempted = $false
         exchange_session_available = $false
+        connected = $false
+        search_session_connected = $false
         probes = [ordered]@{}
     }
     mail_security = [ordered]@{
@@ -709,6 +729,23 @@ $report = [ordered]@{
 $failedProbes = @()
 
 try {
+    $configuration = Load-ExchangeConfiguration -Path $resolvedConfigurationPath
+    $authResolution = Resolve-EffectiveAuthenticationMode -Configuration $configuration
+    $requiredModulesFromPolicy = Get-RequiredModulesFromPolicy -PolicyPath $bootstrapPolicyPath
+
+    $report.configuration = [ordered]@{
+        requested_authentication_mode = $authResolution.requested_mode
+        effective_authentication_mode = $authResolution.effective_mode
+        used_device_code_fallback = [bool]$authResolution.used_device_code_fallback
+        authentication_fallback_reason = $authResolution.fallback_reason
+        exchange_environment_name = $configuration.ExchangeEnvironmentName
+        exchange_organization = $configuration.ExchangeOrganization
+        delegated_organization = $configuration.DelegatedOrganization
+        graph_tenant_id = $configuration.GraphTenantId
+        enable_graph_after_exchange_connect = [bool]$configuration.EnableGraphAfterExchangeConnect
+        graph_validation_requested = -not [bool]$SkipGraph
+        graph_scopes = @($configuration.GraphScopes)
+    }
     Write-Step "Ensuring approved PowerShell modules"
     $requiredModules = New-Object System.Collections.Generic.List[object]
     foreach ($moduleRequirement in $requiredModulesFromPolicy) {
@@ -719,7 +756,7 @@ try {
 
         $requiredVersion = [string]$moduleRequirement.required_version
         if ([string]::IsNullOrWhiteSpace($requiredVersion)) {
-            Stop-WithError "Bootstrap policy missing required version for $moduleName."
+            throw "Bootstrap policy missing required version for $moduleName."
         }
 
         $requiredModules.Add((Ensure-RequiredModule -ModuleName $moduleName -RequiredVersion $requiredVersion -InstallIfMissing ([bool]$InstallApprovedModules)))
@@ -775,6 +812,13 @@ try {
     Write-Step "Running Compliance validation probes"
     $report.compliance.attempted = $true
     $report.compliance.exchange_session_available = $true
+    $report.compliance.probes.connection = Invoke-Probe -Name 'Connect-IPPSSession' -ScriptBlock {
+        $command = Get-ComplianceConnectCommand -Configuration $configuration -AuthenticationMode $authResolution.effective_mode
+        $arguments = $command.Arguments
+        & $command.CommandName @arguments | Out-Null
+        $report.compliance.connected = $true
+        return [ordered]@{ connected = $true }
+    }
 
     $report.compliance.probes.search_unified_audit_log = Invoke-Probe -Name "Search-UnifiedAuditLog" -ScriptBlock {
         $endDate = Get-Date
@@ -797,7 +841,18 @@ try {
         }
     }
 
+    $report.compliance.probes.new_case_hold_policy = Invoke-CommandAvailabilityProbe -CommandName "New-CaseHoldPolicy" -RequiredParameters @("Name", "Case", "ExchangeLocation") -SessionConnected $report.compliance.connected
+    $report.compliance.probes.new_case_hold_rule = Invoke-CommandAvailabilityProbe -CommandName "New-CaseHoldRule" -RequiredParameters @("Name", "Policy", "ContentMatchQuery") -SessionConnected $report.compliance.connected
+
+    $report.compliance.probes.search_connection = Invoke-Probe -Name 'Connect-IPPSSession -EnableSearchOnlySession' -ScriptBlock {
+        $command = Get-ComplianceConnectCommand -Configuration $configuration -AuthenticationMode $authResolution.effective_mode -SearchOnly
+        $arguments = $command.Arguments
+        & $command.CommandName @arguments | Out-Null
+        $report.compliance.search_session_connected = $true
+        return [ordered]@{ connected = $true }
+    }
     $report.compliance.probes.compliance_searches = Invoke-Probe -Name "Get-ComplianceSearch" -ScriptBlock {
+        if (-not $report.compliance.search_session_connected) { throw 'eDiscovery search session was not established.' }
         $searches = @(Get-ComplianceSearch -ErrorAction Stop | Sort-Object Name | Select-Object -First 3)
         [ordered]@{
             sample_count = $searches.Count
@@ -811,12 +866,10 @@ try {
         }
     }
 
-    $report.compliance.probes.new_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "New-ComplianceSearch" -RequiredParameters @("Name", "ExchangeLocation")
-    $report.compliance.probes.start_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "Start-ComplianceSearch" -RequiredParameters @("Identity")
-    $report.compliance.probes.remove_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "Remove-ComplianceSearch" -RequiredParameters @("Identity")
-    $report.compliance.probes.new_compliance_search_action = Invoke-CommandAvailabilityProbe -CommandName "New-ComplianceSearchAction" -RequiredParameters @("SearchName", "Purge", "PurgeType")
-    $report.compliance.probes.new_case_hold_policy = Invoke-CommandAvailabilityProbe -CommandName "New-CaseHoldPolicy" -RequiredParameters @("Name", "Case", "ExchangeLocation")
-    $report.compliance.probes.new_case_hold_rule = Invoke-CommandAvailabilityProbe -CommandName "New-CaseHoldRule" -RequiredParameters @("Name", "Policy", "ContentMatchQuery")
+    $report.compliance.probes.new_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "New-ComplianceSearch" -RequiredParameters @("Name", "ExchangeLocation") -SessionConnected $report.compliance.search_session_connected
+    $report.compliance.probes.start_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "Start-ComplianceSearch" -RequiredParameters @("Identity") -SessionConnected $report.compliance.search_session_connected
+    $report.compliance.probes.remove_compliance_search = Invoke-CommandAvailabilityProbe -CommandName "Remove-ComplianceSearch" -RequiredParameters @("Identity") -SessionConnected $report.compliance.search_session_connected
+    $report.compliance.probes.new_compliance_search_action = Invoke-CommandAvailabilityProbe -CommandName "New-ComplianceSearchAction" -RequiredParameters @("SearchName", "Purge", "PurgeType") -SessionConnected $report.compliance.search_session_connected
 
     Write-Step "Running Mail Security validation probes"
     $report.mail_security.attempted = $true
@@ -951,26 +1004,30 @@ try {
             error = $_.error
         }
     })
-
-    $report | ConvertTo-Json -Depth 10 | Out-File -FilePath $resolvedReportPath -Encoding utf8
-    Write-Info "Tenant validation report: $resolvedReportPath"
+}
+catch {
+    $report.summary.fatal_error = $_.Exception.Message
+    throw
 }
 finally {
     try {
-        Disconnect-ExchangeOnline -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+        $report | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resolvedReportPath -Encoding utf8NoBOM
+        Write-Info "Tenant validation report: $resolvedReportPath"
     }
-    catch {
-    }
-
-    try {
-        Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
-    }
-    catch {
+    finally {
+        try {
+            if ($report.exchange.connected -or $report.compliance.connected) {
+                Disconnect-ExchangeOnline -Confirm:$false -ErrorAction Stop | Out-Null
+            }
+        }
+        finally {
+            if ($report.graph.connected) { Disconnect-MgGraph -ErrorAction Stop | Out-Null }
+        }
     }
 }
 
 if ($failedProbes.Count -gt 0) {
-    Stop-WithError "Tenant validation completed with $($failedProbes.Count) failed probe(s). See report: $resolvedReportPath"
+    throw "Tenant validation completed with $($failedProbes.Count) failed probe(s). See report: $resolvedReportPath"
 }
 
 Write-Host ""

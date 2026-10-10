@@ -4,9 +4,6 @@ namespace OnlyExo365.Tests;
 
 public sealed class LicenseCatalogDownloaderTests
 {
-    // -------------------------------------------------------------------------
-    // ParseCsvRow
-    // -------------------------------------------------------------------------
 
     [Fact]
     public void ParseCsvRow_SplitsSimpleRow()
@@ -38,9 +35,6 @@ public sealed class LicenseCatalogDownloaderTests
         Assert.Equal(["a", "b", "c"], result);
     }
 
-    // -------------------------------------------------------------------------
-    // ConvertCsvToDocument
-    // -------------------------------------------------------------------------
 
     private static string BuildMinimalCsv(params (string Guid, string StringId, string ProductName)[] rows)
     {
@@ -140,7 +134,6 @@ public sealed class LicenseCatalogDownloaderTests
     [Fact]
     public void ConvertCsvToDocument_ThrowsCatalogDownloadException_WhenHeaderMissingColumn()
     {
-        // CSV with no GUID column.
         const string csv = "Product_Display_Name,String_Id,Service_Plan_Name\nProduct A,SKU_A,PLAN\n";
 
         Assert.Throws<CatalogDownloadException>(
@@ -159,7 +152,6 @@ public sealed class LicenseCatalogDownloaderTests
     [Fact]
     public void ConvertCsvToDocument_ThrowsCatalogDownloadException_WhenNoDataRows()
     {
-        // Only header, no data.
         const string csv = "Product_Display_Name,String_Id,GUID,Service_Plan_Name,Service_Plan_Id,Service_Plans_Included_Friendly_Names\n";
 
         Assert.Throws<CatalogDownloadException>(

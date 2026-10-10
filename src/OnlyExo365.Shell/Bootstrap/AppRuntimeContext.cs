@@ -21,7 +21,7 @@ internal sealed class AppRuntimeContext : IAsyncDisposable
     {
         await ShellViewModel.StartWorkerOnStartupAsync();
 
-        // Non-blocking background catalog initialization.
+        // Initialize catalog without blocking startup.
         _ = Task.Run(() => CatalogUpdateService.InitializeAsync());
     }
 

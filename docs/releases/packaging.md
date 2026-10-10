@@ -1,66 +1,31 @@
-# Release and Packaging
+# Packaging and release assets
 
-Procedures for packaging, smoke testing, digital signing, and publishing OnlyExo365 releases.
-
-## Packaging
-
-Build the distributable installer:
+Requirements are in [workflow](../development/workflow.md). Run from repository root:
 
 ```powershell
 pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64
 ```
 
-Outputs produced:
-- `artifacts/publish/win-x64/`: Published application binaries.
-- `artifacts/packages/OnlyExo365.Setup.exe`: Inno Setup installer executable.
+Outputs: `artifacts/publish/win-x64/` and `artifacts/packages/OnlyExo365.Setup.exe`. Default packaging is framework-dependent and requires .NET 10 Desktop Runtime; `-SelfContained` includes the runtime. Pack defaults to `Clean=false`, but publishing rebuilds the publish tree; prepare release assets afterward.
 
-> [!NOTE]
-> By default, packaging produces framework-dependent binaries requiring the .NET 10 Desktop Runtime on target machines. Pass `-SelfContained` to include the runtime within the package.
-
----
-
-## Smoke Testing
-
-Execute end-to-end smoke verification only in a disposable Windows VM or equivalent isolated host:
+For unsigned reproducibility:
 
 ```powershell
-pwsh ./build/run-smoke-tests.ps1
+pwsh ./build/verify-package-reproducibility.ps1 -Configuration Release -RuntimeIdentifier win-x64
 ```
 
-Validates:
-- Binary completeness in publish directories.
-- Successful headless launch of `OnlyExo365.Shell.exe`.
-- Out-of-process worker spawn and IPC handshake establishment.
-- Creation of UI, Worker, and Supervisor log files.
-- Worker console show/hide toggle behavior.
+The two snapshots/reports are retained under `artifacts/reproducibility`; prior test/security evidence survives bounded clean. Timestamped signed-package reproducibility is outside this comparison.
 
----
-
-## Code Signing
-
-Digital signing scripts reside in `build/`:
-- `sign-artifacts.ps1`: Applies Authenticode signatures to binaries and installers.
-- `verify-signatures.ps1`: Validates file signatures against certificate roots.
-- `validate-artifact-signing.ps1`: Gate asserting all published artifacts are signed.
-
----
-
-## Release Asset Generation
-
-To bundle release artifacts for distribution:
+Prepare an already-packaged release bundle:
 
 ```powershell
-pwsh ./scripts/agents/publish.ps1 -ReleaseTag <vX.Y.Z> -RuntimeIdentifier win-x64
+pwsh ./scripts/agents/publish.ps1 -ReleaseTag vX.Y.Z -RuntimeIdentifier win-x64
 ```
 
-Creates under `artifacts/publish/release-assets/`:
-- `OnlyExo365-<tag>-win-x64-publish.zip`
-- `OnlyExo365-<tag>-win-x64-setup.exe`
-- `OnlyExo365-<tag>-win-x64.sha256`
-- `OnlyExo365-<tag>-win-x64-assets.json`
+Replace `vX.Y.Z` with the intended tag. Under `artifacts/publish/release-assets/`: `OnlyExo365-<tag>-win-x64-publish.zip`, `-setup.exe`, `.sha256`, `-assets.json`. The helper prepares files; release workflows perform GitHub upload.
 
-## Uninstall Data Contract
+## Installation data contract
 
-Inno Setup removes files recorded during installation. Uninstall preserves export files and unknown files in the installation directory; transient logs and IPC secrets are removed. The installer smoke script checks that installed payload files disappear and preserved marker contents survive, then restores its local-data backups. Do not run it against an operator profile.
+[OnlyExo365.iss](../../installer/OnlyExo365.iss) removes installed payload, default logs and IPC secrets while preserving exports and unknown installation files. It does not indiscriminately delete the application directory, consistent with [Inno Setup guidance](https://jrsoftware.org/ishelp/topic_uninstalldeletesection.htm).
 
-Compiling the installer does not verify installation or uninstall behavior. The October 2026 audit records isolated install/uninstall as pending. [Inno Setup advises against indiscriminate application-directory deletion](https://jrsoftware.org/ishelp/topic_uninstalldeletesection.htm).
+Compilation/reproducibility does not verify install/uninstall. Use [isolated qualification](../development/qualification.md) for recovery and installed-payload checks; [signing](signing.md) for the signed release order. AUD-07 remains pending and current Release artifacts must include the MainWindow startup repair.

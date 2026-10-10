@@ -7,31 +7,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
-
-function Get-ExecutablePath {
-    param(
-        [string]$CommandName,
-        [string[]]$CandidateDirectories = @()
-    )
-
-    foreach ($directory in $CandidateDirectories) {
-        if ([string]::IsNullOrWhiteSpace($directory)) {
-            continue
-        }
-
-        $candidatePath = Join-Path $directory $CommandName
-        if (Test-Path $candidatePath) {
-            return $candidatePath
-        }
-    }
-
-    $command = Get-Command $CommandName -ErrorAction SilentlyContinue
-    if ($null -ne $command -and -not [string]::IsNullOrWhiteSpace($command.Source)) {
-        return $command.Source
-    }
-
-    return $null
-}
+. (Join-Path (Split-Path -Parent $PSScriptRoot) "scripts\internal\common.ps1")
 
 function Get-SignToolSearchDirectories {
     $kitRoots = @()

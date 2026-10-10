@@ -422,7 +422,6 @@ public class MailboxListViewModel : ViewModelBase
             {
                 await RunOnUiThreadAsync(() =>
                 {
-                    // In-place collection update
                     Mailboxes.ReplaceAll(result.Value.Mailboxes);
                     TotalCount = result.Value.TotalCount;
                     IsTotalCountExact = result.Value.IsTotalCountExact;

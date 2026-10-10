@@ -5,6 +5,18 @@ namespace OnlyExo365.Tests;
 public sealed class BuildScriptSecurityTests
 {
     [Fact]
+    public void SignedRelease_PackagesSignedPayloadBeforeSigningSetup()
+    {
+        var workflow = File.ReadAllText(GetRepositoryFilePath(".github", "workflows", "release-signed.yml"));
+        var payload = workflow.IndexOf("- name: Sign release payload", StringComparison.Ordinal);
+        var package = workflow.IndexOf("- name: Package signed payload", StringComparison.Ordinal);
+        var setup = workflow.IndexOf("- name: Sign setup EXE", StringComparison.Ordinal);
+        var verify = workflow.IndexOf("- name: Verify Authenticode signatures", StringComparison.Ordinal);
+        Assert.True(payload >= 0 && package > payload && setup > package && verify > setup);
+        Assert.Contains("./build/create-setup-exe.ps1 -PublishPath artifacts/publish", workflow, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ToolManifest_PinsGitleaksWindowsX64Checksum()
     {
         var manifestPath = GetRepositoryFilePath("build", "tool-manifest.json");
@@ -44,17 +56,17 @@ public sealed class BuildScriptSecurityTests
     }
 
     [Fact]
-    public void ValidateArtifactSigningScript_CleansDisposableCertificatesBySubjectBeforeAndAfterExecution()
+    public void ValidateArtifactSigningScript_CleansOnlyOwnedCertificate()
     {
         var scriptPath = GetRepositoryFilePath("build", "validate-artifact-signing.ps1");
         var script = File.ReadAllText(scriptPath);
 
-        Assert.Contains("function Remove-CertificatesBySubject", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Remove-CertificatesBySubject", script, StringComparison.Ordinal);
         Assert.DoesNotContain("function Add-CertificateToStoreSilently", script, StringComparison.Ordinal);
         Assert.DoesNotContain("CurrentUser\\Root", script, StringComparison.Ordinal);
         Assert.DoesNotContain("CurrentUser\\TrustedPublisher", script, StringComparison.Ordinal);
         Assert.Contains("-AllowUntrustedSigner", script, StringComparison.Ordinal);
-        Assert.Contains("Remove-CertificatesBySubject -StorePath \"Cert:\\CurrentUser\\My\" -Subject $SignerSubject -DeleteKey", script, StringComparison.Ordinal);
+        Assert.Contains("Remove-CertificateFromStore -StorePath \"Cert:\\CurrentUser\\My\" -Thumbprint $certificateThumbprint -DeleteKey", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -86,20 +98,13 @@ public sealed class BuildScriptSecurityTests
     }
 
     [Fact]
-    public void BuildScript_StopsArtifactProcessesBeforeRetryingLockedArtifactsCleanup()
+    public void BuildScript_UsesConstrainedCleanupWithoutStoppingOperatorProcesses()
     {
-        var scriptPath = GetRepositoryFilePath("build", "build.ps1");
-        var script = File.ReadAllText(scriptPath);
-
-        Assert.Contains("function Get-ArtifactOnlyExo365Processes", script, StringComparison.Ordinal);
-        Assert.Contains("function Stop-ArtifactOnlyExo365Processes", script, StringComparison.Ordinal);
-        Assert.Contains("Detected running OnlyExo365 process(es) from artifacts", script, StringComparison.Ordinal);
-        Assert.Contains("Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop", script, StringComparison.Ordinal);
-        Assert.Contains("Remove-DirectoryRobust -Path $OutputDir -Description \"artifacts output\" -ArtifactRootForProcessStop $OutputDir", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("[switch]$Msi", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("helpers\\msi-packaging.ps1", script, StringComparison.Ordinal);
+        var script = File.ReadAllText(GetRepositoryFilePath("build", "build.ps1"));
+        Assert.Contains("build/clean.ps1", script, StringComparison.Ordinal);
+        Assert.Contains("Assert-RepositoryCleanupPath", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Stop-Process", script, StringComparison.Ordinal);
     }
-
     [Fact]
     public void CommonAndDoctorScripts_ResolveInnoSetupCompilerInsteadOfWixOrIexpress()
     {
@@ -166,19 +171,16 @@ public sealed class BuildScriptSecurityTests
     }
 
     [Fact]
-    public void CleanScript_RecursivelyRemovesRepositoryBinObjDirectoriesOutsideArtifacts()
+    public void CleanScript_ValidatesGeneratedTargetsBeforeDeletion()
     {
-        var scriptPath = GetRepositoryFilePath("build", "clean.ps1");
-        var script = File.ReadAllText(scriptPath);
-
-        Assert.Contains("Get-ChildItem -Path $SolutionDir -Directory -Recurse -Force", script, StringComparison.Ordinal);
-        Assert.Contains("$_.Name -in @('bin', 'obj')", script, StringComparison.Ordinal);
-        Assert.Contains("$_.FullName -notlike \"$ArtifactsDir\\*\"", script, StringComparison.Ordinal);
-        Assert.Contains("$_.FullName -notlike \"$SolutionDir\\.git\\*\"", script, StringComparison.Ordinal);
-        Assert.Contains("$measurement.PSObject.Properties['Sum']", script, StringComparison.Ordinal);
-        Assert.Contains("Write-Success \"Cleaned $cleanedBinObjDirectories bin/obj directorie(s)\"", script, StringComparison.Ordinal);
+        var script = File.ReadAllText(GetRepositoryFilePath("build", "clean.ps1"));
+        Assert.Contains("Get-RepositoryCleanupTargets", script, StringComparison.Ordinal);
+        Assert.Contains("Get-TrackedRepositoryPaths", script, StringComparison.Ordinal);
+        Assert.Contains("Assert-RepositoryCleanupPath", script, StringComparison.Ordinal);
+        Assert.Contains("Remove-Item -LiteralPath", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("SilentlyContinue", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Get-ChildItem -Path $SolutionDir -Directory -Recurse", script, StringComparison.Ordinal);
     }
-
     [Fact]
     public void GateScript_PreservesLocalAppStateAndRunsCanonicalArtifactBuild()
     {

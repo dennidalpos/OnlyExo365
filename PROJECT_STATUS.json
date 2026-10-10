@@ -1,11 +1,11 @@
 {
   "project_name": "OnlyExo365",
   "status": "active",
-  "current_phase": "UI/UX repairs verified offline and saved for session handoff; interactive, isolated installer and test-tenant qualification pending",
-  "last_updated": "2026-10-10T13:30:00+02:00",
+  "current_phase": "Documentation/source reconciliation verified; IPC byte-limit repair, isolated installer, dedicated tenant, interactive UI and retained fixture cleanup pending",
+  "last_updated": "2026-10-10T18:47:45+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
-  "active_objective": "Qualify the repaired UI at supported window sizes and DPI with keyboard, Narrator and high contrast; retain isolated installer and dedicated test-tenant checks.",
+  "active_objective": "Address IPC-01 with byte-accurate bounded framing; qualify AUD-07/AUD-08/UX-08 in required environments; clear CLEAN-01 only under an allowed verified cleanup. Keep IMP proposals separate.",
   "assumptions": [
     "The local machine uses installed .NET SDK 10.0.401 while preserving explicit SDK pinning and disabled roll-forward."
   ],
@@ -17,27 +17,38 @@
     "Share one approved module policy from Contracts and import exact approved versions.",
     "Use focused WPF repairs without new dependencies or IPC changes; preserve 300/200 ms search delays and existing pages.",
     "Use owned modal confirmation, request snapshots and explicit discard/stay actions for draft replacement.",
-    "Translate client presentation and selected-culture formatting without changing technical protocol identifiers or tenant-provided data.",
-    "The user explicitly authorized saving all UI/UX work, committing and pushing on main, and updating the tracker for a session change."
+    "Translate client presentation and selected-culture formatting without changing technical protocol identifiers or tenant-provided data."
   ],
   "current_tasks": [
     {
       "id": "AUD-07",
       "priority": "P1",
       "status": "pending_isolated_environment",
-      "description": "Validate install/uninstall of the new package in a disposable Windows VM, including survival and unchanged contents of exports and unknown installation files."
+      "description": "Regenerate Release package with the MainWindow Language-binding startup fix, then validate install/reinstall/uninstall in a disposable Windows VM; verify exports/unknown files unchanged, installed payload hashes and trusted Authenticode signer matching signed setup. Earlier native reproducibility and disposable signing/timestamp validation passed before this UI follow-up."
     },
     {
       "id": "AUD-08",
       "priority": "P2",
       "status": "pending_dedicated_test_tenant",
-      "description": "Qualify real approved module imports, authentication modes, progressive Message Trace and failure propagation using a dedicated test tenant."
+      "description": "Qualify real approved module imports/authentication, Compliance/eDiscovery, progressive Message Trace and failure propagation on a dedicated test tenant. DeviceCode is unsupported by IPPS, app-only eDiscovery is unsupported; delegated Interactive requires an interactive host. Offline report/session/argument regressions pass."
     },
     {
       "id": "UX-08",
       "priority": "P2",
       "status": "pending_interactive_ui",
       "description": "Qualify 900x600/1200x800 windows at 100/150/200% DPI, IT/EN, keyboard/Escape/owner modality, Narrator and real Windows high contrast. Profile populated Dashboard, Compliance and Security grids and record actual realized rows/responsiveness. Offline repairs and 21 additional regressions are documented in docs/audits/2026-10-10-ui-ux-audit.md."
+    },
+    {
+      "id": "IPC-01",
+      "priority": "P2",
+      "status": "pending",
+      "description": "Enforce IPC limits by UTF-8 bytes and bound line reads before full allocation. IpcClient/IpcServer pass string.Length into IsValidMessageSize; a native Contracts probe accepts 4,000,002 characters / 12,000,002 UTF-8 bytes against the declared 10,485,760-byte maximum. MaxReadBufferSize is unused; existing oversize tests cover ASCII only. Evidence: docs/audits/2026-10-10-documentation-review.md. No protocol change in documentation pass."
+    },
+    {
+      "id": "CLEAN-01",
+      "priority": "P3",
+      "status": "blocked_by_execution_policy",
+      "description": "Remove only previously verified session-owned fixtures when execution policy allows; reconfirm ownership first. Earlier bounded/literal cleanup attempts were rejected twice and stopped. Exact retained paths/reasons are in docs/audits/2026-10-10-retained-fixtures.md; source repairs pass. This documentation pass also retains artifacts/documentation-review-20261010 after one verified literal removal was rejected by automatic approval review with blocked by policy; not retried."
     }
   ],
   "next_tasks": [
@@ -66,15 +77,18 @@
       "description": "Measure startup cost of the 18 eagerly created pages before considering lazy creation; preserve navigation and page lifetime semantics."
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Scratch-cleanup Done criterion is blocked: execution harness rejected two bounded/literal remediation fixture deletions with blocked by policy. Source remediation and verification are complete; exact retained paths are in the audit."
+  ],
   "risks": [
     "Install/uninstall behavior is not verified interactively; no isolated Windows host was available.",
     "Offline simulated cmdlets do not qualify real Microsoft 365 authentication or module execution.",
     "Cancellation/deadline does not roll back writes already submitted to Microsoft 365.",
-    "Artifact signing and reproducibility checks were not executed.",
     "Actual DPI, Narrator, full keyboard use and Windows high-contrast behavior remain unverified; offscreen WPF tests cover only the documented cases.",
     "The bounded-grid probe validates the virtualization pattern; production performance and each populated page have not been profiled.",
-    "The existing Release package predates these UI changes and must be regenerated before isolated installer qualification."
+    "PSScriptAnalyzer 1.25.0 fails on the new test harness with Reference Position should begin before start Position of Range. Two attempts failed and that check was stopped; harness parser and 21 native-script regressions pass.",
+    "Earlier fixture cleanup was rejected twice per stage; exact retained paths are in docs/audits/2026-10-10-retained-fixtures.md. Preserve backups and ignored audit evidence.",
+    "IPC byte-named size guards currently count .NET characters after allocating a complete line; multibyte payloads can exceed the advertised byte limit. IPC-01 remains open."
   ],
   "dependencies": {
     "runtime": [
@@ -94,15 +108,16 @@
   },
   "quality_gates": {
     "format": "git diff --check passed; no dedicated formatter configured",
-    "lint": "Project analyzers retained; no PowerShell scripts changed in the UI/UX task. Earlier script parsing evidence belongs to the critical audit.",
-    "typecheck": "Current UI/UX source: Debug compilation passed, 0 errors. Earlier Release compilation belongs to the critical audit.",
-    "tests": "789/789 passed, 0 failed, 0 skipped; 21 additional regressions against the prior 768-test suite",
-    "build": "Current Debug win-x64 compile passed; prior Release package was not regenerated after UI changes",
-    "security_review": "Earlier critical audit: no known NuGet vulnerabilities across 4 projects and gitleaks found no secrets. No dependencies or IPC changes in the UI/UX task; scans not repeated.",
+    "lint": "32 scripts parse with 0 errors; all 31 production scripts pass PSScriptAnalyzer Error/Warning with 146 warnings and 0 errors, no suppressions. Test-harness static analysis is not verified because of the recorded tool failure.",
+    "typecheck": "Debug compile passed; final Release test-project build: 0 warnings and 0 errors.",
+    "tests": "Debug 810/810 and final Release 811/811 passed, 0 failed/skipped. After final helper/caller fixes, 54/54 focused script/security tests passed. Separate actual publish-path resolution checks also pass. Startup follow-up: the new WPF Language-binding regression reproduced the reported crash before the fix; 31/31 focused launch/interaction/localization/error-monitor tests pass afterward.",
+    "build": "Native Release packaging repeated twice: publish_reproducible=true, package_reproducible=true, mismatches=[]. Both snapshots and prior test/audit evidence retained. Native signing/timestamp/verification copies pass, original artifact hashes and certificate store inventory unchanged.",
+    "security_review": "Earlier native NuGet scan: no known vulnerabilities across 4 projects. Handoff gitleaks 8.30.0 staged scan: no leaks found in 136.68 KB. Whole-directory scan reported 7 generic-api-key matches only in gitignored artifacts/documentation-review-20261010/baseline.json; that snapshot is excluded from the commit and retained under CLEAN-01. Reports: artifacts/security/handoff-gitleaks.sarif and handoff-staged-gitleaks.sarif. No dependencies or IPC changes.",
     "architecture": "passed; App 62/80 and registrar 161/190 non-empty lines; limits unchanged",
     "isolated_install_uninstall": "pending",
-    "tenant_validation": "pending",
-    "interactive_ui": "pending UX-08; offscreen Trace layout, contrast/palette, accessibility structure and bounded-grid probe passed"
+    "tenant_validation": "Offline canonical policy/minimal config/session arguments/failure report/app-only coverage pass. Real qualification remains AUD-08 on a dedicated test tenant; search authentication limitations fail explicitly.",
+    "interactive_ui": "Startup verified from scripts via start.ps1: full Debug window, Worker 7.6.6, authenticated IPC, normal close, exit 0; Exchange disabled in child process. Approved Exchange module unavailable. DPI/accessibility qualification remains UX-08.",
+    "documentation": "Source/documentation reconciliation verified: 396 C# executable/directive token comparisons, 32 PowerShell parser/token comparisons, 35 unchanged XML/resource files, 114 valid local links. UTF-8/no BOM, existing line endings and baseline task IDs/priorities/statuses preserved; superseded ADR references removed. Debug compile: 0 errors; focused IPC: 20 passed, 0 failed/skipped (203 ms). Architecture and git diff --check pass. No full suite rerun. IPC-01 remains open. Evidence: docs/audits/2026-10-10-documentation-review.md."
   },
   "commands": {
     "install": "pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64",
@@ -119,7 +134,7 @@
     "required_env_vars": [],
     "env_files": []
   },
-  "last_completed_work": "Implemented focused UI/UX repairs: Dispatcher debounce/lifetime cleanup, owned modal confirmations and stable requests, editable security ComboBoxes, accessible action colors/labels/system palette, six editor-group draft guards, responsive Trace/footer and bounded grids, IT/EN presentation and selected-culture formatting. Fixed mailbox writes occurring before confirmation and cross-policy draft loss on save. Final Debug build, 789 tests, architecture and whitespace checks pass. Audit and session handoff evidence updated and included in the user-authorized main commit. Final push, remote equality and checkout evidence are reported in the chat.",
+  "last_completed_work": "Reconciled all repository documentation with runtime/configuration/build/installer code, split guides by domain, condensed historical audits without closing environment checks, removed the superseded SDK ADR and shortened source comments. Corrected catalog modes/defaults, log retention, roaming preferences, raw IPC session-token transport, scoped pipe names, gate/smoke boundaries and shipped license-write scopes. Executable tokens remain unchanged in the documentation/comment pass. All accumulated automation, startup and documentation changes are included in the user-requested main handoff commit. A native Contracts probe confirmed the IPC character/byte-limit discrepancy; IPC-01/P2 tracks byte enforcement and bounded reads. Debug compile and 20 focused IPC tests pass; existing tests do not cover the multibyte defect.",
   "open_questions": [],
-  "handoff_notes": "Resume on main from the commit containing this tracker and docs/audits/2026-10-10-ui-ux-audit.md; critical-audit.md retains earlier remediation evidence. UI/UX repairs are verified offline: Debug build passed with 0 errors, 789/789 tests passed, architecture constraints and diff whitespace checks passed. Prioritize UX-08 interactive windows/DPI/IT-EN/keyboard/Narrator/high-contrast qualification and populated-grid profiling. Retain AUD-07 isolated install/uninstall and AUD-08 dedicated test tenant; never use production tenant. Regenerate Release artifacts for this revision before installer checks. IMP-01/02/03/04 remain separate proposals. The user authorized main commit and push for this session handoff; final chat records the commit and verified remote equality/checkout state. Do not repeat the full suite unless source changes, failures or new concerns justify it. Build/test artifacts are gitignored and retained locally; no temporary scratch files remain."
+  "handoff_notes": "Start from README.md and PROJECT_STATUS.json. Current guides and validation scope: docs/audits/2026-10-10-documentation-review.md. Earlier reliability/UI/script evidence remains in the three domain audits and ignored artifacts. AUD-07 requires Release regeneration including the MainWindow startup binding fix before isolated install/reinstall/uninstall and trusted installed-payload checks. AUD-08 needs a dedicated tenant; UX-08 needs real Windows UI/accessibility/performance qualification. IMP-01..04 remain proposals. Preserve ignored evidence and exact retained CLEAN-01 fixtures listed in docs/audits/2026-10-10-retained-fixtures.md; do not retry earlier rejected cleanup under unchanged policy. Test-harness PSScriptAnalyzer failed twice with its recorded range-position error; do not claim it passed. Existing Debug/Release test and signing/reproducibility results are historical; Debug compilation and focused IPC tests were triggered by the newly confirmed IPC-01 discrepancy; no full application suite was rerun. This tracker is included in the user-requested main handoff commit. The final session response records the verified commit and remote alignment; continue from that revision. No tenant connection attempted. IPC-01 documents byte-count and unbounded-line enforcement gaps; source behavior remains unchanged. New documentation-review scratch remains after automatic approval review rejected its verified literal removal once; source verification is complete but scratch cleanup is pending as CLEAN-01. The handoff staged secret scan passed; the whole-directory scan has seven matches confined to the ignored baseline snapshot, recorded separately in quality_gates.security_review. No blanket clean-directory security result is claimed."
 }

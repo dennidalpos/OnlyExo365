@@ -279,7 +279,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _logState.AddLog(level, message, source, correlationId);
     }
 
-    /// <summary>Raised when local SKU catalog updates, allowing ViewModels to re-normalize licenses.</summary>
+    /// <summary>Refresh license names after catalog updates.</summary>
     public event EventHandler<OnlyExo365.Shell.Services.CatalogUpdatedEventArgs>? LicenseCatalogUpdated;
 
     internal void RaiseLicenseCatalogUpdated(OnlyExo365.Shell.Services.CatalogUpdatedEventArgs args)

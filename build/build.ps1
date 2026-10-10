@@ -70,117 +70,6 @@ function Get-BootstrapModuleVersion {
     }
 }
 
-function Normalize-Path {
-    param([string]$PathValue)
-
-    if ([string]::IsNullOrWhiteSpace($PathValue)) {
-        return $null
-    }
-
-    try {
-        return [System.IO.Path]::GetFullPath($PathValue).TrimEnd('\')
-    }
-    catch {
-        return $PathValue.TrimEnd('\')
-    }
-}
-
-function Test-PathWithinRoot {
-    param(
-        [string]$CandidatePath,
-        [string]$RootPath
-    )
-
-    $normalizedCandidate = Normalize-Path -PathValue $CandidatePath
-    $normalizedRoot = Normalize-Path -PathValue $RootPath
-
-    if ([string]::IsNullOrWhiteSpace($normalizedCandidate) -or [string]::IsNullOrWhiteSpace($normalizedRoot)) {
-        return $false
-    }
-
-    return $normalizedCandidate.StartsWith($normalizedRoot, [System.StringComparison]::OrdinalIgnoreCase)
-}
-
-function Get-ArtifactOnlyExo365Processes {
-    param([string]$RootPath)
-
-    $targetNames = @("OnlyExo365.Shell.exe", "OnlyExo365.Worker.exe")
-    $processes = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-        $targetNames -contains $_.Name -and
-        -not [string]::IsNullOrWhiteSpace($_.ExecutablePath) -and
-        (Test-PathWithinRoot -CandidatePath $_.ExecutablePath -RootPath $RootPath)
-    }
-
-    return @($processes | Sort-Object ProcessId -Unique)
-}
-
-function Stop-ArtifactOnlyExo365Processes {
-    param([string]$RootPath)
-
-    $processes = @(Get-ArtifactOnlyExo365Processes -RootPath $RootPath)
-    if ($processes.Count -eq 0) {
-        return $false
-    }
-
-    Write-Warn "Detected running OnlyExo365 process(es) from artifacts. Stopping them before clean."
-
-    foreach ($process in $processes) {
-        Write-Info "Stopping PID $($process.ProcessId): $($process.ExecutablePath)"
-        try {
-            Stop-Process -Id $process.ProcessId -Force -ErrorAction Stop
-        }
-        catch {
-            Write-Warn "Unable to stop PID $($process.ProcessId): $($_.Exception.Message)"
-        }
-    }
-
-    Start-Sleep -Milliseconds 750
-    return $true
-}
-
-function Remove-DirectoryRobust {
-    param(
-        [string]$Path,
-        [string]$Description,
-        [string]$ArtifactRootForProcessStop = $null,
-        [int]$RetryCount = 3
-    )
-
-    if (-not (Test-Path $Path)) {
-        return
-    }
-
-    $stoppedProcesses = $false
-
-    for ($attempt = 1; $attempt -le $RetryCount; $attempt++) {
-        try {
-            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
-            Write-Success "Removed ${Description}: $Path"
-            return
-        }
-        catch {
-            if (-not $stoppedProcesses -and -not [string]::IsNullOrWhiteSpace($ArtifactRootForProcessStop)) {
-                $stoppedProcesses = Stop-ArtifactOnlyExo365Processes -RootPath $ArtifactRootForProcessStop
-            }
-
-            if ($attempt -lt $RetryCount) {
-                Write-Warn "Retrying cleanup for $Description after failure: $($_.Exception.Message)"
-                Start-Sleep -Milliseconds (500 * $attempt)
-                continue
-            }
-
-            $hint = if ($stoppedProcesses) {
-                "A lock is still active after stopping OnlyExo365 artifact processes."
-            }
-            else {
-                "No OnlyExo365 process from artifacts was found to stop automatically."
-            }
-
-            Stop-WithError "Unable to remove $Description at '$Path'. $hint Close external file handles and retry. Root cause: $($_.Exception.Message)"
-        }
-    }
-}
-
 function Invoke-DotNet {
     param(
         [string]$Command,
@@ -259,12 +148,8 @@ catch {
 if ($Clean) {
     Write-Step "Cleaning"
 
-    if (Test-Path $OutputDir) {
-        Remove-DirectoryRobust -Path $OutputDir -Description "artifacts output" -ArtifactRootForProcessStop $OutputDir
-    }
-    else {
-        Write-Info "Output directory doesn't exist, skipping"
-    }
+    Invoke-RepositoryPowerShellScript -ScriptPath (Join-Path $RepositoryRoot 'build/clean.ps1') `
+        -Arguments @('-SkipDotNetClean') -ErrorMessage 'Generated output cleanup failed'
 
     Invoke-DotNet -Command "clean" -Arguments @($SolutionFile, "-c", $Configuration, "--verbosity", "minimal") -ErrorMessage "Clean failed"
     Write-Success "Solution cleaned"
@@ -316,7 +201,9 @@ if ($Publish) {
     Write-Step "Publishing applications"
 
     if (Test-Path $PublishDir) {
-        Remove-DirectoryRobust -Path $PublishDir -Description "publish output"
+        $null = Assert-RepositoryCleanupPath -RepositoryRoot $RepositoryRoot -PathValue $PublishDir `
+            -TrackedPaths @(Get-TrackedRepositoryPaths -RepositoryRoot $RepositoryRoot)
+        Remove-Item -LiteralPath $PublishDir -Recurse -Force -ErrorAction Stop
     }
 
     New-Item -Path $PublishDir -ItemType Directory -Force | Out-Null

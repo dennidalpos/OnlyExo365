@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>Root document for locally-cached Microsoft 365 SKU catalog JSON.</summary>
 public sealed class LocalSkuCatalogDocument
 {
     [JsonPropertyName("generatedOn")]

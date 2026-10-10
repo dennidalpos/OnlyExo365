@@ -58,7 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- Shell -->
   <data name="Shell.WindowTitle" xml:space="preserve">
     <value>OnlyExo365 - Exchange Online Admin</value>
   </data>
@@ -71,7 +70,6 @@
   <data name="Shell.AuditTaskSelectorLabel" xml:space="preserve">
     <value>Audit search task</value>
   </data>
-  <!-- Status indicators -->
   <data name="Status.WorkerLabel" xml:space="preserve">
     <value>Worker:</value>
   </data>
@@ -81,7 +79,6 @@
   <data name="Status.GraphLabel" xml:space="preserve">
     <value>Graph:</value>
   </data>
-  <!-- Navigation -->
   <data name="Nav.Dashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
@@ -157,7 +154,6 @@
   <data name="Nav.Tooltip.MailSecurity.Open" xml:space="preserve">
     <value>Open the Mail Security workspace</value>
   </data>
-  <!-- Buttons -->
   <data name="Btn.StartWorker" xml:space="preserve">
     <value>Start Worker</value>
   </data>
@@ -227,7 +223,6 @@
   <data name="Btn.QueueAuditSearch" xml:space="preserve">
     <value>Queue Audit Search</value>
   </data>
-  <!-- Tabs -->
   <data name="Tab.MailboxOverview" xml:space="preserve">
     <value>Overview</value>
   </data>
@@ -243,7 +238,6 @@
   <data name="Tab.MailboxPermissions" xml:space="preserve">
     <value>Permissions</value>
   </data>
-  <!-- Mailbox detail -->
   <data name="Mailbox.DetailsFallbackTitle" xml:space="preserve">
     <value>Mailbox details</value>
   </data>
@@ -283,7 +277,6 @@
   <data name="Mailbox.PendingPermissionsFormat" xml:space="preserve">
     <value>âš  {0} pending permission changes</value>
   </data>
-  <!-- Messages / dialogs -->
   <data name="Msg.DetailsHeading" xml:space="preserve">
     <value>Details:</value>
   </data>
@@ -342,7 +335,6 @@ Confirm?</value>
   <data name="Alert.PageUnavailableMessageFormat" xml:space="preserve">
     <value>The {0} page is unavailable right now.</value>
   </data>
-  <!-- Progress -->
   <data name="Progress.LoadedRemaining" xml:space="preserve">
     <value>Loaded: {0} | Remaining: {1}</value>
   </data>
@@ -352,7 +344,6 @@ Confirm?</value>
   <data name="Progress.LoadedWithLabel" xml:space="preserve">
     <value>Loaded: {0} {1}</value>
   </data>
-  <!-- Error messages -->
   <data name="Error.AuthenticationFailed" xml:space="preserve">
     <value>Authentication failed. Check your credentials and try again.</value>
   </data>
@@ -477,7 +468,6 @@ Try restarting the worker or the application.</value>
   <data name="Error.UnknownGeneric" xml:space="preserve">
     <value>An unexpected error occurred. Check the logs for more information.</value>
   </data>
-  <!-- Dashboard -->
   <data name="Dashboard.Title" xml:space="preserve">
     <value>Dashboard</value>
   </data>
@@ -559,7 +549,6 @@ Try restarting the worker or the application.</value>
   <data name="Dashboard.ErrorBanner" xml:space="preserve">
     <value>Error</value>
   </data>
-  <!-- Mailbox list -->
   <data name="Mailbox.List.Title" xml:space="preserve">
     <value>Mailboxes</value>
   </data>
@@ -665,7 +654,6 @@ Try restarting the worker or the application.</value>
   <data name="Mailbox.List.MailNotSet" xml:space="preserve">
     <value>Mail not set</value>
   </data>
-  <!-- Mailbox overview tab -->
   <data name="Mailbox.Overview.DisplayName" xml:space="preserve">
     <value>Display name:</value>
   </data>
@@ -684,7 +672,6 @@ Try restarting the worker or the application.</value>
   <data name="Mailbox.Overview.AdminInterventionWarning" xml:space="preserve">
     <value>This action requires administrative intervention to reverse.</value>
   </data>
-  <!-- Mailbox licenses tab -->
   <data name="Mailbox.Licenses.SuggestedValueInstructions" xml:space="preserve">
     <value>You can confirm the suggested value or choose a different one from the UsageLocation list below.</value>
   </data>
@@ -709,7 +696,6 @@ Try restarting the worker or the application.</value>
   <data name="Mailbox.Licenses.OperationInProgress" xml:space="preserve">
     <value>License operation in progress...</value>
   </data>
-  <!-- Contacts -->
   <data name="Contact.Title" xml:space="preserve">
     <value>Mail Contacts</value>
   </data>
@@ -761,7 +747,6 @@ Try restarting the worker or the application.</value>
   <data name="Contact.HideFromAddressLists" xml:space="preserve">
     <value>Hide from address lists</value>
   </data>
-  <!-- Compliance -->
   <data name="Compliance.Title" xml:space="preserve">
     <value>Compliance</value>
   </data>
@@ -921,7 +906,6 @@ Try restarting the worker or the application.</value>
   <data name="Compliance.FieldHoldName" xml:space="preserve">
     <value>Hold name</value>
   </data>
-  <!-- Logs -->
   <data name="Logs.Title" xml:space="preserve">
     <value>Logs</value>
   </data>
@@ -955,7 +939,6 @@ Try restarting the worker or the application.</value>
   <data name="Logs.SearchPlaceholder" xml:space="preserve">
     <value>Filter log entries...</value>
   </data>
-  <!-- Distribution lists -->
   <data name="Distribution.Title" xml:space="preserve">
     <value>Distribution Lists</value>
   </data>
@@ -1025,7 +1008,6 @@ Try restarting the worker or the application.</value>
   <data name="Distribution.DistributionGroupOnly" xml:space="preserve">
     <value>Distribution group only</value>
   </data>
-  <!-- Deleted mailboxes -->
   <data name="DeletedMailbox.Title" xml:space="preserve">
     <value>Deleted Mailboxes</value>
   </data>
@@ -1035,7 +1017,6 @@ Try restarting the worker or the application.</value>
   <data name="DeletedMailbox.ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>
-  <!-- Mailbox access report -->
   <data name="MailboxAccess.Title" xml:space="preserve">
     <value>Mailbox Access</value>
   </data>
@@ -1051,7 +1032,6 @@ Try restarting the worker or the application.</value>
   <data name="MailboxAccess.ErrorBanner" xml:space="preserve">
     <value>Error</value>
   </data>
-  <!-- Language options -->
   <data name="Lang.English" xml:space="preserve">
     <value>English</value>
   </data>
@@ -1088,7 +1068,6 @@ Try restarting the worker or the application.</value>
   <data name="Permissions.Title" xml:space="preserve">
     <value>Permissions</value>
   </data>
-  <!-- Permissions view -->
   <data name="Permissions.ColName" xml:space="preserve">
     <value>Name</value>
   </data>
@@ -1158,7 +1137,6 @@ Try restarting the worker or the application.</value>
   <data name="Permissions.Reset" xml:space="preserve">
     <value>Reset</value>
   </data>
-  <!-- Mailbox permissions tab -->
   <data name="MailboxPerms.ManagementHeading" xml:space="preserve">
     <value>Permission management</value>
   </data>
@@ -1219,7 +1197,6 @@ Try restarting the worker or the application.</value>
   <data name="MailboxPerms.BtnApply" xml:space="preserve">
     <value>Apply</value>
   </data>
-  <!-- Mailbox settings tab -->
   <data name="MailboxSettings.SmtpHeading" xml:space="preserve">
     <value>SMTP identity and visibility</value>
   </data>
@@ -1337,7 +1314,6 @@ Try restarting the worker or the application.</value>
   <data name="MailboxSettings.Everyone" xml:space="preserve">
     <value>Everyone</value>
   </data>
-  <!-- Mailbox restore tab -->
   <data name="MailboxRestore.Heading" xml:space="preserve">
     <value>Mailbox restore</value>
   </data>

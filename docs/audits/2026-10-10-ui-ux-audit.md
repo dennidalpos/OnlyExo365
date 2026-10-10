@@ -1,62 +1,44 @@
-# UI and UX audit — 2026-10-10
+# UI/UX remediation — 2026-10-10
 
-The approved WPF repairs are implemented and verified offline. Interactive qualification remains open as UX-08 in [PROJECT_STATUS.json](../../PROJECT_STATUS.json). No new dependencies, IPC changes or production tenant operations were performed. The user subsequently authorized commit and push on main for session handoff.
+Historical offline WPF evidence; no dependencies, IPC changes or production tenant operations. Interactive qualification remains UX-08 in [PROJECT_STATUS.json](../../PROJECT_STATUS.json). Prior handoff statements are not authorization to commit/push subsequent work.
 
-## Baseline
+## Findings and repairs
 
-Debug compilation passed with 0 errors. The targeted presentation/navigation/editor baseline passed 165 tests; the prior complete suite contained 768 tests. Offline WPF probes reproduced cross-thread CollectionView updates and an editable ComboBox whose text part remained hidden and whose popup part was unnamed. Button contrast was 2.82:1 (primary) and 2.22:1 (danger).
+| ID | Priority | Repair / recorded evidence |
+| --- | --- | --- |
+| UX-01 | P1 | DispatcherTimer debounce shared with groups; preserved 300/200 ms delays, removed unused DebounceAsync, disposed callbacks. Dispatcher-bound updates, latest-only execution and disposal pass. |
+| UX-02 | P1 | Owned ShowDialog; cancel initially/default focused; Escape/close cancel; manual DispatcherFrame removed. Contact/security/resource/public-folder/group/Mail Flow targets captured before confirmation. Cancellation submits no write; full keyboard journey remains UX-08. |
+| UX-03 | P1 | Restored PART_Popup/PART_EditableTextBox and Text bindings on all 12 editable security selectors. Typed/selected values reach save. |
+| UX-04 | P1 | Shared action foreground/background pairs across hover/pressed/focus; selected content inherits foreground; visible focus. Contrast changed from primary 2.82 / danger 2.22 to 4.53 / 4.67; hover pairs pass. |
+| UX-05 | P2 | Snapshot dirty detection; explicit discard/stay on selection/New/Refresh/navigation/close; restore selection after refusal; block editors during detail loading. Six editor groups covered: mailboxes, groups, resources, public folders, contacts, security; reverting a field clears dirty state. |
+| UX-06 | P2 | Editable/search labels and automation names; dynamic system high-contrast palette, reversible to ordinary colors. Catalog/label/palette structure passes; real Narrator/theme checks remain UX-08. |
+| UX-07 | P2 | Wrapping Trace filters/footer, compact status selector, resizable/collapsible details; 320-DIP Dashboard/Compliance/Security grids retain recycling. Offscreen bounds/container checks pass; actual DPI/performance remains UX-08. |
+| IMP-03 UI portion | P3 | IT/EN client messages, confirmations, summaries, field guidance, filter captions and selected-culture dates/numbers; resource keys/format arguments agree. Technical identifiers/tenant data unchanged; broader proposal remains open. |
 
-## Findings, evidence and closure criteria
+Additional repairs: mailbox settings/retention requests now validate and confirm before the first write, including auto-reply; cancelling submits zero writes. Saving a security policy explicitly confirms loss of other drafts; refusal preserves both and submits no write. LocExtension releases dead-target/shutdown-Dispatcher subscriptions.
 
-| ID | Priority | Evidence and repair | Closure criterion | Outcome |
-| --- | --- | --- | --- | --- |
-| UX-01 | P1 | [DebounceHelper](../../src/OnlyExo365.Shell/Helpers/DebounceHelper.cs): replace thread-pool scheduling with DispatcherTimer; share it with groups; preserve 300/200 ms delays; remove unused DebounceAsync; release callbacks at shutdown | Bound CollectionView updates run on its Dispatcher; only the latest callback executes; disposal cancels pending work | Verified offline |
-| UX-02 | P1 | [ErrorDialogService](../../src/OnlyExo365.Shell/Services/ErrorDialogService.cs), [ConfirmationDialog](../../src/OnlyExo365.Shell/Views/ConfirmationDialog.xaml): Owner + ShowDialog; cancel gets initial/default focus; Escape/close cancel; remove manual DispatcherFrame. Capture contact, security policy, resource, public folder, group settings and Mail Flow deletion requests before confirmation | Cancellation submits no write; submitted target and payload match the captured request; safe cancel/close behavior | Verified offline; full keyboard journey in UX-08 |
-| UX-03 | P1 | [DarkTheme](../../src/OnlyExo365.Shell/Themes/DarkTheme.xaml), [MailSecurityView](../../src/OnlyExo365.Shell/Views/MailSecurityView.xaml): restore PART_Popup/PART_EditableTextBox and bind all twelve editable selectors through Text | Typing and choosing an option update the property used by save; popup and visible editor exist | Verified offline |
-| UX-04 | P1 | [DarkTheme](../../src/OnlyExo365.Shell/Themes/DarkTheme.xaml): central action text/background pairs; hover/pressed states retain the pair; selected item content inherits selected foreground; visible keyboard focus | Normal action text reaches 4.5:1 in default/hover/focus states | Verified offline: primary 4.53:1, danger 4.67:1; hover pairs also pass |
-| UX-05 | P2 | [Contacts](../../src/OnlyExo365.Shell/ViewModels/ContactsViewModel.cs), [MailSecurity](../../src/OnlyExo365.Shell/ViewModels/MailSecurityViewModel.cs), [PublicFolders](../../src/OnlyExo365.Shell/ViewModels/PublicFoldersViewModel.cs), [registrar](../../src/OnlyExo365.Shell/Bootstrap/AppShellModuleRegistrar.cs): compare snapshots; guard destructive replacement; restore selection after refusal; discard before approved navigation; guard window close; block editing during detail loads | Cancelled selection/New/Refresh/navigation retains draft and selection; reverting a field clears dirty state; no implicit discard of another security editor on save | Verified offline across the six registered editor groups: mailboxes, groups, resources, public folders, contacts, security |
-| UX-06 | P2 | All [Views](../../src/OnlyExo365.Shell/Views), [ThemePaletteService](../../src/OnlyExo365.Shell/Services/ThemePaletteService.cs): LabeledBy/name for editable fields and searches; dynamic resources switch to system high-contrast brushes | Inputs have accessible labels; high-contrast palette restores ordinary colors when disabled | Catalog/label structure and palette mapping verified offline; Narrator and real Windows themes in UX-08 |
-| UX-07 | P2 | [MessageTraceView](../../src/OnlyExo365.Shell/Views/MessageTraceView.xaml), [MainWindow](../../src/OnlyExo365.Shell/Views/MainWindow.xaml): wrapping filters/footer, compact status selector, resizable/collapsible detail panel. Bound Dashboard/Compliance/Security grids to 320 DIP and retain recycling | Commands/paging stay inside compact viewports; large grids realize viewport rows instead of the full collection | Verified offline; actual DPI/window matrix and performance profiling in UX-08 |
-| IMP-03 | P3 | [catalogs](../../src/OnlyExo365.Shell/Localization/Strings.resx), [LocalizationService](../../src/OnlyExo365.Shell/Localization/LocalizationService.cs), [LocalizedFormatConverter](../../src/OnlyExo365.Shell/Localization/LocalizedFormatConverter.cs): IT/EN messages, confirmations, summaries, required-field guidance, localized filter captions, selected-culture dates/numbers, descriptive resource keys | Catalog keys/format arguments match; date and number formatting follow selected locale; disabled Save explains requirements | Targeted UI portion verified offline; broader IMP-03 remains a separate proposal |
+Sources: [Views](../../src/OnlyExo365.Shell/Views), [ViewModels](../../src/OnlyExo365.Shell/ViewModels), [DarkTheme](../../src/OnlyExo365.Shell/Themes/DarkTheme.xaml), [DebounceHelper](../../src/OnlyExo365.Shell/Helpers/DebounceHelper.cs), [ErrorDialogService](../../src/OnlyExo365.Shell/Services/ErrorDialogService.cs), [ThemePaletteService](../../src/OnlyExo365.Shell/Services/ThemePaletteService.cs), [registrar](../../src/OnlyExo365.Shell/Bootstrap/AppShellModuleRegistrar.cs), [localization](../../src/OnlyExo365.Shell/Localization).
 
-## Additional defects corrected
+## Recorded verification
 
-- Mailbox settings and retention writes previously ran before confirmation. [MailboxDetailsViewModel](../../src/OnlyExo365.Shell/ViewModels/MailboxDetailsViewModel.cs) now builds and validates all requests, then confirms before the first write. Cancelling submits zero settings/retention/auto-reply writes.
-- Saving one security policy reloads every policy editor. When other drafts exist, the single confirmation explicitly offers saving and discarding the other changes, or staying. Refusal preserves both editors and submits no request.
-- A selected ComboBoxItem previously retained its inner text's ordinary foreground. The text now inherits the selected foreground.
-- Localization notifications could target a closed Dispatcher. [LocExtension](../../src/OnlyExo365.Shell/Localization/LocExtension.cs) releases subscriptions for dead targets or shutting-down Dispatchers.
+Baseline: Debug compiled; 165 targeted presentation/navigation/editor tests passed; preceding full suite had 768. Probes reproduced cross-thread CollectionView updates, hidden editable text and unnamed popup parts.
 
-## Verification
+Final UI revision: Debug 0 errors; **789 passed, 0 failed/skipped**, 21 new regressions. Architecture passed (App 62/80, registrar 161/190); `git diff --check` passed. Commands are in [workflow](../development/workflow.md).
 
-Executed against the final source on 2026-10-10:
+- UiInteractionTests: debounce/disposal, safe dialogs, editable/selected ComboBox behavior, contrast/palette, culture, layout/virtualization, reversible drafts, navigation and cancellation before writes.
+- ContactsViewModelTests / MailSecurityViewModelTests: immutable confirmed requests and draft preservation, including save-induced loss of another policy draft.
+- UiAccessibilityTests: names/labels, IT/EN keys/arguments and selected-culture numbers.
+- Offscreen Trace: 650×420 / 950×620 page viewports, IT/EN, with/without details; visible command/paging buttons stay inside bounds. These approximate page space, not actual window/DPI qualification.
+- Virtualization: 1,000 rows; 1–50 realized containers; height ≤320 DIP inside an outer ScrollViewer. This proves the pattern, not each populated page's performance.
 
-```powershell
-pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
-pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap -NoBuild -NoRestore
-pwsh ./build/assert-architecture-constraints.ps1
-git diff --check
-```
+Evidence: `artifacts/test-results/onlyexo365-tests.trx` and native Debug build output. Earlier Release/security results belong to the [critical audit](2026-10-10-critical-audit.md); later full-suite/script evidence belongs to the [PowerShell audit](2026-10-10-powershell-audit.md).
 
-- Debug compilation: **0 errors**. Full suite: **789 passed, 0 failed, 0 skipped** (21 additional regressions).
-- Architecture constraints: passed; App 62/80 and registrar 161/190 non-empty lines. Diff whitespace check: passed.
-- [UiInteractionTests](../../tests/OnlyExo365.Tests/UiInteractionTests.cs): Dispatcher-bound collection updates; latest-only scheduling and disposal; safe dialog action and close; typed/selected ComboBox value; rendered selected foreground; contrast and system palette; inherited date culture; bounded grid realization; compact Trace layout; reversible dirty state; navigation preservation/discard; cancellation before mailbox writes.
-- [ContactsViewModelTests](../../tests/OnlyExo365.Tests/ContactsViewModelTests.cs) and [MailSecurityViewModelTests](../../tests/OnlyExo365.Tests/MailSecurityViewModelTests.cs): immutable confirmed requests and cancelled draft replacement, including save-induced loss of another policy draft.
-- [UiAccessibilityTests](../../tests/OnlyExo365.Tests/UiAccessibilityTests.cs): editable input names/labels, localization key presence, IT/EN parity and format arguments, selected-culture numbers.
-- Offscreen Trace layout: page viewports **650×420** and **950×620**, IT/EN, with/without details. These approximate the page space in 900×600 and 1200×800 windows; every visible command/paging button remained within bounds.
-- Virtualization probe: **1,000 rows**, realized containers **between 1 and 50**, bounded height **≤320 DIP** inside an outer ScrollViewer. This verifies the container pattern; production performance and each populated page have not been profiled.
-- Evidence: `artifacts/test-results/onlyexo365-tests.trx` and the native build output are retained locally, gitignored. Earlier Release/security/packaging results belong to the critical audit and were not rerun for these UI changes.
+## Startup follow-up
 
-## Sources
+`scripts/start.ps1` exit -1 came from MainWindow.Show activating the Language binding. UI log `2026-10-10T13:49:38Z` records BindingExpressionBase.GetCulture failing while converting its own target language to XmlLanguage. Script failure propagation was correct.
 
-Microsoft documentation consulted on 2026-10-10: [WPF threading](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/threading-model), [ComboBox parts](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox), [owned modal windows](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/windows/how-to-open-window-dialog-box), [accessible text](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessible-text-requirements), [control virtualization](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/optimizing-performance-controls).
+MainWindow now sets `ConverterCulture=en-US`; inherited display culture still follows IT/EN. The actual-root-binding offscreen regression reproduced the exception before repair and checks EN/IT/EN date formatting afterward, consistent with [Microsoft ConverterCulture](https://learn.microsoft.com/en-us/dotnet/api/system.windows.data.binding.converterculture).
 
-## Remaining qualification and proposals
+**31 focused launch/interaction/localization/exception tests passed**, 0 failures/skips; architecture/diff checks passed. Actual `pwsh -NoProfile -File .\start.ps1` from scripts, with EXO disabled only in the child, opened Debug Shell, started Worker 7.6.6, authenticated IPC and closed normally: exit 0, Worker terminated (Shell PID 9932 / Worker PID 14968). Approved EXO was unavailable; no tenant connection. Existing Release publish/setup predate this fix: regenerate before AUD-07.
 
-- **UX-08 / P2:** interactive windows at 900×600 and 1200×800; DPI 100/150/200%; IT/EN; full keyboard journey, Escape, owner modality and Narrator; actual Windows high-contrast toggles. These checks are **not verified**: this session provided offline WPF probes, without access to native desktop automation. Inspect all repaired pages with realistic long text and data, and measure actual realized rows and responsiveness.
-- **IMP-03 / P3:** the standard CSV parser proposal and wider localization of technical operation descriptions/worker-provided status messages remain separate. This repair translates client presentation text without changing protocol identifiers or tenant-provided data.
-- Lazy creation of the 18 startup pages remains a measurement-led proposal. Measure startup cost before changing page lifetime.
-- **AUD-07/AUD-08:** isolated installer and dedicated test-tenant qualification remain open. Regenerate the Release package before qualifying this UI revision. Offline regressions do not qualify actual assistive technology or Microsoft 365 behavior.
-
-## Session handoff
-
-The user requested saving the completed work, committing and pushing on `main`, and changing session. This audit, the source repairs and the tracker are included in the same handoff commit. The final chat records the committed revision and the verified remote/checkout state. Resume from `PROJECT_STATUS.json`; UX-08, AUD-07 and AUD-08 remain open, with IMP-01/02/03/04 tracked separately. Preserve local ignored evidence; regenerate Release artifacts before installer qualification.
+UX-08, AUD-07/AUD-08 and IMP-03/04 remain separate; closure checks are in [qualification](../development/qualification.md). Sources: [WPF threading](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/threading-model), [ComboBox parts](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox-styles-and-templates), [owned dialogs](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/windows/how-to-open-window-dialog-box), [accessible text](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessible-text-requirements), [virtualization](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/optimizing-performance-controls).

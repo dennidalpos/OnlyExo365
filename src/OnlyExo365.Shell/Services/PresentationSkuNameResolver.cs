@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>Thread-safe resolver for Microsoft 365 SKU display names with lock-free reads.</summary>
+/// <summary>SKU names with atomic reloads and lock-free reads.</summary>
 public sealed class PresentationSkuNameResolver
 {
     private sealed record CatalogIndex(
@@ -27,7 +27,6 @@ public sealed class PresentationSkuNameResolver
 
     public int EntryCount => _index.EntryCount;
 
-    /// <summary>Atomically replaces active catalog index from document.</summary>
     public void Reload(LocalSkuCatalogDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -57,7 +56,7 @@ public sealed class PresentationSkuNameResolver
             document.Entries.Count);
     }
 
-    /// <summary>Resolves product name by SKU part number or ID, with humanized fallback.</summary>
+    /// <summary>Part number, then ID, then humanized fallback.</summary>
     public string Resolve(string? skuPartNumber, string? skuId = null)
     {
         var idx = _index;

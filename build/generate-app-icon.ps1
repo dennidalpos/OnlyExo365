@@ -24,16 +24,7 @@ public static class NativeIconMethods
 
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repositoryRoot = Split-Path -Parent $scriptDirectory
-
-function Resolve-RepoPath {
-    param([string]$PathValue)
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return [System.IO.Path]::GetFullPath($PathValue)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $PathValue))
-}
+. (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
 function Convert-HexColor {
     param(
@@ -244,9 +235,9 @@ function New-IconBitmap {
     }
 }
 
-$resolvedSourceSpecPath = Resolve-RepoPath -PathValue $SourceSpecPath
-$resolvedIcoPath = Resolve-RepoPath -PathValue $OutputIcoPath
-$resolvedPngPath = Resolve-RepoPath -PathValue $OutputPngPath
+$resolvedSourceSpecPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $SourceSpecPath
+$resolvedIcoPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $OutputIcoPath
+$resolvedPngPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $OutputPngPath
 $iconPalette = Read-IconPalette -Path $resolvedSourceSpecPath
 
 New-Item -Path (Split-Path -Parent $resolvedIcoPath) -ItemType Directory -Force | Out-Null

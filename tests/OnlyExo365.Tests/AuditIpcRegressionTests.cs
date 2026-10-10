@@ -105,7 +105,7 @@ public sealed class AuditIpcRegressionTests
             }
             catch (TimeoutException)
             {
-                // The local deadline can win the race with the worker response.
+                // Local timeout may precede Worker response.
             }
         }
         finally

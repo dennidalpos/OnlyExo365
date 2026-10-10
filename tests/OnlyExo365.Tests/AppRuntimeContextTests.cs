@@ -17,7 +17,7 @@ public sealed class AppRuntimeContextTests
             CheckOnStartup = false,
             LocalCachePath = Path.Combine(Path.GetTempPath(), "OnlyExo365.Tests.Runtime", Guid.NewGuid().ToString("N"))
         };
-#pragma warning disable CA2000 // LicenseCatalogUpdateService owns and disposes the downloader.
+#pragma warning disable CA2000 // Catalog service owns the downloader.
         var downloader = new LicenseCatalogDownloader(cfg);
         try
         {

@@ -3,10 +3,9 @@ using System.Reflection;
 
 namespace OnlyExo365.Shell.Services;
 
-/// <summary>Manages lifecycle of local Microsoft 365 SKU catalog in Shell process.</summary>
+/// <summary>Maintains the Shell SKU cache.</summary>
 public sealed class LicenseCatalogUpdateService : IDisposable
 {
-    // Embedded Worker fallback resource
     private const string EmbeddedWorkerCatalogResourceName =
         "OnlyExo365.Worker.Data.Microsoft365SkuCatalog.json";
 
@@ -21,7 +20,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
     private volatile bool _isUpdating;
     private bool _disposed;
 
-    /// <summary>Raised when catalog is updated; subscribers must marshal to UI thread.</summary>
+    /// <summary>Subscribers must marshal updates to the UI thread.</summary>
     public event EventHandler<CatalogUpdatedEventArgs>? CatalogUpdated;
 
     public LicenseCatalogUpdateService(
@@ -47,7 +46,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
 
     public LicenseCatalogConfiguration Configuration => _configuration;
 
-    /// <summary>Initializes service, loads local or embedded catalog, and arms update timer.</summary>
+    /// <summary>Loads local/embedded catalog and schedules updates.</summary>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -78,7 +77,6 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         else
         {
-            // Fallback to embedded Worker catalog
             TryLoadEmbeddedWorkerCatalog();
         }
 
@@ -94,12 +92,11 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
     }
 
-    /// <summary>Downloads and applies catalog if update is due or forceDownload is true.</summary>
+    /// <summary>Updates when due or forced.</summary>
     public async Task TryCheckAndUpdateAsync(
         bool forceDownload = false,
         CancellationToken cancellationToken = default)
     {
-        // Skip if update is already in progress
         if (!await _updateLock.WaitAsync(TimeSpan.Zero, cancellationToken))
         {
             return;
@@ -125,7 +122,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Cancelled on shutdown
+            // Shutdown cancellation.
         }
         catch (Exception ex)
         {
@@ -141,7 +138,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
     }
 
-    /// <summary>Updates auto-update mode preference and re-arms scheduler.</summary>
+    /// <summary>Persists mode and reschedules updates.</summary>
     public async Task ChangeAutoUpdateModeAsync(
         CatalogAutoUpdateMode mode,
         CancellationToken cancellationToken = default)
@@ -166,7 +163,6 @@ public sealed class LicenseCatalogUpdateService : IDisposable
                 "Catalog download failed: " + ex.Message, ex);
         }
 
-        // Validate before committing
         var incoming = System.Text.Json.JsonSerializer.Deserialize(
             json, LocalSkuCatalogJsonContext.Default.LocalSkuCatalogDocument);
 
@@ -175,7 +171,6 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             throw new InvalidOperationException("The downloaded catalog contains no entries.");
         }
 
-        // Skip write if catalog is not newer
         if (!string.IsNullOrWhiteSpace(_metadata.CatalogVersion) &&
             !string.IsNullOrWhiteSpace(incoming.GeneratedOn) &&
             string.Compare(incoming.GeneratedOn, _metadata.CatalogVersion, StringComparison.Ordinal) <= 0)
@@ -244,7 +239,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
                 : TimeSpan.Zero;
         }
 
-        // One-shot timer re-armed inside callback
+        // Callback re-arms this one-shot timer.
         _timer = new Timer(
             _ => _ = TimerCallbackAsync(),
             null,
@@ -266,7 +261,6 @@ public sealed class LicenseCatalogUpdateService : IDisposable
     {
         try
         {
-            // Load Worker embedded catalog resource
             var workerAssembly = TryGetWorkerAssembly();
             if (workerAssembly == null)
             {
@@ -291,7 +285,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         catch
         {
-            // Best-effort fallback
+            // Fallback failure is non-fatal.
         }
     }
 
@@ -304,7 +298,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
             return loaded;
         }
 
-        // Load co-located assembly from disk if not already loaded
+        // Load co-located Worker if needed.
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var workerPath = Path.Combine(baseDir, "OnlyExo365.Worker.dll");
         if (!File.Exists(workerPath))
@@ -336,7 +330,7 @@ public sealed class LicenseCatalogUpdateService : IDisposable
         }
         catch
         {
-            // Best-effort metadata write
+            // Metadata failure is non-fatal.
         }
     }
 

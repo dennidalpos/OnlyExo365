@@ -16,37 +16,6 @@ $repositoryRoot = Split-Path -Parent $scriptDirectory
 
 . (Join-Path $repositoryRoot "scripts\internal\common.ps1")
 
-function Resolve-RepoPath {
-    param(
-        [string]$BaseDirectory,
-        [string]$PathValue
-    )
-
-    if ([System.IO.Path]::IsPathRooted($PathValue)) {
-        return $PathValue
-    }
-
-    return Join-Path $BaseDirectory $PathValue
-}
-
-function Get-ObjectPropertyValue {
-    param(
-        [object]$Object,
-        [string]$PropertyName
-    )
-
-    if ($null -eq $Object) {
-        return $null
-    }
-
-    $property = $Object.PSObject.Properties[$PropertyName]
-    if ($null -eq $property) {
-        return $null
-    }
-
-    return $property.Value
-}
-
 function Get-SolutionProjectPaths {
     param([string]$SolutionPath)
 
@@ -60,7 +29,7 @@ function Get-SolutionProjectPaths {
             Where-Object { $_ -match '\.csproj$' } |
             ForEach-Object { $_.Trim() } |
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-            ForEach-Object { Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $_ }
+            ForEach-Object { Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $_ }
     )
 
     if ($projectPaths.Count -eq 0) {
@@ -145,8 +114,8 @@ function Get-VulnerabilityRecords {
     return $records
 }
 
-$resolvedSolutionPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $SolutionPath
-$resolvedReportPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $ReportPath
+$resolvedSolutionPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $SolutionPath
+$resolvedReportPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $ReportPath
 $reportDirectory = Split-Path -Parent $resolvedReportPath
 
 if (-not (Test-Path $resolvedSolutionPath -PathType Leaf)) {

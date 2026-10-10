@@ -52,7 +52,7 @@ public sealed class PresentationSkuNameResolverTests
         var resolver = new PresentationSkuNameResolver();
         var result = resolver.Resolve("EXCHANGE_S_STANDARD");
         Assert.False(string.IsNullOrWhiteSpace(result));
-        Assert.DoesNotContain("EXCHANGE_S_STANDARD", result); // humanised
+        Assert.DoesNotContain("EXCHANGE_S_STANDARD", result);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class PresentationSkuNameResolverTests
             ("id1", "PART1", "Name By Part"),
             ("id1", "OTHER", "Name By Id")));
 
-        // Both share the same skuId; lookup by part number should win.
+        // Part number wins over a shared SKU ID.
         Assert.Equal("Name By Part", resolver.Resolve("PART1", "id1"));
     }
 
@@ -113,7 +113,6 @@ public sealed class PresentationSkuNameResolverTests
 
         resolver.Reload(BuildDocument(("id2", "NEW_SKU", "New Product")));
 
-        // Old entry is gone; new entry is present.
         var oldResult = resolver.Resolve("OLD_SKU");
         Assert.NotEqual("Old Product", oldResult);
         Assert.Equal("New Product", resolver.Resolve("NEW_SKU"));
@@ -142,7 +141,7 @@ public sealed class PresentationSkuNameResolverTests
 
     [Theory]
     [InlineData("EXCHANGE_S_STANDARD", "Exchange S Standard")]
-    [InlineData("O365_BUSINESS", "microsoft 365 Business")] // O365 → Microsoft 365
+    [InlineData("O365_BUSINESS", "microsoft 365 Business")]
     public void HumanizeFallback_ProducesReadableName(string raw, string expectedContains)
     {
         var result = PresentationSkuNameResolver.HumanizeFallback(raw);

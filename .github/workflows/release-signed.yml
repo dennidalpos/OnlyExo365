@@ -48,13 +48,27 @@ jobs:
           [System.IO.File]::WriteAllBytes($certificatePath, [System.Convert]::FromBase64String($env:SIGNING_PFX_BASE64))
           "SIGNING_CERT_PATH=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Sign release artifacts
+      - name: Sign release payload
         shell: pwsh
         env:
           SIGNING_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
         run: >
           ./build/sign-artifacts.ps1
-          -Path artifacts/publish,artifacts/packages
+          -Path artifacts/publish
+          -CertificatePath "$env:SIGNING_CERT_PATH"
+          -CertificatePassword "$env:SIGNING_PFX_PASSWORD"
+
+      - name: Package signed payload
+        shell: pwsh
+        run: ./build/create-setup-exe.ps1 -PublishPath artifacts/publish -OutputDirectory artifacts/packages -OutputFileName OnlyExo365.Setup.exe -ProductName OnlyExo365
+
+      - name: Sign setup EXE
+        shell: pwsh
+        env:
+          SIGNING_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
+        run: >
+          ./build/sign-artifacts.ps1
+          -Path artifacts/packages/OnlyExo365.Setup.exe
           -CertificatePath "$env:SIGNING_CERT_PATH"
           -CertificatePassword "$env:SIGNING_PFX_PASSWORD"
 

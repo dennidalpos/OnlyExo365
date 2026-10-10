@@ -119,7 +119,7 @@ public class AsyncRelayCommand : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Ignored.
+            // Cancellation is expected.
         }
         finally
         {
@@ -196,7 +196,7 @@ public class AsyncRelayCommand<T> : ICommand
         }
         catch (OperationCanceledException)
         {
-            // Ignored.
+            // Cancellation is expected.
         }
         finally
         {

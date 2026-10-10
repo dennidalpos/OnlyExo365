@@ -25,58 +25,20 @@ function Remove-CertificateFromStore {
         return
     }
 
-    Get-ChildItem -Path $StorePath -ErrorAction SilentlyContinue |
+    Get-ChildItem -LiteralPath $StorePath -ErrorAction Stop |
         Where-Object { $_.Thumbprint -eq $Thumbprint } |
         ForEach-Object {
-            try {
-                $removeArguments = @{
-                    Path = $_.PSPath
-                    Force = $true
-                    ErrorAction = 'Stop'
-                }
-
-                if ($DeleteKey) {
-                    $removeArguments.DeleteKey = $true
-                }
-
-                Remove-Item @removeArguments
+            $removeArguments = @{
+                LiteralPath = $_.PSPath
+                Force = $true
+                ErrorAction = 'Stop'
             }
-            catch {
-                Write-Verbose "Skipped certificate cleanup for $StorePath ($Thumbprint): $($_.Exception.Message)"
+
+            if ($DeleteKey) {
+                $removeArguments.DeleteKey = $true
             }
-        }
-}
 
-function Remove-CertificatesBySubject {
-    param(
-        [string]$StorePath,
-        [string]$Subject,
-        [switch]$DeleteKey
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Subject) -or -not (Test-Path $StorePath)) {
-        return
-    }
-
-    Get-ChildItem -Path $StorePath -ErrorAction SilentlyContinue |
-        Where-Object { $_.Subject -eq $Subject } |
-        ForEach-Object {
-            try {
-                $removeArguments = @{
-                    Path = $_.PSPath
-                    Force = $true
-                    ErrorAction = 'Stop'
-                }
-
-                if ($DeleteKey) {
-                    $removeArguments.DeleteKey = $true
-                }
-
-                Remove-Item @removeArguments
-            }
-            catch {
-                Write-Verbose "Skipped certificate cleanup for $StorePath ($($_.Thumbprint)): $($_.Exception.Message)"
-            }
+            Remove-Item @removeArguments
         }
 }
 
@@ -100,7 +62,7 @@ foreach ($entry in $Path) {
             continue
         }
 
-        $resolvedPath = Resolve-RepoPath -BaseDirectory $repositoryRoot -PathValue $item.Trim()
+        $resolvedPath = Resolve-RepositoryPath -RepositoryRoot $repositoryRoot -PathValue $item.Trim()
         if (-not (Test-Path $resolvedPath)) {
             Stop-WithError "Input path not found: $resolvedPath"
         }
@@ -119,8 +81,6 @@ $TimestampUrl = Resolve-TimestampUrl -Url $TimestampUrl
 try {
     New-Item -Path $temporaryRoot -ItemType Directory -Force | Out-Null
 
-    # Remove stale disposable validation certificates from previous interrupted runs.
-    Remove-CertificatesBySubject -StorePath "Cert:\CurrentUser\My" -Subject $SignerSubject -DeleteKey
     Write-Step "Preparing disposable artifact copies for signature validation"
 
     for ($index = 0; $index -lt $resolvedPaths.Count; $index++) {
@@ -202,10 +162,8 @@ finally {
         Remove-CertificateFromStore -StorePath "Cert:\CurrentUser\My" -Thumbprint $certificateThumbprint -DeleteKey
     }
 
-    Remove-CertificatesBySubject -StorePath "Cert:\CurrentUser\My" -Subject $SignerSubject -DeleteKey
-
-    if (Test-Path $temporaryRoot) {
-        Remove-Item -Path $temporaryRoot -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $temporaryRoot) {
+        Remove-Item -LiteralPath $temporaryRoot -Recurse -Force -ErrorAction Stop
     }
 }
 

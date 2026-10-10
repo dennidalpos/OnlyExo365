@@ -33,7 +33,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     protected ViewModelBase()
     {
-        // ViewModels are application-lifetime singletons
+        // ViewModels live until shutdown.
         LocalizationService.Instance.CultureChanged += OnCultureChanged;
     }
 

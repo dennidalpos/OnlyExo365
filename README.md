@@ -2,72 +2,38 @@
 
 # OnlyExo365
 
-OnlyExo365 is a Windows desktop application for Microsoft Exchange Online and Microsoft Graph administration, architected around an out-of-process PowerShell host.
+Windows x64 WPF application for Exchange Online and Microsoft Graph administration. The Shell handles presentation; a separate Worker executes PowerShell; Contracts defines their shared protocol.
 
-- **`OnlyExo365.Shell`**: WPF desktop presentation, configuration loading, local SKU catalog cache, and worker supervision.
-- **`OnlyExo365.Worker`**: Out-of-process PowerShell 7.6.6 execution engine.
-- **`OnlyExo365.Contracts`**: Shared IPC contracts, DTOs, configuration schemas, and diagnostics.
-- **`OnlyExo365.Tests`**: Automated unit, characterization, and UI regression tests.
-
----
-
-## Verified Baseline
-
-- **Platform**: Windows x64
-- **Runtime & Shell**: Embedded PowerShell 7.6.6, .NET 10 Desktop Runtime; external PowerShell 7.6+ for Exchange bootstrap/tenant validation
-- **Build Toolchain**: .NET SDK `10.0.401` (pinned in `global.json`, roll-forward disabled)
-- **Installer**: Inno Setup 6 (required only for installer packaging)
-
----
-
-## Canonical Commands
-
-Run from the repository root:
+Start from the repository root:
 
 ```powershell
-# Restore dependencies
 pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64
-
-# Compile Debug build
 pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
-
-# Run shell from source
 pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
-
-# Clean build artifacts
-pwsh ./scripts/clean.ps1
-
-# Local verification gate (clean, build, test, architecture, security, pack)
-pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64
-
-# Build release installer
-pwsh ./scripts/pack.ps1 -Configuration Release -LockedMode -RuntimeIdentifier win-x64
 ```
 
----
+Requirements and verification commands: [development workflow](docs/development/workflow.md).
 
-## Documentation by Domain
+## Documentation
 
-- **Architecture**:
-  - [Overview](docs/architecture/overview.md): Runtime model, project structure, and internal layering.
-  - [IPC Specification](docs/architecture/ipc.md): Named pipes, protocol framing, timeouts, and session security.
-- **Configuration**:
-  - [Settings & Environment](docs/configuration/settings.md): Resolution hierarchy, `appsettings.json`, and `ONLYEXO365_*` variables.
-- **Development**:
-  - [Workflow & Tooling](docs/development/workflow.md): Local development, scripts map, and quality gates.
-- **Operations**:
-  - [Operator Guide](docs/operations/operator-guide.md): Installation, first-run module bootstrap, and diagnostics console.
-- **Licensing**:
-  - [SKU Catalog](docs/licensing/catalog.md): Embedded catalog, background caching, and refresh procedures.
-- **Audit**:
-  - [October 2026 Remediation](docs/audits/2026-10-10-critical-audit.md): Findings, offline evidence, dependency sources, and pending isolated/live validation.
-- **Releases**:
-  - [Packaging & Verification](docs/releases/packaging.md): Inno Setup packaging, smoke testing, and code signing.
-- **Decisions**:
-  - [PowerShell SDK & .NET ADR](docs/decisions/2026-04-11-powershell-sdk-major-upgrade-strategy.md): Architectural decision record.
+| Area | Reference |
+| --- | --- |
+| Runtime and source responsibilities | [Architecture](docs/architecture/overview.md) |
+| Transport, authentication, cancellation | [IPC](docs/architecture/ipc.md) |
+| Exchange/Graph settings and environment | [Configuration](docs/configuration/settings.md) |
+| Files, retention and preservation | [Local storage](docs/configuration/storage.md) |
+| Install and first connection | [Operator guide](docs/operations/operator-guide.md) |
+| Approved modules and authentication limits | [Modules and authentication](docs/operations/authentication.md) |
+| Logs, console and troubleshooting | [Diagnostics](docs/operations/diagnostics.md) |
+| SKU cache and embedded catalog maintenance | [License catalog](docs/licensing/catalog.md) |
+| Build, clean, tests and local gate | [Development workflow](docs/development/workflow.md) |
+| Isolated installer, tenant and UI checks | [Qualification](docs/development/qualification.md) |
+| Installer and release asset generation | [Packaging](docs/releases/packaging.md) |
+| Payload signing and verification | [Signing](docs/releases/signing.md) |
+| Reliability / UI / script evidence | [Critical audit](docs/audits/2026-10-10-critical-audit.md), [UI audit](docs/audits/2026-10-10-ui-ux-audit.md), [PowerShell audit](docs/audits/2026-10-10-powershell-audit.md) |
+| Retained fixture cleanup | [Cleanup record](docs/audits/2026-10-10-retained-fixtures.md) |
+| Documentation/code reconciliation | [Review](docs/audits/2026-10-10-documentation-review.md) |
 
----
+Open work and current qualification status: [PROJECT_STATUS.json](PROJECT_STATUS.json). Audit results describe their recorded revisions; they do not qualify later changes.
 
-## License
-
-OnlyExo365 is distributed under the proprietary terms in [LICENSE](LICENSE).
+Distributed under the proprietary [LICENSE](LICENSE).

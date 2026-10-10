@@ -2,10 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace OnlyExo365.Shell.Helpers;
 
-/// <summary>ObservableCollection extension methods optimized for UI stability.</summary>
+/// <summary>Updates bound collections without unnecessary resets.</summary>
 public static class CollectionExtensions
 {
-    /// <summary>Synchronizes collection with new items by key, minimizing UI flicker.</summary>
+    /// <summary>Adds/removes by key; retains matching items.</summary>
     public static void SyncWith<T, TKey>(
         this ObservableCollection<T> collection,
         IEnumerable<T> newItems,
@@ -35,7 +35,7 @@ public static class CollectionExtensions
         }
     }
 
-    /// <summary>Replaces items using count heuristic or in-place update.</summary>
+    /// <summary>Resets large count changes; otherwise updates in place.</summary>
     public static void ReplaceAll<T>(this ObservableCollection<T> collection, IEnumerable<T> newItems)
     {
         var newItemsList = newItems.ToList();
@@ -55,7 +55,6 @@ public static class CollectionExtensions
             return;
         }
 
-        // Clear and add if counts differ significantly (faster than per-element update)
         if (Math.Abs(collection.Count - newItemsList.Count) > collection.Count / 2)
         {
             collection.Clear();
@@ -66,7 +65,6 @@ public static class CollectionExtensions
             return;
         }
 
-        // In-place update and size alignment
         while (collection.Count > newItemsList.Count)
         {
             collection.RemoveAt(collection.Count - 1);
@@ -85,7 +83,6 @@ public static class CollectionExtensions
         }
     }
 
-    /// <summary>Adds a sequence of items to the collection.</summary>
     public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
     {
         foreach (var item in items)

@@ -1,44 +1,30 @@
-# Inter-Process Communication (IPC)
+# IPC
 
-OnlyExo365 isolates UI presentation (`OnlyExo365.Shell`) from PowerShell execution (`OnlyExo365.Worker`) using local Windows Named Pipes.
+Sources: [IpcConstants](../../src/OnlyExo365.Contracts/IpcConstants.cs), [IpcSessionContext](../../src/OnlyExo365.Contracts/IpcSessionContext.cs), [IpcServer](../../src/OnlyExo365.Worker/Ipc/IpcServer.cs), [IpcClient](../../src/OnlyExo365.Shell/Ipc/IpcClient.cs), [WorkerSupervisor](../../src/OnlyExo365.Shell/Ipc/WorkerSupervisor.cs).
 
-## Transport & Framing
+## Transport and security
 
-- **Main Pipe (`OnlyExo365_IPC_Main`)**: Duplex request/response channel for commands, authentication, and lifecycle control.
-- **Event Pipe (`OnlyExo365_IPC_Events`)**: Asynchronous worker-to-shell stream for progress notifications, log streaming, and operational warnings.
-- **Framing**: UTF-8 line-delimited JSON (`\n` delimiter).
-- **Buffer & Size Limits**:
-  - Max message size: 10 MB (`MaxMessageSizeBytes`).
-  - Pipe buffer size: 64 KB (`PipeBufferSize`).
-  - Max pending requests: 8 (`MaxPendingRequests`).
-  - Max events per request: 10,000 (`MaxEventsPerRequest`).
+- Windows named pipes: duplex request/response and Worker-to-Shell events. Base names `OnlyExo365_IPC_Main` / `OnlyExo365_IPC_Events` receive a user-scope SHA256 prefix and Windows session ID suffix.
+- Current-user-only access; UTF-8 JSON lines, newline delimiter, compatible contract version required.
+- Supervisor creates a random session token and passes it directly to the child environment as `ONLYEXO365_IPC_SESSION_TOKEN`. It is not DPAPI ciphertext. Handshake validates token, user scope and session ID; a failed handshake leaves domain requests blocked.
+- DPAPI `CurrentUser` separately protects password references in `PreparedIpcPayload` / `ProtectedSecretStore`; Worker consumes and deletes those files. The session token and protected payload references are different mechanisms.
 
-## Security Model
+| Setting | Default |
+| --- | --- |
+| Message guard / pipe buffer | 10,485,760 .NET string characters / 64 KiB |
+| Pending request capacity | 8 |
+| Event count guard | Counter must remain below 10,000 |
+| Pipe connection / handshake / request deadline | 10 s / 5 s / 15 min |
+| Supervisor startup budget / restart budget | 90 s / 3 attempts |
+| Heartbeat interval / timeout / grace | 5 s / 15 s / 5 s |
+| Missed heartbeat threshold | 3; elapsed-time checks also participate in recovery |
 
-- **Session Token**: Authenticated via a cryptographically random token stored in DPAPI-protected user storage (`ProtectedSecretStore`).
-- **Environment Variable**: Shell transmits token to worker via `ONLYEXO365_IPC_SESSION_TOKEN`.
-- **Handshake**: Worker validates session token upon connection before processing any domain request. Unauthorized connections terminate immediately.
+Despite its `MaxMessageSizeBytes` name, the guard receives `string.Length`, not UTF-8 byte count, and runs after `ReadLineAsync` allocates the complete line. A 4,000,002-character JSON string of 12,000,002 UTF-8 bytes passes the declared 10,485,760-byte limit. `MaxReadBufferSize` is declared but unused. IPC-01 tracks byte-accurate enforcement and bounded reads; see the [review](../audits/2026-10-10-documentation-review.md). Console visibility uses a dedicated request after handshake, without stopping Worker.
 
-## Timeouts & Health Monitoring
+## Requests and recovery
 
-- **Handshake Timeout**: 5 seconds (`HandshakeTimeoutMs`).
-- **Connection Timeout**: 10 seconds (`ConnectionTimeoutMs`).
-- **Request Timeout**: 15 minutes (`RequestTimeoutMs = 900000`).
-- **Heartbeat Interval**: 5 seconds (`HeartbeatIntervalMs`).
-- **Heartbeat Timeout**: 15 seconds (`HeartbeatTimeoutMs`).
-- **Heartbeat Missed Threshold**: 3 consecutive misses (`HeartbeatMissedThreshold`) trigger worker health alert and supervisor recovery.
+Lifetime begins before queue admission. Full queues return transient `ServiceUnavailable`; duplicate pending correlation IDs are rejected. Heartbeat/cancellation handling remains available while queued work waits. Cancelled or expired queued work does not dispatch.
 
-## Process Supervision
+`TimeoutMs` covers wait and execution. Deadline expiry returns `ErrorCode.Timeout` with `WasCancelled=false`; voluntary cancellation uses `WasCancelled=true`. Shell sends cancellation when its own wait expires. Neither outcome rolls back writes already submitted to Microsoft 365; writes are never retried automatically.
 
-`WorkerSupervisor` in the shell manages the worker process:
-- Spawns `OnlyExo365.Worker.exe` on startup.
-- Automatically handles reconnection and restart policies (up to 3 attempts).
-- Toggles console visibility via IPC handshake without terminating the background process.
-
-## Queue, Cancellation, and Deadlines
-
-The Worker registers each request before queue admission. A full queue rejects the request with transient `ServiceUnavailable`; the reader remains available for heartbeat and cancellation messages. Duplicate pending correlation IDs are rejected. Cancellation of queued work prevents dispatch.
-
-`TimeoutMs` covers queue wait and execution. Expired requests return `ErrorCode.Timeout` with `WasCancelled = false`; voluntary cancellation uses `WasCancelled = true`. The client sends cancellation when its local wait expires. Changes already submitted to Microsoft 365 may have completed, so writes are never retried automatically. The existing IPC envelopes are unchanged.
-
-`Retry-After` is a minimum wait supplied by the server. Only local exponential backoff is capped; cancellation interrupts the entire wait. See [Microsoft Graph throttling guidance](https://learn.microsoft.com/en-us/graph/throttling).
+Server `Retry-After` is a minimum wait; only local exponential backoff is capped. Cancellation interrupts the wait. This follows [Microsoft Graph throttling guidance](https://learn.microsoft.com/en-us/graph/throttling).

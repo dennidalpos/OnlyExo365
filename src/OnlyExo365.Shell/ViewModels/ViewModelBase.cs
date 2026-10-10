@@ -9,7 +9,27 @@ namespace OnlyExo365.Shell.ViewModels;
 
 public abstract class ViewModelBase : INotifyPropertyChanged
 {
+    private readonly List<IDisposable> _ownedResources = [];
+    private bool _disposed;
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected T Own<T>(T resource) where T : IDisposable
+    {
+        _ownedResources.Add(resource);
+        return resource;
+    }
+
+    protected OnlyExo365.Shell.Helpers.DebounceHelper CreateDebounceHelper()
+        => Own(new OnlyExo365.Shell.Helpers.DebounceHelper());
+
+    public virtual void ReleaseUiResources()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        LocalizationService.Instance.CultureChanged -= OnCultureChanged;
+        foreach (var resource in _ownedResources) resource.Dispose();
+        _ownedResources.Clear();
+    }
 
     protected ViewModelBase()
     {

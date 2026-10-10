@@ -22,4 +22,4 @@ pwsh ./build/assert-no-vulnerable-packages.ps1 -SolutionPath OnlyExo365.sln -Rep
 pwsh ./scripts/pack.ps1 -Configuration Release -Clean:$false -LockedMode -RuntimeIdentifier win-x64
 ```
 
-Current evidence and pending checks: `docs/audits/2026-10-10-critical-audit.md` and `PROJECT_STATUS.json`.
+Current evidence and pending checks: `docs/audits/2026-10-10-critical-audit.md`, `docs/audits/2026-10-10-ui-ux-audit.md` and `PROJECT_STATUS.json`.

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
              xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
-    <Grid Margin="16">
+    <Grid Margin="16" IsEnabled="{Binding Resources.IsEditorBusy, Converter={StaticResource InverseBool}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.2*"/>
             <ColumnDefinition Width="12"/>
@@ -23,7 +23,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <TextBlock Text="{loc:Loc Key=Nav.ResourceMailboxes}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding Resources.List.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=Resources.New}" Command="{Binding Resources.NewResourceCommand}"
@@ -44,8 +44,8 @@
                     <ColumnDefinition Width="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" Text="{Binding Resources.List.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-                <ComboBox Grid.Column="1"
+                <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0" Text="{Binding Resources.List.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1"
                           ItemsSource="{Binding Resources.List.ResourceTypeFilters}"
                           SelectedItem="{Binding Resources.List.ResourceTypeFilter}"/>
             </Grid>
@@ -60,10 +60,10 @@
                       CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      BorderBrush="{StaticResource BorderBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{loc:Loc Key=Resources.Name}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="180"/>
                     <DataGridTextColumn Header="{loc:Loc Key=Resources.Type}" Binding="{Binding ResourceType}" Width="Auto" MinWidth="100"/>
@@ -98,7 +98,7 @@
             </Border>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+        <GridSplitter Grid.Column="1" Width="4" Background="{DynamicResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       ResizeDirection="Columns"
                       ResizeBehavior="PreviousAndNext"/>
@@ -122,23 +122,23 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.Type}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.DisplayName}" Margin="0,0,8,6"/>
-                        <ComboBox Grid.Row="1" Grid.Column="0"
+                        <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.Type}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel002" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.DisplayName}" Margin="0,0,8,6"/>
+                        <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="1" Grid.Column="0"
                                   ItemsSource="{Binding Resources.Editor.ResourceTypes}"
                                   SelectedItem="{Binding Resources.Editor.ResourceType}"
                                   Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Resources.Name}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Resources.Alias}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Resources.Editor.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Resources.Editor.Alias, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock x:Name="InputLabel003" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Resources.Name}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel004" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Resources.Alias}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="3" Grid.Column="0" Text="{Binding Resources.Editor.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="3" Grid.Column="1" Text="{Binding Resources.Editor.Alias, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.PrimarySMTP}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.AutomateProcessing}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <ComboBox Grid.Row="5" Grid.Column="1"
+                        <TextBlock x:Name="InputLabel005" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.PrimarySMTP}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel006" Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.AutomateProcessing}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Grid.Row="5" Grid.Column="1"
                                   ItemsSource="{Binding Resources.Editor.AutomateProcessingModes}"
                                   SelectedItem="{Binding Resources.Editor.BookingSettings.AutomateProcessing}"/>
 
@@ -149,9 +149,9 @@
                                     Orientation="Horizontal"
                                     Visibility="{Binding Resources.Editor.IsEditingExistingResource, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{loc:Loc Key=Resources.IdentityPrefix}"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding Resources.Editor.ResourceIdentity}"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
                     </Grid>
                 </controls:SectionPanel>
@@ -184,20 +184,20 @@
                         <CheckBox Grid.Row="3" Grid.Column="0" Content="{loc:Loc Key=Resources.RemovePrivateProperty}" IsChecked="{Binding Resources.Editor.BookingSettings.RemovePrivateProperty}" Margin="0,0,8,8"/>
                         <CheckBox Grid.Row="3" Grid.Column="1" Content="{loc:Loc Key=Resources.EnforceSchedulingHorizon}" IsChecked="{Binding Resources.Editor.BookingSettings.EnforceSchedulingHorizon}" Margin="0,0,0,8"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.BookingWindowDays}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.MaximumDurationMinutes}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookingWindowInDays, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.MaximumDurationInMinutes, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock x:Name="InputLabel007" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Resources.BookingWindowDays}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel008" Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Resources.MaximumDurationMinutes}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Grid.Row="5" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookingWindowInDays, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Grid.Row="5" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.MaximumDurationInMinutes, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Resources.BookInPolicyCSV}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Resources.RequestInPolicyCSV}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookInPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
-                        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.RequestInPolicy, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBlock x:Name="InputLabel009" Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Resources.BookInPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel010" Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Resources.RequestInPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Grid.Row="7" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.BookInPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" Grid.Row="7" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.RequestInPolicy, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
 
-                        <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Resources.RequestOutOfPolicyCSV}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Resources.ResourceDelegatesCSV}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="9" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.RequestOutOfPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
-                        <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.ResourceDelegates, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBlock x:Name="InputLabel011" Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Resources.RequestOutOfPolicyCSV}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel012" Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Resources.ResourceDelegatesCSV}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" Grid.Row="9" Grid.Column="0" Text="{Binding Resources.Editor.BookingSettings.RequestOutOfPolicy, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" Grid.Row="9" Grid.Column="1" Text="{Binding Resources.Editor.BookingSettings.ResourceDelegates, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52"/>
                     </Grid>
                 </controls:SectionPanel>
 
@@ -213,17 +213,17 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.FullAccessCSV}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.SendAsCSV}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Resources.SendOnBehalfCSV}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Resources.Editor.FullAccessUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.SendAsUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
-                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Resources.Editor.SendOnBehalfUsers, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                        <TextBlock x:Name="InputLabel013" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Resources.FullAccessCSV}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel014" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Resources.SendAsCSV}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel015" Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Resources.SendOnBehalfCSV}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" Grid.Row="1" Grid.Column="0" Text="{Binding Resources.Editor.FullAccessUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Grid.Row="1" Grid.Column="1" Text="{Binding Resources.Editor.SendAsUsers, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel015}" Grid.Row="1" Grid.Column="2" Text="{Binding Resources.Editor.SendOnBehalfUsers, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="68"/>
                     </Grid>
                 </controls:SectionPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                    <Button Content="{loc:Loc Key=Resources.Save}" Command="{Binding Resources.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                    <Button ToolTip="{loc:Loc Key=Resources.Requirements}" Content="{loc:Loc Key=Resources.Save}" Command="{Binding Resources.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
                     <Button Content="{loc:Loc Key=Resources.New}" Command="{Binding Resources.NewResourceCommand}"
                             Style="{StaticResource InlineActionButton}"/>
                 </StackPanel>

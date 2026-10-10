@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -73,7 +74,7 @@ internal sealed class MailFlowOfflineAddressBooksViewModel : MailFlowSectionView
     public string OfflineAddressBookValidationMessage
         => IsOfflineAddressBookInputValid
             ? string.Empty
-            : "Offline address book: Name is required, at least one AddressList must be provided, and DiffRetentionPeriod is optional but must be a non-negative integer.";
+            : Loc.Get("Presentation.OfflineAddressBookValidation");
 
     public string? OfflineAddressBookIdentity { get => _offlineAddressBookIdentity; set => SetEditorProperty(ref _offlineAddressBookIdentity, value); }
     public string OfflineAddressBookName { get => _offlineAddressBookName; set => SetEditorProperty(ref _offlineAddressBookName, value); }
@@ -90,7 +91,7 @@ internal sealed class MailFlowOfflineAddressBooksViewModel : MailFlowSectionView
         var result = await WorkerService.GetOfflineAddressBooksAsync(new GetOfflineAddressBooksRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load offline address books";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadOfflineAddressBooks");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow offline address books load failed: {error}", "MailFlow");
             return;
@@ -150,7 +151,7 @@ internal sealed class MailFlowOfflineAddressBooksViewModel : MailFlowSectionView
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving offline address book failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveOfflineAddressBookFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save offline address book failed (name={OfflineAddressBookName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -166,7 +167,9 @@ internal sealed class MailFlowOfflineAddressBooksViewModel : MailFlowSectionView
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting offline address book\nTarget: {SelectedOfflineAddressBook.Name}\nImpact: can affect OAB distribution for legacy or segmented clients.\n\nConfirm?");
+        var selected = SelectedOfflineAddressBook;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteOfflineAddressBooksMessage", selected.Name));
         if (!confirmed)
         {
             return;
@@ -176,14 +179,14 @@ internal sealed class MailFlowOfflineAddressBooksViewModel : MailFlowSectionView
         {
             var result = await WorkerService.RemoveOfflineAddressBookAsync(new RemoveOfflineAddressBookRequest
             {
-                Identity = SelectedOfflineAddressBook.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete offline address book";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteOfflineAddressBook");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove offline address book failed (name={SelectedOfflineAddressBook.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove offline address book failed (name={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

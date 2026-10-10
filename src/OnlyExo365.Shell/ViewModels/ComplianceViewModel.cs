@@ -357,12 +357,12 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         : string.Join(", ", SelectedSearch.ExchangeLocations);
 
     public string SelectedSearchQuery => string.IsNullOrWhiteSpace(SelectedSearch?.ContentMatchQuery)
-        ? "(No query)"
+        ? Loc.Get("Presentation.NoQuery")
         : SelectedSearch!.ContentMatchQuery!;
 
-    public string SearchesStatusText => $"{Searches.Count} search";
-    public string CasesStatusText => $"{Cases.Count} case";
-    public string ActionsStatusText => $"{Actions.Count} action";
+    public string SearchesStatusText => Loc.GetFormat("Compliance.SearchCount", Searches.Count);
+    public string CasesStatusText => Loc.GetFormat("Compliance.CaseCount", Cases.Count);
+    public string ActionsStatusText => Loc.GetFormat("Compliance.ActionCount", Actions.Count);
     public string AuditStatusText => GetAuditStatusText();
 
     public bool HasAuditSearchTasks => AuditSearchTasks.Count > 0;
@@ -504,10 +504,10 @@ public sealed partial class ComplianceViewModel : ViewModelBase
     private async Task CreateSearchAsync(CancellationToken cancellationToken)
     {
         if (!ConfirmMutation(
-                "Creating compliance search",
+                Loc.Get("Presentation.CreatingComplianceSearch"),
                 CreateSearchName.Trim(),
-                "Create a new compliance search with the configured locations and query.",
-                "Confirm compliance search creation"))
+                Loc.Get("Presentation.CreateANewComplianceSearchWithTheConfigured"),
+                Loc.Get("Presentation.ConfirmComplianceSearchCreation")))
         {
             return;
         }
@@ -529,7 +529,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Creating compliance search failed.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.CreatingComplianceSearchFailed");
                 return;
             }
 
@@ -557,10 +557,10 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         }
 
         if (!ConfirmMutation(
-                "Start compliance search",
+                Loc.Get("Presentation.StartComplianceSearch"),
                 SelectedSearch.Name,
-                "Start the selected compliance search.",
-                "Confirm compliance search start"))
+                Loc.Get("Presentation.StartTheSelectedComplianceSearch"),
+                Loc.Get("Presentation.ConfirmComplianceSearchStart")))
         {
             return;
         }
@@ -576,7 +576,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Starting the compliance search failed.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.StartingTheComplianceSearchFailed");
                 return;
             }
 
@@ -601,7 +601,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         }
 
         var confirmed = ErrorDialogService.ShowConfirmation(
-            "Confirm compliance search removal",
+            Loc.Get("Presentation.ConfirmComplianceSearchRemoval"),
             $"Operation: remove compliance search\nSearch: {SelectedSearch.Name}\n\nConfirm?");
 
         if (!confirmed)
@@ -620,7 +620,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Removing the compliance search failed.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.RemovingTheComplianceSearchFailed");
                 return;
             }
 
@@ -645,7 +645,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         }
 
         var confirmed = ErrorDialogService.ShowConfirmation(
-            "Confirm purge",
+            Loc.Get("Presentation.ConfirmPurge"),
             $"Operation: purge compliance search\nSearch: {SelectedSearch.Name}\nPurgeType: {SelectedPurgeType}\n\nConfirm?");
 
         if (!confirmed)
@@ -672,7 +672,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
         }
 
         var confirmed = ErrorDialogService.ShowConfirmation(
-            "Confirm hold",
+            Loc.Get("Presentation.ConfirmHold"),
             $"Operation: create hold from compliance search\nSearch: {SelectedSearch.Name}\nCase: {SelectedCase.Name}\nHold: {HoldName}\n\nConfirm?");
 
         if (!confirmed)
@@ -702,7 +702,7 @@ public sealed partial class ComplianceViewModel : ViewModelBase
             var result = await _workerService.InvokeComplianceActionAsync(request, cancellationToken: cancellationToken);
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Compliance action failed.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.ComplianceActionFailed");
                 return;
             }
 
@@ -778,20 +778,20 @@ public sealed partial class ComplianceViewModel : ViewModelBase
     {
         if (IsApplyingAction)
         {
-            return "Applying Compliance action...";
+            return Loc.Get("Presentation.ApplyingComplianceActionInProgress");
         }
 
         if (IsCreatingSearch)
         {
-            return "Creating compliance search...";
+            return Loc.Get("Presentation.CreatingComplianceSearchInProgress");
         }
 
         if (IsSearchingAudit)
         {
-            return "Searching audit logs...";
+            return Loc.Get("Presentation.SearchingAuditLogsInProgress");
         }
 
-        return "Loading Compliance workspace...";
+        return Loc.Get("Presentation.LoadingComplianceWorkspaceInProgress");
     }
 
     private bool HasWorkspaceData =>

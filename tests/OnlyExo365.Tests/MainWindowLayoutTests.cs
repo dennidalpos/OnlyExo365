@@ -14,7 +14,7 @@ public sealed class MainWindowLayoutTests
             .FirstOrDefault(candidate =>
                 candidate.Name.LocalName == "Border" &&
                 string.Equals((string?)candidate.Attribute("Grid.Column"), "0", StringComparison.Ordinal) &&
-                string.Equals((string?)candidate.Attribute("Background"), "{StaticResource TertiaryBackgroundBrush}", StringComparison.Ordinal));
+                string.Equals((string?)candidate.Attribute("Background"), "{DynamicResource TertiaryBackgroundBrush}", StringComparison.Ordinal));
 
         Assert.NotNull(border);
 
@@ -235,14 +235,16 @@ public sealed class MainWindowLayoutTests
 
         Assert.NotNull(promptBorder);
 
-        var confirmButton = promptBorder!
+        var closeButton = promptBorder!
             .Descendants()
             .FirstOrDefault(candidate =>
                 candidate.Name.LocalName == "Button" &&
-                string.Equals((string?)candidate.Attribute("Content"), "{loc:Loc Key=Btn.Confirm}", StringComparison.Ordinal) &&
-                string.Equals((string?)candidate.Attribute("Command"), "{Binding Prompt.ConfirmCommand}", StringComparison.Ordinal));
+                string.Equals((string?)candidate.Attribute("Content"), "{loc:Loc Key=Btn.Close}", StringComparison.Ordinal) &&
+                string.Equals((string?)candidate.Attribute("Command"), "{Binding Prompt.CancelCommand}", StringComparison.Ordinal));
 
-        Assert.NotNull(confirmButton);
+        Assert.NotNull(closeButton);
+        Assert.DoesNotContain(promptBorder.Descendants(), element =>
+            ((string?)element.Attribute("Command"))?.Contains("ConfirmCommand", StringComparison.Ordinal) == true);
     }
 
     [Fact]
@@ -345,7 +347,7 @@ public sealed class MainWindowLayoutTests
         Assert.Contains(keyboardFocusTrigger!.Elements(), element =>
             element.Name.LocalName == "Setter" &&
             string.Equals((string?)element.Attribute("Property"), "BorderBrush", StringComparison.Ordinal) &&
-            string.Equals((string?)element.Attribute("Value"), "{StaticResource AccentBrush}", StringComparison.Ordinal));
+            string.Equals((string?)element.Attribute("Value"), "{DynamicResource AccentBrush}", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -404,7 +406,7 @@ public sealed class MainWindowLayoutTests
         Assert.Contains(keyboardFocusTrigger!.Elements(), element =>
             element.Name.LocalName == "Setter" &&
             string.Equals((string?)element.Attribute("Property"), "BorderBrush", StringComparison.Ordinal) &&
-            string.Equals((string?)element.Attribute("Value"), "{StaticResource AccentBrush}", StringComparison.Ordinal));
+            string.Equals((string?)element.Attribute("Value"), "{DynamicResource AccentBrush}", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -462,7 +464,7 @@ public sealed class MainWindowLayoutTests
                     candidate.Elements().Any(descendant =>
                         descendant.Name.LocalName == "Setter" &&
                         string.Equals((string?)descendant.Attribute("Property"), "Background", StringComparison.Ordinal) &&
-                        string.Equals((string?)descendant.Attribute("Value"), "{StaticResource AccentBrush}", StringComparison.Ordinal)));
+                        string.Equals((string?)descendant.Attribute("Value"), "{DynamicResource AccentBrush}", StringComparison.Ordinal)));
 
             Assert.NotNull(accentTrigger);
         }

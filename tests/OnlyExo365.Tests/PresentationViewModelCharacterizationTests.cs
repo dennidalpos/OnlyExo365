@@ -25,10 +25,10 @@ public sealed class PresentationViewModelCharacterizationTests
         Assert.Contains("PublicFolderPermissionRoles", content, StringComparison.Ordinal);
         Assert.Contains("NormalizeParentPath", content, StringComparison.Ordinal);
         Assert.Contains("SetTrackedProperty", content, StringComparison.Ordinal);
-        Assert.Contains("HasPendingChanges = true;", content, StringComparison.Ordinal);
+        Assert.Contains("_originalDraft != CaptureDraft()", content, StringComparison.Ordinal);
         Assert.Contains("SetPublicFolderClientPermissionAsync", content, StringComparison.Ordinal);
         Assert.Contains("Recursive = HasSubFolders", content, StringComparison.Ordinal);
-        Assert.Contains("Confirm public folder permission update", content, StringComparison.Ordinal);
+        Assert.Contains("ConfirmMutation(", content, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -48,17 +48,12 @@ public sealed class PresentationViewModelCharacterizationTests
     }
 
     [Fact]
-    public void ShellPromptViewModel_UsesDispatcherFrameForBlockingConfirmation()
+    public void ShellPromptViewModel_DelegatesConfirmationWithoutManualDispatcherLoop()
     {
         var content = ReadViewModel("ShellPromptViewModel.cs");
-
-        Assert.Contains("TaskCompletionSource<bool>", content, StringComparison.Ordinal);
-        Assert.Contains("public bool ShowConfirmationBlocking", content, StringComparison.Ordinal);
-        Assert.Contains("DispatcherFrame", content, StringComparison.Ordinal);
-        Assert.Contains("Dispatcher.PushFrame(frame);", content, StringComparison.Ordinal);
-        Assert.Contains("ResolvePendingConfirmation(true);", content, StringComparison.Ordinal);
-        Assert.Contains("ResolvePendingConfirmation(false);", content, StringComparison.Ordinal);
-        Assert.Contains("ConfirmCommand = new RelayCommand(Confirm", content, StringComparison.Ordinal);
+        Assert.Contains("ErrorDialogService.ShowConfirmation(title, message)", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("DispatcherFrame", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("TaskCompletionSource", content, StringComparison.Ordinal);
     }
 
     [Fact]

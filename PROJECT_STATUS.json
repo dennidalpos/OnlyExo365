@@ -1,11 +1,11 @@
 {
   "project_name": "OnlyExo365",
   "status": "active",
-  "current_phase": "offline audit remediation completed; isolated and tenant qualification pending",
-  "last_updated": "2026-10-10T01:07:56+02:00",
+  "current_phase": "UI/UX repairs verified offline and saved for session handoff; interactive, isolated installer and test-tenant qualification pending",
+  "last_updated": "2026-10-10T13:30:00+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
-  "active_objective": "Qualify the repaired installer in an isolated host and approved modules against a dedicated test tenant.",
+  "active_objective": "Qualify the repaired UI at supported window sizes and DPI with keyboard, Narrator and high contrast; retain isolated installer and dedicated test-tenant checks.",
   "assumptions": [
     "The local machine uses installed .NET SDK 10.0.401 while preserving explicit SDK pinning and disabled roll-forward."
   ],
@@ -15,7 +15,10 @@
     "Use progressive Message Trace with partial counts and a page-plus-one lookahead.",
     "Keep .NET 10 and SDK 10.0.401; upgrade PowerShell SDK to 7.6.6, approved EXO to 3.10.1, four Graph modules to 2.41.1 and crypto packages to 10.0.12.",
     "Share one approved module policy from Contracts and import exact approved versions.",
-    "No production tenant validation. The user explicitly authorized committing and pushing the completed audit work to main for session handoff."
+    "Use focused WPF repairs without new dependencies or IPC changes; preserve 300/200 ms search delays and existing pages.",
+    "Use owned modal confirmation, request snapshots and explicit discard/stay actions for draft replacement.",
+    "Translate client presentation and selected-culture formatting without changing technical protocol identifiers or tenant-provided data.",
+    "The user explicitly authorized saving all UI/UX work, committing and pushing on main, and updating the tracker for a session change."
   ],
   "current_tasks": [
     {
@@ -29,6 +32,12 @@
       "priority": "P2",
       "status": "pending_dedicated_test_tenant",
       "description": "Qualify real approved module imports, authentication modes, progressive Message Trace and failure propagation using a dedicated test tenant."
+    },
+    {
+      "id": "UX-08",
+      "priority": "P2",
+      "status": "pending_interactive_ui",
+      "description": "Qualify 900x600/1200x800 windows at 100/150/200% DPI, IT/EN, keyboard/Escape/owner modality, Narrator and real Windows high contrast. Profile populated Dashboard, Compliance and Security grids and record actual realized rows/responsiveness. Offline repairs and 21 additional regressions are documented in docs/audits/2026-10-10-ui-ux-audit.md."
     }
   ],
   "next_tasks": [
@@ -48,7 +57,13 @@
       "id": "IMP-03",
       "priority": "P3",
       "status": "proposal",
-      "description": "Adopt a standard CSV parser and finish localization of direct ViewModel messages; evaluate new dependencies separately."
+      "description": "Adopt a standard catalog CSV parser and evaluate wider localization of technical operation descriptions/worker-provided status messages. Client UI messages, summaries, filter captions, guidance and selected-culture formatting were repaired in the UI/UX audit; evaluate new dependencies separately."
+    },
+    {
+      "id": "IMP-04",
+      "priority": "P3",
+      "status": "proposal_requires_measurement",
+      "description": "Measure startup cost of the 18 eagerly created pages before considering lazy creation; preserve navigation and page lifetime semantics."
     }
   ],
   "blockers": [],
@@ -56,7 +71,10 @@
     "Install/uninstall behavior is not verified interactively; no isolated Windows host was available.",
     "Offline simulated cmdlets do not qualify real Microsoft 365 authentication or module execution.",
     "Cancellation/deadline does not roll back writes already submitted to Microsoft 365.",
-    "Artifact signing and reproducibility checks were not executed."
+    "Artifact signing and reproducibility checks were not executed.",
+    "Actual DPI, Narrator, full keyboard use and Windows high-contrast behavior remain unverified; offscreen WPF tests cover only the documented cases.",
+    "The bounded-grid probe validates the virtualization pattern; production performance and each populated page have not been profiled.",
+    "The existing Release package predates these UI changes and must be regenerated before isolated installer qualification."
   ],
   "dependencies": {
     "runtime": [
@@ -76,14 +94,15 @@
   },
   "quality_gates": {
     "format": "git diff --check passed; no dedicated formatter configured",
-    "lint": "4 changed PowerShell scripts parsed successfully; project analyzers retained",
-    "typecheck": "Debug and Release compilation passed, 0 errors",
-    "tests": "768/768 passed, 0 failed, 0 skipped; one complete suite after targeted checks",
-    "build": "Release win-x64 publish and Inno Setup package creation passed",
-    "security_review": "NuGet: no known vulnerabilities across 4 projects; gitleaks: no secrets found",
-    "architecture": "passed; IPC server 684/760 non-empty lines",
+    "lint": "Project analyzers retained; no PowerShell scripts changed in the UI/UX task. Earlier script parsing evidence belongs to the critical audit.",
+    "typecheck": "Current UI/UX source: Debug compilation passed, 0 errors. Earlier Release compilation belongs to the critical audit.",
+    "tests": "789/789 passed, 0 failed, 0 skipped; 21 additional regressions against the prior 768-test suite",
+    "build": "Current Debug win-x64 compile passed; prior Release package was not regenerated after UI changes",
+    "security_review": "Earlier critical audit: no known NuGet vulnerabilities across 4 projects and gitleaks found no secrets. No dependencies or IPC changes in the UI/UX task; scans not repeated.",
+    "architecture": "passed; App 62/80 and registrar 161/190 non-empty lines; limits unchanged",
     "isolated_install_uninstall": "pending",
-    "tenant_validation": "pending"
+    "tenant_validation": "pending",
+    "interactive_ui": "pending UX-08; offscreen Trace layout, contrast/palette, accessibility structure and bounded-grid probe passed"
   },
   "commands": {
     "install": "pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64",
@@ -100,7 +119,7 @@
     "required_env_vars": [],
     "env_files": []
   },
-  "last_completed_work": "Implemented the approved data-protection, credential binding, error propagation, IPC lifetime, retry delay, Message Trace and exact module import fixes. Added 35 regressions; 768 tests pass. Native Debug/Release builds, architecture, locked NuGet scan, secret scan and Release installer packaging pass. Documentation and audit evidence updated. The user requested session handoff with commit and push on main.",
+  "last_completed_work": "Implemented focused UI/UX repairs: Dispatcher debounce/lifetime cleanup, owned modal confirmations and stable requests, editable security ComboBoxes, accessible action colors/labels/system palette, six editor-group draft guards, responsive Trace/footer and bounded grids, IT/EN presentation and selected-culture formatting. Fixed mailbox writes occurring before confirmation and cross-policy draft loss on save. Final Debug build, 789 tests, architecture and whitespace checks pass. Audit and session handoff evidence updated and included in the user-authorized main commit. Final push, remote equality and checkout evidence are reported in the chat.",
   "open_questions": [],
-  "handoff_notes": "Resume on main from this tracker and docs/audits/2026-10-10-critical-audit.md. Offline remediation is complete: 768/768 tests passed, Debug/Release builds, architecture, NuGet and secret scans, and installer packaging passed. Do not repeat the full suite unless source changes or problems justify it. Prioritize AUD-07 (isolated install/uninstall preserving exports and unknown files), then AUD-08 (dedicated test tenant; no production tenant). IMP-01/02/03 remain separate proposals. Artifacts are gitignored and retained locally; regenerate the Release package if absent in the next environment. Commit/push on main authorized by the user for this handoff; final Git/remote evidence is reported in the chat."
+  "handoff_notes": "Resume on main from the commit containing this tracker and docs/audits/2026-10-10-ui-ux-audit.md; critical-audit.md retains earlier remediation evidence. UI/UX repairs are verified offline: Debug build passed with 0 errors, 789/789 tests passed, architecture constraints and diff whitespace checks passed. Prioritize UX-08 interactive windows/DPI/IT-EN/keyboard/Narrator/high-contrast qualification and populated-grid profiling. Retain AUD-07 isolated install/uninstall and AUD-08 dedicated test tenant; never use production tenant. Regenerate Release artifacts for this revision before installer checks. IMP-01/02/03/04 remain separate proposals. The user authorized main commit and push for this session handoff; final chat records the commit and verified remote equality/checkout state. Do not repeat the full suite unless source changes, failures or new concerns justify it. Build/test artifacts are gitignored and retained locally; no temporary scratch files remain."
 }

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -126,8 +127,8 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
 
     public bool IsRuleInputValid => !string.IsNullOrWhiteSpace(RuleName) && RuleModes.Contains(RuleMode) && HasAnyRuleCondition && HasAnyRuleAction;
     public bool IsRuleTestInputValid => MailFlowViewModelSupport.IsValidEmail(TestSender) && MailFlowViewModelSupport.IsValidEmail(TestRecipient);
-    public string RuleValidationMessage => IsRuleInputValid ? string.Empty : "Rule: name is required, mode must be valid, and at least one condition and one action are required.";
-    public string TestValidationMessage => IsRuleTestInputValid ? string.Empty : "Test: sender and recipient must be valid email addresses.";
+    public string RuleValidationMessage => IsRuleInputValid ? string.Empty : Loc.Get("Presentation.TransportRuleValidation");
+    public string TestValidationMessage => IsRuleTestInputValid ? string.Empty : Loc.Get("Presentation.TransportRuleTestValidation");
 
     public string? RuleIdentity { get => _ruleIdentity; set => SetProperty(ref _ruleIdentity, value); }
     public string RuleName { get => _ruleName; set => SetEditorProperty(ref _ruleName, value); }
@@ -167,7 +168,7 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
         var result = await WorkerService.GetTransportRulesAsync(new GetTransportRulesRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load transport rules.";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadTransportRules");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow rules load failed: {error}", "MailFlow");
             return;
@@ -196,12 +197,14 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
             return;
         }
 
+        var selected = SelectedRule;
+
         if (!enabled &&
             !ConfirmMutation(
-                "Disable transport rule",
-                SelectedRule.Name,
-                "Can stop tenant-wide controls or enforcement.",
-                "Confirm tenant-wide disable"))
+                Loc.Get("Presentation.DisableTransportRule"),
+                selected.Name,
+                Loc.Get("Presentation.CanStopTenantWideControlsOrEnforcement"),
+                Loc.Get("Presentation.ConfirmTenantWideDisable")))
         {
             return;
         }
@@ -210,15 +213,15 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
         {
             var result = await WorkerService.SetTransportRuleStateAsync(new SetTransportRuleStateRequest
             {
-                Identity = SelectedRule.Identity,
+                Identity = selected.Identity,
                 Enabled = enabled
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Rule state error";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.RuleStateError");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Set rule state failed (rule={SelectedRule.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Set rule state failed (rule={selected.Name}): {error}", "MailFlow");
                 return;
             }
 
@@ -263,7 +266,7 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving rule failed. Try again or check the logs (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveRuleFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save rule failed (name={RuleName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -279,11 +282,13 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
             return;
         }
 
+        var selected = SelectedRule;
+
         if (!ConfirmMutation(
-                "Deleting transport rule",
-                SelectedRule.Name,
-                "Permanently removes the rule with potential tenant-wide impact.",
-                "Confirm tenant-wide deletion"))
+                Loc.Get("Presentation.DeletingTransportRule"),
+                selected.Name,
+                Loc.Get("Presentation.PermanentlyRemovesTheRuleWithPotentialTenantWide"),
+                Loc.Get("Ui.TenantDeletion")))
         {
             return;
         }
@@ -292,14 +297,14 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
         {
             var result = await WorkerService.RemoveTransportRuleAsync(new RemoveTransportRuleRequest
             {
-                Identity = SelectedRule.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete rule";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteRule");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove rule failed (rule={SelectedRule.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove rule failed (rule={selected.Name}): {error}", "MailFlow");
                 return;
             }
 
@@ -325,12 +330,12 @@ internal sealed class MailFlowRulesViewModel : MailFlowSectionViewModelBase
 
             if (!result.IsSuccess)
             {
-                SetError(result.Error?.Message ?? "Rule test error");
+                SetError(result.Error?.Message ?? Loc.Get("Presentation.RuleTestError"));
                 return;
             }
 
             TestResult = result.Value == null || result.Value.MatchedRuleNames.Count == 0
-                ? "No rules found"
+                ? Loc.Get("Presentation.NoRulesFound")
                 : string.Join(", ", result.Value.MatchedRuleNames);
         }, cancellationToken);
     }

@@ -1,7 +1,7 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
-using System.Windows.Threading;
 using OnlyExo365.Shell.Services;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Paging;
@@ -17,7 +17,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
 
     private readonly IDistributionListsWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DispatcherTimer _searchDebounceTimer;
+    private readonly DebounceHelper _searchDebounce;
     private readonly Action<DistributionListItemDto?> _viewDetails;
     private readonly Action<string?> _setErrorMessage;
 
@@ -52,11 +52,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
             "Dynamic"
         });
 
-        _searchDebounceTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(300)
-        };
-        _searchDebounceTimer.Tick += OnSearchDebounceElapsed;
+        _searchDebounce = CreateDebounceHelper();
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
@@ -89,8 +85,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
         {
             if (SetProperty(ref _searchQuery, value))
             {
-                _searchDebounceTimer.Stop();
-                _searchDebounceTimer.Start();
+                _searchDebounce.Debounce(TriggerRefreshFromUi, 300);
             }
         }
     }
@@ -176,12 +171,20 @@ public sealed class DistributionListListViewModel : ViewModelBase
         }
     }
 
+    internal Func<bool> CanReplaceDraft { get; set; } = () => true;
+
+    internal void RestoreSelection(DistributionListItemDto? item)
+    {
+        _selectedItem = item;
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(() => OnPropertyChanged(nameof(SelectedItem)));
+    }
+
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
     public bool CanIncludeDynamicFilter => _shellViewModel.IsFeatureAvailable(f => f.CanGetDynamicDistributionGroup);
     public string StatusText => IsTotalCountExact
-        ? $"{DistributionLists.Count} of {TotalCount} groups"
-        : $"{DistributionLists.Count}+ groups loaded";
+        ? Loc.GetFormat("Ui.InventoryFormat", DistributionLists.Count, TotalCount, Loc.Get("Noun.Groups"))
+        : Loc.GetFormat("Ui.PartialInventoryFormat", DistributionLists.Count, Loc.Get("Noun.Groups"));
 
     public ICommand RefreshCommand { get; }
     public ICommand LoadMoreCommand { get; }
@@ -235,12 +238,6 @@ public sealed class DistributionListListViewModel : ViewModelBase
         CommandManager.InvalidateRequerySuggested();
     }
 
-    private void OnSearchDebounceElapsed(object? sender, EventArgs e)
-    {
-        _searchDebounceTimer.Stop();
-        TriggerRefreshFromUi();
-    }
-
     private void TriggerRefreshFromUi() => _ = SafeRefreshAsync();
 
     private async Task SafeRefreshAsync()
@@ -257,11 +254,12 @@ public sealed class DistributionListListViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!CanReplaceDraft()) return;
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
-        LoadProgress.Start("Loading groups...", "groups");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingGroupsInProgress"), Loc.Get("Presentation.Groups"));
         _setErrorMessage(null);
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(DistributionLists.Count);
@@ -287,7 +285,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
 
             if (!result.WasCancelled)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load distribution lists.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadDistributionLists");
                 _setErrorMessage(null);
                 _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, $"Group load failed: {errorMessage}");
@@ -319,7 +317,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         IsLoading = true;
-        LoadProgress.Start("Loading groups...", "groups");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingGroupsInProgress"), Loc.Get("Presentation.Groups"));
         _setErrorMessage(null);
         _shellViewModel.ClearPageAlert(AlertPage);
 
@@ -350,7 +348,7 @@ public sealed class DistributionListListViewModel : ViewModelBase
                 _setErrorMessage(null);
                 _shellViewModel.ShowPageLoadFailedAlert(
                     AlertPage,
-                    result.Error?.Message ?? "Unable to load more distribution lists.",
+                    result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMoreDistributionLists"),
                     AppAlertSeverity.Warning);
             }
         }

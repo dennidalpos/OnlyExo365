@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
@@ -184,11 +185,20 @@ public sealed class DistributionListSettingsEditorViewModel : ViewModelBase
             return;
         }
 
+        var request = new SetDistributionListSettingsRequest
+        {
+            Identity = selectedDetails.Identity,
+            GroupType = DistributionListViewModelSupport.MapGroupTypeForWorker(selectedDetails.GroupType),
+            RequireSenderAuthenticationEnabled = CanEditExternalSenders ? !AllowExternalSenders : null,
+            AcceptMessagesOnlyFrom = CanEditAcceptMessagesOnlyFrom ? DistributionListViewModelSupport.NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
+            RejectMessagesFrom = CanEditRejectMessagesFrom ? DistributionListViewModelSupport.NormalizeSenderList(RejectMessagesFrom).ToList() : null
+        };
+
         if (!ConfirmMutation(
-                "Updating settings group",
+                Loc.Get("Presentation.UpdatingGroupSettings"),
                 selectedDetails.Identity,
-                "Update allowed/blocked senders and sender authentication for the distribution list.",
-                "Confirm group update"))
+                Loc.Get("Presentation.UpdateAllowedBlockedSendersAndSenderAuthenticationFor"),
+                Loc.Get("Presentation.ConfirmGroupUpdate")))
         {
             return;
         }
@@ -198,15 +208,6 @@ public sealed class DistributionListSettingsEditorViewModel : ViewModelBase
 
         try
         {
-            var request = new SetDistributionListSettingsRequest
-            {
-                Identity = selectedDetails.Identity,
-                GroupType = DistributionListViewModelSupport.MapGroupTypeForWorker(selectedDetails.GroupType),
-                RequireSenderAuthenticationEnabled = CanEditExternalSenders ? !AllowExternalSenders : null,
-                AcceptMessagesOnlyFrom = CanEditAcceptMessagesOnlyFrom ? DistributionListViewModelSupport.NormalizeSenderList(AcceptMessagesOnlyFrom).ToList() : null,
-                RejectMessagesFrom = CanEditRejectMessagesFrom ? DistributionListViewModelSupport.NormalizeSenderList(RejectMessagesFrom).ToList() : null
-            };
-
             var result = await _workerService.SetDistributionListSettingsAsync(request, cancellationToken: cancellationToken);
             if (result.IsSuccess)
             {
@@ -234,7 +235,7 @@ public sealed class DistributionListSettingsEditorViewModel : ViewModelBase
 
             if (!result.WasCancelled)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to update group settings.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateGroupSettings");
                 _setErrorMessage(errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, $"Save group settings failed: {errorMessage}");
             }

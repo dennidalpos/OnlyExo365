@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -58,7 +59,6 @@ public class MessageTraceViewModel : ViewModelBase
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => CurrentPage > 1 && !IsLoading);
         ExportExcelCommand = new RelayCommand(ExportExcel, () => Messages.Count > 0 && !IsLoading);
         LoadDetailsCommand = new AsyncRelayCommand(LoadDetailsAsync, () => SelectedMessage != null && !IsLoading && !IsLoadingDetails);
-        SetStatusFilterCommand = new RelayCommand<string?>(SetStatusFilter);
     }
 
     public bool IsLoading
@@ -248,10 +248,10 @@ public class MessageTraceViewModel : ViewModelBase
 
     public bool HasLoadingCount => LoadingCurrentItem.HasValue;
     public string LoadingPercentText => FormatProgressPercent(LoadingProgress);
-    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, "messages");
+    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, Loc.Get("Noun.Messages"));
     public string ResultSummaryText => IsTotalCountExact
-        ? $"Total messages: {TotalCount}"
-        : $"Messages found so far: {TotalCount}";
+        ? Loc.GetFormat("Trace.TotalMessages", TotalCount)
+        : Loc.GetFormat("Trace.MessagesSoFar", TotalCount);
 
     public string StatusFilter
     {
@@ -288,7 +288,6 @@ public class MessageTraceViewModel : ViewModelBase
     public ICommand PreviousPageCommand { get; }
     public ICommand ExportExcelCommand { get; }
     public ICommand LoadDetailsCommand { get; }
-    public ICommand SetStatusFilterCommand { get; }
 
     public Task LoadAsync()
     {
@@ -339,7 +338,7 @@ public class MessageTraceViewModel : ViewModelBase
         DiagnosticCorrelationId = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         LoadingProgress = 0;
-        LoadingStatus = "Searching messages...";
+        LoadingStatus = Loc.Get("Presentation.SearchingMessagesInProgress");
         LoadingCurrentItem = null;
         LoadingTotalItems = null;
         IsTotalCountExact = false;
@@ -358,7 +357,7 @@ public class MessageTraceViewModel : ViewModelBase
 
             LoadingProgress = 30;
             request.Validate(DateTime.UtcNow);
-            LoadingStatus = "Querying Exchange...";
+            LoadingStatus = Loc.Get("Presentation.QueryingExchangeInProgress");
 
             var result = await _workerService.GetMessageTraceAsync(
                 request,
@@ -382,7 +381,7 @@ public class MessageTraceViewModel : ViewModelBase
                 cancellationToken: _searchCts.Token);
 
             LoadingProgress = 90;
-            LoadingStatus = "Processing results...";
+            LoadingStatus = Loc.Get("Presentation.ProcessingResultsInProgress");
 
             if (result.IsSuccess && result.Value != null)
             {
@@ -415,7 +414,7 @@ public class MessageTraceViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                var errorMessage = result.Error?.Message ?? "Unable to retrieve the message trace.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToRetrieveTheMessageTrace");
                 ErrorMessage = null;
                 _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, $"Message trace failed: {errorMessage}", correlationId: DiagnosticCorrelationId);
@@ -487,7 +486,7 @@ public class MessageTraceViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId ?? DiagnosticCorrelationId;
-                ErrorMessage = result.Error?.Message ?? "Unable to retrieve message details.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToRetrieveMessageDetails");
             }
         }
         catch (Exception ex)
@@ -498,12 +497,6 @@ public class MessageTraceViewModel : ViewModelBase
         {
             IsLoadingDetails = false;
         }
-    }
-
-    private void SetStatusFilter(string? status)
-    {
-        var normalized = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
-        StatusFilter = AllowedStatusFilters.Contains(normalized) ? normalized : "All";
     }
 
     private void ApplyStatusFilter()
@@ -577,7 +570,7 @@ public class MessageTraceViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Export failed: {ex.Message}";
+            ErrorMessage = Loc.GetFormat("Ui.ExportFailed", ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Message trace export failed: {ex.Message}");
         }
     }

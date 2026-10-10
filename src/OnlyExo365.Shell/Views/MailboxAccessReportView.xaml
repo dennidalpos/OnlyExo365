@@ -19,7 +19,7 @@
             <StackPanel>
                 <TextBlock Text="{loc:Loc Key=MailboxAccess.SummaryHeading}" FontSize="18" FontWeight="SemiBold"/>
                 <TextBlock Text="{loc:Loc Key=MailboxAccess.AnalyzeDescription}"
-                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -64,10 +64,10 @@
                       CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      BorderBrush="{StaticResource BorderBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColUser}" Binding="{Binding User}" Width="Auto" MinWidth="180"/>
                     <DataGridTextColumn Header="{loc:Loc Key=MailboxAccess.ColMailbox}" Binding="{Binding Mailbox}" Width="Auto" MinWidth="220"/>

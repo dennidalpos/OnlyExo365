@@ -23,7 +23,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <TextBlock Text="{loc:Loc Key=Permissions.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding Permissions.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=Btn.New}" Command="{Binding Permissions.NewRoleGroupCommand}"
@@ -38,7 +38,7 @@
                 <TextBlock Text="{Binding Permissions.ErrorMessage}" Style="{StaticResource StatusBannerMessageTextStyle}"/>
             </Border>
 
-            <TextBox Grid.Row="2" Text="{Binding Permissions.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12"/>
+            <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Row="2" Text="{Binding Permissions.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12"/>
 
             <Grid Grid.Row="3" Grid.RowSpan="2">
                 <Grid.RowDefinitions>
@@ -56,10 +56,10 @@
                           CanUserDeleteRows="False"
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
-                          Background="{StaticResource SecondaryBackgroundBrush}"
-                          BorderBrush="{StaticResource BorderBrush}"
-                          RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                          AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                          Background="{DynamicResource SecondaryBackgroundBrush}"
+                          BorderBrush="{DynamicResource BorderBrush}"
+                          RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                          AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="{loc:Loc Key=Permissions.ColName}" Binding="{Binding Name}" Width="Auto" MinWidth="180"/>
                         <DataGridTextColumn Header="{loc:Loc Key=Permissions.ColDisplayName}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="200"/>
@@ -95,7 +95,7 @@
             </Grid>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+        <GridSplitter Grid.Column="1" Width="4" Background="{DynamicResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       ResizeDirection="Columns"
                       ResizeBehavior="PreviousAndNext"/>
@@ -123,15 +123,15 @@
                                    Text="{Binding Permissions.SelectedRoleGroupSummary}"
                                    TextWrapping="Wrap" Margin="0,0,0,12"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldIdentity}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldDescription}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Permissions.SelectedRoleGroupDetails.Identity}" IsReadOnly="True" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Permissions.SelectedRoleGroupDetails.Description}" IsReadOnly="True" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="InputLabel001" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldIdentity}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel002" Grid.Row="1" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldDescription}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="2" Grid.Column="0" Text="{Binding Permissions.SelectedRoleGroupDetails.Identity}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="2" Grid.Column="1" Text="{Binding Permissions.SelectedRoleGroupDetails.Description}" IsReadOnly="True" TextWrapping="Wrap"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldRbacRoles}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldScopes}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding Permissions.RolesText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Permissions.ScopesText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
+                        <TextBlock x:Name="InputLabel003" Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldRbacRoles}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel004" Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldScopes}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="4" Grid.Column="0" Text="{Binding Permissions.RolesText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="4" Grid.Column="1" Text="{Binding Permissions.ScopesText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
 
                         <TextBlock Grid.Row="5" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldManagedBy}" Margin="0,8,8,6"/>
                         <TextBlock Grid.Row="5" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldCreatedChanged}" Margin="0,8,8,6"/>
@@ -151,7 +151,7 @@
                         </StackPanel>
 
                         <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
-                                Background="{StaticResource SecondaryBackgroundBrush}"
+                                Background="{DynamicResource SecondaryBackgroundBrush}"
                                 Padding="8" Margin="0,12,0,0"
                                 Visibility="{Binding Permissions.IsLoadingDetails, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{loc:Loc Key=Permissions.LoadingDetails}" HorizontalAlignment="Center"/>
@@ -175,7 +175,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{Binding Permissions.MemberToAdd, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                            <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.MemberIdentity}" Grid.Column="0" Text="{Binding Permissions.MemberToAdd, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
                             <Button Grid.Column="1" Content="{loc:Loc Key=Permissions.AddMember}" Command="{Binding Permissions.AddMemberCommand}" Style="{StaticResource PrimaryButton}"/>
                         </Grid>
 
@@ -183,8 +183,8 @@
                                  ItemsSource="{Binding Permissions.SelectedRoleGroupDetails.Members}"
                                  SelectedItem="{Binding Permissions.SelectedMember}"
                                  DisplayMemberPath="DisplayName"
-                                 Background="{StaticResource SecondaryBackgroundBrush}"
-                                 BorderBrush="{StaticResource BorderBrush}"/>
+                                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
 
                         <Button Grid.Row="3" Content="{loc:Loc Key=Permissions.RemoveMemberSelected}"
                                 Command="{Binding Permissions.RemoveSelectedMemberCommand}"
@@ -211,33 +211,33 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Permissions.ColName}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldCopyFrom}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Permissions.NewRoleGroupName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <ComboBox Grid.Row="1" Grid.Column="1"
+                        <TextBlock x:Name="InputLabel005" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Permissions.ColName}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel006" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldCopyFrom}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Grid.Row="1" Grid.Column="0" Text="{Binding Permissions.NewRoleGroupName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Grid.Row="1" Grid.Column="1"
                                   ItemsSource="{Binding Permissions.RoleGroups}"
                                   DisplayMemberPath="DisplayName"
                                   SelectedValuePath="Identity"
                                   SelectedValue="{Binding Permissions.CopyFromRoleGroupIdentity}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldDescription}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldRolesCsv}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Permissions.NewRoleGroupDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Permissions.NewRoleGroupRoles, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
+                        <TextBlock x:Name="InputLabel007" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Permissions.FieldDescription}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel008" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Permissions.FieldRolesCsv}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Grid.Row="3" Grid.Column="0" Text="{Binding Permissions.NewRoleGroupDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Grid.Row="3" Grid.Column="1" Text="{Binding Permissions.NewRoleGroupRoles, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                    Text="{loc:Loc Key=Permissions.CopyHint}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    TextWrapping="Wrap"
                                    Margin="0,8,0,6"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="{loc:Loc Key=Permissions.InitialMembers}" Margin="0,0,0,6"/>
-                        <TextBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                        <TextBlock x:Name="InputLabel009" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="{loc:Loc Key=Permissions.InitialMembers}" Margin="0,0,0,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
                                  Text="{Binding Permissions.NewRoleGroupMembers, UpdateSourceTrigger=PropertyChanged}"
                                  TextWrapping="Wrap" AcceptsReturn="True" MinHeight="72"/>
 
                         <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="{loc:Loc Key=Permissions.SaveRoleGroup}" Command="{Binding Permissions.SaveRoleGroupCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=Permissions.SaveRoleGroup}" Command="{Binding Permissions.SaveRoleGroupCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
                             <Button Content="{loc:Loc Key=Permissions.Reset}" Command="{Binding Permissions.NewRoleGroupCommand}"
                                     Style="{StaticResource InlineActionButton}"/>
                         </StackPanel>

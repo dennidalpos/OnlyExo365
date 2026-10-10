@@ -231,63 +231,63 @@
                 <StackPanel>
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditTransportRule}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.RuleIdentity}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel001" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Text="{Binding MailFlow.RuleIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel002" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Text="{Binding MailFlow.RuleName, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Conditions}" Margin="0,10,0,0" FontWeight="SemiBold"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.FromCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleFrom, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.SentToCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleSentTo, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.SenderDomainIsCsvDomain}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleSenderDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RecipientDomainIsCsvDomain}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleRecipientDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.SentToMemberOfCsvGroupIdentity}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleSentToMemberOf, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.SubjectContainsWordsCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleSubjectContains, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel003" Text="{loc:Loc Key=MailFlow.FromCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Text="{Binding MailFlow.RuleFrom, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel004" Text="{loc:Loc Key=MailFlow.SentToCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Text="{Binding MailFlow.RuleSentTo, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel005" Text="{loc:Loc Key=MailFlow.SenderDomainIsCsvDomain}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Text="{Binding MailFlow.RuleSenderDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel006" Text="{loc:Loc Key=MailFlow.RecipientDomainIsCsvDomain}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Text="{Binding MailFlow.RuleRecipientDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel007" Text="{loc:Loc Key=MailFlow.SentToMemberOfCsvGroupIdentity}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Text="{Binding MailFlow.RuleSentToMemberOf, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel008" Text="{loc:Loc Key=MailFlow.SubjectContainsWordsCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Text="{Binding MailFlow.RuleSubjectContains, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Exceptions}" Margin="0,10,0,0" FontWeight="SemiBold"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ExceptIfFromCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleExceptIfFrom, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ExceptIfSentToCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleExceptIfSentTo, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ExceptIfSenderDomainIsCsvDomain}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleExceptIfSenderDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ExceptIfRecipientDomainIsCsvDomain}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleExceptIfRecipientDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ExceptIfSubjectContainsWordsCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleExceptIfSubjectContains, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel009" Text="{loc:Loc Key=MailFlow.ExceptIfFromCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Text="{Binding MailFlow.RuleExceptIfFrom, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel010" Text="{loc:Loc Key=MailFlow.ExceptIfSentToCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" Text="{Binding MailFlow.RuleExceptIfSentTo, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel011" Text="{loc:Loc Key=MailFlow.ExceptIfSenderDomainIsCsvDomain}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" Text="{Binding MailFlow.RuleExceptIfSenderDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel012" Text="{loc:Loc Key=MailFlow.ExceptIfRecipientDomainIsCsvDomain}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" Text="{Binding MailFlow.RuleExceptIfRecipientDomainIs, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel013" Text="{loc:Loc Key=MailFlow.ExceptIfSubjectContainsWordsCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" Text="{Binding MailFlow.RuleExceptIfSubjectContains, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{loc:Loc Key=MailFlow.Actions}" Margin="0,10,0,0" FontWeight="SemiBold"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.PrependSubject}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RulePrependSubject, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RedirectMessageToCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleRedirectMessageTo, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.BlindCopyToCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleBlindCopyTo, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.AddToRecipientsCsvEmail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RuleAddToRecipients, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel014" Text="{loc:Loc Key=MailFlow.PrependSubject}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Text="{Binding MailFlow.RulePrependSubject, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel015" Text="{loc:Loc Key=MailFlow.RedirectMessageToCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel015}" Text="{Binding MailFlow.RuleRedirectMessageTo, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel016" Text="{loc:Loc Key=MailFlow.BlindCopyToCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel016}" Text="{Binding MailFlow.RuleBlindCopyTo, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel017" Text="{loc:Loc Key=MailFlow.AddToRecipientsCsvEmail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel017}" Text="{Binding MailFlow.RuleAddToRecipients, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.StopRuleProcessing}" IsChecked="{Binding MailFlow.RuleStopRuleProcessing}" Margin="0,6,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DeleteMessage}" IsChecked="{Binding MailFlow.RuleDeleteMessage}" Margin="0,2,0,0"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Mode}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.RuleModes}" SelectedItem="{Binding MailFlow.RuleMode}"/>
+                            <TextBlock x:Name="InputLabel018" Text="{loc:Loc Key=MailFlow.Mode}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel018}" ItemsSource="{Binding MailFlow.RuleModes}" SelectedItem="{Binding MailFlow.RuleMode}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.Enabled}" IsChecked="{Binding MailFlow.RuleEnabled}" Margin="0,6,0,0"/>
                             <TextBlock Text="{Binding MailFlow.RuleValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsRuleInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveRule}" Command="{Binding MailFlow.SaveRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveRule}" Command="{Binding MailFlow.SaveRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsRuleInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.TestTransportRules}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Sender}"/>
-                            <TextBox Text="{Binding MailFlow.TestSender, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Recipient}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.TestRecipient, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Subject}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.TestSubject}"/>
+                            <TextBlock x:Name="InputLabel019" Text="{loc:Loc Key=MailFlow.Sender}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel019}" Text="{Binding MailFlow.TestSender, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel020" Text="{loc:Loc Key=MailFlow.Recipient}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel020}" Text="{Binding MailFlow.TestRecipient, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel021" Text="{loc:Loc Key=MailFlow.Subject}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel021}" Text="{Binding MailFlow.TestSubject}"/>
                             <TextBlock Text="{Binding MailFlow.TestValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsRuleTestInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
                             <Button Content="{loc:Loc Key=MailFlow.Test}" Command="{Binding MailFlow.TestRuleCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
@@ -299,55 +299,55 @@
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditConnector}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorIdentityDisplay}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Type}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.ConnectorTypes}" SelectedItem="{Binding MailFlow.ConnectorType}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Comment}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorComment}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.SenderDomainsCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorSenderDomains, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RecipientDomainsCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.ConnectorRecipientDomains, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel022" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel022}" Text="{Binding MailFlow.ConnectorIdentityDisplay}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel023" Text="{loc:Loc Key=MailFlow.Type}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel023}" ItemsSource="{Binding MailFlow.ConnectorTypes}" SelectedItem="{Binding MailFlow.ConnectorType}"/>
+                            <TextBlock x:Name="InputLabel024" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel024}" Text="{Binding MailFlow.ConnectorName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel025" Text="{loc:Loc Key=MailFlow.Comment}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel025}" Text="{Binding MailFlow.ConnectorComment}"/>
+                            <TextBlock x:Name="InputLabel026" Text="{loc:Loc Key=MailFlow.SenderDomainsCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel026}" Text="{Binding MailFlow.ConnectorSenderDomains, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel027" Text="{loc:Loc Key=MailFlow.RecipientDomainsCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel027}" Text="{Binding MailFlow.ConnectorRecipientDomains, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.Enabled}" IsChecked="{Binding MailFlow.ConnectorEnabled}" Margin="0,6,0,0" IsEnabled="{Binding MailFlow.CanEditSelectedConnector}"/>
                             <TextBlock Text="{Binding MailFlow.ConnectorValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsConnectorInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveConnector}" Command="{Binding MailFlow.SaveConnectorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveConnector}" Command="{Binding MailFlow.SaveConnectorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsConnectorInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAcceptedDomain}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.DomainIdentity}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.DomainName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DomainFQDN}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.DomainFqdn, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DomainType}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.DomainTypes}" SelectedItem="{Binding MailFlow.DomainType}"/>
+                            <TextBlock x:Name="InputLabel028" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel028}" Text="{Binding MailFlow.DomainIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel029" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel029}" Text="{Binding MailFlow.DomainName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel030" Text="{loc:Loc Key=MailFlow.DomainFQDN}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel030}" Text="{Binding MailFlow.DomainFqdn, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel031" Text="{loc:Loc Key=MailFlow.DomainType}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel031}" ItemsSource="{Binding MailFlow.DomainTypes}" SelectedItem="{Binding MailFlow.DomainType}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.MakeDefault}" IsChecked="{Binding MailFlow.DomainMakeDefault}" Margin="0,6,0,0" IsEnabled="{Binding MailFlow.CanEditSelectedDomain}"/>
                             <TextBlock Text="{Binding MailFlow.DomainValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsDomainInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveDomain}" Command="{Binding MailFlow.SaveDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveDomain}" Command="{Binding MailFlow.SaveDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsDomainInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditRemoteDomain}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.RemoteDomainIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel032" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel032}" Text="{Binding MailFlow.RemoteDomainIdentity}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DefaultRemoteDomain}" IsChecked="{Binding MailFlow.RemoteDomainIsDefault}" Margin="0,6,0,0" IsEnabled="False"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RemoteDomainName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DomainWildcard}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.RemoteDomainDomainName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedRemoteDomain}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.AllowedOOFType}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.AllowedOofTypes}" SelectedItem="{Binding MailFlow.RemoteDomainAllowedOofType}"/>
+                            <TextBlock x:Name="InputLabel033" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel033}" Text="{Binding MailFlow.RemoteDomainName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel034" Text="{loc:Loc Key=MailFlow.DomainWildcard}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel034}" Text="{Binding MailFlow.RemoteDomainDomainName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedRemoteDomain}"/>
+                            <TextBlock x:Name="InputLabel035" Text="{loc:Loc Key=MailFlow.AllowedOOFType}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel035}" ItemsSource="{Binding MailFlow.AllowedOofTypes}" SelectedItem="{Binding MailFlow.RemoteDomainAllowedOofType}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.AutoReplyEnabled}" IsChecked="{Binding MailFlow.RemoteDomainAutoReplyEnabled}" Margin="0,6,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.AutoForwardEnabled}" IsChecked="{Binding MailFlow.RemoteDomainAutoForwardEnabled}" Margin="0,2,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DeliveryReportEnabled}" IsChecked="{Binding MailFlow.RemoteDomainDeliveryReportEnabled}" Margin="0,2,0,0"/>
@@ -357,37 +357,37 @@
                             <CheckBox Content="{loc:Loc Key=MailFlow.TrustedMailOutboundEnabled}" IsChecked="{Binding MailFlow.RemoteDomainTrustedMailOutboundEnabled}" Margin="0,2,0,0"/>
                             <TextBlock Text="{Binding MailFlow.RemoteDomainValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsRemoteDomainInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveRemoteDomain}" Command="{Binding MailFlow.SaveRemoteDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveRemoteDomain}" Command="{Binding MailFlow.SaveRemoteDomainCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsRemoteDomainInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditOrganizationRelationship}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.OrganizationRelationshipIdentity}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OrganizationRelationshipName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DomainNamesCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OrganizationRelationshipDomainNames, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel036" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel036}" Text="{Binding MailFlow.OrganizationRelationshipIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel037" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel037}" Text="{Binding MailFlow.OrganizationRelationshipName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel038" Text="{loc:Loc Key=MailFlow.DomainNamesCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel038}" Text="{Binding MailFlow.OrganizationRelationshipDomainNames, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.Enabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipEnabled}" Margin="0,6,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.FreeBusyAccessEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipFreeBusyAccessEnabled}" Margin="0,2,0,0"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.FreeBusyAccessLevel}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.FreeBusyAccessLevels}" SelectedItem="{Binding MailFlow.OrganizationRelationshipFreeBusyAccessLevel}"/>
+                            <TextBlock x:Name="InputLabel039" Text="{loc:Loc Key=MailFlow.FreeBusyAccessLevel}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel039}" ItemsSource="{Binding MailFlow.FreeBusyAccessLevels}" SelectedItem="{Binding MailFlow.OrganizationRelationshipFreeBusyAccessLevel}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.MailTipsAccessEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipMailTipsAccessEnabled}" Margin="0,6,0,0"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.MailTipsAccessLevel}" Margin="0,6,0,0"/>
-                            <ComboBox ItemsSource="{Binding MailFlow.MailTipsAccessLevels}" SelectedItem="{Binding MailFlow.OrganizationRelationshipMailTipsAccessLevel}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.TargetApplicationUri}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OrganizationRelationshipTargetApplicationUri, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.TargetAutodiscoverEpr}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OrganizationRelationshipTargetAutodiscoverEpr, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel040" Text="{loc:Loc Key=MailFlow.MailTipsAccessLevel}" Margin="0,6,0,0"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel040}" ItemsSource="{Binding MailFlow.MailTipsAccessLevels}" SelectedItem="{Binding MailFlow.OrganizationRelationshipMailTipsAccessLevel}"/>
+                            <TextBlock x:Name="InputLabel041" Text="{loc:Loc Key=MailFlow.TargetApplicationUri}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel041}" Text="{Binding MailFlow.OrganizationRelationshipTargetApplicationUri, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel042" Text="{loc:Loc Key=MailFlow.TargetAutodiscoverEpr}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel042}" Text="{Binding MailFlow.OrganizationRelationshipTargetAutodiscoverEpr, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.ArchiveAccessEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipArchiveAccessEnabled}" Margin="0,6,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DeliveryReportEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipDeliveryReportEnabled}" Margin="0,2,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.MailboxMoveEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipMailboxMoveEnabled}" Margin="0,2,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.PhotosEnabled}" IsChecked="{Binding MailFlow.OrganizationRelationshipPhotosEnabled}" Margin="0,2,0,0"/>
                             <TextBlock Text="{Binding MailFlow.OrganizationRelationshipValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsOrganizationRelationshipInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveOrganizationRelationship}" Command="{Binding MailFlow.SaveOrganizationRelationshipCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveOrganizationRelationship}" Command="{Binding MailFlow.SaveOrganizationRelationshipCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsOrganizationRelationshipInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
@@ -398,50 +398,50 @@
                                        Style="{StaticResource InlineValidationTextStyle}"
                                        Margin="0,0,0,8"
                                        Visibility="{Binding MailFlow.HasAddressListSectionWarning, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.AddressListIdentity}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedAddressList}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DisplayName}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListDisplayName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RecipientFilterCustom}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListRecipientFilter, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RecipientContainer}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListRecipientContainer, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IncludedRecipientsCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListIncludedRecipients, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ConditionalCompanyCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListConditionalCompany, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ConditionalDepartmentCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListConditionalDepartment, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ConditionalStateOrProvinceCsv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListConditionalStateOrProvince, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.ConditionalCustomAttribute1Csv}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressListConditionalCustomAttribute1, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel043" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel043}" Text="{Binding MailFlow.AddressListIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel044" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel044}" Text="{Binding MailFlow.AddressListName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedAddressList}"/>
+                            <TextBlock x:Name="InputLabel045" Text="{loc:Loc Key=MailFlow.DisplayName}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel045}" Text="{Binding MailFlow.AddressListDisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel046" Text="{loc:Loc Key=MailFlow.RecipientFilterCustom}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel046}" Text="{Binding MailFlow.AddressListRecipientFilter, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
+                            <TextBlock x:Name="InputLabel047" Text="{loc:Loc Key=MailFlow.RecipientContainer}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel047}" Text="{Binding MailFlow.AddressListRecipientContainer, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel048" Text="{loc:Loc Key=MailFlow.IncludedRecipientsCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel048}" Text="{Binding MailFlow.AddressListIncludedRecipients, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel049" Text="{loc:Loc Key=MailFlow.ConditionalCompanyCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel049}" Text="{Binding MailFlow.AddressListConditionalCompany, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel050" Text="{loc:Loc Key=MailFlow.ConditionalDepartmentCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel050}" Text="{Binding MailFlow.AddressListConditionalDepartment, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel051" Text="{loc:Loc Key=MailFlow.ConditionalStateOrProvinceCsv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel051}" Text="{Binding MailFlow.AddressListConditionalStateOrProvince, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel052" Text="{loc:Loc Key=MailFlow.ConditionalCustomAttribute1Csv}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel052}" Text="{Binding MailFlow.AddressListConditionalCustomAttribute1, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{Binding MailFlow.AddressListValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsAddressListInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveAddressList}" Command="{Binding MailFlow.SaveAddressListCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveAddressList}" Command="{Binding MailFlow.SaveAddressListCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsAddressListInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditAddressBookPolicy}" Margin="0,0,0,8">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyIdentity}" IsReadOnly="True"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedAddressBookPolicy}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.AddressListsCsvIdentities}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyAddressLists, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.GlobalAddressList}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyGlobalAddressList, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.OfflineAddressBook}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyOfflineAddressBook, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.RoomListOptional}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.AddressBookPolicyRoomList, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel053" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel053}" Text="{Binding MailFlow.AddressBookPolicyIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel054" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel054}" Text="{Binding MailFlow.AddressBookPolicyName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedAddressBookPolicy}"/>
+                            <TextBlock x:Name="InputLabel055" Text="{loc:Loc Key=MailFlow.AddressListsCsvIdentities}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel055}" Text="{Binding MailFlow.AddressBookPolicyAddressLists, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50"/>
+                            <TextBlock x:Name="InputLabel056" Text="{loc:Loc Key=MailFlow.GlobalAddressList}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel056}" Text="{Binding MailFlow.AddressBookPolicyGlobalAddressList, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel057" Text="{loc:Loc Key=MailFlow.OfflineAddressBook}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel057}" Text="{Binding MailFlow.AddressBookPolicyOfflineAddressBook, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel058" Text="{loc:Loc Key=MailFlow.RoomListOptional}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel058}" Text="{Binding MailFlow.AddressBookPolicyRoomList, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{Binding MailFlow.AddressBookPolicyValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsAddressBookPolicyInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveAddressBookPolicy}" Command="{Binding MailFlow.SaveAddressBookPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveAddressBookPolicy}" Command="{Binding MailFlow.SaveAddressBookPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsAddressBookPolicyInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
@@ -452,36 +452,36 @@
                                        Style="{StaticResource InlineValidationTextStyle}"
                                        Margin="0,0,0,8"
                                        Visibility="{Binding MailFlow.HasOfflineAddressBookSectionWarning, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.OfflineAddressBookIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel059" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel059}" Text="{Binding MailFlow.OfflineAddressBookIdentity}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DefaultOfflineAddressBook}" IsChecked="{Binding MailFlow.OfflineAddressBookIsDefault}" Margin="0,6,0,0" IsEnabled="False"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OfflineAddressBookName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedOfflineAddressBook}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.AddressListsCsvIdentities}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OfflineAddressBookAddressLists, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DiffRetentionPeriodOptionalInteger}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.OfflineAddressBookDiffRetentionPeriod, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel060" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel060}" Text="{Binding MailFlow.OfflineAddressBookName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedOfflineAddressBook}"/>
+                            <TextBlock x:Name="InputLabel061" Text="{loc:Loc Key=MailFlow.AddressListsCsvIdentities}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel061}" Text="{Binding MailFlow.OfflineAddressBookAddressLists, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50"/>
+                            <TextBlock x:Name="InputLabel062" Text="{loc:Loc Key=MailFlow.DiffRetentionPeriodOptionalInteger}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel062}" Text="{Binding MailFlow.OfflineAddressBookDiffRetentionPeriod, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="{Binding MailFlow.OfflineAddressBookValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsOfflineAddressBookInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveOfflineAddressBook}" Command="{Binding MailFlow.SaveOfflineAddressBookCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveOfflineAddressBook}" Command="{Binding MailFlow.SaveOfflineAddressBookCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsOfflineAddressBookInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>
 
                     <controls:SectionPanel Header="{loc:Loc Key=MailFlow.CreateEditSharingPolicy}">
                         <StackPanel>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
-                            <TextBox Text="{Binding MailFlow.SharingPolicyIdentity}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel063" Text="{loc:Loc Key=MailFlow.IdentityEditOnly}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel063}" Text="{Binding MailFlow.SharingPolicyIdentity}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.DefaultSharingPolicy}" IsChecked="{Binding MailFlow.SharingPolicyIsDefault}" Margin="0,6,0,0" IsEnabled="False"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.SharingPolicyName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedSharingPolicy}"/>
-                            <TextBlock Text="{loc:Loc Key=MailFlow.DomainsCsvExContosoComCalendarSharingFreeBusyDetail}" Margin="0,6,0,0"/>
-                            <TextBox Text="{Binding MailFlow.SharingPolicyDomains, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
+                            <TextBlock x:Name="InputLabel064" Text="{loc:Loc Key=MailFlow.Name}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel064}" Text="{Binding MailFlow.SharingPolicyName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding MailFlow.CanEditSelectedSharingPolicy}"/>
+                            <TextBlock x:Name="InputLabel065" Text="{loc:Loc Key=MailFlow.DomainsCsvExContosoComCalendarSharingFreeBusyDetail}" Margin="0,6,0,0"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel065}" Text="{Binding MailFlow.SharingPolicyDomains, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.Enabled}" IsChecked="{Binding MailFlow.SharingPolicyEnabled}" Margin="0,6,0,0"/>
                             <CheckBox Content="{loc:Loc Key=MailFlow.MakeDefault}" IsChecked="{Binding MailFlow.SharingPolicyMakeDefault}" Margin="0,2,0,0"/>
                             <TextBlock Text="{Binding MailFlow.SharingPolicyValidationMessage}" Style="{StaticResource InlineValidationTextStyle}"
                                        Visibility="{Binding MailFlow.IsSharingPolicyInputValid, Converter={StaticResource InverseBoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=MailFlow.SaveSharingPolicy}" Command="{Binding MailFlow.SaveSharingPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=MailFlow.SaveSharingPolicy}" Command="{Binding MailFlow.SaveSharingPolicyCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                     IsEnabled="{Binding MailFlow.IsSharingPolicyInputValid}"/>
                         </StackPanel>
                     </controls:SectionPanel>

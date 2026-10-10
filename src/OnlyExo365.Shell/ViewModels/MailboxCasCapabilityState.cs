@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 
 namespace OnlyExo365.Shell.ViewModels;
@@ -69,7 +70,7 @@ internal sealed class MailboxCasCapabilityState
                 canEditPopEnabled: false,
                 canEditImapEnabled: false,
                 canEditSmtpClientAuthenticationDisabled: false,
-                message: $"Mailbox protocol configuration is not available: Get-CASMailbox is not supported{DescribeCmdletAvailability(capabilities, "Get-CASMailbox")}.");
+                message: Loc.GetFormat("Mailbox.ProtocolUnavailable", DescribeCmdletAvailability(capabilities, "Get-CASMailbox")));
         }
 
         var warnings = new List<string>();
@@ -102,13 +103,13 @@ internal sealed class MailboxCasCapabilityState
             canEditSmtpClientAuthenticationDisabled: canEditSmtpClientAuthenticationDisabled,
             message: warnings.Count == 0
                 ? null
-                : $"Mailbox protocol configuration is available with limitations: {string.Join("; ", warnings)}.");
+                : Loc.GetFormat("Mailbox.ProtocolLimitations", string.Join("; ", warnings)));
 
         void AddWarningIfNeeded(List<string> items, bool isAvailable, string label, string parameterName)
         {
             if (!isAvailable)
             {
-                items.Add($"{label} is read-only ({parameterName} is not supported)");
+                items.Add(Loc.GetFormat("Mailbox.ProtocolReadOnly", label, parameterName));
             }
         }
     }
@@ -117,7 +118,7 @@ internal sealed class MailboxCasCapabilityState
     {
         if (!capabilities.Cmdlets.TryGetValue(cmdletName, out var cmdlet))
         {
-            return " (capability not detected)";
+            return Loc.Get("Presentation.CapabilityNotDetected");
         }
 
         if (cmdlet.IsAvailable)
@@ -126,7 +127,7 @@ internal sealed class MailboxCasCapabilityState
         }
 
         return string.IsNullOrWhiteSpace(cmdlet.UnavailableReason)
-            ? " (cmdlet not available)"
+            ? Loc.Get("Presentation.CmdletNotAvailable")
             : $": {cmdlet.UnavailableReason}";
     }
 }

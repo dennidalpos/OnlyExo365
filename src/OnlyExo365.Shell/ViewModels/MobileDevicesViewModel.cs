@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -14,7 +15,7 @@ public partial class MobileDevicesViewModel : ViewModelBase
     private const NavigationPage AlertPage = NavigationPage.MobileDevices;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private bool _isLoading;
     private bool _isLoadingSelection;
@@ -38,6 +39,7 @@ public partial class MobileDevicesViewModel : ViewModelBase
 
     public MobileDevicesViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
@@ -187,10 +189,10 @@ public partial class MobileDevicesViewModel : ViewModelBase
 
     public string LoadingPercentText => FormatProgressPercent(LoadingProgress);
 
-    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, "items");
+    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, Loc.Get("Noun.Items"));
 
     public string LoadingOverlayText => LoadingStatus
-        ?? (IsLoading ? "Loading mobile devices list..." : "Loading device details...");
+        ?? (IsLoading ? Loc.Get("Presentation.LoadingMobileDevicesListInProgress") : Loc.Get("Presentation.LoadingDeviceDetailsInProgress"));
 
     public string? SearchQuery
     {
@@ -254,9 +256,9 @@ public partial class MobileDevicesViewModel : ViewModelBase
 
     public string StatusText => IsMobileDevicesFeatureAvailable
         ? IsTotalCountExact
-            ? $"{Devices.Count} of {TotalCount} device"
-            : $"{Devices.Count}+ device loaded"
-        : "Module not available";
+            ? Loc.GetFormat("MobileDevices.InventoryExact", Devices.Count, TotalCount)
+            : Loc.GetFormat("MobileDevices.InventoryPartial", Devices.Count)
+        : Loc.Get("Presentation.ModuleNotAvailable");
 
     public MobileDeviceListItemDto? SelectedDevice
     {
@@ -289,7 +291,7 @@ public partial class MobileDevicesViewModel : ViewModelBase
     }
 
     public string SelectedDeviceSummary => SelectedDevice == null
-        ? "Select a device to review details and available actions."
+        ? Loc.Get("Presentation.SelectADeviceToReviewDetailsAndAvailable")
         : $"{SelectedDevice.UserDisplayName ?? SelectedDevice.UserPrincipalName ?? SelectedDevice.MailboxIdentity} - {SelectedDevice.DeviceType ?? "Unknown"} / {SelectedDevice.DeviceId}";
 
     public bool IsMobileDevicesFeatureAvailable => GetCapabilityState().IsModuleAvailable;
@@ -443,7 +445,7 @@ public partial class MobileDevicesViewModel : ViewModelBase
                 HasMore = false;
                 IsLoadingSelection = false;
                 ClearLoadingProgress();
-                CapabilityMessage = "Unable to verify Mobile Devices capabilities for the current Exchange session. The module will not be loaded automatically.";
+                CapabilityMessage = Loc.Get("Presentation.UnableToVerifyMobileDevicesCapabilitiesForThe");
                 ErrorMessage = null;
                 RaiseCanExecuteChanged();
                 return false;

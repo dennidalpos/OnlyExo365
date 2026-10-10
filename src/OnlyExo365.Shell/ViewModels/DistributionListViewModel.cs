@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -26,6 +27,8 @@ public class DistributionListViewModel : ViewModelBase
         _details = new DistributionListDetailsViewModel(workerService, navigationService, shellViewModel, () => _list.SelectedItem, SetErrorMessage, OnDetailsChanged);
         _settings = new DistributionListSettingsEditorViewModel(workerService, shellViewModel, () => _details.SelectedDetails, SetErrorMessage);
         _editor = new DistributionListEditorViewModel(workerService, shellViewModel, SetErrorMessage, RefreshAsync);
+
+        _list.CanReplaceDraft = () => IsSavingSettings || !HasPendingSettingsChanges || ErrorDialogService.ConfirmDiscardChanges();
 
         _list.PropertyChanged += OnChildPropertyChanged;
         _details.PropertyChanged += OnChildPropertyChanged;
@@ -88,7 +91,12 @@ public class DistributionListViewModel : ViewModelBase
     public DistributionListItemDto? SelectedItem
     {
         get => _list.SelectedItem;
-        set => _list.SelectedItem = value;
+        set
+        {
+            var previous = _list.SelectedItem;
+            _list.SelectedItem = value;
+            if (value != null && _navigationService.SelectedIdentity != value.Identity) _list.RestoreSelection(previous);
+        }
     }
 
     public DistributionListDetailsDto? SelectedDetails => _details.SelectedDetails;
@@ -270,25 +278,33 @@ public class DistributionListViewModel : ViewModelBase
     {
         if (IsCreatingDistributionList)
         {
-            return "Creating group...";
+            return Loc.Get("Presentation.CreatingGroupInProgress");
         }
 
         if (IsSavingSettings)
         {
-            return "Saving settings group...";
+            return Loc.Get("Presentation.SavingGroupSettingsInProgress");
         }
 
         if (IsLoadingMembers)
         {
-            return "Loading group members...";
+            return Loc.Get("Presentation.LoadingGroupMembersInProgress");
         }
 
         if (IsLoadingDetails)
         {
-            return "Loading group details...";
+            return Loc.Get("Presentation.LoadingGroupDetailsInProgress");
         }
 
-        return "Loading groups...";
+        return Loc.Get("Presentation.LoadingGroupsInProgress");
+    }
+    public override void ReleaseUiResources()
+    {
+        base.ReleaseUiResources();
+        _list.ReleaseUiResources();
+        _details.ReleaseUiResources();
+        _settings.ReleaseUiResources();
+        _editor.ReleaseUiResources();
     }
 }
 

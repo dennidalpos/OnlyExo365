@@ -228,6 +228,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     public bool IsNavigationLocked => _navigationState.IsNavigationLocked;
     public bool CanNavigate => _navigationState.CanNavigate;
+    public bool ConfirmClose() => _navigationState.ConfirmDiscardActiveDraft();
 
     public bool IsVerboseLoggingEnabled
     {
@@ -309,9 +310,9 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         _navigationState.RegisterBlockingStateSource(source, isBlocking, watchedProperties);
     }
 
-    public void RegisterUnsavedChangesCheck(Func<bool> hasUnsavedChanges)
+    public void RegisterUnsavedChangesCheck(Func<bool> hasUnsavedChanges, Action? discard = null)
     {
-        _navigationState.RegisterUnsavedChangesCheck(hasUnsavedChanges);
+        _navigationState.RegisterUnsavedChangesCheck(hasUnsavedChanges, discard);
     }
 
     public bool IsFeatureAvailable(Func<FeatureCapabilitiesDto, bool> featureCheck)
@@ -395,6 +396,7 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
+        ReleaseUiResources();
         _workerService.StateChanged -= OnWorkerStateChanged;
         _workerService.EventReceived -= OnEventReceived;
         _workerService.CapabilitiesUpdated -= OnCapabilitiesUpdated;
@@ -406,6 +408,14 @@ public sealed class ShellViewModel : ViewModelBase, IDisposable
         LocalizationService.Instance.CultureChanged -= OnCultureChanged;
 
         _navigationState.Dispose();
+        ViewModelBase?[] pages = [Contacts, Resources, PublicFolders, MobileDevices, Migration,
+            Permissions, Mailboxes, DeletedMailboxes, MailboxDetails, DistributionLists, Logs,
+            Tools, MessageTrace, Compliance, MailSecurity, MailFlow, Dashboard, MailboxSpace, MailboxAccessReport];
+        foreach (var page in pages)
+        {
+            if (page is IDisposable disposable) disposable.Dispose();
+            else page?.ReleaseUiResources();
+        }
     }
 
     private void OnWorkerStateChanged(object? sender, WorkerConnectionState state)

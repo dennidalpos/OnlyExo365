@@ -56,6 +56,88 @@ public sealed class MailSecurityViewModelTests
         Assert.Equal("Delete", viewModel.AntiSpamPhishSpamAction);
     }
 
+    [Fact]
+    public void Draft_CancelledPolicySelectionAndRefreshPreserveEditedAction()
+    {
+        var worker = new MailSecurityTestWorkerService();
+        using var shell = new ShellViewModel(new ConnectedConnectionWorkerServiceStub(), new NavigationService());
+        SetExchangeConnected(shell);
+        var editor = new MailSecurityViewModel(worker, shell);
+        var first = new HostedContentFilterPolicyDto { Identity = "a", Name = "A" };
+        editor.SelectedAntiSpamPolicy = first;
+        Assert.False(editor.HasPendingChanges);
+        editor.AntiSpamSpamAction = "CustomAction";
+        Assert.True(editor.HasPendingChanges);
+        ErrorDialogService.ConfirmationHandlerOverride = (_, _) => false;
+        try
+        {
+            editor.SelectedAntiSpamPolicy = new HostedContentFilterPolicyDto { Identity = "b", Name = "B" };
+            editor.RefreshWorkspaceCommand.Execute(null);
+            Assert.Same(first, editor.SelectedAntiSpamPolicy);
+            Assert.Equal("CustomAction", editor.AntiSpamSpamAction);
+            Assert.Equal(0, worker.GetMailSecurityBaselineCalls);
+        }
+        finally { ErrorDialogService.ConfirmationHandlerOverride = null; editor.ReleaseUiResources(); }
+    }
+
+    [Fact]
+    public void SaveAntiSpam_SubmitsSnapshotRatherThanValuesChangedDuringConfirmation()
+    {
+        var worker = new MailSecurityTestWorkerService();
+        using var shell = new ShellViewModel(new ConnectedConnectionWorkerServiceStub(), new NavigationService());
+        SetExchangeConnected(shell);
+        var editor = new MailSecurityViewModel(worker, shell)
+        {
+            SelectedAntiSpamPolicy = new HostedContentFilterPolicyDto { Identity = "a", Name = "A", SpamAction = "Delete" }
+        };
+        editor.AntiSpamSpamAction = "Quarantine";
+        ErrorDialogService.ConfirmationHandlerOverride = (_, message) =>
+        {
+            Assert.Contains("A", message, StringComparison.Ordinal);
+            editor.AntiSpamSpamAction = "Redirect";
+            return true;
+        };
+        try
+        {
+            editor.SaveAntiSpamCommand.Execute(null);
+            Assert.Equal("a", worker.LastAntiSpamRequest?.Identity);
+            Assert.Equal("Quarantine", worker.LastAntiSpamRequest?.SpamAction);
+        }
+        finally { ErrorDialogService.ConfirmationHandlerOverride = null; editor.ReleaseUiResources(); }
+    }
+
+    [Fact]
+    public async Task SaveAntiSpam_CancelledDiscardOfOtherDraftsPreservesEditorsAndSkipsWrite()
+    {
+        var worker = new MailSecurityTestWorkerService();
+        using var shell = new ShellViewModel(new ConnectedConnectionWorkerServiceStub(), new NavigationService());
+        SetExchangeConnected(shell);
+        var editor = new MailSecurityViewModel(worker, shell);
+        await editor.LoadAsync();
+        var selected = editor.SelectedAntiSpamPolicy;
+        editor.AntiSpamSpamAction = "Delete";
+        editor.AntiPhishThresholdLevel = 4;
+        var prompts = 0;
+        ErrorDialogService.ConfirmationHandlerOverride = (_, message) =>
+        {
+            prompts++;
+            Assert.Contains(OnlyExo365.Shell.Localization.Loc.Get("Security.SaveDiscardsOtherDrafts"), message, StringComparison.Ordinal);
+            return false;
+        };
+        try
+        {
+            editor.SaveAntiSpamCommand.Execute(null);
+            Assert.Equal(1, prompts);
+            Assert.Null(worker.LastAntiSpamRequest);
+            Assert.Equal(1, worker.GetMailSecurityBaselineCalls);
+            Assert.Same(selected, editor.SelectedAntiSpamPolicy);
+            Assert.Equal("Delete", editor.AntiSpamSpamAction);
+            Assert.Equal(4, editor.AntiPhishThresholdLevel);
+            Assert.True(editor.HasPendingChanges);
+        }
+        finally { ErrorDialogService.ConfirmationHandlerOverride = null; editor.ReleaseUiResources(); }
+    }
+
     private static void SetExchangeConnected(ShellViewModel shell)
     {
         var property = typeof(ShellViewModel)
@@ -68,6 +150,7 @@ public sealed class MailSecurityViewModelTests
     private sealed class MailSecurityTestWorkerService : TestMailSecurityWorkerServiceBase
     {
         public int GetMailSecurityBaselineCalls { get; private set; }
+        public UpdateHostedContentFilterPolicyRequest? LastAntiSpamRequest { get; private set; }
 
         public override Task<Result<GetMailSecurityBaselineResponse>> GetMailSecurityBaselineAsync(GetMailSecurityBaselineRequest? request = null, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
         {
@@ -88,7 +171,10 @@ public sealed class MailSecurityViewModelTests
             => throw TestStubExceptions.CreateUnsupported();
 
         public override Task<Result> UpdateHostedContentFilterPolicyAsync(UpdateHostedContentFilterPolicyRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
-            => throw TestStubExceptions.CreateUnsupported();
+        {
+            LastAntiSpamRequest = request;
+            return Task.FromResult(Result.Success());
+        }
 
         public override Task<Result> UpdateAntiPhishPolicyAsync(UpdateAntiPhishPolicyRequest request, Action<EventEnvelope>? eventHandler = null, CancellationToken cancellationToken = default)
             => throw TestStubExceptions.CreateUnsupported();

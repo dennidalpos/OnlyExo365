@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -500,7 +501,7 @@ public sealed class MailboxSettingsEditorViewModel : ViewModelBase
                 }
                 else if (!result.WasCancelled)
                 {
-                    _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? "Unable to retrieve retention policies.");
+                    _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? Loc.Get("Presentation.UnableToRetrieveRetentionPolicies"));
                 }
             }
 
@@ -512,7 +513,7 @@ public sealed class MailboxSettingsEditorViewModel : ViewModelBase
                     AvailableRetentionPolicies.Add(new RetentionPolicySummaryDto
                     {
                         Name = string.Empty,
-                        Description = "No policy assigned"
+                        Description = Loc.Get("Presentation.NoPolicyAssigned")
                     });
 
                     foreach (var policy in policies)
@@ -580,7 +581,7 @@ public sealed class MailboxSettingsEditorViewModel : ViewModelBase
         {
             if (string.IsNullOrWhiteSpace(normalizedPrimarySmtpAddress))
             {
-                throw new InvalidOperationException("Primary SMTP is required when updating mailbox addresses.");
+                throw new InvalidOperationException(Loc.Get("Presentation.PrimarySMTPIsRequiredWhenUpdatingMailboxAddresses"));
             }
 
             request.PrimarySmtpAddress = normalizedPrimarySmtpAddress;

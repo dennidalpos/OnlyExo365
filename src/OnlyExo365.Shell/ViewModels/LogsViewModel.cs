@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
@@ -17,7 +18,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
 {
     private readonly ShellViewModel _shellViewModel;
     private readonly object _filterLock = new();
-    private readonly DebounceHelper _refreshDebounce = new();
+    private readonly DebounceHelper _refreshDebounce;
     private readonly string _persistentLogDirectory;
     private readonly string _defaultExportDirectory;
 
@@ -41,6 +42,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
                                                                                 
     public LogsViewModel(ShellViewModel shellViewModel)
     {
+        _refreshDebounce = CreateDebounceHelper();
         _shellViewModel = shellViewModel;
         _persistentLogDirectory = PersistentLogWriter.GetDefaultLogDirectoryPath();
         _defaultExportDirectory = ExcelExportService.ResolveExportDirectory();
@@ -186,8 +188,8 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
     public string PersistentLogDirectory => _persistentLogDirectory;
     public string PersistentObservabilitySummaryPath => PersistentLogStore.GetSummaryFilePath(_persistentLogDirectory);
 
-    public string PersistentLogPolicySummary => $"Persisted JSONL logs retained for {PersistentLogWriter.ResolveRetentionDays()} UTC day(s).";
-    public string PersistentObservabilitySummary => "Collector-friendly summary JSON is refreshed from persisted logs and included in exports.";
+    public string PersistentLogPolicySummary => Loc.GetFormat("Logs.RetentionSummary", PersistentLogWriter.ResolveRetentionDays());
+    public string PersistentObservabilitySummary => Loc.Get("Presentation.CollectorFriendlySummaryJSONIsRefreshedFromPersisted");
 
                  
                                         
@@ -464,6 +466,7 @@ public sealed class LogsViewModel : ViewModelBase, IDisposable
                   
     public void Dispose()
     {
+        ReleaseUiResources();
         _shellViewModel.LogEntries.CollectionChanged -= OnLogEntriesChanged;
         _refreshDebounce.Dispose();
     }

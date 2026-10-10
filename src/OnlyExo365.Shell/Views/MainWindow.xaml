@@ -8,6 +8,7 @@
         xmlns:ipc="clr-namespace:OnlyExo365.Shell.Ipc;assembly=OnlyExo365.Shell"
         xmlns:dtos="clr-namespace:OnlyExo365.Contracts.Dtos;assembly=OnlyExo365.Contracts"
         Title="{loc:Loc Key=Shell.WindowTitle}"
+        Language="{Binding LanguageSelection.SelectedLocale.Code}"
         Height="800" Width="1200"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen">
@@ -20,8 +21,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+        <Border Grid.Row="0" Background="{DynamicResource SecondaryBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
                 Padding="12,8">
             <Grid>
                 <Grid.RowDefinitions>
@@ -37,9 +38,9 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{loc:Loc Key=Shell.AppName}" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource PrimaryTextBrush}"/>
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <TextBlock Text="{Binding CurrentPageTitle}" FontSize="16" Margin="8,0,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                     </StackPanel>
                     <ComboBox Grid.Column="1"
                               ItemsSource="{Binding LanguageSelection.AvailableLocales}"
@@ -69,30 +70,30 @@
                 <WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left"
                            VerticalAlignment="Center" Margin="0,12,0,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                        <TextBlock Text="{loc:Loc Key=Status.WorkerLabel}" Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Text="{loc:Loc Key=Status.WorkerLabel}" Foreground="{DynamicResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <Ellipse VerticalAlignment="Center">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
-                                    <Setter Property="Fill" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Setter Property="Fill" Value="{DynamicResource SecondaryTextBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Connected}">
-                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource SuccessBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Starting}">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.WaitingForHandshake}">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Restarting}">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Crashed}">
-                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding WorkerState}" Value="{x:Static ipc:WorkerConnectionState.Unresponsive}">
-                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -103,27 +104,27 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                        <TextBlock Text="{loc:Loc Key=Status.ExchangeLabel}" Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Text="{loc:Loc Key=Status.ExchangeLabel}" Foreground="{DynamicResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <Ellipse VerticalAlignment="Center">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
-                                    <Setter Property="Fill" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Setter Property="Fill" Value="{DynamicResource SecondaryTextBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Connected}">
-                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource SuccessBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Connecting}">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Reconnecting}">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ExchangeState}" Value="{x:Static dtos:ConnectionState.Failed}">
-                                            <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding IsExchangeConnectionDisabled}" Value="True">
-                                            <Setter Property="Fill" Value="{StaticResource WarningBrush}"/>
+                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -134,7 +135,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{loc:Loc Key=Status.GraphLabel}" Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Text="{loc:Loc Key=Status.GraphLabel}" Foreground="{DynamicResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <Ellipse Style="{StaticResource StatusIndicator}" VerticalAlignment="Center">
                             <Ellipse.Fill>
@@ -153,16 +154,16 @@
                 Visibility="{Binding GlobalAlert.IsVisible, Converter={StaticResource BoolToVisibility}}">
             <Border.Style>
                 <Style TargetType="Border" BasedOn="{StaticResource ShellGlobalAlertBorderStyle}">
-                    <Setter Property="Background" Value="{StaticResource InfoBannerBackgroundBrush}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource InfoBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource InfoBannerBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource InfoBrush}"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Warning}">
-                            <Setter Property="Background" Value="{StaticResource WarningBannerBackgroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource WarningBannerBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Error}">
-                            <Setter Property="Background" Value="{StaticResource ErrorBannerBackgroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource ErrorBannerBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource ErrorBrush}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -173,13 +174,13 @@
                     <TextBlock Text="{Binding GlobalAlert.Title}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource ShellGlobalAlertTitleTextStyle}">
-                                <Setter Property="Foreground" Value="{StaticResource InfoBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Warning}">
-                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding GlobalAlert.Severity}" Value="{x:Static vm:AppAlertSeverity.Error}">
-                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -208,8 +209,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="{StaticResource TertiaryBackgroundBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <Border Grid.Column="0" Background="{DynamicResource TertiaryBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               CanContentScroll="True">
@@ -219,21 +220,23 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDashboardPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
 
-                    <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
+                    <Separator Margin="8,8" Background="{DynamicResource BorderBrush}"/>
 
                     <Button Content="{loc:Loc Key=Nav.MailContacts}" Command="{Binding NavigateToContactsCommand}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsContactsPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -245,7 +248,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsResourcesPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -257,21 +261,23 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDistributionListsPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
 
-                    <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
+                    <Separator Margin="8,8" Background="{DynamicResource BorderBrush}"/>
 
                     <Button Content="{loc:Loc Key=Nav.Mailboxes}" Command="{Binding NavigateToMailboxesCommand}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailboxesPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -283,7 +289,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDeletedMailboxesPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -295,7 +302,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailboxSpacePage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -307,7 +315,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailboxAccessReportPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -319,7 +328,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsPublicFoldersPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -333,21 +343,23 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMobileDevicesPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
 
-                    <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
+                    <Separator Margin="8,8" Background="{DynamicResource BorderBrush}"/>
 
                     <Button Content="{loc:Loc Key=Nav.MailFlow}" Command="{Binding NavigateToMailFlowCommand}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailFlowPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -361,7 +373,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMailSecurityPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -375,7 +388,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMessageTracePage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -389,7 +403,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMigrationPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -403,7 +418,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsPermissionsPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -417,21 +433,23 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCompliancePage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
 
-                    <Separator Margin="8,8" Background="{StaticResource BorderBrush}"/>
+                    <Separator Margin="8,8" Background="{DynamicResource BorderBrush}"/>
 
                     <Button Content="{loc:Loc Key=Nav.Tools}" Command="{Binding NavigateToToolsCommand}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsToolsPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -443,7 +461,8 @@
                             <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsLogsPage}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryActionTextBrush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -453,7 +472,7 @@
                 </ScrollViewer>
             </Border>
 
-            <Grid Grid.Column="1" Background="{StaticResource PrimaryBackgroundBrush}">
+            <Grid Grid.Column="1" Background="{DynamicResource PrimaryBackgroundBrush}">
                 <views:DashboardView x:Name="DashboardView"
                                       Visibility="{Binding IsDashboardPage, Converter={StaticResource BoolToVisibility}}"/>
 
@@ -515,8 +534,8 @@
                         MaxWidth="520"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
-                        Background="{StaticResource SecondaryBackgroundBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
+                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Visibility="{Binding Prompt.IsOpen, Converter={StaticResource BoolToVisibility}}">
@@ -525,7 +544,7 @@
                             <TextBlock Text="{Binding Prompt.Title}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
-                                       Foreground="{StaticResource PrimaryTextBrush}"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        DockPanel.Dock="Left"/>
                             <Border Width="12"
                                     Height="12"
@@ -534,13 +553,10 @@
                                     DockPanel.Dock="Right">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Prompt.IsWarning}" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Prompt.IsConfirmation}" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -551,72 +567,57 @@
                         <TextBlock Text="{Binding Prompt.Message}"
                                    Margin="0,12,0,0"
                                    TextWrapping="Wrap"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
 
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     Margin="0,16,0,0">
-                            <Button Content="{loc:Loc Key=Btn.Cancel}"
-                                    Command="{Binding Prompt.CancelCommand}"
-                                    Style="{StaticResource InlineActionButton}"
-                                    Visibility="{Binding Prompt.IsConfirmation, Converter={StaticResource BoolToVisibility}}"/>
-                            <Button Content="{loc:Loc Key=Btn.Confirm}"
-                                    Command="{Binding Prompt.ConfirmCommand}"
-                                    Style="{StaticResource InlinePrimaryActionButton}"
-                                    Visibility="{Binding Prompt.IsConfirmation, Converter={StaticResource BoolToVisibility}}"/>
                             <Button Content="{loc:Loc Key=Btn.Close}"
                                     Command="{Binding Prompt.CancelCommand}"
-                                    Style="{StaticResource InlinePrimaryActionButton}"
-                                    Visibility="{Binding Prompt.IsConfirmation, Converter={StaticResource InverseBoolToVisibility}}"/>
+                                    Style="{StaticResource InlinePrimaryActionButton}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>
         </Grid>
 
-        <Border Grid.Row="3" Background="{StaticResource TertiaryBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+        <Border Grid.Row="3" Background="{DynamicResource TertiaryBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="12,4">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <WrapPanel>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding GlobalStatus, FallbackValue='Ready'}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding GlobalStatus}" TextTrimming="CharacterEllipsis" MaxWidth="200"
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Text="{Binding GlobalProgressPercentText}"
                                Margin="8,0,0,0"
                                FontWeight="SemiBold"
                                Visibility="{Binding IsGlobalOperationRunning, Converter={StaticResource BoolToVisibility}}"/>
                     <TextBlock Text="{Binding GlobalProgressCountText}"
                                Margin="8,0,0,0"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Visibility="{Binding HasGlobalItemProgress, Converter={StaticResource BoolToVisibility}}"/>
                     <ProgressBar Value="{Binding GlobalProgress}" Maximum="100"
                                  Width="100" Height="6" Margin="12,0,0,0"
                                  Visibility="{Binding IsGlobalOperationRunning, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
 
-                <Border Grid.Column="1"
+                <Border
                         Margin="12,0"
                         Padding="8,4"
-                        Background="{StaticResource SecondaryBackgroundBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
+                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="4"
                         Visibility="{Binding Compliance.HasAuditSearchTasks, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Compliance.AuditTaskCenterStatus}"
                                    VerticalAlignment="Center"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <ComboBox ItemsSource="{Binding Compliance.AuditSearchTasks}"
                                   SelectedItem="{Binding Compliance.SelectedAuditSearchTask}"
                                   DisplayMemberPath="TaskSummary"
-                                  Width="320"
+                                  Width="220"
                                   Margin="8,0,0,0"
                                   AutomationProperties.Name="{loc:Loc Key=Shell.AuditTaskSelectorLabel}"
                                   ToolTip="{loc:Loc Key=Shell.AuditTaskSelectorLabel}"/>
@@ -626,21 +627,21 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Column="2"
+                <StackPanel
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
                             Margin="12,0"
                             Visibility="{Binding IsExchangeConnected, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="{loc:Loc Key=Shell.ConnectedPrefix}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
-                    <TextBlock Text="{Binding ConnectedUser, Mode=OneWay}"
-                               Foreground="{StaticResource SuccessBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="{Binding ConnectedUser, Mode=OneWay}" MaxWidth="240" TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource SuccessBrush}"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"
+                <TextBlock VerticalAlignment="Center"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
                            Text="{x:Static contracts:ProductInfo.DisplayVersion}"/>
-            </Grid>
+            </WrapPanel>
         </Border>
     </Grid>
 </Window>

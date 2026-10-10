@@ -14,7 +14,7 @@ public sealed class MailboxDetailViewsBindingTests
             text => string.Equals(text, "{loc:Loc Key=Mailbox.PendingChangesLabel}", StringComparison.Ordinal));
         Assert.Contains(
             document.Descendants().Where(element => element.Name.LocalName == "TextBlock").Select(element => (string?)element.Attribute("Text")),
-            text => string.Equals(text, "{Binding PendingActionsCount, StringFormat={loc:Loc Key=Mailbox.PendingPermissionsFormat}}", StringComparison.Ordinal));
+            text => string.Equals(text, "{Binding PendingActionsCount, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.PendingPermissionsFormat}", StringComparison.Ordinal));
 
         var tabHeaders = document
             .Descendants()

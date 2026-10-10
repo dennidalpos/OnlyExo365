@@ -10,53 +10,73 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="180"/>
+            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition>
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Setter Property="Height" Value="8"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MessageTrace.SelectedMessageEvents.Count}" Value="0">
+                                <Setter Property="Height" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition MaxHeight="180">
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Setter Property="Height" Value="*"/>
+                        <Setter Property="MinHeight" Value="60"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MessageTrace.SelectedMessageEvents.Count}" Value="0">
+                                <Setter Property="Height" Value="0"/>
+                                <Setter Property="MinHeight" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{loc:Loc Key=Nav.MessageTrace}" Style="{StaticResource PageTitleTextStyle}"/>
+        <TextBlock Grid.Row="0" Text="{loc:Loc Key=Nav.MessageTrace}" Style="{StaticResource PageTitleTextStyle}" Margin="0,0,0,8"/>
 
-        <Border Grid.Row="1" Style="{StaticResource SectionCardBorderStyle}" Margin="0,0,0,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Text="{loc:Loc Key=MessageTrace.From}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <DatePicker Grid.Column="1" SelectedDate="{Binding MessageTrace.StartDate}" Margin="0,0,12,0"/>
-
-                <TextBlock Grid.Column="2" Text="{loc:Loc Key=MessageTrace.To}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <DatePicker Grid.Column="3" SelectedDate="{Binding MessageTrace.EndDate}" Margin="0,0,12,0"/>
-
-                <TextBlock Grid.Column="4" Text="{loc:Loc Key=MessageTrace.Sender}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox Grid.Column="5" Text="{Binding MessageTrace.SenderAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-
-                <TextBlock Grid.Column="6" Text="{loc:Loc Key=MessageTrace.Recipient}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox Grid.Column="7" Text="{Binding MessageTrace.RecipientAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-
-                <Button Grid.Column="8" Content="{loc:Loc Key=MessageTrace.SearchBtn}" Command="{Binding MessageTrace.SearchCommand}"
-                        Style="{StaticResource PrimaryButton}"/>
-            </Grid>
+        <Border Grid.Row="1" Style="{StaticResource SectionCardBorderStyle}" Padding="8" Margin="0,0,0,8">
+            <WrapPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock x:Name="TraceFromLabel" Text="{loc:Loc Key=MessageTrace.From}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding MessageTrace.StartDate}" Width="135" AutomationProperties.LabeledBy="{Binding ElementName=TraceFromLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock x:Name="TraceToLabel" Text="{loc:Loc Key=MessageTrace.To}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding MessageTrace.EndDate}" Width="135" AutomationProperties.LabeledBy="{Binding ElementName=TraceToLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock x:Name="TraceSenderLabel" Text="{loc:Loc Key=MessageTrace.Sender}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Text="{Binding MessageTrace.SenderAddress, UpdateSourceTrigger=PropertyChanged}" Width="150" AutomationProperties.LabeledBy="{Binding ElementName=TraceSenderLabel}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock x:Name="TraceRecipientLabel" Text="{loc:Loc Key=MessageTrace.Recipient}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Text="{Binding MessageTrace.RecipientAddress, UpdateSourceTrigger=PropertyChanged}" Width="150" AutomationProperties.LabeledBy="{Binding ElementName=TraceRecipientLabel}"/>
+                </StackPanel>
+                <Button Content="{loc:Loc Key=MessageTrace.SearchBtn}" Command="{Binding MessageTrace.SearchCommand}" Style="{StaticResource PrimaryButton}"/>
+            </WrapPanel>
         </Border>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="{loc:Loc Key=MessageTrace.QuickFilters}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-            <Button Content="{loc:Loc Key=MessageTrace.FilterAll}" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="All" Style="{StaticResource ActionGroupPrimaryButton}" Margin="0,0,6,0"/>
-            <Button Content="{loc:Loc Key=MessageTrace.FilterDelivered}" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Delivered" Style="{StaticResource ActionGroupPrimaryButton}" Margin="0,0,6,0"/>
-            <Button Content="{loc:Loc Key=MessageTrace.FilterFailed}" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Failed" Style="{StaticResource ActionGroupPrimaryButton}" Margin="0,0,6,0"/>
-            <Button Content="{loc:Loc Key=MessageTrace.FilterPending}" Command="{Binding MessageTrace.SetStatusFilterCommand}" CommandParameter="Pending" Style="{StaticResource ActionGroupPrimaryButton}" Margin="0,0,12,0"/>
+        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock x:Name="TraceStatusLabel" Text="{loc:Loc Key=MessageTrace.QuickFilters}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox Width="140" Margin="0,0,8,0" SelectedValuePath="Tag"
+                      SelectedValue="{Binding MessageTrace.StatusFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      AutomationProperties.LabeledBy="{Binding ElementName=TraceStatusLabel}">
+                <ComboBoxItem Tag="All" Content="{loc:Loc Key=MessageTrace.FilterAll}"/>
+                <ComboBoxItem Tag="Delivered" Content="{loc:Loc Key=MessageTrace.FilterDelivered}"/>
+                <ComboBoxItem Tag="Failed" Content="{loc:Loc Key=MessageTrace.FilterFailed}"/>
+                <ComboBoxItem Tag="Pending" Content="{loc:Loc Key=MessageTrace.FilterPending}"/>
+            </ComboBox>
             <Button Content="{loc:Loc Key=Btn.ExportExcel}" Command="{Binding MessageTrace.ExportExcelCommand}" Style="{StaticResource ActionGroupPrimaryButton}" Margin="0,0,6,0"/>
             <Button Content="{loc:Loc Key=MessageTrace.MessageDetails}" Command="{Binding MessageTrace.LoadDetailsCommand}" Style="{StaticResource PrimaryButton}"/>
-        </StackPanel>
+        </WrapPanel>
 
         <Border Grid.Row="3" Style="{StaticResource WarningBannerBorderStyle}" Margin="0,0,0,8"
                 Visibility="{Binding MessageTrace.HasWarnings, Converter={StaticResource BoolToVisibility}}">
@@ -91,7 +111,7 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColReceived}" Binding="{Binding Received, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="140"/>
+                    <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColReceived}" Binding="{Binding Received, StringFormat={}{0:g}}" Width="140"/>
                     <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColSender}" Binding="{Binding SenderAddress}" Width="Auto" MinWidth="220"/>
                     <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColRecipient}" Binding="{Binding RecipientAddress}" Width="Auto" MinWidth="220"/>
                     <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColSubject}" Binding="{Binding Subject}" Width="Auto" MinWidth="260"/>
@@ -120,15 +140,37 @@
             </Border>
         </Grid>
 
-        <DataGrid Grid.Row="6"
+        <GridSplitter Grid.Row="6" Height="4" HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                      Background="{DynamicResource BorderBrush}" AutomationProperties.Name="{loc:Loc Key=Ui.ResizeDetails}">
+            <GridSplitter.Style>
+                <Style TargetType="GridSplitter">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MessageTrace.SelectedMessageEvents.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GridSplitter.Style>
+        </GridSplitter>
+        <DataGrid Grid.Row="7"
                   ItemsSource="{Binding MessageTrace.SelectedMessageEvents}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
                   Margin="0,8,0,0">
+            <DataGrid.Style>
+                <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MessageTrace.SelectedMessageEvents.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Style>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColDate}" Binding="{Binding Date, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}" Width="150"/>
+                <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColDate}" Binding="{Binding Date, StringFormat={}{0:G}}" Width="150"/>
                 <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColEvent}" Binding="{Binding Event}" Width="130"/>
                 <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColAction}" Binding="{Binding Action}" Width="120"/>
                 <DataGridTextColumn Header="{loc:Loc Key=MessageTrace.ColDetail}" Binding="{Binding Detail}" Width="Auto" MinWidth="220"/>
@@ -136,7 +178,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Row="7" Margin="0,12,0,0">
+        <Grid Grid.Row="8" Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

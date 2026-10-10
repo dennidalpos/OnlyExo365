@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -17,7 +18,7 @@ public class MailboxListViewModel : ViewModelBase
     private readonly NavigationService _navigationService;
     private readonly ShellViewModel _shellViewModel;
 
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
     private CancellationTokenSource? _loadCts;
 
     private bool _isLoading;
@@ -44,6 +45,7 @@ public class MailboxListViewModel : ViewModelBase
 
     public MailboxListViewModel(IMailboxesWorkerService workerService, NavigationService navigationService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _navigationService = navigationService;
         _shellViewModel = shellViewModel;
@@ -177,9 +179,15 @@ public class MailboxListViewModel : ViewModelBase
         get => _selectedMailbox;
         set
         {
+            var previous = _selectedMailbox;
             if (SetProperty(ref _selectedMailbox, value) && value != null)
             {
                 ViewDetails(value);
+                if (_navigationService.SelectedIdentity != value.Identity)
+                {
+                    _selectedMailbox = previous;
+                    System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(() => OnPropertyChanged(nameof(SelectedMailbox)));
+                }
             }
         }
     }
@@ -281,10 +289,10 @@ public class MailboxListViewModel : ViewModelBase
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
 
     public string StatusText => IsTotalCountExact
-        ? $"{Mailboxes.Count} of {TotalCount} mailboxes"
-        : $"{Mailboxes.Count}+ mailboxes loaded";
+        ? Loc.GetFormat("Ui.InventoryFormat", Mailboxes.Count, TotalCount, Loc.Get("Noun.Mailboxes"))
+        : Loc.GetFormat("Ui.PartialInventoryFormat", Mailboxes.Count, Loc.Get("Noun.Mailboxes"));
 
-    public string CreateMailboxSectionTitle => IsSharedMailboxCreation ? "New Shared Mailbox" : "New Mailbox";
+    public string CreateMailboxSectionTitle => IsSharedMailboxCreation ? Loc.Get("Presentation.NewSharedMailbox") : Loc.Get("Presentation.NewMailbox");
 
     #endregion
 
@@ -389,7 +397,7 @@ public class MailboxListViewModel : ViewModelBase
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
-        LoadProgress.Start("Loading mailbox...", "mailbox");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMailboxInProgress"), Loc.Get("Presentation.Mailbox"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Mailboxes.Count);
@@ -431,7 +439,7 @@ public class MailboxListViewModel : ViewModelBase
             {
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
-                    : "Failed to load mailboxes (no error details)";
+                    : Loc.Get("Presentation.FailedToLoadMailboxesNoErrorDetails");
                 ErrorMessage = hasExistingMailboxes ? errorDetails : null;
                 if (!hasExistingMailboxes)
                 {
@@ -476,7 +484,7 @@ public class MailboxListViewModel : ViewModelBase
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
-        LoadProgress.Start("Loading mailbox...", "mailbox");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMailboxInProgress"), Loc.Get("Presentation.Mailbox"));
         ErrorMessage = null;
 
         try
@@ -513,7 +521,7 @@ public class MailboxListViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load more mailboxes";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMoreMailboxes");
             }
         }
         catch (OperationCanceledException)
@@ -568,7 +576,7 @@ public class MailboxListViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to create mailbox";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToCreateMailbox");
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox creation failed: {ErrorMessage}");
             }
         }
@@ -776,5 +784,10 @@ public class MailboxListViewModel : ViewModelBase
     }
 
     #endregion
+    public override void ReleaseUiResources()
+    {
+        base.ReleaseUiResources();
+        Provisioning.ReleaseUiResources();
+    }
 }
 

@@ -24,6 +24,11 @@ public partial class MainWindow : Window
         }
 
         e.Cancel = true;
+        if (_shutdownTask == null && DataContext is OnlyExo365.Shell.ViewModels.ShellViewModel shell && !shell.ConfirmClose())
+        {
+            base.OnClosing(e);
+            return;
+        }
         IsEnabled = false;
         _shutdownTask ??= ShutdownAndCloseAsync();
 

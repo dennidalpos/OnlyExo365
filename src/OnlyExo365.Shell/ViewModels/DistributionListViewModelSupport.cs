@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -22,9 +23,9 @@ internal static class DistributionListViewModelSupport
 
     public static string FormatGroupTypeLabel(string? groupType) => groupType switch
     {
-        "MailSecurity" => "Mail-enabled security",
+        "MailSecurity" => Loc.Get("Presentation.MailEnabledSecurity"),
         "Microsoft365" => "Microsoft 365",
-        "Dynamic" => "Dynamic distribution",
+        "Dynamic" => Loc.Get("Presentation.DynamicDistribution"),
         "Distribution" => "Distribution",
         _ => groupType ?? string.Empty
     };

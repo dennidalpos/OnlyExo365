@@ -56,7 +56,7 @@
                            TextAlignment="Center"/>
                 <TextBlock Text="{loc:Loc Key=Dashboard.DisconnectedMessage}"
                            Margin="0,8,0,0"
-                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
                            TextAlignment="Center"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -93,7 +93,7 @@
                                HorizontalAlignment="Right">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                <Setter Property="Foreground" Value="{StaticResource InfoBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
@@ -105,24 +105,24 @@
                             ToolTip="{loc:Loc Key=Dashboard.SharedMailboxesTooltip}"
                             Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Dashboard.SharedMailboxCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
+                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource InfoBrush}"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Dashboard.RoomMailboxes}" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Dashboard.RoomMailboxCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
+                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource InfoBrush}"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Dashboard.EquipmentMailboxes}" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Dashboard.EquipmentMailboxCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
+                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource InfoBrush}"/>
 
                     <Separator Grid.Row="4" Grid.ColumnSpan="2" Margin="0,12,0,8"
-                               Background="{StaticResource BorderBrush}"/>
+                               Background="{DynamicResource BorderBrush}"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="0" Text="{loc:Loc Key=Dashboard.Total}" FontWeight="SemiBold"/>
                     <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <TextBlock Text="{Binding Dashboard.TotalMailboxCount}" FontWeight="Bold" FontSize="18"
-                                   Foreground="{StaticResource AccentBrush}"/>
-                        <TextBlock Text="*" Foreground="{StaticResource WarningBrush}"
+                                   Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="*" Foreground="{DynamicResource WarningBrush}"
                                    Visibility="{Binding Dashboard.IsApproximate, Converter={StaticResource BoolToVisibility}}"
                                    ToolTip="{loc:Loc Key=Dashboard.ApproximateCount}"/>
                     </StackPanel>
@@ -149,24 +149,24 @@
                             Style="{StaticResource SummaryLinkButton}"
                             ToolTip="{loc:Loc Key=Dashboard.DistributionGroupsTooltip}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Dashboard.DistributionGroupCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Foreground="{StaticResource InfoBrush}"/>
+                               HorizontalAlignment="Right" Foreground="{DynamicResource InfoBrush}"/>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Dashboard.DynamicGroups}" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Dashboard.DynamicDistributionGroupCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"/>
+                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource InfoBrush}"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Dashboard.M365Groups}" Margin="0,8,0,0"
                                Visibility="{Binding Dashboard.ShowUnifiedGroups, Converter={StaticResource BoolToVisibility}}"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Dashboard.UnifiedGroupCount}" FontWeight="SemiBold"
-                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{StaticResource InfoBrush}"
+                               HorizontalAlignment="Right" Margin="0,8,0,0" Foreground="{DynamicResource InfoBrush}"
                                Visibility="{Binding Dashboard.ShowUnifiedGroups, Converter={StaticResource BoolToVisibility}}"/>
 
                     <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,12,0,8"
-                               Background="{StaticResource BorderBrush}"/>
+                               Background="{DynamicResource BorderBrush}"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Dashboard.Total}" FontWeight="SemiBold"/>
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Dashboard.TotalGroupCount}" FontWeight="Bold" FontSize="18"
-                               HorizontalAlignment="Right" Foreground="{StaticResource AccentBrush}"/>
+                               HorizontalAlignment="Right" Foreground="{DynamicResource AccentBrush}"/>
                 </Grid>
             </controls:SectionPanel>
         </Grid>
@@ -201,18 +201,18 @@
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                         <TextBlock Text="{loc:Loc Key=Dashboard.LicensesTotal}"
                                                    Style="{StaticResource CaptionTextStyle}"
-                                                   Foreground="{StaticResource PrimaryTextBrush}"/>
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
                                         <TextBlock Text="{Binding Total, Mode=OneWay}"
                                                    Style="{StaticResource CaptionTextStyle}"
-                                                   Foreground="{StaticResource PrimaryTextBrush}"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                                    FontWeight="SemiBold"/>
                                     </StackPanel>
                                 </Grid>
                                 <ProgressBar Grid.Row="1" Minimum="0" Maximum="{Binding Total}"
                                              Value="{Binding Assigned, Mode=OneWay}"
                                              Height="6" Margin="0,6,0,4"
-                                             Foreground="{StaticResource AccentBrush}"
-                                             Background="{StaticResource TertiaryBackgroundBrush}"/>
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Background="{DynamicResource TertiaryBackgroundBrush}"/>
                                 <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -220,11 +220,11 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                                         <TextBlock Text="{loc:Loc Key=Dashboard.LicensesAssigned}" Style="{StaticResource CaptionTextStyle}"/>
-                                        <TextBlock Text="{Binding Assigned, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Foreground="{StaticResource InfoBrush}"/>
+                                        <TextBlock Text="{Binding Assigned, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                                         <TextBlock Text="{loc:Loc Key=Dashboard.LicensesAvailable}" Style="{StaticResource CaptionTextStyle}"/>
-                                        <TextBlock Text="{Binding Available, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                                        <TextBlock Text="{Binding Available, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}"/>
                                     </StackPanel>
                                 </Grid>
                             </Grid>
@@ -238,13 +238,13 @@
         <StackPanel Grid.Row="4" Margin="0,16,0,0"
                     Visibility="{Binding Dashboard.HasAdminUsers, Converter={StaticResource BoolToVisibility}}">
             <TextBlock Text="{loc:Loc Key=Dashboard.AdminUsers}" Style="{StaticResource SectionHeadingTextStyle}"/>
-            <DataGrid ItemsSource="{Binding Dashboard.AdminUsers}"
+            <DataGrid MaxHeight="320" ItemsSource="{Binding Dashboard.AdminUsers}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      Foreground="{StaticResource PrimaryTextBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}"
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      Foreground="{DynamicResource PrimaryTextBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}"
                       GridLinesVisibility="None"
                       BorderThickness="0"
                       HeadersVisibility="Column"

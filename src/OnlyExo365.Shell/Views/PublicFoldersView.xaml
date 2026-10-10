@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization"
              xmlns:controls="clr-namespace:OnlyExo365.Shell.Controls">
-    <Grid Margin="16">
+    <Grid Margin="16" IsEnabled="{Binding PublicFolders.IsEditorBusy, Converter={StaticResource InverseBool}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.1*"/>
             <ColumnDefinition Width="12"/>
@@ -23,7 +23,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <TextBlock Text="{loc:Loc Key=Nav.PublicFolders}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding PublicFolders.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button Content="{loc:Loc Key=PublicFolders.New}" Command="{Binding PublicFolders.NewFolderCommand}"
@@ -44,10 +44,13 @@
                     <ColumnDefinition Width="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" Text="{Binding PublicFolders.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-                <ComboBox Grid.Column="1"
-                          ItemsSource="{Binding PublicFolders.MailEnabledFilters}"
-                          SelectedItem="{Binding PublicFolders.MailEnabledFilter}"/>
+                <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0" Text="{Binding PublicFolders.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1"
+                          SelectedValuePath="Tag" SelectedValue="{Binding PublicFolders.MailEnabledFilter}">
+                    <ComboBoxItem Tag="All" Content="{loc:Loc Key=MessageTrace.FilterAll}"/>
+                    <ComboBoxItem Tag="Mail-enabled only" Content="{loc:Loc Key=PublicFolders.FilterMailEnabled}"/>
+                    <ComboBoxItem Tag="Mail-disabled only" Content="{loc:Loc Key=PublicFolders.FilterMailDisabled}"/>
+                </ComboBox>
             </Grid>
 
             <DataGrid Grid.Row="3"
@@ -60,10 +63,10 @@
                       CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      BorderBrush="{StaticResource BorderBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.Path}" Binding="{Binding Identity}" Width="Auto" MinWidth="260"/>
                     <DataGridTextColumn Header="{loc:Loc Key=PublicFolders.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="160"/>
@@ -98,7 +101,7 @@
             </Border>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+        <GridSplitter Grid.Column="1" Width="4" Background="{DynamicResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       ResizeDirection="Columns"
                       ResizeBehavior="PreviousAndNext"/>
@@ -122,33 +125,33 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Name}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.ParentPath}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding PublicFolders.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PublicFolders.ParentPath, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Name}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel002" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.ParentPath}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="1" Grid.Column="0" Text="{Binding PublicFolders.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="1" Grid.Column="1" Text="{Binding PublicFolders.ParentPath, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <CheckBox Grid.Row="2" Grid.Column="0" Content="{loc:Loc Key=PublicFolders.MailEnabled}"
                                   IsChecked="{Binding PublicFolders.MailEnabled}" Margin="0,8,8,0"/>
                         <CheckBox Grid.Row="2" Grid.Column="1" Content="{loc:Loc Key=PublicFolders.HiddenFromAddressLists}"
                                   IsChecked="{Binding PublicFolders.HiddenFromAddressListsEnabled}" Margin="0,8,0,0"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Alias}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.PrimarySMTP}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding PublicFolders.Alias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding PublicFolders.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock x:Name="InputLabel003" Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=PublicFolders.Alias}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel004" Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=PublicFolders.PrimarySMTP}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="4" Grid.Column="0" Text="{Binding PublicFolders.Alias, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="4" Grid.Column="1" Text="{Binding PublicFolders.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <StackPanel Grid.Row="5" Grid.Column="0"
                                     Orientation="Horizontal"
                                     Visibility="{Binding PublicFolders.IsEditingExistingFolder, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{loc:Loc Key=PublicFolders.IdentityPrefix}"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding PublicFolders.Identity}"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
                         <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="{loc:Loc Key=PublicFolders.Items}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{loc:Loc Key=PublicFolders.Items}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding PublicFolders.ItemCount}" Margin="0,0,10,0"/>
-                            <TextBlock Text="{loc:Loc Key=PublicFolders.Size}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{loc:Loc Key=PublicFolders.Size}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding PublicFolders.TotalItemSize}"/>
                         </StackPanel>
 
@@ -157,7 +160,7 @@
 
                         <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
                                    Text="{loc:Loc Key=PublicFolders.NoteSavingUpdatesTheNameParentPathMailEnabledStatusAndEmailPrope}"
-                                   Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,0"/>
                     </Grid>
                 </controls:SectionPanel>
 
@@ -170,11 +173,11 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0"
+                            <TextBox AutomationProperties.Name="{loc:Loc Key=PublicFolders.UserOrGroupThatShouldReceiveTheRole}" Grid.Column="0"
                                      Text="{Binding PublicFolders.NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,8,0"
                                      ToolTip="{loc:Loc Key=PublicFolders.UserOrGroupThatShouldReceiveTheRole}"/>
-                            <ComboBox Grid.Column="1"
+                            <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.PermissionRole}" Grid.Column="1"
                                       ItemsSource="{Binding PublicFolders.PublicFolderPermissionRoles}"
                                       SelectedItem="{Binding PublicFolders.NewPermissionRole}"
                                       Margin="0,0,8,0"/>
@@ -188,8 +191,8 @@
                                   AutoGenerateColumns="False"
                                   HeadersVisibility="Column"
                                   GridLinesVisibility="Horizontal"
-                                  Background="{StaticResource SecondaryBackgroundBrush}"
-                                  BorderBrush="{StaticResource BorderBrush}"
+                                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{DynamicResource BorderBrush}"
                                   MaxHeight="220"
                                   Margin="0,0,0,12">
                             <DataGrid.Columns>
@@ -197,7 +200,7 @@
                                 <DataGridTemplateColumn Header="{loc:Loc Key=PublicFolders.Role}" Width="Auto" MinWidth="170">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ComboBox ItemsSource="{Binding DataContext.PublicFolders.PublicFolderPermissionRoles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.PermissionRole}" ItemsSource="{Binding DataContext.PublicFolders.PublicFolderPermissionRoles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                       SelectedItem="{Binding SelectedRole, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -235,7 +238,7 @@
                 </controls:SectionPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                    <Button Content="{loc:Loc Key=PublicFolders.Save}" Command="{Binding PublicFolders.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
+                    <Button ToolTip="{loc:Loc Key=PublicFolders.Requirements}" Content="{loc:Loc Key=PublicFolders.Save}" Command="{Binding PublicFolders.SaveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
                     <Button Content="{loc:Loc Key=PublicFolders.New}" Command="{Binding PublicFolders.NewFolderCommand}"
                             Style="{StaticResource InlineActionButton}"/>
                     <Button Content="{loc:Loc Key=PublicFolders.Delete}" Command="{Binding PublicFolders.DeleteCommand}" Style="{StaticResource DangerButton}"/>

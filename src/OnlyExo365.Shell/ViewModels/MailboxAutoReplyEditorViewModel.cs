@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Net;
 using System.Text.RegularExpressions;
 using OnlyExo365.Contracts.Dtos;
@@ -142,8 +143,8 @@ public sealed class MailboxAutoReplyEditorViewModel : ViewModelBase
     }
 
     public string AutoReplyStateLabel => AutoReplyEnabled
-        ? AutoReplyScheduled ? "Programmato" : "Attivo"
-        : "Disattivato";
+        ? AutoReplyScheduled ? Loc.Get("Mailbox.AutoReplyStateScheduled") : Loc.Get("Mailbox.AutoReplyStateEnabled")
+        : Loc.Get("Mailbox.AutoReplyStateDisabled");
 
     public void Initialize(AutoReplyConfigurationDto? autoReply)
     {
@@ -231,13 +232,13 @@ public sealed class MailboxAutoReplyEditorViewModel : ViewModelBase
             if (!TryBuildScheduledDateTime(AutoReplyStartDate, AutoReplyStartTime, out var start) ||
                 !TryBuildScheduledDateTime(AutoReplyEndDate, AutoReplyEndTime, out var end))
             {
-                validationError = "Enter valid date and time values for the automatic reply window.";
+                validationError = Loc.Get("Presentation.EnterValidDateAndTimeValuesForThe");
                 return null;
             }
 
             if (end <= start)
             {
-                validationError = "La data of fine deve essere successiva alla data of inizio.";
+                validationError = Loc.Get("Presentation.TheEndDateMustBeAfterTheStart");
                 return null;
             }
         }

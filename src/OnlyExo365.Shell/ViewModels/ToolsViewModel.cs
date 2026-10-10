@@ -491,6 +491,7 @@ public class ToolsViewModel : ViewModelBase, IDisposable
     {
         if (disposing)
         {
+            ReleaseUiResources();
             _shellViewModel.PropertyChanged -= OnShellPropertyChanged;
             LocalizationService.Instance.CultureChanged -= OnCultureChanged;
             Catalog?.Dispose();

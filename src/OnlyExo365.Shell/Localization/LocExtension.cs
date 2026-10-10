@@ -16,14 +16,19 @@ public sealed class LocExtension : MarkupExtension
         {
             var weakRef = new WeakReference<DependencyObject>(targetObject);
             var key = Key;
-            LocalizationService.Instance.CultureChanged += (_, _) =>
+            EventHandler? handler = null;
+            handler = (_, _) =>
             {
-                if (weakRef.TryGetTarget(out var t) && t is not null)
+                if (!weakRef.TryGetTarget(out var target) || target.Dispatcher.HasShutdownStarted)
                 {
-                    t.Dispatcher?.Invoke(
-                        () => t.SetValue(targetProperty, LocalizationService.Instance.Get(key)));
+                    LocalizationService.Instance.CultureChanged -= handler;
+                    return;
                 }
+                void Update() => target.SetValue(targetProperty, LocalizationService.Instance.Get(key));
+                if (target.Dispatcher.CheckAccess()) Update();
+                else target.Dispatcher.BeginInvoke(Update);
             };
+            LocalizationService.Instance.CultureChanged += handler;
         }
 
         return LocalizationService.Instance.Get(Key);

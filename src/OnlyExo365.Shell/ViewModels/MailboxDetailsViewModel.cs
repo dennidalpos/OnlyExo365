@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -305,6 +306,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!IsSaving && Details?.Identity == Identity && (HasPendingChanges || HasPendingMailboxChanges) && !ErrorDialogService.ConfirmDiscardChanges()) return;
         if (string.IsNullOrEmpty(Identity))
         {
             return;
@@ -346,7 +348,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load mailbox details";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMailboxDetails");
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox details load failed: {ErrorMessage}");
             }
 
@@ -388,38 +390,11 @@ public class MailboxDetailsViewModel : ViewModelBase
         {
             var settingsRequest = SettingsEditor.BuildUpdateRequest(Identity, out var settingsChanged, out var retentionPolicyChanged, out var retentionPolicyOverride);
 
-            if (settingsChanged)
+            var retentionRequest = new SetRetentionPolicyRequest
             {
-                _shellViewModel.AddLog(LogLevel.Information, "Saving mailbox settings...");
-
-                var result = await _workerService.UpdateMailboxSettingsAsync(settingsRequest, cancellationToken: cancellationToken);
-                if (!result.IsSuccess)
-                {
-                    ErrorMessage = result.Error?.Message ?? "Unable to update mailbox settings.";
-                    _shellViewModel.AddLog(LogLevel.Error, $"Mailbox settings update failed: {ErrorMessage}");
-                    return;
-                }
-            }
-
-            if (retentionPolicyChanged)
-            {
-                _shellViewModel.AddLog(LogLevel.Information, "Saving retention policy...");
-
-                var retentionResult = await _workerService.SetRetentionPolicyAsync(
-                    new SetRetentionPolicyRequest
-                    {
-                        Identity = Identity,
-                        PolicyName = string.IsNullOrWhiteSpace(retentionPolicyOverride) ? null : retentionPolicyOverride
-                    },
-                    cancellationToken: cancellationToken);
-
-                if (!retentionResult.IsSuccess)
-                {
-                    ErrorMessage = retentionResult.Error?.Message ?? "Unable to update the retention policy.";
-                    _shellViewModel.AddLog(LogLevel.Error, $"Retention policy update failed: {ErrorMessage}");
-                    return;
-                }
-            }
+                Identity = Identity,
+                PolicyName = string.IsNullOrWhiteSpace(retentionPolicyOverride) ? null : retentionPolicyOverride
+            };
 
             var autoReplyRequest = AutoReplyEditor.BuildRequest(Identity, out var autoReplyValidationError);
             if (!string.IsNullOrWhiteSpace(autoReplyValidationError))
@@ -431,12 +406,41 @@ public class MailboxDetailsViewModel : ViewModelBase
             var autoReplyChanged = autoReplyRequest != null;
             if ((settingsChanged || retentionPolicyChanged || autoReplyChanged) &&
                 !ConfirmMutation(
-                    "Update mailbox configuration",
+                    Loc.Get("Presentation.UpdateMailboxConfiguration"),
                     $"{DisplayName} ({Identity})",
-                    "Update mailbox settings, retention policy, or automatic replies.",
-                    "Confirm mailbox save"))
+                    Loc.Get("Presentation.UpdateMailboxSettingsRetentionPolicyOrAutomaticReplies"),
+                    Loc.Get("Presentation.ConfirmMailboxSave")))
             {
                 return;
+            }
+
+            if (settingsChanged)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, "Saving mailbox settings...");
+
+                var result = await _workerService.UpdateMailboxSettingsAsync(settingsRequest, cancellationToken: cancellationToken);
+                if (!result.IsSuccess)
+                {
+                    ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateMailboxSettings");
+                    _shellViewModel.AddLog(LogLevel.Error, $"Mailbox settings update failed: {ErrorMessage}");
+                    return;
+                }
+            }
+
+            if (retentionPolicyChanged)
+            {
+                _shellViewModel.AddLog(LogLevel.Information, "Saving retention policy...");
+
+                var retentionResult = await _workerService.SetRetentionPolicyAsync(
+                    retentionRequest,
+                    cancellationToken: cancellationToken);
+
+                if (!retentionResult.IsSuccess)
+                {
+                    ErrorMessage = retentionResult.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateTheRetentionPolicy");
+                    _shellViewModel.AddLog(LogLevel.Error, $"Retention policy update failed: {ErrorMessage}");
+                    return;
+                }
             }
 
             if (autoReplyChanged)
@@ -449,7 +453,7 @@ public class MailboxDetailsViewModel : ViewModelBase
 
                 if (!autoReplyResult.IsSuccess)
                 {
-                    ErrorMessage = autoReplyResult.Error?.Message ?? "Unable to update automatic replies.";
+                    ErrorMessage = autoReplyResult.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateAutomaticReplies");
                     _shellViewModel.AddLog(LogLevel.Error, $"Auto-reply update failed: {ErrorMessage}");
                     return;
                 }
@@ -487,10 +491,10 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
 
         if (!ConfirmMutation(
-                "Convert mailbox to shared",
+                Loc.Get("Presentation.ConvertMailboxToShared"),
                 $"{DisplayName} ({Identity})",
-                "The mailbox becomes shared and licensing or access behavior can change.",
-                "Confirm mailbox conversion"))
+                Loc.Get("Presentation.TheMailboxBecomesSharedAndLicensingOrAccess"),
+                Loc.Get("Presentation.ConfirmMailboxConversion")))
         {
             return;
         }
@@ -511,7 +515,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             }
             else
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to convert the mailbox.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToConvertTheMailbox");
             }
         }
         catch (Exception ex)
@@ -533,10 +537,10 @@ public class MailboxDetailsViewModel : ViewModelBase
         }
 
         if (!ConfirmMutation(
-                "Convert mailbox to user",
+                Loc.Get("Presentation.ConvertMailboxToUser"),
                 $"{DisplayName} ({Identity})",
-                "The mailbox becomes a user mailbox and may require different licensing or policies.",
-                "Confirm mailbox conversion"))
+                Loc.Get("Presentation.TheMailboxBecomesAUserMailboxAndMay"),
+                Loc.Get("Presentation.ConfirmMailboxConversion")))
         {
             return;
         }
@@ -557,7 +561,7 @@ public class MailboxDetailsViewModel : ViewModelBase
             }
             else
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to convert the mailbox.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToConvertTheMailbox");
             }
         }
         catch (Exception ex)
@@ -580,24 +584,24 @@ public class MailboxDetailsViewModel : ViewModelBase
     {
         if (Statistics == null)
         {
-            return "Not available";
+            return Loc.Get("Presentation.NotAvailable");
         }
 
         if (Statistics.TotalItemSizeBytes == null)
         {
-            return Statistics.TotalItemSize ?? "Not available";
+            return Statistics.TotalItemSize ?? Loc.Get("Presentation.NotAvailable");
         }
 
         var quotaBytes = GetEffectiveQuotaBytes();
         if (quotaBytes == null || quotaBytes.Value <= 0)
         {
-            return Statistics.TotalItemSize ?? "Not available";
+            return Statistics.TotalItemSize ?? Loc.Get("Presentation.NotAvailable");
         }
 
         var percent = Statistics.TotalItemSizeBytes.Value / (double)quotaBytes.Value * 100;
         var quotaLabel = GetEffectiveQuotaLabel();
-        var suffix = string.IsNullOrWhiteSpace(quotaLabel) ? string.Empty : $" of {quotaLabel}";
-        return $"{Statistics.TotalItemSize} ({percent:0.0}%{suffix})";
+        var suffix = string.IsNullOrWhiteSpace(quotaLabel) ? string.Empty : Loc.GetFormat("Mailbox.OfQuota", quotaLabel);
+        return Loc.GetFormat("Mailbox.QuotaSummary", Statistics.TotalItemSize!, percent, suffix);
     }
 
     private long? GetEffectiveQuotaBytes()

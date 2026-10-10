@@ -20,7 +20,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{loc:Loc Key=DeletedMailbox.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                 <TextBlock Text="{Binding DeletedMailboxes.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -44,12 +44,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+            <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.ColumnSpan="2"
                        Text="{loc:Loc Key=DeletedMailbox.UpnLabel}"
                        Style="{StaticResource CaptionTextStyle}"
                        Margin="0,0,0,4"/>
 
-            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding DeletedMailboxes.UpnQuery, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="1" Grid.Column="0" Text="{Binding DeletedMailboxes.UpnQuery, UpdateSourceTrigger=PropertyChanged}"
                      Margin="0,0,12,0">
                 <TextBox.Style>
                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -76,7 +76,7 @@
                        Margin="0,8,0,0"
                        Text="{loc:Loc Key=DeletedMailbox.ListDescription}"
                        TextWrapping="Wrap"
-                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                       Foreground="{DynamicResource SecondaryTextBrush}"/>
         </Grid>
 
         <Grid Grid.Row="2">
@@ -90,10 +90,10 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      BorderBrush="{StaticResource BorderBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}"
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       EnableRowVirtualization="True"

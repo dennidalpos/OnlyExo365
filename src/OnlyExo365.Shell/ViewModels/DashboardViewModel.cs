@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -180,7 +181,7 @@ public class DashboardViewModel : ViewModelBase
 
     public bool HasLoadingItemProgress => LoadingCurrentItem.HasValue;
     public string LoadingPercentText => FormatProgressPercent(LoadingProgress);
-    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, "items");
+    public string? LoadingCountText => FormatProgressCount(LoadingCurrentItem, LoadingTotalItems, Loc.Get("Noun.Items"));
 
     public string? ErrorMessage
     {
@@ -240,7 +241,7 @@ public class DashboardViewModel : ViewModelBase
         _shellViewModel.ClearPageAlert(AlertPage);
         _diagnosticCorrelationId = null;
         LoadingProgress = 0;
-        LoadingStatus = "Loading dashboard...";
+        LoadingStatus = Loc.Get("Presentation.LoadingDashboardInProgress");
         LoadingCurrentItem = null;
         LoadingTotalItems = null;
 
@@ -312,7 +313,7 @@ public class DashboardViewModel : ViewModelBase
                 OnPropertyChanged(nameof(DiagnosticReferenceText));
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
-                    : "Failed to load dashboard (no error details)";
+                    : Loc.Get("Presentation.FailedToLoadDashboardNoErrorDetails");
                 if (hasExistingStats)
                 {
                     ErrorMessage = errorDetails;

@@ -43,11 +43,11 @@ public sealed class VisualConsistencyTests
         Assert.Contains(comboBoxStyle!.Elements(), element =>
             element.Name.LocalName == "Setter" &&
             string.Equals((string?)element.Attribute("Property"), "Background", StringComparison.Ordinal) &&
-            string.Equals((string?)element.Attribute("Value"), "{StaticResource TertiaryBackgroundBrush}", StringComparison.Ordinal));
+            string.Equals((string?)element.Attribute("Value"), "{DynamicResource TertiaryBackgroundBrush}", StringComparison.Ordinal));
         Assert.Contains(comboBoxStyle.Elements(), element =>
             element.Name.LocalName == "Setter" &&
             string.Equals((string?)element.Attribute("Property"), "Foreground", StringComparison.Ordinal) &&
-            string.Equals((string?)element.Attribute("Value"), "{StaticResource PrimaryTextBrush}", StringComparison.Ordinal));
+            string.Equals((string?)element.Attribute("Value"), "{DynamicResource PrimaryTextBrush}", StringComparison.Ordinal));
     }
 
     [Fact]

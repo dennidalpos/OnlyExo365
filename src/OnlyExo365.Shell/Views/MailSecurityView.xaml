@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:OnlyExo365.Shell.Localization">
 
-    <Grid Margin="16">
+    <Grid Margin="16" IsEnabled="{Binding MailSecurity.IsBusy, Converter={StaticResource InverseBool}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -65,12 +65,12 @@
 
                         <StackPanel Grid.Column="1" Margin="16,0,0,0">
                             <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedDKIMConfig}" FontWeight="SemiBold"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Domain}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.SelectedDkimConfig.Domain}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel001" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Domain}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Text="{Binding MailSecurity.SelectedDkimConfig.Domain}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailSecurity.Enabled}"
                                       IsChecked="{Binding MailSecurity.DkimEnabled}"
                                       Margin="0,12,0,0"/>
-                            <Button Content="{loc:Loc Key=MailSecurity.SaveDKIM}"
+                            <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveDKIM}"
                                     Command="{Binding MailSecurity.SaveDkimCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,12,0,0"/>
@@ -101,27 +101,27 @@
 
                         <StackPanel Grid.Column="1" Margin="16,0,0,0">
                             <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedAntiSpamPolicy}" FontWeight="SemiBold"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.SelectedAntiSpamPolicy.Name}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel002" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Text="{Binding MailSecurity.SelectedAntiSpamPolicy.Name}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailSecurity.RuleEnabled}"
                                       IsChecked="{Binding MailSecurity.AntiSpamRuleEnabled}"
                                       Margin="0,12,0,0"
                                       IsEnabled="{Binding MailSecurity.SelectedAntiSpamHasRule}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.BulkThreshold}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.AntiSpamBulkThreshold, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.SpamAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.SpamActions}"
-                                      SelectedItem="{Binding MailSecurity.AntiSpamSpamAction}"
+                            <TextBlock x:Name="InputLabel003" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.BulkThreshold}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Text="{Binding MailSecurity.AntiSpamBulkThreshold, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel004" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.SpamAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" ItemsSource="{Binding MailSecurity.SpamActions}"
+                                      Text="{Binding MailSecurity.AntiSpamSpamAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.HighConfidenceSpamAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.SpamActions}"
-                                      SelectedItem="{Binding MailSecurity.AntiSpamHighConfidenceSpamAction}"
+                            <TextBlock x:Name="InputLabel005" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.HighConfidenceSpamAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" ItemsSource="{Binding MailSecurity.SpamActions}"
+                                      Text="{Binding MailSecurity.AntiSpamHighConfidenceSpamAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.PhishSpamAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.SpamActions}"
-                                      SelectedItem="{Binding MailSecurity.AntiSpamPhishSpamAction}"
+                            <TextBlock x:Name="InputLabel006" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.PhishSpamAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" ItemsSource="{Binding MailSecurity.SpamActions}"
+                                      Text="{Binding MailSecurity.AntiSpamPhishSpamAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <Button Content="{loc:Loc Key=MailSecurity.SaveAntiSpamPolicy}"
+                            <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveAntiSpamPolicy}"
                                     Command="{Binding MailSecurity.SaveAntiSpamCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,12,0,0"/>
@@ -137,7 +137,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <DataGrid Grid.Column="0"
+                            <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" Grid.Column="0"
                                       ItemsSource="{Binding MailSecurity.AntiPhishPolicies}"
                                       SelectedItem="{Binding MailSecurity.SelectedAntiPhishPolicy}"
                                       AutoGenerateColumns="False"
@@ -153,8 +153,8 @@
 
                             <StackPanel Grid.Column="1" Margin="16,0,0,0">
                                 <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedAntiPhishPolicy}" FontWeight="SemiBold"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding MailSecurity.SelectedAntiPhishPolicy.Name}" IsReadOnly="True"/>
+                                <TextBlock x:Name="InputLabel007" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Text="{Binding MailSecurity.SelectedAntiPhishPolicy.Name}" IsReadOnly="True"/>
                                 <CheckBox Content="{loc:Loc Key=MailSecurity.RuleEnabled}"
                                           IsChecked="{Binding MailSecurity.AntiPhishRuleEnabled}"
                                           Margin="0,12,0,0"
@@ -171,29 +171,29 @@
                                 <CheckBox Content="{loc:Loc Key=MailSecurity.HonorDMARCPolicy}"
                                           IsChecked="{Binding MailSecurity.AntiPhishHonorDmarcPolicy}"
                                           Margin="0,4,0,0"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.PhishThresholdLevel}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding MailSecurity.AntiPhishThresholdLevel, UpdateSourceTrigger=PropertyChanged}"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.MailboxIntelligenceAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <ComboBox ItemsSource="{Binding MailSecurity.AntiPhishActions}"
-                                          SelectedItem="{Binding MailSecurity.AntiPhishMailboxIntelligenceProtectionAction}"
-                                          IsEditable="True"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.TargetedUserAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <ComboBox ItemsSource="{Binding MailSecurity.AntiPhishActions}"
-                                          SelectedItem="{Binding MailSecurity.AntiPhishTargetedUserProtectionAction}"
-                                          IsEditable="True"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.AuthenticationFailAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <ComboBox ItemsSource="{Binding MailSecurity.AntiPhishActions}"
-                                          SelectedItem="{Binding MailSecurity.AntiPhishAuthenticationFailAction}"
-                                          IsEditable="True"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.DMARCRejectAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <ComboBox ItemsSource="{Binding MailSecurity.AntiPhishActions}"
-                                          SelectedItem="{Binding MailSecurity.AntiPhishDmarcRejectAction}"
-                                          IsEditable="True"/>
-                                <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.DMARCQuarantineAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <ComboBox ItemsSource="{Binding MailSecurity.AntiPhishActions}"
-                                          SelectedItem="{Binding MailSecurity.AntiPhishDmarcQuarantineAction}"
-                                          IsEditable="True"/>
-                                <Button Content="{loc:Loc Key=MailSecurity.SaveAntiPhishPolicy}"
+                                <TextBlock x:Name="InputLabel008" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.PhishThresholdLevel}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Text="{Binding MailSecurity.AntiPhishThresholdLevel, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel009" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.MailboxIntelligenceAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" ItemsSource="{Binding MailSecurity.AntiPhishActions}"
+                                          Text="{Binding MailSecurity.AntiPhishMailboxIntelligenceProtectionAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True"/>
+                                <TextBlock x:Name="InputLabel010" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.TargetedUserAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" ItemsSource="{Binding MailSecurity.AntiPhishActions}"
+                                          Text="{Binding MailSecurity.AntiPhishTargetedUserProtectionAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True"/>
+                                <TextBlock x:Name="InputLabel011" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.AuthenticationFailAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" ItemsSource="{Binding MailSecurity.AntiPhishActions}"
+                                          Text="{Binding MailSecurity.AntiPhishAuthenticationFailAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True"/>
+                                <TextBlock x:Name="InputLabel012" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.DMARCRejectAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" ItemsSource="{Binding MailSecurity.AntiPhishActions}"
+                                          Text="{Binding MailSecurity.AntiPhishDmarcRejectAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True"/>
+                                <TextBlock x:Name="InputLabel013" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.DMARCQuarantineAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" ItemsSource="{Binding MailSecurity.AntiPhishActions}"
+                                          Text="{Binding MailSecurity.AntiPhishDmarcQuarantineAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True"/>
+                                <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveAntiPhishPolicy}"
                                         Command="{Binding MailSecurity.SaveAntiPhishCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Margin="0,12,0,0"/>
@@ -225,8 +225,8 @@
 
                         <StackPanel Grid.Column="1" Margin="16,0,0,0">
                             <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedAntiMalwarePolicy}" FontWeight="SemiBold"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.SelectedMalwarePolicy.Name}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel014" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Text="{Binding MailSecurity.SelectedMalwarePolicy.Name}" IsReadOnly="True"/>
                             <CheckBox Content="{loc:Loc Key=MailSecurity.RuleEnabled}"
                                       IsChecked="{Binding MailSecurity.MalwareRuleEnabled}"
                                       Margin="0,12,0,0"
@@ -237,11 +237,11 @@
                             <CheckBox Content="{loc:Loc Key=MailSecurity.EnableZAP}"
                                       IsChecked="{Binding MailSecurity.MalwareZapEnabled}"
                                       Margin="0,4,0,0"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.FileTypeAction}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.MalwareFileTypeActions}"
-                                      SelectedItem="{Binding MailSecurity.MalwareFileTypeAction}"
+                            <TextBlock x:Name="InputLabel015" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.FileTypeAction}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel015}" ItemsSource="{Binding MailSecurity.MalwareFileTypeActions}"
+                                      Text="{Binding MailSecurity.MalwareFileTypeAction, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <Button Content="{loc:Loc Key=MailSecurity.SaveAntiMalwarePolicy}"
+                            <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveAntiMalwarePolicy}"
                                     Command="{Binding MailSecurity.SaveMalwareCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,12,0,0"/>
@@ -271,23 +271,23 @@
 
                         <StackPanel Grid.Column="1" Margin="16,0,0,0">
                             <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedQuarantinePolicy}" FontWeight="SemiBold"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.SelectedQuarantinePolicy.Name}" IsReadOnly="True"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.EndUserPermissions}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.QuarantinePermissions}"
-                                      SelectedItem="{Binding MailSecurity.QuarantinePermissionsValue}"
+                            <TextBlock x:Name="InputLabel016" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel016}" Text="{Binding MailSecurity.SelectedQuarantinePolicy.Name}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel017" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.EndUserPermissions}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel017}" ItemsSource="{Binding MailSecurity.QuarantinePermissions}"
+                                      Text="{Binding MailSecurity.QuarantinePermissionsValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
                             <CheckBox Content="{loc:Loc Key=MailSecurity.EnableEndUserSpamNotifications}"
                                       IsChecked="{Binding MailSecurity.QuarantineEsnEnabled}"
                                       Margin="0,12,0,0"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.NotificationFrequencyDays}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.QuarantineEndUserSpamNotificationFrequency, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RetentionDays}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.QuarantineRetentionDays, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel018" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.NotificationFrequencyDays}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel018}" Text="{Binding MailSecurity.QuarantineEndUserSpamNotificationFrequency, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel019" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RetentionDays}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel019}" Text="{Binding MailSecurity.QuarantineRetentionDays, UpdateSourceTrigger=PropertyChanged}"/>
                             <CheckBox Content="{loc:Loc Key=MailSecurity.OrganizationBrandingEnabled}"
                                       IsChecked="{Binding MailSecurity.QuarantineOrganizationBrandingEnabled}"
                                       Margin="0,12,0,0"/>
-                            <Button Content="{loc:Loc Key=MailSecurity.SaveQuarantinePolicy}"
+                            <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveQuarantinePolicy}"
                                     Command="{Binding MailSecurity.SaveQuarantineCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,12,0,0"/>
@@ -318,23 +318,23 @@
 
                         <StackPanel Grid.Column="1" Margin="16,0,0,0">
                             <TextBlock Text="{loc:Loc Key=MailSecurity.SelectedOutboundSpamPolicy}" FontWeight="SemiBold"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.SelectedOutboundSpamPolicy.Name}" IsReadOnly="True"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitExternalHour}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.OutboundRecipientLimitExternalPerHour, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitInternalHour}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.OutboundRecipientLimitInternalPerHour, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitPerDay}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding MailSecurity.OutboundRecipientLimitPerDay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.ActionWhenThresholdReached}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.OutboundThresholdActions}"
-                                      SelectedItem="{Binding MailSecurity.OutboundActionWhenThresholdReached}"
+                            <TextBlock x:Name="InputLabel020" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.Name}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel020}" Text="{Binding MailSecurity.SelectedOutboundSpamPolicy.Name}" IsReadOnly="True"/>
+                            <TextBlock x:Name="InputLabel021" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitExternalHour}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel021}" Text="{Binding MailSecurity.OutboundRecipientLimitExternalPerHour, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel022" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitInternalHour}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel022}" Text="{Binding MailSecurity.OutboundRecipientLimitInternalPerHour, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel023" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.RecipientLimitPerDay}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel023}" Text="{Binding MailSecurity.OutboundRecipientLimitPerDay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel024" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.ActionWhenThresholdReached}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel024}" ItemsSource="{Binding MailSecurity.OutboundThresholdActions}"
+                                      Text="{Binding MailSecurity.OutboundActionWhenThresholdReached, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <TextBlock Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.AutoForwardingMode}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding MailSecurity.AutoForwardingModes}"
-                                      SelectedItem="{Binding MailSecurity.OutboundAutoForwardingMode}"
+                            <TextBlock x:Name="InputLabel025" Margin="0,12,0,0" Text="{loc:Loc Key=MailSecurity.AutoForwardingMode}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel025}" ItemsSource="{Binding MailSecurity.AutoForwardingModes}"
+                                      Text="{Binding MailSecurity.OutboundAutoForwardingMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEditable="True"/>
-                            <Button Content="{loc:Loc Key=MailSecurity.SaveOutboundSpamPolicy}"
+                            <Button ToolTip="{loc:Loc Key=MailSecurity.Requirements}" Content="{loc:Loc Key=MailSecurity.SaveOutboundSpamPolicy}"
                                     Command="{Binding MailSecurity.SaveOutboundSpamCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,12,0,0"/>

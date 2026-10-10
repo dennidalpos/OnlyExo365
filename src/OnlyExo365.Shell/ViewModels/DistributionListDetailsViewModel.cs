@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -137,8 +138,8 @@ public sealed class DistributionListDetailsViewModel : ViewModelBase
         : _shellViewModel.IsFeatureAvailable(f => f.CanAddDistributionGroupMember) || _shellViewModel.IsFeatureAvailable(f => f.CanRemoveDistributionGroupMember));
     public bool CanAddMember => !string.IsNullOrWhiteSpace(NewMemberIdentity) && CanModifyMembers;
     public string MembersStatusText => SelectedDetails?.Members != null
-        ? $"{Members.Count} of {SelectedDetails.Members.TotalCount} members"
-        : $"{Members.Count} members";
+        ? Loc.GetFormat("Ui.InventoryFormat", Members.Count, SelectedDetails.Members.TotalCount, Loc.Get("Noun.Members"))
+        : Loc.GetFormat("Ui.MemberCount", Members.Count);
 
     public ICommand BackCommand { get; }
     public ICommand LoadMoreMembersCommand { get; }
@@ -198,7 +199,7 @@ public sealed class DistributionListDetailsViewModel : ViewModelBase
 
             if (!result.WasCancelled)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load distribution list details.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadDistributionListDetails");
                 _setErrorMessage(errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, $"Group details load failed: {errorMessage}");
             }
@@ -346,10 +347,10 @@ public sealed class DistributionListDetailsViewModel : ViewModelBase
         {
             var memberIdentity = NewMemberIdentity!.Trim();
             if (!ConfirmMutation(
-                    "Add member to distribution list",
+                    Loc.Get("Presentation.AddMemberToDistributionList"),
                     $"{memberIdentity} -> {SelectedDetails.Identity}",
-                    "Refresh the membership of the selected distribution list.",
-                    "Confirm membership update"))
+                    Loc.Get("Presentation.RefreshTheMembershipOfTheSelectedDistributionList"),
+                    Loc.Get("Presentation.ConfirmMembershipUpdate")))
             {
                 return;
             }
@@ -390,10 +391,10 @@ public sealed class DistributionListDetailsViewModel : ViewModelBase
         try
         {
             if (!ConfirmMutation(
-                    "Remove member from distribution list",
+                    Loc.Get("Presentation.RemoveMemberFromDistributionList"),
                     $"{member.Identity} <- {SelectedDetails.Identity}",
-                    "The member is removed from the selected distribution list.",
-                    "Confirm membership update"))
+                    Loc.Get("Presentation.TheMemberIsRemovedFromTheSelectedDistribution"),
+                    Loc.Get("Presentation.ConfirmMembershipUpdate")))
             {
                 return;
             }

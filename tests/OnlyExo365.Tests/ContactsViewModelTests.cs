@@ -254,6 +254,60 @@ public sealed class ContactsViewModelTests
         return changed.Task.WaitAsync(TimeSpan.FromSeconds(2));
     }
 
+    [Fact]
+    public async Task SaveCommand_SubmitsTheValuesShownBeforeConfirmation()
+    {
+        var worker = new ContactsWorkerServiceStub();
+        using var shell = new ShellViewModel(worker, new NavigationService());
+        SetExchangeConnected(shell);
+        var editor = new ContactsViewModel(worker, shell)
+        {
+            DisplayName = "Target A", Alias = "target-a", PrimarySmtpAddress = "a@contoso.com",
+            ExternalEmailAddress = "a@example.com"
+        };
+        ErrorDialogService.ConfirmationHandlerOverride = (_, message) =>
+        {
+            Assert.Contains("a@contoso.com", message, StringComparison.Ordinal);
+            editor.PrimarySmtpAddress = "b@contoso.com";
+            editor.DisplayName = "Target B";
+            return true;
+        };
+        try
+        {
+            editor.SaveCommand.Execute(null);
+            await worker.ContactUpserted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            Assert.Equal("a@contoso.com", worker.LastUpsertContactRequest?.PrimarySmtpAddress);
+            Assert.Equal("Target A", worker.LastUpsertContactRequest?.DisplayName);
+        }
+        finally { ErrorDialogService.ConfirmationHandlerOverride = null; editor.ReleaseUiResources(); }
+    }
+
+    [Fact]
+    public void Draft_CancelledSelectionNewAndRefreshPreserveTheEditor()
+    {
+        var worker = new ContactsWorkerServiceStub();
+        using var shell = new ShellViewModel(worker, new NavigationService());
+        SetExchangeConnected(shell);
+        var editor = new ContactsViewModel(worker, shell);
+        var first = new ContactListItemDto { Identity = "first", ContactKind = "MailContact" };
+        editor.SelectedContact = first;
+        editor.DisplayName = "Unsaved draft";
+        Assert.True(editor.HasPendingChanges);
+        var initialLoads = worker.ContactRequests.Count;
+        ErrorDialogService.ConfirmationHandlerOverride = (_, _) => false;
+        try
+        {
+            editor.SelectedContact = new ContactListItemDto { Identity = "second", ContactKind = "MailContact" };
+            editor.NewContactCommand.Execute(null);
+            editor.RefreshCommand.Execute(null);
+            Assert.Same(first, editor.SelectedContact);
+            Assert.Equal("Unsaved draft", editor.DisplayName);
+            Assert.Equal(initialLoads, worker.ContactRequests.Count);
+            Assert.True(editor.HasPendingChanges);
+        }
+        finally { ErrorDialogService.ConfirmationHandlerOverride = null; editor.ReleaseUiResources(); }
+    }
+
     private static void SetExchangeConnected(ShellViewModel shell)
     {
         SetExchangeState(shell, ConnectionState.Connected);

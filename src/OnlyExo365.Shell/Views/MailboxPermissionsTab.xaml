@@ -21,18 +21,18 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxPerms.FieldUser}"
+                            <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxPerms.FieldUser}"
                                        Style="{StaticResource CaptionTextStyle}" Margin="0,0,8,4"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=MailboxPerms.FieldPermissionType}"
+                            <TextBlock x:Name="InputLabel002" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=MailboxPerms.FieldPermissionType}"
                                        Style="{StaticResource CaptionTextStyle}" Margin="0,0,8,4"/>
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=MailboxPerms.FieldAutoMap}"
+                            <TextBlock x:Name="InputLabel003" Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=MailboxPerms.FieldAutoMap}"
                                        Style="{StaticResource CaptionTextStyle}" Margin="0,0,8,4"/>
 
-                            <TextBox Grid.Row="1" Grid.Column="0"
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="1" Grid.Column="0"
                                      Text="{Binding NewPermissionUser, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,8,0"
                                      ToolTip="{loc:Loc Key=MailboxPerms.UserTooltip}"/>
-                            <ComboBox Grid.Row="1" Grid.Column="1"
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="1" Grid.Column="1"
                                       SelectedValue="{Binding NewPermissionType}"
                                       SelectedValuePath="Tag"
                                       Margin="0,0,8,0"
@@ -41,7 +41,7 @@
                                 <ComboBoxItem Content="{loc:Loc Key=MailboxPerms.PermissionSendAs}" Tag="{x:Static contracts:PermissionType.SendAs}"/>
                                 <ComboBoxItem Content="{loc:Loc Key=MailboxPerms.PermissionSendOnBehalf}" Tag="{x:Static contracts:PermissionType.SendOnBehalf}"/>
                             </ComboBox>
-                            <ComboBox Grid.Row="1" Grid.Column="2"
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="1" Grid.Column="2"
                                       SelectedValue="{Binding NewPermissionAutoMapping}"
                                       SelectedValuePath="Tag"
                                       Margin="0,0,8,0"
@@ -61,15 +61,15 @@
                     <DataGrid ItemsSource="{Binding FullAccessPermissions}"
                               AutoGenerateColumns="False" IsReadOnly="True"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               MaxHeight="200" Margin="0,0,0,12">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="{loc:Loc Key=MailboxPerms.ColUser}" Binding="{Binding User}" Width="Auto" MinWidth="220"/>
                             <DataGridTemplateColumn Header="{loc:Loc Key=MailboxPerms.ColAutoMap}" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox SelectedValue="{Binding AutoMapping, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        <ComboBox AutomationProperties.Name="{loc:Loc Key=MailboxPerms.AutoMapTooltip}" SelectedValue="{Binding AutoMapping, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   SelectedValuePath="Tag"
                                                   Width="75"
                                                   ToolTip="{loc:Loc Key=MailboxPerms.AutoMapTooltip}">
@@ -110,8 +110,8 @@
                     <DataGrid ItemsSource="{Binding SendAsPermissions}"
                               AutoGenerateColumns="False" IsReadOnly="True"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               MaxHeight="200" Margin="0,0,0,12">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="{loc:Loc Key=MailboxPerms.ColUser}" Binding="{Binding User}" Width="Auto" MinWidth="220"/>
@@ -136,8 +136,8 @@
                     <DataGrid ItemsSource="{Binding SendOnBehalfPermissions}"
                               AutoGenerateColumns="False" IsReadOnly="True"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               MaxHeight="200" Margin="0,0,0,12">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="{loc:Loc Key=MailboxPerms.ColUser}" Binding="{Binding User}" Width="Auto" MinWidth="220"/>
@@ -173,9 +173,9 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxPerms.FieldFolderPath}"
+                            <TextBlock x:Name="InputLabel004" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxPerms.FieldFolderPath}"
                                        Style="{StaticResource CaptionTextStyle}" Margin="0,0,8,4"/>
-                            <TextBox Grid.Row="1" Grid.Column="0"
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="1" Grid.Column="0"
                                      Text="{Binding FolderPermissionFolderPath, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,8,0"
                                      ToolTip="{loc:Loc Key=MailboxPerms.FolderPathTooltip}"/>
@@ -184,7 +184,7 @@
                             <TextBlock Grid.Row="1" Grid.Column="1"
                                        Text="{Binding FolderPermissionTargetLabel}"
                                        VerticalAlignment="Center"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <Button Grid.Row="1" Grid.Column="3" Content="{loc:Loc Key=MailboxPerms.BtnLoad}"
                                     Command="{Binding RefreshFolderPermissionsCommand}"
                                     Style="{StaticResource PrimaryButton}"
@@ -204,11 +204,11 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
+                        <TextBox AutomationProperties.Name="{loc:Loc Key=MailboxPerms.FolderUserTooltip}" Grid.Column="0"
                                  Text="{Binding NewFolderPermissionUser, UpdateSourceTrigger=PropertyChanged}"
                                  Margin="0,0,8,0"
                                  ToolTip="{loc:Loc Key=MailboxPerms.FolderUserTooltip}"/>
-                        <ComboBox Grid.Column="1"
+                        <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.PermissionRole}" Grid.Column="1"
                                   ItemsSource="{Binding FolderPermissionRoles}"
                                   SelectedItem="{Binding NewFolderPermissionRole}"
                                   Margin="0,0,8,0"/>
@@ -222,8 +222,8 @@
                               AutoGenerateColumns="False"
                               HeadersVisibility="Column"
                               GridLinesVisibility="Horizontal"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               MaxHeight="220"
                               Margin="0,0,0,8">
                         <DataGrid.Columns>
@@ -231,7 +231,7 @@
                             <DataGridTemplateColumn Header="{loc:Loc Key=MailboxPerms.ColRole}" Width="180">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding DataContext.FolderPermissionRoles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.PermissionRole}" ItemsSource="{Binding DataContext.FolderPermissionRoles, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                   SelectedItem="{Binding SelectedRole, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   IsEnabled="{Binding IsInherited, Converter={StaticResource InverseBool}}"/>
                                     </DataTemplate>

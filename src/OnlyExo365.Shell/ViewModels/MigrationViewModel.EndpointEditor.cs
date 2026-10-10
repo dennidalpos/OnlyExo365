@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Shell.Helpers;
@@ -283,7 +284,7 @@ public partial class MigrationViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load migration endpoint";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMigrationEndpoint");
                 if (hasWorkspaceData)
                 {
                     ErrorMessage = errorMessage;
@@ -344,10 +345,10 @@ public partial class MigrationViewModel
         var request = BuildUpsertEndpointRequest();
 
         if (!ConfirmMutation(
-                "Saving migration endpoint",
+                Loc.Get("Presentation.SavingMigrationEndpoint"),
                 expectedIdentity,
-                "Create or update the selected migration endpoint.",
-                "Confirm endpoint save"))
+                Loc.Get("Presentation.CreateOrUpdateTheSelectedMigrationEndpoint"),
+                Loc.Get("Presentation.ConfirmEndpointSave")))
         {
             return;
         }
@@ -362,7 +363,7 @@ public partial class MigrationViewModel
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to save the migration endpoint.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToSaveTheMigrationEndpoint");
                 return;
             }
 
@@ -413,7 +414,7 @@ public partial class MigrationViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to test the migration endpoint.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToTestTheMigrationEndpoint");
                 return;
             }
 

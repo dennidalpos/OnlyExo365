@@ -15,10 +15,11 @@ public class ContactsViewModel : ViewModelBase
     private const NavigationPage AlertPage = NavigationPage.Contacts;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private bool _isLoading;
     private bool _isSaving;
+    private int _detailsLoadingCount;
     private string? _errorMessage;
     private string? _searchQuery;
     private string _contactKindFilter = "All";
@@ -39,9 +40,53 @@ public class ContactsViewModel : ViewModelBase
     private string? _pendingMailUserPassword;
     private int _mailUserPasswordClearTrigger;
     private bool _hiddenFromAddressListsEnabled;
+    private bool _applyingDraft;
+    private ContactDraft _draftBaseline = new("MailContact", "", "", "", "", "", "", false);
+
+    private sealed record ContactDraft(string Kind, string DisplayName, string Name, string Alias,
+        string PrimaryAddress, string ExternalAddress, string Upn, bool Hidden);
+
+    private ContactDraft CaptureDraft() => new(ContactKind, DisplayName, Name, Alias,
+        PrimarySmtpAddress, ExternalEmailAddress, UserPrincipalName, HiddenFromAddressListsEnabled);
+
+    public bool HasPendingChanges => CaptureDraft() != _draftBaseline || HasMailUserPassword;
+
+    private bool CanReplaceDraft() => _applyingDraft || IsLoading || IsSaving || !HasPendingChanges || ErrorDialogService.ConfirmDiscardChanges();
+
+    public void DiscardDraft() => RestoreDraft();
+
+    private void RestoreDraft()
+    {
+        var draft = _draftBaseline;
+        ContactKind = draft.Kind;
+        DisplayName = draft.DisplayName;
+        Name = draft.Name;
+        Alias = draft.Alias;
+        PrimarySmtpAddress = draft.PrimaryAddress;
+        ExternalEmailAddress = draft.ExternalAddress;
+        UserPrincipalName = draft.Upn;
+        HiddenFromAddressListsEnabled = draft.Hidden;
+        ClearMailUserPassword();
+    }
+
+    private void AcceptDraft()
+    {
+        _draftBaseline = CaptureDraft();
+        OnPropertyChanged(nameof(HasPendingChanges));
+    }
+
+    protected override void OnPropertyChanged(string? propertyName = null)
+    {
+        base.OnPropertyChanged(propertyName);
+        if (propertyName is nameof(ContactKind) or nameof(DisplayName) or nameof(Name) or nameof(Alias)
+            or nameof(PrimarySmtpAddress) or nameof(ExternalEmailAddress) or nameof(UserPrincipalName)
+            or nameof(HiddenFromAddressListsEnabled) or nameof(HasMailUserPassword))
+            base.OnPropertyChanged(nameof(HasPendingChanges));
+    }
 
     public ContactsViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
@@ -70,11 +115,14 @@ public class ContactsViewModel : ViewModelBase
                 OnPropertyChanged(nameof(CanRefresh));
                 OnPropertyChanged(nameof(CanLoadMore));
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 OnPropertyChanged(nameof(CanRemove));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
     }
+
+    public bool IsEditorBusy => IsLoading || IsSaving || _detailsLoadingCount > 0;
 
     public bool IsSaving
     {
@@ -84,6 +132,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _isSaving, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 OnPropertyChanged(nameof(CanRemove));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -153,13 +202,20 @@ public class ContactsViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{Contacts.Count} of {TotalCount} contacts";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Contacts.Count, TotalCount, Loc.Get("Noun.Contacts"));
 
     public ContactListItemDto? SelectedContact
     {
         get => _selectedContact;
         set
         {
+            if (ReferenceEquals(_selectedContact, value)) return;
+            if (!CanReplaceDraft())
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedContact))));
+                return;
+            }
             if (SetProperty(ref _selectedContact, value) && value != null)
             {
                 _ = LoadDetailsAsync(value);
@@ -178,6 +234,7 @@ public class ContactsViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsEditingExistingContact));
                 OnPropertyChanged(nameof(IsCreateMailUser));
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 OnPropertyChanged(nameof(CanRemove));
             }
         }
@@ -205,6 +262,7 @@ public class ContactsViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsMailUser));
                 OnPropertyChanged(nameof(IsCreateMailUser));
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -220,6 +278,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _displayName, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             }
         }
     }
@@ -238,6 +297,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _alias, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             }
         }
     }
@@ -250,6 +310,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _primarySmtpAddress, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             }
         }
     }
@@ -262,6 +323,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _externalEmailAddress, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             }
         }
     }
@@ -274,6 +336,7 @@ public class ContactsViewModel : ViewModelBase
             if (SetProperty(ref _userPrincipalName, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             }
         }
     }
@@ -354,6 +417,11 @@ public class ContactsViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!IsSaving && HasPendingChanges)
+        {
+            if (!CanReplaceDraft()) return;
+            RestoreDraft();
+        }
         var hasExistingContacts = Contacts.Count > 0;
 
         if (!_shellViewModel.IsExchangeConnected)
@@ -368,7 +436,7 @@ public class ContactsViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading contacts...", "contacts");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingContactsInProgress"), Loc.Get("Presentation.Contacts"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Contacts.Count);
@@ -389,7 +457,7 @@ public class ContactsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load contacts";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadContacts");
                 if (hasExistingContacts)
                 {
                     ErrorMessage = errorMessage;
@@ -433,7 +501,7 @@ public class ContactsViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading contacts...", "contacts");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingContactsInProgress"), Loc.Get("Presentation.Contacts"));
         ErrorMessage = null;
 
         try
@@ -451,7 +519,7 @@ public class ContactsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load contacts";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadContacts");
                 return;
             }
 
@@ -482,6 +550,8 @@ public class ContactsViewModel : ViewModelBase
         var selectedKind = selected.ContactKind;
         ErrorMessage = null;
 
+        _detailsLoadingCount++;
+        OnPropertyChanged(nameof(IsEditorBusy));
         try
         {
             var result = await _workerService.GetContactDetailsAsync(
@@ -494,7 +564,7 @@ public class ContactsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load contact details.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadContactDetails");
                 return;
             }
 
@@ -511,6 +581,11 @@ public class ContactsViewModel : ViewModelBase
         {
             ErrorMessage = ex.Message;
         }
+        finally
+        {
+            _detailsLoadingCount--;
+            OnPropertyChanged(nameof(IsEditorBusy));
+        }
     }
 
     private async Task SaveAsync(CancellationToken cancellationToken)
@@ -520,11 +595,25 @@ public class ContactsViewModel : ViewModelBase
             return;
         }
 
+        var request = new UpsertContactRequest
+        {
+            Identity = ContactIdentity,
+            ContactKind = ContactKind,
+            DisplayName = DisplayName.Trim(),
+            Name = string.IsNullOrWhiteSpace(Name) ? DisplayName.Trim() : Name.Trim(),
+            Alias = Alias.Trim(),
+            PrimarySmtpAddress = PrimarySmtpAddress.Trim(),
+            ExternalEmailAddress = ExternalEmailAddress.Trim(),
+            UserPrincipalName = string.IsNullOrWhiteSpace(UserPrincipalName) ? null : UserPrincipalName.Trim(),
+            Password = IsCreateMailUser ? CaptureMailUserPassword() : null,
+            HiddenFromAddressListsEnabled = HiddenFromAddressListsEnabled
+        };
+
         if (!ConfirmMutation(
-                string.IsNullOrWhiteSpace(ContactIdentity) ? "Creating contact" : "Updating contact",
+                string.IsNullOrWhiteSpace(ContactIdentity) ? Loc.Get("Presentation.CreatingContact") : Loc.Get("Presentation.UpdatingContact"),
                 PrimarySmtpAddress.Trim(),
-                $"Save the {ContactKind} contact.",
-                "Confirm contact save"))
+                Loc.GetFormat("Contact.SaveImpact", request.ContactKind),
+                Loc.Get("Presentation.ConfirmContactSave")))
         {
             ClearMailUserPassword();
             return;
@@ -535,34 +624,22 @@ public class ContactsViewModel : ViewModelBase
 
         try
         {
-            var password = IsCreateMailUser ? CaptureMailUserPassword() : null;
             var result = await _workerService.UpsertContactAsync(
-                new UpsertContactRequest
-                {
-                    Identity = ContactIdentity,
-                    ContactKind = ContactKind,
-                    DisplayName = DisplayName.Trim(),
-                    Name = string.IsNullOrWhiteSpace(Name) ? DisplayName.Trim() : Name.Trim(),
-                    Alias = Alias.Trim(),
-                    PrimarySmtpAddress = PrimarySmtpAddress.Trim(),
-                    ExternalEmailAddress = ExternalEmailAddress.Trim(),
-                    UserPrincipalName = string.IsNullOrWhiteSpace(UserPrincipalName) ? null : UserPrincipalName.Trim(),
-                    Password = password,
-                    HiddenFromAddressListsEnabled = HiddenFromAddressListsEnabled
-                },
+                request,
                 cancellationToken: cancellationToken);
 
             ClearMailUserPassword();
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to save the contact.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToSaveTheContact");
                 return;
             }
 
-            _shellViewModel.AddLog(LogLevel.Information, $"Contact saved: {DisplayName} ({ContactKind})", "Contacts");
+            AcceptDraft();
+            _shellViewModel.AddLog(LogLevel.Information, $"Contact saved: {request.DisplayName} ({request.ContactKind})", "Contacts");
             await RefreshAsync(cancellationToken);
-            await TryReselectSavedContactAsync(cancellationToken);
+            await TryReselectSavedContactAsync(request.PrimarySmtpAddress, request.ContactKind, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -581,11 +658,13 @@ public class ContactsViewModel : ViewModelBase
             return;
         }
 
+        var request = new RemoveContactRequest { Identity = ContactIdentity, ContactKind = ContactKind };
+
         if (!ConfirmMutation(
-                "Deleting contact",
+                Loc.Get("Presentation.DeletingContact"),
                 DisplayName,
-                $"Permanently removes the {ContactKind} contact.",
-                "Confirm contact deletion"))
+                Loc.GetFormat("Contact.DeleteImpact", request.ContactKind),
+                Loc.Get("Presentation.ConfirmContactDeletion")))
         {
             return;
         }
@@ -596,21 +675,19 @@ public class ContactsViewModel : ViewModelBase
         try
         {
             var result = await _workerService.RemoveContactAsync(
-                new RemoveContactRequest
-                {
-                    Identity = ContactIdentity,
-                    ContactKind = ContactKind
-                },
+                request,
                 cancellationToken: cancellationToken);
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to remove the contact.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToRemoveTheContact");
                 return;
             }
 
             _shellViewModel.AddLog(LogLevel.Warning, $"Contact removed: {DisplayName} ({ContactKind})", "Contacts");
-            BeginCreate();
+            _applyingDraft = true;
+            try { BeginCreate(); }
+            finally { _applyingDraft = false; }
             await RefreshAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -625,7 +702,9 @@ public class ContactsViewModel : ViewModelBase
 
     private void BeginCreate()
     {
-        SelectedContact = null;
+        if (!CanReplaceDraft()) return;
+        _selectedContact = null;
+        OnPropertyChanged(nameof(SelectedContact));
         ContactIdentity = null;
         ContactKind = "MailContact";
         DisplayName = string.Empty;
@@ -637,6 +716,7 @@ public class ContactsViewModel : ViewModelBase
         ClearMailUserPassword();
         HiddenFromAddressListsEnabled = false;
         ErrorMessage = null;
+        AcceptDraft();
     }
 
     private void ApplyDetails(ContactListItemDto selected, ContactDetailsDto details)
@@ -660,13 +740,14 @@ public class ContactsViewModel : ViewModelBase
         UserPrincipalName = resolvedUserPrincipalName;
         ClearMailUserPassword();
         HiddenFromAddressListsEnabled = details.HiddenFromAddressListsEnabled;
+        AcceptDraft();
     }
 
-    private async Task TryReselectSavedContactAsync(CancellationToken cancellationToken)
+    private async Task TryReselectSavedContactAsync(string primaryAddress, string kind, CancellationToken cancellationToken)
     {
         var match = Contacts.FirstOrDefault(contact =>
-            string.Equals(contact.PrimarySmtpAddress, PrimarySmtpAddress, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(contact.ContactKind, ContactKind, StringComparison.OrdinalIgnoreCase));
+            string.Equals(contact.PrimarySmtpAddress, primaryAddress, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(contact.ContactKind, kind, StringComparison.OrdinalIgnoreCase));
 
         if (match != null)
         {
@@ -696,6 +777,7 @@ public class ContactsViewModel : ViewModelBase
         _pendingMailUserPassword = normalized;
         OnPropertyChanged(nameof(HasMailUserPassword));
         OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -716,6 +798,7 @@ public class ContactsViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(HasMailUserPassword));
             OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
             CommandManager.InvalidateRequerySuggested();
         }
     }

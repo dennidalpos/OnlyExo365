@@ -84,7 +84,7 @@ public sealed class AppBootstrapCompositionTests
 
         var checks = checksField!.GetValue(navigationState) as System.Collections.ICollection;
         Assert.NotNull(checks);
-        Assert.Equal(4, checks!.Count);
+        Assert.Equal(6, checks!.Count);
     }
 
     private static AppModuleCatalog CreateModules()

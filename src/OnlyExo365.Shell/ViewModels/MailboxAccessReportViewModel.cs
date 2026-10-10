@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -145,7 +146,7 @@ public class MailboxAccessReportViewModel : ViewModelBase
 
     public bool HasProgressCount => ProgressCurrentItem.HasValue;
     public string ProgressPercentText => FormatProgressPercent(ProgressPercent);
-    public string? ProgressCountText => FormatProgressCount(ProgressCurrentItem, ProgressTotalItems, "mailboxes");
+    public string? ProgressCountText => FormatProgressCount(ProgressCurrentItem, ProgressTotalItems, Loc.Get("Noun.Mailboxes"));
 
     public ICommand StartScanCommand { get; }
     public ICommand ExportExcelCommand { get; }
@@ -166,7 +167,7 @@ public class MailboxAccessReportViewModel : ViewModelBase
         Rows.Clear();
         _shellViewModel.ClearPageAlert(AlertPage);
         ProgressPercent = 0;
-        ProgressStatus = "Starting mailbox access scan...";
+        ProgressStatus = Loc.Get("Presentation.StartingMailboxAccessScanInProgress");
         ProgressCurrentItem = null;
         ProgressTotalItems = null;
 
@@ -229,7 +230,7 @@ public class MailboxAccessReportViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                var errorMessage = result.Error?.Message ?? "Unable to load the mailbox access report.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadTheMailboxAccessReport");
                 ErrorMessage = null;
                 _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, errorMessage, correlationId: DiagnosticCorrelationId);
@@ -306,7 +307,7 @@ public class MailboxAccessReportViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Export failed: {ex.Message}";
+            ErrorMessage = Loc.GetFormat("Ui.ExportFailed", ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox access report export failed: {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
     }

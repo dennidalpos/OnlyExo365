@@ -1,4 +1,5 @@
 using OnlyExo365.Shell.ViewModels;
+using OnlyExo365.Shell.Services;
 
 namespace OnlyExo365.Shell.Bootstrap;
 
@@ -142,10 +143,29 @@ internal static class AppShellModuleRegistrar
     {
         var shellViewModel = modules.ShellViewModel;
 
-        shellViewModel.RegisterUnsavedChangesCheck(() => modules.MailboxDetailsViewModel.HasPendingChanges || modules.MailboxDetailsViewModel.HasPendingMailboxChanges);
-        shellViewModel.RegisterUnsavedChangesCheck(() => modules.DistributionListViewModel.HasPendingSettingsChanges);
-        shellViewModel.RegisterUnsavedChangesCheck(() => modules.ResourcesViewModel.HasPendingChanges);
-        shellViewModel.RegisterUnsavedChangesCheck(() => modules.PublicFoldersViewModel.HasPendingChanges);
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.MailSecurity && modules.MailSecurityViewModel.HasPendingChanges,
+            modules.MailSecurityViewModel.DiscardDraft);
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.Contacts && modules.ContactsViewModel.HasPendingChanges,
+            modules.ContactsViewModel.DiscardDraft);
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.Mailboxes &&
+                (modules.MailboxDetailsViewModel.HasPendingChanges || modules.MailboxDetailsViewModel.HasPendingMailboxChanges),
+            () =>
+            {
+                modules.MailboxDetailsViewModel.DiscardMailboxChangesCommand.Execute(null);
+                modules.MailboxDetailsViewModel.DiscardPermissionsCommand.Execute(null);
+            });
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.DistributionLists && modules.DistributionListViewModel.HasPendingSettingsChanges,
+            () => modules.DistributionListViewModel.DiscardSettingsCommand.Execute(null));
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.Resources && modules.ResourcesViewModel.HasPendingChanges,
+            modules.ResourcesViewModel.DiscardDraft);
+        shellViewModel.RegisterUnsavedChangesCheck(
+            () => shellViewModel.CurrentPage == NavigationPage.PublicFolders && modules.PublicFoldersViewModel.HasPendingChanges,
+            modules.PublicFoldersViewModel.DiscardDraft);
     }
 }
 

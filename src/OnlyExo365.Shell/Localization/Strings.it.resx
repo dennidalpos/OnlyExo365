@@ -3378,5 +3378,740 @@ Rimuovi ONLYEXO365_DISABLE_EXO e riavvia l'applicazione per abilitarle.</value>
   <data name="Tools.LeastPrivilege.Feature.mailboxes.licensing-write.Notes" xml:space="preserve">
     <value>Gli ambiti di scrittura licenze sono opt-in tramite graphLicenseWriteScopes / ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES. La modalità AppCertificate richiede anche GraphTenantId per evitare discovery implicita del tenant.</value>
   </data>
+  <data name="Btn.DiscardChanges" xml:space="preserve">
+    <value>Scarta modifiche</value>
+  </data>
+  <data name="Btn.Stay" xml:space="preserve">
+    <value>Resta</value>
+  </data>
+  <data name="Ui.SearchLabel" xml:space="preserve">
+    <value>Cerca</value>
+  </data>
+  <data name="Ui.FilterLabel" xml:space="preserve">
+    <value>Filtro</value>
+  </data>
+  <data name="Ui.ResizeDetails" xml:space="preserve">
+    <value>Ridimensiona dettagli</value>
+  </data>
+  <data name="Ui.InventoryFormat" xml:space="preserve">
+    <value>{0} di {1} {2}</value>
+  </data>
+  <data name="Ui.PartialInventoryFormat" xml:space="preserve">
+    <value>{0}+ {1} caricati</value>
+  </data>
+  <data name="Ui.RequiredFieldsGuidance" xml:space="preserve">
+    <value>Seleziona un elemento e completa i campi obbligatori. Connettiti a Exchange Online per salvare.</value>
+  </data>
+  <data name="Contact.Requirements" xml:space="preserve">
+    <value>Obbligatori: nome visualizzato, alias, email primaria ed esterna. I nuovi utenti di posta richiedono anche UPN e password.</value>
+  </data>
+  <data name="Contact.PendingChanges" xml:space="preserve">
+    <value>Modifiche non salvate</value>
+  </data>
+  <data name="Noun.Contacts" xml:space="preserve">
+    <value>contatti</value>
+  </data>
+  <data name="Noun.Mailboxes" xml:space="preserve">
+    <value>caselle</value>
+  </data>
+  <data name="Noun.DeletedMailboxes" xml:space="preserve">
+    <value>caselle eliminate</value>
+  </data>
+  <data name="Noun.Users" xml:space="preserve">
+    <value>utenti</value>
+  </data>
+  <data name="Noun.Groups" xml:space="preserve">
+    <value>gruppi</value>
+  </data>
+  <data name="Noun.Batches" xml:space="preserve">
+    <value>batch</value>
+  </data>
+  <data name="Noun.RoleGroups" xml:space="preserve">
+    <value>gruppi di ruoli</value>
+  </data>
+  <data name="Noun.PublicFolders" xml:space="preserve">
+    <value>cartelle pubbliche</value>
+  </data>
+  <data name="Noun.Resources" xml:space="preserve">
+    <value>risorse</value>
+  </data>
+  <data name="Ui.ExportFailed" xml:space="preserve">
+    <value>Esportazione non riuscita: {0}</value>
+  </data>
+  <data name="Contact.SaveImpact" xml:space="preserve">
+    <value>Salva il contatto {0}.</value>
+  </data>
+  <data name="Contact.DeleteImpact" xml:space="preserve">
+    <value>Elimina definitivamente il contatto {0}.</value>
+  </data>
+  <data name="Ui.TenantDeletion" xml:space="preserve">
+    <value>Conferma eliminazione nel tenant</value>
+  </data>
+  <data name="MailFlow.ConnectorImpact" xml:space="preserve">
+    <value>Modifica l’instradamento della posta nel tenant.</value>
+  </data>
+  <data name="Presentation.LoadingContactsInProgress" xml:space="preserve">
+    <value>Caricamento contatti...</value>
+  </data>
+  <data name="Presentation.Contacts" xml:space="preserve">
+    <value>contatti</value>
+  </data>
+  <data name="Presentation.LoadingDeletedMailboxesInProgress" xml:space="preserve">
+    <value>Caricamento caselle eliminate...</value>
+  </data>
+  <data name="Presentation.LoadingGroupsInProgress" xml:space="preserve">
+    <value>Caricamento gruppi...</value>
+  </data>
+  <data name="Presentation.Groups" xml:space="preserve">
+    <value>gruppi</value>
+  </data>
+  <data name="Presentation.LoadingMailboxInProgress" xml:space="preserve">
+    <value>Caricamento caselle...</value>
+  </data>
+  <data name="Presentation.Mailbox" xml:space="preserve">
+    <value>casella</value>
+  </data>
+  <data name="Presentation.LoadingMemberUsersInProgress" xml:space="preserve">
+    <value>Caricamento utenti Member...</value>
+  </data>
+  <data name="Presentation.Users" xml:space="preserve">
+    <value>utenti</value>
+  </data>
+  <data name="Presentation.LoadingMigrationBatchesInProgress" xml:space="preserve">
+    <value>Caricamento batch di migrazione...</value>
+  </data>
+  <data name="Presentation.Batch" xml:space="preserve">
+    <value>batch</value>
+  </data>
+  <data name="Presentation.LoadingRoleGroupsInProgress" xml:space="preserve">
+    <value>Caricamento gruppi di ruoli...</value>
+  </data>
+  <data name="Presentation.RoleGroups" xml:space="preserve">
+    <value>gruppi di ruoli</value>
+  </data>
+  <data name="Presentation.LoadingPublicFoldersInProgress" xml:space="preserve">
+    <value>Caricamento cartelle pubbliche...</value>
+  </data>
+  <data name="Presentation.Folders" xml:space="preserve">
+    <value>cartelle</value>
+  </data>
+  <data name="Presentation.LoadingResourceMailboxesInProgress" xml:space="preserve">
+    <value>Caricamento caselle risorsa...</value>
+  </data>
+  <data name="Presentation.Resources" xml:space="preserve">
+    <value>risorse</value>
+  </data>
+  <data name="Presentation.UnableToLoadContacts" xml:space="preserve">
+    <value>Impossibile caricare i contatti</value>
+  </data>
+  <data name="Presentation.UnableToLoadContactDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli del contatto.</value>
+  </data>
+  <data name="Presentation.UnableToSaveTheContact" xml:space="preserve">
+    <value>Impossibile salvare il contatto.</value>
+  </data>
+  <data name="Presentation.UnableToRemoveTheContact" xml:space="preserve">
+    <value>Impossibile eliminare il contatto.</value>
+  </data>
+  <data name="Presentation.FailedToLoadMoreDeletedMailboxes" xml:space="preserve">
+    <value>Impossibile caricare altre caselle eliminate</value>
+  </data>
+  <data name="Presentation.FailedToLoadMailboxDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli della casella</value>
+  </data>
+  <data name="Presentation.UnableToUpdateMailboxSettings" xml:space="preserve">
+    <value>Impossibile aggiornare le impostazioni della casella.</value>
+  </data>
+  <data name="Presentation.UnableToUpdateTheRetentionPolicy" xml:space="preserve">
+    <value>Impossibile aggiornare i criteri di conservazione.</value>
+  </data>
+  <data name="Presentation.UnableToUpdateAutomaticReplies" xml:space="preserve">
+    <value>Impossibile aggiornare le risposte automatiche.</value>
+  </data>
+  <data name="Presentation.UnableToConvertTheMailbox" xml:space="preserve">
+    <value>Impossibile convertire la casella.</value>
+  </data>
+  <data name="Presentation.UnableToRetrieveUserLicenses" xml:space="preserve">
+    <value>Impossibile recuperare le licenze dell’utente.</value>
+  </data>
+  <data name="Presentation.UnableToUpdateUsageLocation" xml:space="preserve">
+    <value>Impossibile aggiornare UsageLocation.</value>
+  </data>
+  <data name="Presentation.FailedToLoadMoreMailboxes" xml:space="preserve">
+    <value>Impossibile caricare altre caselle</value>
+  </data>
+  <data name="Presentation.FailedToCreateMailbox" xml:space="preserve">
+    <value>Impossibile creare la casella</value>
+  </data>
+  <data name="Presentation.SpecifyTheSourceMailboxUPNOrGUID" xml:space="preserve">
+    <value>Specifica UPN o GUID della casella di origine.</value>
+  </data>
+  <data name="Presentation.FailedToLoadMoreMemberUsers" xml:space="preserve">
+    <value>Impossibile caricare altri utenti Member</value>
+  </data>
+  <data name="Presentation.UnableToRetrieveMessageDetails" xml:space="preserve">
+    <value>Impossibile recuperare i dettagli del messaggio.</value>
+  </data>
+  <data name="Presentation.UnableToLoadMigrationBatches" xml:space="preserve">
+    <value>Impossibile caricare i batch di migrazione</value>
+  </data>
+  <data name="Presentation.UnableToLoadMigrationBatchDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli del batch di migrazione.</value>
+  </data>
+  <data name="Presentation.UnableToCreateTheMigrationBatch" xml:space="preserve">
+    <value>Impossibile creare il batch di migrazione.</value>
+  </data>
+  <data name="Presentation.UnableToSaveTheMigrationEndpoint" xml:space="preserve">
+    <value>Impossibile salvare l’endpoint di migrazione.</value>
+  </data>
+  <data name="Presentation.UnableToTestTheMigrationEndpoint" xml:space="preserve">
+    <value>Impossibile verificare l’endpoint di migrazione.</value>
+  </data>
+  <data name="Presentation.UnableToLoadRoleGroups" xml:space="preserve">
+    <value>Impossibile caricare i gruppi di ruoli</value>
+  </data>
+  <data name="Presentation.UnableToLoadRoleGroupDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli del gruppo di ruoli.</value>
+  </data>
+  <data name="Presentation.UnableToSaveTheRoleGroup" xml:space="preserve">
+    <value>Impossibile salvare il gruppo di ruoli.</value>
+  </data>
+  <data name="Presentation.UnableToUpdateMembership" xml:space="preserve">
+    <value>Impossibile aggiornare i membri.</value>
+  </data>
+  <data name="Presentation.UnableToSendTheRemoteWipe" xml:space="preserve">
+    <value>Impossibile inviare la cancellazione remota.</value>
+  </data>
+  <data name="Presentation.UnableToAssignTheMailboxPolicy" xml:space="preserve">
+    <value>Impossibile assegnare i criteri alla casella.</value>
+  </data>
+  <data name="Presentation.UnableToLoadPublicFolders" xml:space="preserve">
+    <value>Impossibile caricare le cartelle pubbliche</value>
+  </data>
+  <data name="Presentation.UnableToLoadPublicFolderDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli della cartella pubblica.</value>
+  </data>
+  <data name="Presentation.UnableToSaveThePublicFolder" xml:space="preserve">
+    <value>Impossibile salvare la cartella pubblica.</value>
+  </data>
+  <data name="Presentation.UnableToUpdatePublicFolderClientPermissions" xml:space="preserve">
+    <value>Impossibile aggiornare le autorizzazioni client della cartella pubblica.</value>
+  </data>
+  <data name="Presentation.UnableToDeleteThePublicFolder" xml:space="preserve">
+    <value>Impossibile eliminare la cartella pubblica</value>
+  </data>
+  <data name="Presentation.UnableToLoadMobileDevices" xml:space="preserve">
+    <value>Impossibile caricare i dispositivi mobili</value>
+  </data>
+  <data name="Presentation.UnableToLoadMobileDeviceDetails" xml:space="preserve">
+    <value>Impossibile caricare i dettagli del dispositivo mobile.</value>
+  </data>
+  <data name="Presentation.UnableToLoadActiveSyncMailboxPolicies" xml:space="preserve">
+    <value>Impossibile caricare i criteri ActiveSync delle caselle.</value>
+  </data>
+  <data name="Presentation.CreatingComplianceSearchFailed" xml:space="preserve">
+    <value>Creazione della ricerca di conformità non riuscita.</value>
+  </data>
+  <data name="Presentation.StartingTheComplianceSearchFailed" xml:space="preserve">
+    <value>Avvio della ricerca di conformità non riuscito.</value>
+  </data>
+  <data name="Presentation.RemovingTheComplianceSearchFailed" xml:space="preserve">
+    <value>Eliminazione della ricerca di conformità non riuscita.</value>
+  </data>
+  <data name="Presentation.ComplianceActionFailed" xml:space="preserve">
+    <value>Operazione di conformità non riuscita.</value>
+  </data>
+  <data name="Presentation.UpdatingMailSecurityFailed" xml:space="preserve">
+    <value>Aggiornamento della sicurezza della posta non riuscito.</value>
+  </data>
+  <data name="Presentation.ApplyingComplianceActionInProgress" xml:space="preserve">
+    <value>Applicazione dell’operazione di conformità...</value>
+  </data>
+  <data name="Presentation.CreatingComplianceSearchInProgress" xml:space="preserve">
+    <value>Creazione ricerca di conformità...</value>
+  </data>
+  <data name="Presentation.SearchingAuditLogsInProgress" xml:space="preserve">
+    <value>Ricerca nei log di audit...</value>
+  </data>
+  <data name="Presentation.LoadingComplianceWorkspaceInProgress" xml:space="preserve">
+    <value>Caricamento area Conformità...</value>
+  </data>
+  <data name="Presentation.CreatingGroupInProgress" xml:space="preserve">
+    <value>Creazione gruppo...</value>
+  </data>
+  <data name="Presentation.SavingGroupSettingsInProgress" xml:space="preserve">
+    <value>Salvataggio impostazioni del gruppo...</value>
+  </data>
+  <data name="Presentation.LoadingGroupMembersInProgress" xml:space="preserve">
+    <value>Caricamento membri del gruppo...</value>
+  </data>
+  <data name="Presentation.LoadingGroupDetailsInProgress" xml:space="preserve">
+    <value>Caricamento dettagli del gruppo...</value>
+  </data>
+  <data name="Presentation.SavingMailSecurityConfigurationInProgress" xml:space="preserve">
+    <value>Salvataggio configurazione della sicurezza della posta...</value>
+  </data>
+  <data name="Presentation.LoadingMailSecurityWorkspaceInProgress" xml:space="preserve">
+    <value>Caricamento area Sicurezza della posta...</value>
+  </data>
+  <data name="Presentation.NewSharedMailbox" xml:space="preserve">
+    <value>Nuova casella condivisa</value>
+  </data>
+  <data name="Presentation.NewMailbox" xml:space="preserve">
+    <value>Nuova casella</value>
+  </data>
+  <data name="Presentation.CreatingContact" xml:space="preserve">
+    <value>Creazione contatto</value>
+  </data>
+  <data name="Presentation.UpdatingContact" xml:space="preserve">
+    <value>Aggiornamento contatto</value>
+  </data>
+  <data name="Presentation.DeletingContact" xml:space="preserve">
+    <value>Eliminazione contatto</value>
+  </data>
+  <data name="Presentation.ConfirmContactSave" xml:space="preserve">
+    <value>Conferma salvataggio contatto</value>
+  </data>
+  <data name="Presentation.ConfirmContactDeletion" xml:space="preserve">
+    <value>Conferma eliminazione contatto</value>
+  </data>
+  <data name="Presentation.ConfirmMailSecurityUpdate" xml:space="preserve">
+    <value>Conferma aggiornamento sicurezza della posta</value>
+  </data>
+  <data name="Presentation.UpdatingDKIM" xml:space="preserve">
+    <value>Aggiornamento DKIM</value>
+  </data>
+  <data name="Presentation.EnableOrDisableDKIMSigningForTheSelected" xml:space="preserve">
+    <value>Abilita o disabilita la firma DKIM per il dominio selezionato.</value>
+  </data>
+  <data name="Presentation.UpdatingAntiSpamPolicy" xml:space="preserve">
+    <value>Aggiornamento criteri antispam</value>
+  </data>
+  <data name="Presentation.UpdateTheThresholdsAndActionsForTheSelected" xml:space="preserve">
+    <value>Aggiorna soglie e azioni dei criteri antispam selezionati.</value>
+  </data>
+  <data name="Presentation.UpdatingAntiPhishPolicy" xml:space="preserve">
+    <value>Aggiornamento criteri antiphishing</value>
+  </data>
+  <data name="Presentation.UpdateAntiPhishAndSpoofProtectionForThe" xml:space="preserve">
+    <value>Aggiorna la protezione antiphishing e contro lo spoofing dei criteri selezionati.</value>
+  </data>
+  <data name="Presentation.UpdatingAntiMalwarePolicy" xml:space="preserve">
+    <value>Aggiornamento criteri antimalware</value>
+  </data>
+  <data name="Presentation.UpdateTheFileFilterAndAntiMalwareActions" xml:space="preserve">
+    <value>Aggiorna filtro dei file e azioni antimalware dei criteri selezionati.</value>
+  </data>
+  <data name="Presentation.UpdatingQuarantinePolicy" xml:space="preserve">
+    <value>Aggiornamento criteri di quarantena</value>
+  </data>
+  <data name="Presentation.UpdateRetentionAndEndUserPermissionsForThe" xml:space="preserve">
+    <value>Aggiorna conservazione e autorizzazioni utente dei criteri di quarantena selezionati.</value>
+  </data>
+  <data name="Presentation.UpdatingOutboundSpamPolicy" xml:space="preserve">
+    <value>Aggiornamento criteri antispam in uscita</value>
+  </data>
+  <data name="Presentation.UpdateTheLimitsAndActionsForTheSelected" xml:space="preserve">
+    <value>Aggiorna limiti e azioni dei criteri antispam in uscita selezionati.</value>
+  </data>
+  <data name="Mailbox.ItemsFormat" xml:space="preserve"><value>{0} elementi</value></data>
+  <data name="Mailbox.EnabledSinceFormat" xml:space="preserve"><value>Attivo dal: {0:d}</value></data>
+  <data name="Mailbox.OwnerFormat" xml:space="preserve"><value>Proprietario: {0}</value></data>
+  <data name="Mailbox.RetentionFormat" xml:space="preserve"><value>Conservazione log: {0}</value></data>
+  <data name="Presentation.CreatingComplianceSearch" xml:space="preserve"><value>Creazione ricerca di conformità</value></data>
+  <data name="Presentation.CreateANewComplianceSearchWithTheConfigured" xml:space="preserve"><value>Crea una ricerca con le posizioni e la query configurate.</value></data>
+  <data name="Presentation.ConfirmComplianceSearchCreation" xml:space="preserve"><value>Conferma creazione ricerca</value></data>
+  <data name="Presentation.StartComplianceSearch" xml:space="preserve"><value>Avvio ricerca di conformità</value></data>
+  <data name="Presentation.StartTheSelectedComplianceSearch" xml:space="preserve"><value>Avvia la ricerca di conformità selezionata.</value></data>
+  <data name="Presentation.ConfirmComplianceSearchStart" xml:space="preserve"><value>Conferma avvio ricerca</value></data>
+  <data name="Presentation.ConfirmComplianceSearchRemoval" xml:space="preserve"><value>Conferma eliminazione ricerca</value></data>
+  <data name="Presentation.ConfirmPurge" xml:space="preserve"><value>Conferma eliminazione messaggi</value></data>
+  <data name="Presentation.ConfirmHold" xml:space="preserve"><value>Conferma conservazione</value></data>
+  <data name="Presentation.AddMemberToDistributionList" xml:space="preserve"><value>Aggiunta membro alla lista di distribuzione</value></data>
+  <data name="Presentation.RefreshTheMembershipOfTheSelectedDistributionList" xml:space="preserve"><value>Aggiorna i membri della lista di distribuzione selezionata.</value></data>
+  <data name="Presentation.ConfirmMembershipUpdate" xml:space="preserve"><value>Conferma modifica membri</value></data>
+  <data name="Presentation.RemoveMemberFromDistributionList" xml:space="preserve"><value>Rimozione membro dalla lista di distribuzione</value></data>
+  <data name="Presentation.TheMemberIsRemovedFromTheSelectedDistribution" xml:space="preserve"><value>Rimuove il membro dalla lista di distribuzione selezionata.</value></data>
+  <data name="Presentation.CreateDistributionList" xml:space="preserve"><value>Creazione lista di distribuzione</value></data>
+  <data name="Presentation.CreateANewDistributionListInTheTenant" xml:space="preserve"><value>Crea una lista di distribuzione nel tenant.</value></data>
+  <data name="Presentation.ConfirmDistributionListCreation" xml:space="preserve"><value>Conferma creazione lista</value></data>
+  <data name="Presentation.UnableToCreateTheDistributionList" xml:space="preserve"><value>Impossibile creare la lista di distribuzione.</value></data>
+  <data name="Presentation.UpdatingGroupSettings" xml:space="preserve"><value>Modifica impostazioni del gruppo</value></data>
+  <data name="Presentation.UpdateAllowedBlockedSendersAndSenderAuthenticationFor" xml:space="preserve"><value>Aggiorna mittenti consentiti e bloccati e autenticazione della lista.</value></data>
+  <data name="Presentation.ConfirmGroupUpdate" xml:space="preserve"><value>Conferma modifica gruppo</value></data>
+  <data name="Presentation.UpdateMailboxConfiguration" xml:space="preserve"><value>Modifica configurazione cassetta postale</value></data>
+  <data name="Presentation.UpdateMailboxSettingsRetentionPolicyOrAutomaticReplies" xml:space="preserve"><value>Aggiorna impostazioni, conservazione o risposte automatiche della cassetta postale.</value></data>
+  <data name="Presentation.ConfirmMailboxSave" xml:space="preserve"><value>Conferma salvataggio cassetta postale</value></data>
+  <data name="Presentation.ConvertMailboxToShared" xml:space="preserve"><value>Conversione in cassetta postale condivisa</value></data>
+  <data name="Presentation.TheMailboxBecomesSharedAndLicensingOrAccess" xml:space="preserve"><value>La cassetta postale diventa condivisa; licenze e accessi possono cambiare.</value></data>
+  <data name="Presentation.ConfirmMailboxConversion" xml:space="preserve"><value>Conferma conversione cassetta postale</value></data>
+  <data name="Presentation.ConvertMailboxToUser" xml:space="preserve"><value>Conversione in cassetta postale utente</value></data>
+  <data name="Presentation.TheMailboxBecomesAUserMailboxAndMay" xml:space="preserve"><value>La cassetta diventa una cassetta utente e può richiedere licenze o criteri diversi.</value></data>
+  <data name="Presentation.ApplyMailboxPermissionChanges" xml:space="preserve"><value>Modifica autorizzazioni cassetta postale</value></data>
+  <data name="Presentation.ConfirmMailboxPermissionUpdate" xml:space="preserve"><value>Conferma modifica autorizzazioni</value></data>
+  <data name="Presentation.ConfirmFolderPermissionUpdate" xml:space="preserve"><value>Conferma modifica autorizzazioni cartella</value></data>
+  <data name="Presentation.FailedToLoadMailboxFolderPermissions" xml:space="preserve"><value>Impossibile caricare le autorizzazioni delle cartelle.</value></data>
+  <data name="Presentation.FailedToApplyPermissions" xml:space="preserve"><value>Impossibile applicare le autorizzazioni.</value></data>
+  <data name="Presentation.FailedToApplyMailboxFolderPermission" xml:space="preserve"><value>Impossibile applicare l'autorizzazione alla cartella.</value></data>
+  <data name="Presentation.ConfirmTenantWideDisable" xml:space="preserve"><value>Conferma disattivazione nel tenant</value></data>
+  <data name="Presentation.DisableTransportRule" xml:space="preserve"><value>Disattivazione regola di trasporto</value></data>
+  <data name="Presentation.CanStopTenantWideControlsOrEnforcement" xml:space="preserve"><value>Può interrompere controlli o applicazione dei criteri nel tenant.</value></data>
+  <data name="Presentation.DeletingTransportRule" xml:space="preserve"><value>Eliminazione regola di trasporto</value></data>
+  <data name="Presentation.PermanentlyRemovesTheRuleWithPotentialTenantWide" xml:space="preserve"><value>Elimina definitivamente la regola con possibili effetti su tutto il tenant.</value></data>
+  <data name="Presentation.CreatingMigrationBatch" xml:space="preserve"><value>Creazione batch di migrazione</value></data>
+  <data name="Presentation.CreateANewMigrationBatchUsingTheCurrent" xml:space="preserve"><value>Crea un batch di migrazione con endpoint, CSV e opzioni attuali.</value></data>
+  <data name="Presentation.ConfirmMigrationBatchCreation" xml:space="preserve"><value>Conferma creazione batch</value></data>
+  <data name="Presentation.StartMigrationBatch" xml:space="preserve"><value>Avvio batch di migrazione</value></data>
+  <data name="Presentation.StartTheSelectedMigrationBatch" xml:space="preserve"><value>Avvia il batch di migrazione selezionato.</value></data>
+  <data name="Presentation.ConfirmMigrationBatchStart" xml:space="preserve"><value>Conferma avvio batch</value></data>
+  <data name="Presentation.CompleteMigrationBatch" xml:space="preserve"><value>Completamento batch di migrazione</value></data>
+  <data name="Presentation.CompleteTheSelectedMigrationBatch" xml:space="preserve"><value>Completa il batch di migrazione selezionato.</value></data>
+  <data name="Presentation.ConfirmMigrationBatchCompletion" xml:space="preserve"><value>Conferma completamento batch</value></data>
+  <data name="Presentation.ConfirmMigrationBatchRemoval" xml:space="preserve"><value>Conferma eliminazione batch</value></data>
+  <data name="Presentation.SavingMigrationEndpoint" xml:space="preserve"><value>Salvataggio endpoint di migrazione</value></data>
+  <data name="Presentation.CreateOrUpdateTheSelectedMigrationEndpoint" xml:space="preserve"><value>Crea o aggiorna l'endpoint di migrazione selezionato.</value></data>
+  <data name="Presentation.ConfirmEndpointSave" xml:space="preserve"><value>Conferma salvataggio endpoint</value></data>
+  <data name="Presentation.ChangeDeviceAccessState" xml:space="preserve"><value>Modifica stato di accesso del dispositivo</value></data>
+  <data name="Presentation.ConfirmDeviceStateChange" xml:space="preserve"><value>Conferma modifica stato dispositivo</value></data>
+  <data name="Presentation.RemoteWipeDevice" xml:space="preserve"><value>Cancellazione remota dispositivo</value></data>
+  <data name="Presentation.SendARemoteWipeToTheSelectedDevice" xml:space="preserve"><value>Invia la cancellazione remota al dispositivo selezionato.</value></data>
+  <data name="Presentation.ConfirmRemoteWipe" xml:space="preserve"><value>Conferma cancellazione remota</value></data>
+  <data name="Presentation.AssignDeviceMailboxPolicy" xml:space="preserve"><value>Assegnazione criterio al dispositivo</value></data>
+  <data name="Presentation.ConfirmPolicyAssignment" xml:space="preserve"><value>Conferma assegnazione criterio</value></data>
+  <data name="Presentation.SavingRoleGroup" xml:space="preserve"><value>Salvataggio gruppo di ruoli</value></data>
+  <data name="Presentation.NewRoleGroup" xml:space="preserve"><value>Nuovo gruppo di ruoli</value></data>
+  <data name="Presentation.CreateOrUpdateMembershipAndRolesForThe" xml:space="preserve"><value>Crea o aggiorna membri e ruoli del gruppo selezionato.</value></data>
+  <data name="Presentation.ConfirmRoleGroupSave" xml:space="preserve"><value>Conferma salvataggio gruppo di ruoli</value></data>
+  <data name="Presentation.UpdateTheAdministrativeMembershipOfTheRoleGroup" xml:space="preserve"><value>Aggiorna i membri amministrativi del gruppo di ruoli.</value></data>
+  <data name="Presentation.CreatingPublicFolder" xml:space="preserve"><value>Creazione cartella pubblica</value></data>
+  <data name="Presentation.UpdatingPublicFolder" xml:space="preserve"><value>Modifica cartella pubblica</value></data>
+  <data name="Presentation.SaveThePublicFolderStructureMailSettingsAnd" xml:space="preserve"><value>Salva struttura, impostazioni di posta e attributi della cartella pubblica.</value></data>
+  <data name="Presentation.ConfirmPublicFolderSave" xml:space="preserve"><value>Conferma salvataggio cartella pubblica</value></data>
+  <data name="Presentation.ConfirmPublicFolderPermissionUpdate" xml:space="preserve"><value>Conferma modifica autorizzazioni cartella pubblica</value></data>
+  <data name="Presentation.DeletingRecursivePublicFolder" xml:space="preserve"><value>Eliminazione cartella pubblica e sottocartelle</value></data>
+  <data name="Presentation.DeletingPublicFolder" xml:space="preserve"><value>Eliminazione cartella pubblica</value></data>
+  <data name="Presentation.RemoveThePublicFolderAndAllOfIts" xml:space="preserve"><value>Elimina la cartella pubblica e tutte le sottocartelle.</value></data>
+  <data name="Presentation.PermanentlyRemoveTheSelectedPublicFolder" xml:space="preserve"><value>Elimina definitivamente la cartella pubblica selezionata.</value></data>
+  <data name="Presentation.ConfirmPublicFolderDeletion" xml:space="preserve"><value>Conferma eliminazione cartella pubblica</value></data>
+  <data name="Presentation.UnableToLoadResources" xml:space="preserve"><value>Impossibile caricare le risorse.</value></data>
+  <data name="Presentation.CreatingResourceMailbox" xml:space="preserve"><value>Creazione cassetta postale risorsa</value></data>
+  <data name="Presentation.UpdatingResourceMailbox" xml:space="preserve"><value>Modifica cassetta postale risorsa</value></data>
+  <data name="Presentation.SaveResourceMailboxAttributesAndConfiguration" xml:space="preserve"><value>Salva attributi e configurazione della cassetta postale risorsa.</value></data>
+  <data name="Presentation.ConfirmResourceMailboxSave" xml:space="preserve"><value>Conferma salvataggio risorsa</value></data>
+  <data name="Presentation.UnableToLoadResourceDetails" xml:space="preserve"><value>Impossibile caricare i dettagli della risorsa.</value></data>
+  <data name="Presentation.UnableToSaveTheResourceMailbox" xml:space="preserve"><value>Impossibile salvare la cassetta postale risorsa.</value></data>
+  <data name="Presentation.MailboxSavedButDelegationUpdateFailed" xml:space="preserve"><value>Cassetta salvata; aggiornamento deleghe non riuscito.</value></data>
+  <data name="Presentation.NotAvailable" xml:space="preserve"><value>Non disponibile</value></data>
+  <data name="Presentation.NoExplicitClientPermissionsDetected" xml:space="preserve"><value>Nessuna autorizzazione client esplicita rilevata</value></data>
+  <data name="Presentation.CollectorFriendlySummaryJSONIsRefreshedFromPersisted" xml:space="preserve"><value>Il riepilogo JSON viene aggiornato dai log salvati e incluso nelle esportazioni.</value></data>
+  <data name="Presentation.MailEnabledSecurity" xml:space="preserve"><value>Sicurezza con posta abilitata</value></data>
+  <data name="Presentation.DynamicDistribution" xml:space="preserve"><value>Distribuzione dinamica</value></data>
+  <data name="Presentation.UnableToLoadTheMailFlowWorkspace" xml:space="preserve"><value>Impossibile caricare l'area Flusso di posta.</value></data>
+  <data name="Ui.PermissionRole" xml:space="preserve"><value>Ruolo di autorizzazione</value></data>
+  <data name="Ui.RetentionPolicy" xml:space="preserve"><value>Criterio di conservazione</value></data>
+  <data name="Ui.MemberIdentity" xml:space="preserve"><value>Identità del membro</value></data>
+  <data name="Ui.AllowedSender" xml:space="preserve"><value>Mittente consentito</value></data>
+  <data name="Ui.BlockedSender" xml:space="preserve"><value>Mittente bloccato</value></data>
+  <data name="MailFlow.DeleteAcceptedDomainsMessage" xml:space="preserve"><value>Operazione: eliminazione dominio accettato
+Destinazione: {0}
+Impatto: può interrompere consegna e instradamento nel tenant.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteAddressBookPoliciesMessage" xml:space="preserve"><value>Operazione: eliminazione criterio rubrica
+Destinazione: {0}
+Impatto: può modificare la segmentazione delle rubriche delle cassette assegnate.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteAddressListsMessage" xml:space="preserve"><value>Operazione: eliminazione elenco indirizzi
+Destinazione: {0}
+Impatto: può influire sugli elenchi globali e sui criteri rubrica.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteConnectorsMessage" xml:space="preserve"><value>Operazione: eliminazione connettore {1}
+Destinazione: {0}
+Impatto: modifica l’instradamento della posta nel tenant.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteOfflineAddressBooksMessage" xml:space="preserve"><value>Operazione: eliminazione rubrica offline
+Destinazione: {0}
+Impatto: può compromettere la distribuzione OAB ai client.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteOrganizationRelationshipsMessage" xml:space="preserve"><value>Operazione: eliminazione relazione organizzativa
+Destinazione: {0}
+Impatto: può interrompere disponibilità, suggerimenti di posta e integrazioni tra tenant.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteRemoteDomainsMessage" xml:space="preserve"><value>Operazione: eliminazione dominio remoto
+Destinazione: {0}
+Impatto: modifica risposte automatiche e rapporti per il dominio remoto.
+
+Confermare?</value></data>
+  <data name="MailFlow.DeleteSharingPoliciesMessage" xml:space="preserve"><value>Operazione: eliminazione criterio di condivisione
+Destinazione: {0}
+Impatto: modifica la condivisione di calendari e contatti con domini esterni.
+
+Confermare?</value></data>
+  <data name="MailFlow.DisableConnector" xml:space="preserve"><value>Disattivazione connettore</value></data>
+  <data name="Presentation.AuditSearchFailed" xml:space="preserve"><value>Ricerca audit non riuscita.</value></data>
+  <data name="Presentation.UnableToLoadDistributionListDetails" xml:space="preserve"><value>Impossibile caricare i dettagli della lista di distribuzione.</value></data>
+  <data name="Presentation.UnableToLoadDistributionLists" xml:space="preserve"><value>Impossibile caricare le liste di distribuzione.</value></data>
+  <data name="Presentation.UnableToLoadMoreDistributionLists" xml:space="preserve"><value>Impossibile caricare altre liste di distribuzione.</value></data>
+  <data name="Presentation.UnableToUpdateGroupSettings" xml:space="preserve"><value>Impossibile aggiornare le impostazioni del gruppo.</value></data>
+  <data name="Presentation.UnableToLoadTheMailboxAccessReport" xml:space="preserve"><value>Impossibile caricare il rapporto sugli accessi alle cassette postali.</value></data>
+  <data name="Presentation.UnableToRetrieveAvailableLicenses" xml:space="preserve"><value>Impossibile recuperare le licenze disponibili.</value></data>
+  <data name="Presentation.FailedToLoadMemberUsers" xml:space="preserve"><value>Impossibile caricare gli utenti membri.</value></data>
+  <data name="Presentation.UnableToStartTheMailboxRestore" xml:space="preserve"><value>Impossibile avviare il ripristino della cassetta postale.</value></data>
+  <data name="Presentation.UnableToRetrieveRetentionPolicies" xml:space="preserve"><value>Impossibile recuperare i criteri di conservazione.</value></data>
+  <data name="Presentation.UnableToLoadTheMailboxStorageReport" xml:space="preserve"><value>Impossibile caricare il rapporto sullo spazio delle cassette postali.</value></data>
+  <data name="Presentation.UnableToLoadAcceptedDomains" xml:space="preserve"><value>Impossibile caricare i domini accettati.</value></data>
+  <data name="Presentation.UnableToDeleteDomain" xml:space="preserve"><value>Impossibile eliminare il dominio.</value></data>
+  <data name="Presentation.UnableToLoadAddressBookPolicies" xml:space="preserve"><value>Impossibile caricare i criteri rubrica.</value></data>
+  <data name="Presentation.UnableToDeleteAddressBookPolicy" xml:space="preserve"><value>Impossibile eliminare il criterio rubrica.</value></data>
+  <data name="Presentation.UnableToLoadAddressLists" xml:space="preserve"><value>Impossibile caricare gli elenchi indirizzi.</value></data>
+  <data name="Presentation.UnableToDeleteAddressList" xml:space="preserve"><value>Impossibile eliminare l'elenco indirizzi.</value></data>
+  <data name="Presentation.UnableToLoadConnector" xml:space="preserve"><value>Impossibile caricare i connettori.</value></data>
+  <data name="Presentation.UnableToDeleteConnector" xml:space="preserve"><value>Impossibile eliminare il connettore.</value></data>
+  <data name="Presentation.UnableToLoadOfflineAddressBooks" xml:space="preserve"><value>Impossibile caricare le rubriche offline.</value></data>
+  <data name="Presentation.UnableToDeleteOfflineAddressBook" xml:space="preserve"><value>Impossibile eliminare la rubrica offline.</value></data>
+  <data name="Presentation.UnableToLoadOrganizationRelationships" xml:space="preserve"><value>Impossibile caricare le relazioni organizzative.</value></data>
+  <data name="Presentation.UnableToDeleteOrganizationRelationship" xml:space="preserve"><value>Impossibile eliminare la relazione organizzativa.</value></data>
+  <data name="Presentation.UnableToLoadRemoteDomains" xml:space="preserve"><value>Impossibile caricare i domini remoti.</value></data>
+  <data name="Presentation.UnableToDeleteRemoteDomain" xml:space="preserve"><value>Impossibile eliminare il dominio remoto.</value></data>
+  <data name="Presentation.UnableToLoadTransportRules" xml:space="preserve"><value>Impossibile caricare le regole di trasporto.</value></data>
+  <data name="Presentation.RuleStateError" xml:space="preserve"><value>Errore nello stato della regola.</value></data>
+  <data name="Presentation.UnableToDeleteRule" xml:space="preserve"><value>Impossibile eliminare la regola.</value></data>
+  <data name="Presentation.RuleTestError" xml:space="preserve"><value>Errore nel test della regola.</value></data>
+  <data name="Presentation.UnableToLoadSharingPolicies" xml:space="preserve"><value>Impossibile caricare i criteri di condivisione.</value></data>
+  <data name="Presentation.UnableToDeleteSharingPolicy" xml:space="preserve"><value>Impossibile eliminare il criterio di condivisione.</value></data>
+  <data name="Presentation.UnableToLoadTheMailSecurityWorkspace" xml:space="preserve"><value>Impossibile caricare l'area Sicurezza posta.</value></data>
+  <data name="Presentation.UnableToRetrieveTheMessageTrace" xml:space="preserve"><value>Impossibile recuperare il tracciamento messaggi.</value></data>
+  <data name="Presentation.UnableToLoadMigrationEndpoint" xml:space="preserve"><value>Impossibile caricare gli endpoint di migrazione.</value></data>
+  <data name="Presentation.LoadingMailFlowWorkspaceInProgress" xml:space="preserve"><value>Caricamento area Flusso di posta...</value></data>
+  <data name="Presentation.ApplyingMailFlowChangesInProgress" xml:space="preserve"><value>Applicazione delle modifiche al flusso di posta...</value></data>
+  <data name="Presentation.NoRulesFound" xml:space="preserve"><value>Nessuna regola trovata</value></data>
+  <data name="Presentation.CapabilityNotDetected" xml:space="preserve"><value> (funzionalità non rilevata)</value></data>
+  <data name="Presentation.CmdletAvailable" xml:space="preserve"><value> (cmdlet disponibile)</value></data>
+  <data name="Presentation.DefaultTenantBehavior" xml:space="preserve"><value>(comportamento predefinito del tenant)</value></data>
+  <data name="Presentation.RefreshUsageLocation" xml:space="preserve"><value>Aggiorna località di utilizzo</value></data>
+  <data name="MailFlow.SaveDomainFailed" xml:space="preserve"><value>Salvataggio dominio non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveAddressBookPolicyFailed" xml:space="preserve"><value>Salvataggio criterio rubrica non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveAddressListFailed" xml:space="preserve"><value>Salvataggio elenco indirizzi non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveConnectorFailed" xml:space="preserve"><value>Salvataggio connettore non riuscito. Controlla i campi e riprova (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveOfflineAddressBookFailed" xml:space="preserve"><value>Salvataggio rubrica offline non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveOrganizationRelationshipFailed" xml:space="preserve"><value>Salvataggio relazione organizzativa non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveRemoteDomainFailed" xml:space="preserve"><value>Salvataggio dominio remoto non riuscito (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveRuleFailed" xml:space="preserve"><value>Salvataggio regola non riuscito. Riprova o consulta i log (rif.: {0}).</value></data>
+  <data name="MailFlow.SaveSharingPolicyFailed" xml:space="preserve"><value>Salvataggio criterio di condivisione non riuscito (rif.: {0}).</value></data>
+  <data name="Compliance.SearchCount" xml:space="preserve"><value>{0} ricerche</value></data>
+  <data name="Compliance.CaseCount" xml:space="preserve"><value>{0} casi</value></data>
+  <data name="Compliance.ActionCount" xml:space="preserve"><value>{0} azioni</value></data>
+  <data name="MailSecurity.Requirements" xml:space="preserve"><value>Connettiti a Exchange e seleziona un criterio prima di salvare.</value></data>
+  <data name="Resources.Requirements" xml:space="preserve"><value>Nome visualizzato, alias e indirizzo email principale sono obbligatori. Connettiti a Exchange prima di salvare.</value></data>
+  <data name="PublicFolders.Requirements" xml:space="preserve"><value>Inserisci un nome. Le cartelle con posta abilitata richiedono anche un alias. Connettiti a Exchange prima di salvare.</value></data>
+  <data name="Resources.DelegationImpact" xml:space="preserve"><value>Salva la cassetta postale risorsa e applica {0} modifiche alle deleghe.</value></data>
+  <data name="Migration.ActionFailed" xml:space="preserve"><value>Impossibile eseguire {0} sul batch di migrazione.</value></data>
+  <data name="MobileDevices.StateFailed" xml:space="preserve"><value>Impossibile impostare lo stato {0}.</value></data>
+  <data name="Logs.RetentionSummary" xml:space="preserve"><value>I log JSONL salvati vengono conservati per {0} giorni UTC.</value></data>
+  <data name="Noun.Members" xml:space="preserve"><value>membri</value></data>
+  <data name="License.SourceUser" xml:space="preserve"><value>utente</value></data>
+  <data name="License.SourceTenant" xml:space="preserve"><value>tenant</value></data>
+  <data name="License.SourceConfiguration" xml:space="preserve"><value>configurazione locale</value></data>
+  <data name="License.SourceUnknown" xml:space="preserve"><value>origine non specificata</value></data>
+  <data name="License.LocationSuggestion" xml:space="preserve"><value>Località di utilizzo suggerita: {0} (origine: {1}).{2}</value></data>
+  <data name="Mailbox.OfQuota" xml:space="preserve"><value> di {0}</value></data>
+  <data name="Mailbox.QuotaSummary" xml:space="preserve"><value>{0} ({1:0.0}%{2})</value></data>
+  <data name="Presentation.RunningSearchUnifiedAuditLogInProgress" xml:space="preserve"><value>Esecuzione Search-UnifiedAuditLog...</value></data>
+  <data name="Presentation.ExchangeSessionDisconnectedBeforeExecution" xml:space="preserve"><value>Sessione Exchange disconnessa prima dell'esecuzione.</value></data>
+  <data name="Presentation.NoQuery" xml:space="preserve"><value>(Nessuna query)</value></data>
+  <data name="Presentation.LoadingDashboardInProgress" xml:space="preserve"><value>Caricamento dashboard...</value></data>
+  <data name="Presentation.FailedToLoadDashboardNoErrorDetails" xml:space="preserve"><value>Caricamento dashboard non riuscito (nessun dettaglio sull'errore).</value></data>
+  <data name="Presentation.FailedToLoadDeletedMailboxesNoErrorDetails" xml:space="preserve"><value>Caricamento cassette eliminate non riuscito (nessun dettaglio sull'errore).</value></data>
+  <data name="Presentation.StartingMailboxAccessScanInProgress" xml:space="preserve"><value>Avvio analisi degli accessi alle cassette postali...</value></data>
+  <data name="Presentation.EnterValidDateAndTimeValuesForThe" xml:space="preserve"><value>Inserisci date e orari validi per il periodo delle risposte automatiche.</value></data>
+  <data name="Presentation.TheEndDateMustBeAfterTheStart" xml:space="preserve"><value>La data di fine deve essere successiva alla data di inizio.</value></data>
+  <data name="Presentation.CmdletNotAvailable" xml:space="preserve"><value> (cmdlet non disponibile)</value></data>
+  <data name="Presentation.AssignOrRemoveMicrosoft365LicensesForThe" xml:space="preserve"><value>Assegna o rimuovi licenze Microsoft 365 per l'utente selezionato.</value></data>
+  <data name="Presentation.UnableToAssignTheLicense" xml:space="preserve"><value>Impossibile assegnare la licenza.</value></data>
+  <data name="Presentation.UnableToRemoveTheLicense" xml:space="preserve"><value>Impossibile rimuovere la licenza.</value></data>
+  <data name="Presentation.UnableToCompleteTheLicenseOperation" xml:space="preserve"><value>Impossibile completare l'operazione sulle licenze.</value></data>
+  <data name="Presentation.FailedToLoadMailboxesNoErrorDetails" xml:space="preserve"><value>Caricamento cassette postali non riuscito (nessun dettaglio sull'errore).</value></data>
+  <data name="Presentation.RemoveTheDelegateFromTheSelectedMailboxFolder" xml:space="preserve"><value>Rimuove il delegato dalla cartella della cassetta postale selezionata.</value></data>
+  <data name="Presentation.SelectAMemberUserToReviewAndAssign" xml:space="preserve"><value>Seleziona un utente membro per consultare e assegnare licenze.</value></data>
+  <data name="Presentation.ExistingMailbox" xml:space="preserve"><value>Cassetta postale esistente</value></data>
+  <data name="Presentation.NotFound" xml:space="preserve"><value>Non trovato</value></data>
+  <data name="Presentation.InProgress" xml:space="preserve"><value>In corso</value></data>
+  <data name="Presentation.ProgressNotAvailable" xml:space="preserve"><value>Avanzamento non disponibile</value></data>
+  <data name="Presentation.NoPolicyAssigned" xml:space="preserve"><value>Nessun criterio assegnato</value></data>
+  <data name="Presentation.PrimarySMTPIsRequiredWhenUpdatingMailboxAddresses" xml:space="preserve"><value>L'indirizzo SMTP principale è obbligatorio per aggiornare gli indirizzi della cassetta postale.</value></data>
+  <data name="Presentation.StartingScanInProgress" xml:space="preserve"><value>Avvio analisi...</value></data>
+  <data name="Presentation.DomainValidation" xml:space="preserve"><value>Dominio: il nome è obbligatorio, il FQDN deve essere valido e DomainType deve essere supportato.</value></data>
+  <data name="Presentation.AddressBookPolicyValidation" xml:space="preserve"><value>Criterio rubrica: sono obbligatori Name, almeno un AddressList, un GlobalAddressList e un OfflineAddressBook.</value></data>
+  <data name="Presentation.AddressListValidation" xml:space="preserve"><value>Elenco indirizzi: Name è obbligatorio, insieme a un RecipientFilter personalizzato o IncludedRecipients validi (AllRecipients, MailboxUsers, MailContacts, MailGroups, MailUsers, Resources, RoomMailboxes, EquipmentMailboxes).</value></data>
+  <data name="Presentation.ConnectorValidation" xml:space="preserve"><value>Connettore: il nome è obbligatorio, il tipo deve essere valido e i domini devono usare il formato corretto.</value></data>
+  <data name="Presentation.OfflineAddressBookValidation" xml:space="preserve"><value>Rubrica offline: Name e almeno un AddressList sono obbligatori. DiffRetentionPeriod è facoltativo e deve essere un intero non negativo.</value></data>
+  <data name="Presentation.OrganizationRelationshipValidation" xml:space="preserve"><value>Relazione organizzativa: nome e almeno un dominio valido sono obbligatori. Seleziona livelli Free/Busy e MailTips supportati; gli URI facoltativi devono essere assoluti.</value></data>
+  <data name="Presentation.RemoteDomainValidation" xml:space="preserve"><value>Dominio remoto: il nome è obbligatorio, il dominio deve essere valido o usare il carattere jolly `*.domain.tld` e AllowedOOFType deve essere supportato.</value></data>
+  <data name="Presentation.TransportRuleValidation" xml:space="preserve"><value>Regola: nome, modalità valida, almeno una condizione e un'azione sono obbligatori.</value></data>
+  <data name="Presentation.TransportRuleTestValidation" xml:space="preserve"><value>Test: mittente e destinatario devono essere indirizzi email validi.</value></data>
+  <data name="Presentation.SharingPolicyValidation" xml:space="preserve"><value>Criterio di condivisione: Name e almeno una voce Domains sono obbligatori (per esempio, domain.tld: CalendarSharingFreeBusyDetail).</value></data>
+  <data name="Presentation.SearchingMessagesInProgress" xml:space="preserve"><value>Ricerca messaggi...</value></data>
+  <data name="Presentation.QueryingExchangeInProgress" xml:space="preserve"><value>Interrogazione di Exchange...</value></data>
+  <data name="Presentation.ProcessingResultsInProgress" xml:space="preserve"><value>Elaborazione risultati...</value></data>
+  <data name="Presentation.UnableToRunMigrationPreflight" xml:space="preserve"><value>Impossibile eseguire la verifica preliminare della migrazione.</value></data>
+  <data name="Presentation.NoPreflightMessages" xml:space="preserve"><value>Nessun messaggio dalla verifica preliminare.</value></data>
+  <data name="Presentation.SelectAMigrationBatchToReviewStatusCounters" xml:space="preserve"><value>Seleziona un batch di migrazione per consultare stato, contatori e azioni disponibili.</value></data>
+  <data name="Presentation.SelectAMigrationBatchToEnableLoadingThe" xml:space="preserve"><value>Seleziona un batch di migrazione per caricare i dettagli completi.</value></data>
+  <data name="Presentation.LoadingTheFullMigrationBatchDetailsAndReportInProgress" xml:space="preserve"><value>Caricamento dettagli completi e rapporto del batch di migrazione...</value></data>
+  <data name="Presentation.FullDetailsAndReportLoadedOnDemand" xml:space="preserve"><value>Dettagli completi e rapporto caricati su richiesta.</value></data>
+  <data name="Presentation.FullDetailsAndReportAreNotPreloadedUse" xml:space="preserve"><value>Dettagli completi e rapporto non sono precaricati. Usa "Carica dettagli" quando servono.</value></data>
+  <data name="Presentation.LoadingMobileDevicesListInProgress" xml:space="preserve"><value>Caricamento elenco dispositivi mobili...</value></data>
+  <data name="Presentation.LoadingDeviceDetailsInProgress" xml:space="preserve"><value>Caricamento dettagli dispositivo...</value></data>
+  <data name="Presentation.ModuleNotAvailable" xml:space="preserve"><value>Modulo non disponibile</value></data>
+  <data name="Presentation.SelectADeviceToReviewDetailsAndAvailable" xml:space="preserve"><value>Seleziona un dispositivo per consultare dettagli e azioni disponibili.</value></data>
+  <data name="Presentation.UnableToVerifyMobileDevicesCapabilitiesForThe" xml:space="preserve"><value>Impossibile verificare le funzionalità Dispositivi mobili nella sessione Exchange attuale. Il modulo non verrà caricato automaticamente.</value></data>
+  <data name="Presentation.SelectARoleGroupToReviewRBACRoles" xml:space="preserve"><value>Seleziona un gruppo di ruoli per consultare ruoli RBAC, membri e ambito.</value></data>
+  <data name="Presentation.AddMemberToRoleGroup" xml:space="preserve"><value>Aggiunta membro al gruppo di ruoli</value></data>
+  <data name="Presentation.RemoveMemberFromRoleGroup" xml:space="preserve"><value>Rimozione membro dal gruppo di ruoli</value></data>
+  <data name="Presentation.TheDelegateLosesExplicitClientAccessToThe" xml:space="preserve"><value>Il delegato perde l'accesso client esplicito alla cartella pubblica.</value></data>
+  <data name="Presentation.WorkerConsoleShown" xml:space="preserve"><value>Console worker visibile</value></data>
+  <data name="Presentation.WorkerConsoleHidden" xml:space="preserve"><value>Console worker nascosta</value></data>
+  <data name="Presentation.UnknownError" xml:space="preserve"><value>Errore sconosciuto</value></data>
+  <data name="Presentation.InteractiveSignInFailed" xml:space="preserve"><value>Accesso interattivo non riuscito</value></data>
+  <data name="Presentation.ConnectionFailed" xml:space="preserve"><value>Connessione non riuscita</value></data>
+  <data name="Presentation.UnableToConnectToExchangeOnlinePleaseCheck" xml:space="preserve"><value>Impossibile connettersi a Exchange Online. Consulta i log per ulteriori dettagli.</value></data>
+  <data name="Security.SaveDiscardsOtherDrafts" xml:space="preserve">
+    <value>Il salvataggio ricarica tutte le policy di sicurezza e scarta le modifiche non salvate negli altri editor.</value>
+  </data>
+  <data name="Security.SaveAndDiscard" xml:space="preserve">
+    <value>Salva e scarta le altre modifiche</value>
+  </data>
+  <data name="Trace.TotalMessages" xml:space="preserve">
+    <value>Messaggi totali: {0}</value>
+  </data>
+  <data name="Trace.MessagesSoFar" xml:space="preserve">
+    <value>Messaggi trovati finora: {0}</value>
+  </data>
+  <data name="License.ApplyLocationAndRetry" xml:space="preserve">
+    <value>Applica {0} e riprova</value>
+  </data>
+  <data name="License.SetUsageLocation" xml:space="preserve">
+    <value>Imposta UsageLocation su {0}</value>
+  </data>
+  <data name="License.WriteDisabled" xml:space="preserve">
+    <value>Le modifiche alle licenze sono disabilitate dalla configurazione corrente. Aggiungi {0} a graphLicenseWriteScopes o ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES e riconnetti la sessione.</value>
+  </data>
+  <data name="License.ValidationDetails" xml:space="preserve">
+    <value>{0} Validazione: {1}</value>
+  </data>
+  <data name="Ui.MemberCount" xml:space="preserve">
+    <value>{0} membri</value>
+  </data>
+  <data name="Permissions.GroupSummary" xml:space="preserve">
+    <value>{0} - {1} membri, {2} ruoli</value>
+  </data>
+  <data name="Permissions.ScopesSummary" xml:space="preserve">
+    <value>Lettura: {0} | Scrittura: {1} | Destinatario personalizzato: {2} | Configurazione personalizzata: {3}</value>
+  </data>
+  <data name="Migration.CountersSummary" xml:space="preserve">
+    <value>Totali {0} | Attivi {1} | Sincronizzati {2} | Completati {3} | Non riusciti {4} | Arrestati {5}</value>
+  </data>
+  <data name="MobileDevices.InventoryExact" xml:space="preserve">
+    <value>{0} di {1} dispositivi</value>
+  </data>
+  <data name="MobileDevices.InventoryPartial" xml:space="preserve">
+    <value>{0}+ dispositivi caricati</value>
+  </data>
+  <data name="MobileDevices.SetStateImpact" xml:space="preserve">
+    <value>Imposta lo stato del dispositivo su {0}.</value>
+  </data>
+  <data name="MobileDevices.AssignPolicyImpact" xml:space="preserve">
+    <value>Assegna la policy {0} al dispositivo selezionato.</value>
+  </data>
+  <data name="Mailbox.AssignFolderRoleImpact" xml:space="preserve">
+    <value>Assegna il ruolo &#x27;{0}&#x27; alla cartella della casella selezionata.</value>
+  </data>
+  <data name="Mailbox.RestoreProgress" xml:space="preserve">
+    <value>{0}% completato</value>
+  </data>
+  <data name="Mailbox.RestoreResponseUnavailable" xml:space="preserve">
+    <value>La risposta del ripristino non è disponibile.</value>
+  </data>
+  <data name="Mailbox.AutoReplyStateScheduled" xml:space="preserve">
+    <value>Programmato</value>
+  </data>
+  <data name="Mailbox.AutoReplyStateEnabled" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="Mailbox.AutoReplyStateDisabled" xml:space="preserve">
+    <value>Disattivato</value>
+  </data>
+  <data name="Ui.Percent" xml:space="preserve">
+    <value>{0:0.0}%</value>
+  </data>
+  <data name="Noun.Items" xml:space="preserve">
+    <value>elementi</value>
+  </data>
+  <data name="Noun.Messages" xml:space="preserve">
+    <value>messaggi</value>
+  </data>
+  <data name="PublicFolders.FilterMailEnabled" xml:space="preserve">
+    <value>Solo con posta abilitata</value>
+  </data>
+  <data name="PublicFolders.FilterMailDisabled" xml:space="preserve">
+    <value>Solo con posta disabilitata</value>
+  </data>
+  <data name="Mailbox.ProtocolUnavailable" xml:space="preserve">
+    <value>La configurazione dei protocolli della casella non è disponibile: Get-CASMailbox non è supportato{0}.</value>
+  </data>
+  <data name="Mailbox.ProtocolLimitations" xml:space="preserve">
+    <value>La configurazione dei protocolli della casella è disponibile con limitazioni: {0}.</value>
+  </data>
+  <data name="Mailbox.ProtocolReadOnly" xml:space="preserve">
+    <value>{0} è di sola lettura ({1} non è supportato)</value>
+  </data>
+  <data name="MobileDevices.CapabilityUnavailable" xml:space="preserve">
+    <value>Il modulo Dispositivi mobili non è disponibile: la sessione Exchange corrente non espone Get-MobileDevice{0}.</value>
+  </data>
+  <data name="MobileDevices.CapabilityLimitations" xml:space="preserve">
+    <value>Il modulo Dispositivi mobili è disponibile con funzionalità ridotte: {0}.</value>
+  </data>
+  <data name="MobileDevices.PolicyUnavailable" xml:space="preserve">
+    <value>policy della casella non disponibile ({0})</value>
+  </data>
+  <data name="MobileDevices.AccessActionsDisabled" xml:space="preserve">
+    <value>le azioni Consenti/Blocca/Quarantena sono disabilitate ({0})</value>
+  </data>
+  <data name="MobileDevices.WipeDisabled" xml:space="preserve">
+    <value>la cancellazione remota è disabilitata ({0})</value>
+  </data>
+  <data name="Mailbox.RestoreSoftDeleted" xml:space="preserve">
+    <value>Eliminata temporaneamente</value>
+  </data>
+  <data name="Mailbox.RestoreInactive" xml:space="preserve">
+    <value>Inattiva</value>
+  </data>
+  <data name="Mailbox.RestoreHardDeleted" xml:space="preserve">
+    <value>Eliminata definitivamente</value>
+  </data>
+  <data name="Mailbox.RestoreCompleted" xml:space="preserve">
+    <value>Completato</value>
+  </data>
+  <data name="Mailbox.RestoreFailed" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="Mailbox.AddFolderPermission" xml:space="preserve">
+    <value>Aggiungi autorizzazione alla cartella della casella</value>
+  </data>
+  <data name="Mailbox.UpdateFolderPermission" xml:space="preserve">
+    <value>Aggiorna autorizzazione alla cartella della casella</value>
+  </data>
+  <data name="Mailbox.RemoveFolderPermission" xml:space="preserve">
+    <value>Rimuovi autorizzazione dalla cartella della casella</value>
+  </data>
+  <data name="Mailbox.PermissionActionsFailed" xml:space="preserve">
+    <value>Alcune azioni non sono riuscite:
+{0}</value>
+  </data>
 </root>
 

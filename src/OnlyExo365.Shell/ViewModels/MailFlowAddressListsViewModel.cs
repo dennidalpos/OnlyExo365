@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -110,7 +111,7 @@ internal sealed class MailFlowAddressListsViewModel : MailFlowSectionViewModelBa
     public string AddressListValidationMessage
         => IsAddressListInputValid
             ? string.Empty
-            : "Address list: Name is required and either a custom RecipientFilter or valid IncludedRecipients (AllRecipients, MailboxUsers, MailContacts, MailGroups, MailUsers, Resources, RoomMailboxes, EquipmentMailboxes) must be provided.";
+            : Loc.Get("Presentation.AddressListValidation");
 
     public string? AddressListIdentity { get => _addressListIdentity; set => SetEditorProperty(ref _addressListIdentity, value); }
     public string AddressListName { get => _addressListName; set => SetEditorProperty(ref _addressListName, value); }
@@ -132,7 +133,7 @@ internal sealed class MailFlowAddressListsViewModel : MailFlowSectionViewModelBa
         var result = await WorkerService.GetAddressListsAsync(new GetAddressListsRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load address lists";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadAddressLists");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow address lists load failed: {error}", "MailFlow");
             return;
@@ -198,7 +199,7 @@ internal sealed class MailFlowAddressListsViewModel : MailFlowSectionViewModelBa
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving address list failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveAddressListFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save address list failed (name={AddressListName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -214,7 +215,9 @@ internal sealed class MailFlowAddressListsViewModel : MailFlowSectionViewModelBa
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting address list\nTarget: {SelectedAddressList.DisplayName}\nImpact: can affect segmented GALs and address book policies.\n\nConfirm?");
+        var selected = SelectedAddressList;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteAddressListsMessage", selected.DisplayName));
         if (!confirmed)
         {
             return;
@@ -224,14 +227,14 @@ internal sealed class MailFlowAddressListsViewModel : MailFlowSectionViewModelBa
         {
             var result = await WorkerService.RemoveAddressListAsync(new RemoveAddressListRequest
             {
-                Identity = SelectedAddressList.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete address list";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteAddressList");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove address list failed (name={SelectedAddressList.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove address list failed (name={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

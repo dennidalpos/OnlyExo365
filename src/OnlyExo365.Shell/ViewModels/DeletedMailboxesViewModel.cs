@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -126,7 +127,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{Mailboxes.Count} of {TotalCount} deleted mailboxes";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Mailboxes.Count, TotalCount, Loc.Get("Noun.Mailboxes"));
 
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanCheckUpn => !IsLoading && _shellViewModel.IsExchangeConnected && !string.IsNullOrWhiteSpace(UpnQuery);
@@ -195,7 +196,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
-        LoadProgress.Start("Loading deleted mailboxes...", "mailbox");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingDeletedMailboxesInProgress"), Loc.Get("Presentation.Mailbox"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Mailboxes.Count);
@@ -233,7 +234,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
             {
                 var errorDetails = result.Error != null
                     ? $"{result.Error.Code}: {result.Error.Message}"
-                    : "Failed to load deleted mailboxes (no error details)";
+                    : Loc.Get("Presentation.FailedToLoadDeletedMailboxesNoErrorDetails");
                 ErrorMessage = hasExistingMailboxes ? errorDetails : null;
                 if (!hasExistingMailboxes)
                 {
@@ -278,7 +279,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         IsLoading = true;
-        LoadProgress.Start("Loading deleted mailboxes...", "mailbox");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingDeletedMailboxesInProgress"), Loc.Get("Presentation.Mailbox"));
         ErrorMessage = null;
 
         try
@@ -314,7 +315,7 @@ public class DeletedMailboxesViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load more deleted mailboxes";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMoreDeletedMailboxes");
             }
         }
         catch (OperationCanceledException)

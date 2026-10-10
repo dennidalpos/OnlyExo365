@@ -1,7 +1,10 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.ComponentModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
+using OnlyExo365.Shell.Text;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Contracts.Results;
@@ -14,6 +17,52 @@ public sealed class MailSecurityViewModel : ViewModelBase
     private const NavigationPage AlertPage = NavigationPage.MailSecurity;
     private readonly IMailSecurityWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
+
+    private bool _restoringDraft;
+    private readonly Dictionary<string, string> _draftBaselines = new();
+    public bool HasPendingChanges => _draftBaselines.Any(pair => pair.Value != CaptureDraft(pair.Key));
+
+    private string CaptureDraft(string selection) => selection switch
+    {
+        nameof(SelectedDkimConfig) => SelectedDkimConfig == null ? "" : JsonSerializer.Serialize(CreateDkimRequest()),
+        nameof(SelectedAntiSpamPolicy) => SelectedAntiSpamPolicy == null ? "" : JsonSerializer.Serialize(CreateAntiSpamRequest()),
+        nameof(SelectedAntiPhishPolicy) => SelectedAntiPhishPolicy == null ? "" : JsonSerializer.Serialize(CreateAntiPhishRequest()),
+        nameof(SelectedMalwarePolicy) => SelectedMalwarePolicy == null ? "" : JsonSerializer.Serialize(CreateMalwareRequest()),
+        nameof(SelectedQuarantinePolicy) => SelectedQuarantinePolicy == null ? "" : JsonSerializer.Serialize(CreateQuarantineRequest()),
+        nameof(SelectedOutboundSpamPolicy) => SelectedOutboundSpamPolicy == null ? "" : JsonSerializer.Serialize(CreateOutboundSpamRequest()),
+        _ => throw new ArgumentOutOfRangeException(nameof(selection))
+    };
+
+    private bool CanReplaceDraft(string selection) => _restoringDraft || IsLoadingWorkspace || IsSaving ||
+        !_shellViewModel.IsExchangeConnected || !_draftBaselines.TryGetValue(selection, out var baseline) ||
+        baseline == CaptureDraft(selection) || ErrorDialogService.ConfirmDiscardChanges();
+
+    public void DiscardDraft()
+    {
+        var dkim = SelectedDkimConfig;
+        var spam = SelectedAntiSpamPolicy;
+        var phish = SelectedAntiPhishPolicy;
+        var malware = SelectedMalwarePolicy;
+        var quarantine = SelectedQuarantinePolicy;
+        var outbound = SelectedOutboundSpamPolicy;
+        _restoringDraft = true;
+        try
+        {
+            SelectedDkimConfig = null; SelectedDkimConfig = dkim;
+            SelectedAntiSpamPolicy = null; SelectedAntiSpamPolicy = spam;
+            SelectedAntiPhishPolicy = null; SelectedAntiPhishPolicy = phish;
+            SelectedMalwarePolicy = null; SelectedMalwarePolicy = malware;
+            SelectedQuarantinePolicy = null; SelectedQuarantinePolicy = quarantine;
+            SelectedOutboundSpamPolicy = null; SelectedOutboundSpamPolicy = outbound;
+        }
+        finally { _restoringDraft = false; }
+    }
+
+    protected override void OnPropertyChanged(string? propertyName = null)
+    {
+        base.OnPropertyChanged(propertyName);
+        if (propertyName != nameof(HasPendingChanges)) base.OnPropertyChanged(nameof(HasPendingChanges));
+    }
 
     private bool _isLoadingWorkspace;
     private bool _isSaving;
@@ -124,8 +173,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
 
     public bool IsBusy => IsLoadingWorkspace || IsSaving;
     public string LoadingOverlayText => IsSaving
-        ? "Saving Mail Security configuration..."
-        : "Loading Mail Security workspace...";
+        ? Loc.Get("Presentation.SavingMailSecurityConfigurationInProgress")
+        : Loc.Get("Presentation.LoadingMailSecurityWorkspaceInProgress");
 
     public string? ErrorMessage
     {
@@ -160,9 +209,18 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedDkimConfig;
         set
         {
+            if (ReferenceEquals(_selectedDkimConfig, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedDkimConfig)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedDkimConfig))));
+                return;
+            }
             if (SetProperty(ref _selectedDkimConfig, value))
             {
                 DkimEnabled = value?.Enabled ?? false;
+                _draftBaselines[nameof(SelectedDkimConfig)] = CaptureDraft(nameof(SelectedDkimConfig));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -173,6 +231,13 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedAntiSpamPolicy;
         set
         {
+            if (ReferenceEquals(_selectedAntiSpamPolicy, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedAntiSpamPolicy)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedAntiSpamPolicy))));
+                return;
+            }
             if (SetProperty(ref _selectedAntiSpamPolicy, value))
             {
                 AntiSpamRuleEnabled = IsRuleEnabled(value?.RuleState);
@@ -181,6 +246,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
                 AntiSpamHighConfidenceSpamAction = value?.HighConfidenceSpamAction ?? "Quarantine";
                 AntiSpamPhishSpamAction = value?.PhishSpamAction ?? "Quarantine";
                 OnPropertyChanged(nameof(SelectedAntiSpamHasRule));
+                _draftBaselines[nameof(SelectedAntiSpamPolicy)] = CaptureDraft(nameof(SelectedAntiSpamPolicy));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -191,6 +258,13 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedAntiPhishPolicy;
         set
         {
+            if (ReferenceEquals(_selectedAntiPhishPolicy, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedAntiPhishPolicy)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedAntiPhishPolicy))));
+                return;
+            }
             if (SetProperty(ref _selectedAntiPhishPolicy, value))
             {
                 AntiPhishRuleEnabled = IsRuleEnabled(value?.RuleState);
@@ -205,6 +279,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
                 AntiPhishDmarcRejectAction = value?.DmarcRejectAction ?? "Quarantine";
                 AntiPhishDmarcQuarantineAction = value?.DmarcQuarantineAction ?? "Quarantine";
                 OnPropertyChanged(nameof(SelectedAntiPhishHasRule));
+                _draftBaselines[nameof(SelectedAntiPhishPolicy)] = CaptureDraft(nameof(SelectedAntiPhishPolicy));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -215,6 +291,13 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedMalwarePolicy;
         set
         {
+            if (ReferenceEquals(_selectedMalwarePolicy, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedMalwarePolicy)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedMalwarePolicy))));
+                return;
+            }
             if (SetProperty(ref _selectedMalwarePolicy, value))
             {
                 MalwareRuleEnabled = IsRuleEnabled(value?.RuleState);
@@ -222,6 +305,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
                 MalwareZapEnabled = value?.ZapEnabled ?? true;
                 MalwareFileTypeAction = value?.FileTypeAction ?? "Reject";
                 OnPropertyChanged(nameof(SelectedMalwareHasRule));
+                _draftBaselines[nameof(SelectedMalwarePolicy)] = CaptureDraft(nameof(SelectedMalwarePolicy));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -232,6 +317,13 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedQuarantinePolicy;
         set
         {
+            if (ReferenceEquals(_selectedQuarantinePolicy, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedQuarantinePolicy)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedQuarantinePolicy))));
+                return;
+            }
             if (SetProperty(ref _selectedQuarantinePolicy, value))
             {
                 QuarantinePermissionsValue = value?.EndUserQuarantinePermissionsValue ?? "FullAccess";
@@ -239,6 +331,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
                 QuarantineEndUserSpamNotificationFrequency = value?.EndUserSpamNotificationFrequency ?? 1;
                 QuarantineRetentionDays = value?.QuarantineRetentionDays ?? 15;
                 QuarantineOrganizationBrandingEnabled = value?.OrganizationBrandingEnabled ?? false;
+                _draftBaselines[nameof(SelectedQuarantinePolicy)] = CaptureDraft(nameof(SelectedQuarantinePolicy));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -249,6 +343,13 @@ public sealed class MailSecurityViewModel : ViewModelBase
         get => _selectedOutboundSpamPolicy;
         set
         {
+            if (ReferenceEquals(_selectedOutboundSpamPolicy, value)) return;
+            if (!CanReplaceDraft(nameof(SelectedOutboundSpamPolicy)))
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(() => OnPropertyChanged(nameof(SelectedOutboundSpamPolicy))));
+                return;
+            }
             if (SetProperty(ref _selectedOutboundSpamPolicy, value))
             {
                 OutboundRecipientLimitExternalPerHour = value?.RecipientLimitExternalPerHour ?? 500;
@@ -256,6 +357,8 @@ public sealed class MailSecurityViewModel : ViewModelBase
                 OutboundRecipientLimitPerDay = value?.RecipientLimitPerDay ?? 1000;
                 OutboundActionWhenThresholdReached = value?.ActionWhenThresholdReached ?? "BlockUser";
                 OutboundAutoForwardingMode = value?.AutoForwardingMode ?? "Automatic";
+                _draftBaselines[nameof(SelectedOutboundSpamPolicy)] = CaptureDraft(nameof(SelectedOutboundSpamPolicy));
+                OnPropertyChanged(nameof(HasPendingChanges));
                 RaiseCanExecuteChanged();
             }
         }
@@ -488,6 +591,7 @@ public sealed class MailSecurityViewModel : ViewModelBase
 
     private async Task RefreshWorkspaceAsync(CancellationToken cancellationToken)
     {
+        if (!IsSaving && HasPendingChanges && !ErrorDialogService.ConfirmDiscardChanges()) return;
         var hasWorkspaceData = HasWorkspaceData;
 
         if (!_shellViewModel.IsExchangeConnected)
@@ -513,7 +617,7 @@ public sealed class MailSecurityViewModel : ViewModelBase
             var result = await _workerService.GetMailSecurityBaselineAsync(cancellationToken: cancellationToken);
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load the Mail Security workspace.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadTheMailSecurityWorkspace");
                 if (hasWorkspaceData)
                 {
                     ErrorMessage = errorMessage;
@@ -568,18 +672,16 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateDkimRequest();
+        var target = SelectedDkimConfig.Domain;
+
         await ExecuteSaveAsync(
-            "Updating DKIM",
-            SelectedDkimConfig.Domain,
-            "Enable or disable DKIM signing for the selected domain.",
-            () => _workerService.UpdateDkimSigningConfigAsync(
-                new UpdateDkimSigningConfigRequest
-                {
-                    Identity = SelectedDkimConfig.Identity,
-                    Enabled = DkimEnabled
-                },
-                cancellationToken: cancellationToken),
-            $"DKIM updated for {SelectedDkimConfig.Domain}",
+            nameof(SelectedDkimConfig),
+            Loc.Get("Presentation.UpdatingDKIM"),
+            target,
+            Loc.Get("Presentation.EnableOrDisableDKIMSigningForTheSelected"),
+            () => _workerService.UpdateDkimSigningConfigAsync(request, cancellationToken: cancellationToken),
+            $"DKIM updated for {target}",
             cancellationToken);
     }
 
@@ -590,23 +692,16 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateAntiSpamRequest();
+        var target = SelectedAntiSpamPolicy.Name;
+
         await ExecuteSaveAsync(
-            "Updating anti-spam policy",
-            SelectedAntiSpamPolicy.Name,
-            "Update the thresholds and actions for the selected anti-spam policy.",
-            () => _workerService.UpdateHostedContentFilterPolicyAsync(
-                new UpdateHostedContentFilterPolicyRequest
-                {
-                    Identity = SelectedAntiSpamPolicy.Identity,
-                    RuleIdentity = SelectedAntiSpamPolicy.RuleIdentity,
-                    Enabled = SelectedAntiSpamHasRule ? AntiSpamRuleEnabled : null,
-                    BulkThreshold = AntiSpamBulkThreshold,
-                    SpamAction = TrimToNull(AntiSpamSpamAction),
-                    HighConfidenceSpamAction = TrimToNull(AntiSpamHighConfidenceSpamAction),
-                    PhishSpamAction = TrimToNull(AntiSpamPhishSpamAction)
-                },
-                cancellationToken: cancellationToken),
-            $"Anti-spam policy updated: {SelectedAntiSpamPolicy.Name}",
+            nameof(SelectedAntiSpamPolicy),
+            Loc.Get("Presentation.UpdatingAntiSpamPolicy"),
+            target,
+            Loc.Get("Presentation.UpdateTheThresholdsAndActionsForTheSelected"),
+            () => _workerService.UpdateHostedContentFilterPolicyAsync(request, cancellationToken: cancellationToken),
+            $"Anti-spam policy updated: {target}",
             cancellationToken);
     }
 
@@ -617,29 +712,16 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateAntiPhishRequest();
+        var target = SelectedAntiPhishPolicy.Name;
+
         await ExecuteSaveAsync(
-            "Updating anti-phish policy",
-            SelectedAntiPhishPolicy.Name,
-            "Update anti-phish and spoof protection for the selected policy.",
-            () => _workerService.UpdateAntiPhishPolicyAsync(
-                new UpdateAntiPhishPolicyRequest
-                {
-                    Identity = SelectedAntiPhishPolicy.Identity,
-                    RuleIdentity = SelectedAntiPhishPolicy.RuleIdentity,
-                    Enabled = SelectedAntiPhishHasRule ? AntiPhishRuleEnabled : null,
-                    EnableSpoofIntelligence = AntiPhishEnableSpoofIntelligence,
-                    EnableMailboxIntelligence = AntiPhishEnableMailboxIntelligence,
-                    EnableTargetedUserProtection = AntiPhishEnableTargetedUserProtection,
-                    HonorDmarcPolicy = AntiPhishHonorDmarcPolicy,
-                    PhishThresholdLevel = AntiPhishThresholdLevel,
-                    MailboxIntelligenceProtectionAction = TrimToNull(AntiPhishMailboxIntelligenceProtectionAction),
-                    TargetedUserProtectionAction = TrimToNull(AntiPhishTargetedUserProtectionAction),
-                    AuthenticationFailAction = TrimToNull(AntiPhishAuthenticationFailAction),
-                    DmarcRejectAction = TrimToNull(AntiPhishDmarcRejectAction),
-                    DmarcQuarantineAction = TrimToNull(AntiPhishDmarcQuarantineAction)
-                },
-                cancellationToken: cancellationToken),
-            $"Anti-phish policy updated: {SelectedAntiPhishPolicy.Name}",
+            nameof(SelectedAntiPhishPolicy),
+            Loc.Get("Presentation.UpdatingAntiPhishPolicy"),
+            target,
+            Loc.Get("Presentation.UpdateAntiPhishAndSpoofProtectionForThe"),
+            () => _workerService.UpdateAntiPhishPolicyAsync(request, cancellationToken: cancellationToken),
+            $"Anti-phish policy updated: {target}",
             cancellationToken);
     }
 
@@ -650,22 +732,16 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateMalwareRequest();
+        var target = SelectedMalwarePolicy.Name;
+
         await ExecuteSaveAsync(
-            "Updating anti-malware policy",
-            SelectedMalwarePolicy.Name,
-            "Update the file filter and anti-malware actions for the selected policy.",
-            () => _workerService.UpdateMalwareFilterPolicyAsync(
-                new UpdateMalwareFilterPolicyRequest
-                {
-                    Identity = SelectedMalwarePolicy.Identity,
-                    RuleIdentity = SelectedMalwarePolicy.RuleIdentity,
-                    Enabled = SelectedMalwareHasRule ? MalwareRuleEnabled : null,
-                    EnableFileFilter = MalwareEnableFileFilter,
-                    ZapEnabled = MalwareZapEnabled,
-                    FileTypeAction = TrimToNull(MalwareFileTypeAction)
-                },
-                cancellationToken: cancellationToken),
-            $"Anti-malware policy updated: {SelectedMalwarePolicy.Name}",
+            nameof(SelectedMalwarePolicy),
+            Loc.Get("Presentation.UpdatingAntiMalwarePolicy"),
+            target,
+            Loc.Get("Presentation.UpdateTheFileFilterAndAntiMalwareActions"),
+            () => _workerService.UpdateMalwareFilterPolicyAsync(request, cancellationToken: cancellationToken),
+            $"Anti-malware policy updated: {target}",
             cancellationToken);
     }
 
@@ -676,22 +752,16 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateQuarantineRequest();
+        var target = SelectedQuarantinePolicy.Name;
+
         await ExecuteSaveAsync(
-            "Updating quarantine policy",
-            SelectedQuarantinePolicy.Name,
-            "Update retention and end-user permissions for the selected quarantine policy.",
-            () => _workerService.UpdateQuarantinePolicyAsync(
-                new UpdateQuarantinePolicyRequest
-                {
-                    Identity = SelectedQuarantinePolicy.Identity,
-                    EndUserQuarantinePermissionsValue = TrimToNull(QuarantinePermissionsValue),
-                    EsnEnabled = QuarantineEsnEnabled,
-                    EndUserSpamNotificationFrequency = QuarantineEndUserSpamNotificationFrequency,
-                    QuarantineRetentionDays = QuarantineRetentionDays,
-                    OrganizationBrandingEnabled = QuarantineOrganizationBrandingEnabled
-                },
-                cancellationToken: cancellationToken),
-            $"Quarantine policy updated: {SelectedQuarantinePolicy.Name}",
+            nameof(SelectedQuarantinePolicy),
+            Loc.Get("Presentation.UpdatingQuarantinePolicy"),
+            target,
+            Loc.Get("Presentation.UpdateRetentionAndEndUserPermissionsForThe"),
+            () => _workerService.UpdateQuarantinePolicyAsync(request, cancellationToken: cancellationToken),
+            $"Quarantine policy updated: {target}",
             cancellationToken);
     }
 
@@ -702,26 +772,85 @@ public sealed class MailSecurityViewModel : ViewModelBase
             return;
         }
 
+        var request = CreateOutboundSpamRequest();
+        var target = SelectedOutboundSpamPolicy.Name;
+
         await ExecuteSaveAsync(
-            "Updating outbound spam policy",
-            SelectedOutboundSpamPolicy.Name,
-            "Update the limits and actions for the selected outbound spam policy.",
-            () => _workerService.UpdateHostedOutboundSpamFilterPolicyAsync(
-                new UpdateHostedOutboundSpamFilterPolicyRequest
-                {
-                    Identity = SelectedOutboundSpamPolicy.Identity,
-                    RecipientLimitExternalPerHour = OutboundRecipientLimitExternalPerHour,
-                    RecipientLimitInternalPerHour = OutboundRecipientLimitInternalPerHour,
-                    RecipientLimitPerDay = OutboundRecipientLimitPerDay,
-                    ActionWhenThresholdReached = TrimToNull(OutboundActionWhenThresholdReached),
-                    AutoForwardingMode = TrimToNull(OutboundAutoForwardingMode)
-                },
-                cancellationToken: cancellationToken),
-            $"Outbound spam policy updated: {SelectedOutboundSpamPolicy.Name}",
+            nameof(SelectedOutboundSpamPolicy),
+            Loc.Get("Presentation.UpdatingOutboundSpamPolicy"),
+            target,
+            Loc.Get("Presentation.UpdateTheLimitsAndActionsForTheSelected"),
+            () => _workerService.UpdateHostedOutboundSpamFilterPolicyAsync(request, cancellationToken: cancellationToken),
+            $"Outbound spam policy updated: {target}",
             cancellationToken);
     }
 
+    private UpdateDkimSigningConfigRequest CreateDkimRequest() => new UpdateDkimSigningConfigRequest
+        {
+            Identity = SelectedDkimConfig!.Identity,
+            Enabled = DkimEnabled
+        };
+
+    private UpdateHostedContentFilterPolicyRequest CreateAntiSpamRequest() => new UpdateHostedContentFilterPolicyRequest
+        {
+            Identity = SelectedAntiSpamPolicy!.Identity,
+            RuleIdentity = SelectedAntiSpamPolicy!.RuleIdentity,
+            Enabled = SelectedAntiSpamHasRule ? AntiSpamRuleEnabled : null,
+            BulkThreshold = AntiSpamBulkThreshold,
+            SpamAction = TrimToNull(AntiSpamSpamAction),
+            HighConfidenceSpamAction = TrimToNull(AntiSpamHighConfidenceSpamAction),
+            PhishSpamAction = TrimToNull(AntiSpamPhishSpamAction)
+        };
+
+    private UpdateAntiPhishPolicyRequest CreateAntiPhishRequest() => new UpdateAntiPhishPolicyRequest
+        {
+            Identity = SelectedAntiPhishPolicy!.Identity,
+            RuleIdentity = SelectedAntiPhishPolicy!.RuleIdentity,
+            Enabled = SelectedAntiPhishHasRule ? AntiPhishRuleEnabled : null,
+            EnableSpoofIntelligence = AntiPhishEnableSpoofIntelligence,
+            EnableMailboxIntelligence = AntiPhishEnableMailboxIntelligence,
+            EnableTargetedUserProtection = AntiPhishEnableTargetedUserProtection,
+            HonorDmarcPolicy = AntiPhishHonorDmarcPolicy,
+            PhishThresholdLevel = AntiPhishThresholdLevel,
+            MailboxIntelligenceProtectionAction = TrimToNull(AntiPhishMailboxIntelligenceProtectionAction),
+            TargetedUserProtectionAction = TrimToNull(AntiPhishTargetedUserProtectionAction),
+            AuthenticationFailAction = TrimToNull(AntiPhishAuthenticationFailAction),
+            DmarcRejectAction = TrimToNull(AntiPhishDmarcRejectAction),
+            DmarcQuarantineAction = TrimToNull(AntiPhishDmarcQuarantineAction)
+        };
+
+    private UpdateMalwareFilterPolicyRequest CreateMalwareRequest() => new UpdateMalwareFilterPolicyRequest
+        {
+            Identity = SelectedMalwarePolicy!.Identity,
+            RuleIdentity = SelectedMalwarePolicy!.RuleIdentity,
+            Enabled = SelectedMalwareHasRule ? MalwareRuleEnabled : null,
+            EnableFileFilter = MalwareEnableFileFilter,
+            ZapEnabled = MalwareZapEnabled,
+            FileTypeAction = TrimToNull(MalwareFileTypeAction)
+        };
+
+    private UpdateQuarantinePolicyRequest CreateQuarantineRequest() => new UpdateQuarantinePolicyRequest
+        {
+            Identity = SelectedQuarantinePolicy!.Identity,
+            EndUserQuarantinePermissionsValue = TrimToNull(QuarantinePermissionsValue),
+            EsnEnabled = QuarantineEsnEnabled,
+            EndUserSpamNotificationFrequency = QuarantineEndUserSpamNotificationFrequency,
+            QuarantineRetentionDays = QuarantineRetentionDays,
+            OrganizationBrandingEnabled = QuarantineOrganizationBrandingEnabled
+        };
+
+    private UpdateHostedOutboundSpamFilterPolicyRequest CreateOutboundSpamRequest() => new UpdateHostedOutboundSpamFilterPolicyRequest
+        {
+            Identity = SelectedOutboundSpamPolicy!.Identity,
+            RecipientLimitExternalPerHour = OutboundRecipientLimitExternalPerHour,
+            RecipientLimitInternalPerHour = OutboundRecipientLimitInternalPerHour,
+            RecipientLimitPerDay = OutboundRecipientLimitPerDay,
+            ActionWhenThresholdReached = TrimToNull(OutboundActionWhenThresholdReached),
+            AutoForwardingMode = TrimToNull(OutboundAutoForwardingMode)
+        };
+
     private async Task ExecuteSaveAsync(
+        string selection,
         string operation,
         string target,
         string impact,
@@ -729,10 +858,17 @@ public sealed class MailSecurityViewModel : ViewModelBase
         string logMessage,
         CancellationToken cancellationToken)
     {
-        if (!ConfirmMutation(operation, target, impact, "Confirm Mail Security update"))
-        {
-            return;
-        }
+        var discardsOtherDrafts = _draftBaselines.Any(pair => pair.Key != selection && pair.Value != CaptureDraft(pair.Key));
+        var confirmationImpact = discardsOtherDrafts
+            ? $"{impact}{Environment.NewLine}{Loc.Get("Security.SaveDiscardsOtherDrafts")}"
+            : impact;
+        var confirmed = false;
+        RunOnUiThread(() => confirmed = ErrorDialogService.ShowConfirmation(
+            Loc.Get("Presentation.ConfirmMailSecurityUpdate"),
+            UserMessageCatalog.FormatMutationConfirmation(operation, target, confirmationImpact),
+            discardsOtherDrafts ? Loc.Get("Security.SaveAndDiscard") : null,
+            discardsOtherDrafts ? Loc.Get("Btn.Stay") : null));
+        if (!confirmed) return;
 
         IsSaving = true;
         ErrorMessage = null;
@@ -742,7 +878,7 @@ public sealed class MailSecurityViewModel : ViewModelBase
             var result = await saveAction();
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Updating Mail Security failed.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UpdatingMailSecurityFailed");
                 return;
             }
 
@@ -774,6 +910,7 @@ public sealed class MailSecurityViewModel : ViewModelBase
 
     private void ClearStateForDisconnectedSession()
     {
+        _draftBaselines.Clear();
         DkimConfigs.Clear();
         AntiSpamPolicies.Clear();
         AntiPhishPolicies.Clear();

@@ -23,7 +23,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                     <TextBlock Text="{loc:Loc Key=Nav.MobileDevices}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding MobileDevices.StatusText}" Margin="12,0,0,0" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
                 <Button DockPanel.Dock="Right" Content="{loc:Loc Key=MobileDevices.Refresh}" Command="{Binding MobileDevices.RefreshCommand}" Style="{StaticResource PrimaryButton}"/>
             </DockPanel>
@@ -47,8 +47,8 @@
                     <ColumnDefinition Width="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" Text="{Binding MobileDevices.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-                <ComboBox Grid.Column="1"
+                <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0" Text="{Binding MobileDevices.SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+                <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1"
                           ItemsSource="{Binding MobileDevices.AccessStateFilters}"
                           SelectedItem="{Binding MobileDevices.AccessStateFilter}"/>
             </Grid>
@@ -64,10 +64,10 @@
                           CanUserDeleteRows="False"
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
-                          Background="{StaticResource SecondaryBackgroundBrush}"
-                          BorderBrush="{StaticResource BorderBrush}"
-                          RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                          AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                          Background="{DynamicResource SecondaryBackgroundBrush}"
+                          BorderBrush="{DynamicResource BorderBrush}"
+                          RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                          AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.User}" Binding="{Binding UserDisplayName}" Width="Auto" MinWidth="180"/>
                         <DataGridTextColumn Header="{loc:Loc Key=MobileDevices.DeviceID}" Binding="{Binding DeviceId}" Width="Auto" MinWidth="220"/>
@@ -92,7 +92,7 @@
                                 <TextBlock Text="{Binding MobileDevices.LoadingCountText}"
                                            Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
                                            Visibility="{Binding MobileDevices.HasLoadingCount, Converter={StaticResource BoolToVisibility}}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -106,7 +106,7 @@
 
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+        <GridSplitter Grid.Column="1" Width="4" Background="{DynamicResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"
                       ResizeDirection="Columns"
                       ResizeBehavior="PreviousAndNext"/>
@@ -134,30 +134,30 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding MobileDevices.SelectedDeviceSummary}" TextWrapping="Wrap" Margin="0,0,0,12"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.UPN}" Margin="0,0,8,6"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.Mailbox}" Margin="0,0,8,6"/>
-                        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.UserPrincipalName}" IsReadOnly="True" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.MailboxIdentity}" IsReadOnly="True"/>
+                        <TextBlock x:Name="InputLabel001" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.UPN}" Margin="0,0,8,6"/>
+                        <TextBlock x:Name="InputLabel002" Grid.Row="1" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.Mailbox}" Margin="0,0,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="2" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.UserPrincipalName}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="2" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.MailboxIdentity}" IsReadOnly="True"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.ModelOS}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.StatusReason}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="4" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.DeviceModel}" IsReadOnly="True" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.DeviceAccessStateReason}" IsReadOnly="True"/>
+                        <TextBlock x:Name="InputLabel003" Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.ModelOS}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel004" Grid.Row="3" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.StatusReason}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="4" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.DeviceModel}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="4" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.DeviceAccessStateReason}" IsReadOnly="True"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.LastSuccessSync}" Margin="0,8,8,6"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.LastPolicyUpdate}" Margin="0,8,8,6"/>
-                        <TextBox Grid.Row="6" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.LastSuccessSync, StringFormat={}{0:g}}" IsReadOnly="True" Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.LastPolicyUpdateTime, StringFormat={}{0:g}}" IsReadOnly="True"/>
+                        <TextBlock x:Name="InputLabel005" Grid.Row="5" Grid.Column="0" Text="{loc:Loc Key=MobileDevices.LastSuccessSync}" Margin="0,8,8,6"/>
+                        <TextBlock x:Name="InputLabel006" Grid.Row="5" Grid.Column="1" Text="{loc:Loc Key=MobileDevices.LastPolicyUpdate}" Margin="0,8,8,6"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Grid.Row="6" Grid.Column="0" Text="{Binding MobileDevices.SelectedDevice.LastSuccessSync, StringFormat={}{0:g}}" IsReadOnly="True" Margin="0,0,8,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Grid.Row="6" Grid.Column="1" Text="{Binding MobileDevices.SelectedDevice.LastPolicyUpdateTime, StringFormat={}{0:g}}" IsReadOnly="True"/>
 
                         <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding MobileDevices.SelectedDevice.DeviceUserAgent}" TextWrapping="Wrap"
-                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,0"/>
                     </Grid>
                 </controls:SectionPanel>
 
                 <controls:SectionPanel Header="{loc:Loc Key=MobileDevices.MailboxPolicy}" Margin="0,12,0,0">
                     <StackPanel IsEnabled="{Binding MobileDevices.CanLoadPolicies}">
-                        <TextBlock Text="{loc:Loc Key=MobileDevices.PoliciesAreAppliedToTheMailboxAssociatedWithTheSelectedDevice}" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap"/>
-                        <ComboBox ItemsSource="{Binding MobileDevices.Policies}"
+                        <TextBlock x:Name="InputLabel007" Text="{loc:Loc Key=MobileDevices.PoliciesAreAppliedToTheMailboxAssociatedWithTheSelectedDevice}" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"/>
+                        <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" ItemsSource="{Binding MobileDevices.Policies}"
                                   SelectedValuePath="Identity"
                                   SelectedValue="{Binding MobileDevices.SelectedMailboxPolicyIdentity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   DisplayMemberPath="Name"

@@ -34,7 +34,7 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
     private readonly ShellProgressViewModel _progressState;
     private readonly ShellPromptViewModel _promptState;
     private readonly List<NavigationBlockingRegistration> _blockingSources = new();
-    private readonly List<Func<bool>> _unsavedChangesChecks = new();
+    private readonly List<(Func<bool> HasChanges, Action? Discard)> _unsavedChangesChecks = new();
 
     private NavigationPage _currentPage = NavigationPage.Dashboard;
     private bool _isNavigationLocked;
@@ -151,13 +151,14 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
         UpdateNavigationLock();
     }
 
-    public void RegisterUnsavedChangesCheck(Func<bool> hasUnsavedChanges)
+    public void RegisterUnsavedChangesCheck(Func<bool> hasUnsavedChanges, Action? discard = null)
     {
-        _unsavedChangesChecks.Add(hasUnsavedChanges);
+        _unsavedChangesChecks.Add((hasUnsavedChanges, discard));
     }
 
     public void Dispose()
     {
+        ReleaseUiResources();
         _navigationService.PageChanged -= OnPageChanged;
         _navigationService.Navigating -= OnNavigating;
         _navigationService.NavigationStateChanged -= OnNavigationStateChanged;
@@ -190,14 +191,7 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        var confirmed = _promptState.ShowConfirmationBlocking(
-            UserMessageCatalog.UnsavedChangesTitle,
-            UserMessageCatalog.UnsavedChangesMessage);
-
-        if (!confirmed)
-        {
-            e.Cancel = true;
-        }
+        e.Cancel = !ConfirmDiscardActiveDraft();
     }
 
     private void OnNavigationStateChanged(object? sender, EventArgs e)
@@ -205,11 +199,20 @@ public sealed class ShellNavigationStateViewModel : ViewModelBase, IDisposable
         UpdateNavigationLock();
     }
 
+    public bool ConfirmDiscardActiveDraft()
+    {
+        if (!HasUnsavedChanges()) return true;
+        if (!ErrorDialogService.ConfirmDiscardChanges()) return false;
+        foreach (var check in _unsavedChangesChecks)
+            if (check.HasChanges()) check.Discard?.Invoke();
+        return true;
+    }
+
     private bool HasUnsavedChanges()
     {
         foreach (var check in _unsavedChangesChecks)
         {
-            if (check())
+            if (check.HasChanges())
             {
                 return true;
             }

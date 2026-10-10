@@ -520,14 +520,14 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
                 IsWorkerConsoleVisible = result.Value.IsVisible;
                 _logState.AddLog(
                     LogLevel.Information,
-                    result.Value.IsVisible ? "Worker console shown" : "Worker console hidden");
+                    result.Value.IsVisible ? Loc.Get("Presentation.WorkerConsoleShown") : Loc.Get("Presentation.WorkerConsoleHidden"));
                 return;
             }
 
             IsWorkerConsoleVisible = previousVisibility;
             _logState.AddLog(
                 LogLevel.Error,
-                $"Failed to change worker console visibility: {result.Error?.Message ?? "Unknown error"}");
+                $"Failed to change worker console visibility: {result.Error?.Message ?? Loc.Get("Presentation.UnknownError")}");
         }
         catch (OperationCanceledException)
         {
@@ -580,7 +580,7 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
 
                 if (bootstrapResult.Error != null)
                 {
-                    ShowErrorDialog("Interactive Sign-In Failed", bootstrapResult.Error);
+                    ShowErrorDialog(Loc.Get("Presentation.InteractiveSignInFailed"), bootstrapResult.Error);
                 }
 
                 return;
@@ -614,11 +614,11 @@ public sealed class ShellConnectionStateViewModel : ViewModelBase
 
         if (result.Error != null)
         {
-            ShowErrorDialog("Connection Failed", result.Error);
+            ShowErrorDialog(Loc.Get("Presentation.ConnectionFailed"), result.Error);
             return;
         }
 
-        ShowErrorDialog("Connection Failed", "Unable to connect to Exchange Online. Please check the logs for more details.");
+        ShowErrorDialog(Loc.Get("Presentation.ConnectionFailed"), Loc.Get("Presentation.UnableToConnectToExchangeOnlinePleaseCheck"));
     }
 
     private async Task DisconnectExchangeAsync(CancellationToken cancellationToken)

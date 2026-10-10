@@ -67,8 +67,8 @@ Evidence: `artifacts/test-results/onlyexo365-tests.trx`, `artifacts/security/nug
 2. **IMP-02 / P2:** Generate exports to a temporary sibling file and replace the destination only after success, preserving existing reports on failure.
 3. **IMP-03 / P3:** Replace the manual catalog CSV parser with a standard parser and finish localization of direct ViewModel messages. Evaluate any additional dependency separately.
 
-These proposals were not implemented as part of the remediation.
+These proposals were not implemented as part of the critical remediation. The subsequent [UI/UX repair audit](2026-10-10-ui-ux-audit.md) implements the client presentation portion of IMP-03; the tracker records its residual scope.
 
 ## Session Handoff
 
-Resume from `main` and `PROJECT_STATUS.json`. Offline remediation is complete; the remaining qualification tasks are AUD-07 and AUD-08. Optional improvements IMP-01/02/03 remain proposals. No additional full-suite run is needed unless source changes or new failures justify it. Build/test/security artifacts are ignored by Git and retained locally; regenerate the installer in another environment if needed. The user explicitly authorized commit and push on `main` for this handoff. The final chat records the committed revision, remote equality, and checkout cleanliness.
+For current work and qualification, use `PROJECT_STATUS.json` and the subsequent [UI/UX repair audit](2026-10-10-ui-ux-audit.md). The 768-test, Release/security/package results above describe the earlier critical remediation. UI changes have since been verified with 789 tests and a Debug build; regenerate Release artifacts before installer qualification. Pending work includes UX-08, AUD-07 and AUD-08. The user separately authorized commit and push on main for the subsequent UI/UX session handoff; the current tracker and final chat record that handoff.

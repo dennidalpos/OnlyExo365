@@ -18,12 +18,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.PrimarySmtp}" FontWeight="SemiBold"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
+                    <TextBlock x:Name="InputLabel004" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.PrimarySmtp}" FontWeight="SemiBold"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="0" Grid.Column="1"
                              Text="{Binding SettingsEditor.PrimarySmtpAddress, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.PrimarySmtpTooltip}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ProxyAddresses}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel005" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ProxyAddresses}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.ProxyAddressesText, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              MinHeight="84"
@@ -31,7 +31,7 @@
                              TextWrapping="Wrap"
                              ToolTip="{loc:Loc Key=MailboxSettings.ProxyAddressesTooltip}"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,6,0,0"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="{loc:Loc Key=MailboxSettings.ProxyAddressesHint}"/>
                     <CheckBox Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
                               IsChecked="{Binding SettingsEditor.HiddenFromAddressListsEnabled}"
@@ -55,12 +55,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ForwardingAddress}" FontWeight="SemiBold"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
+                    <TextBlock x:Name="InputLabel006" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ForwardingAddress}" FontWeight="SemiBold"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Grid.Row="0" Grid.Column="1"
                              Text="{Binding SettingsEditor.ForwardingAddress, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.ForwardingAddressTooltip}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ForwardingSmtp}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel007" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ForwardingSmtp}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.ForwardingSmtpAddress, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.ForwardingSmtpTooltip}"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.DeliverToMailboxLabel}" FontWeight="SemiBold" Margin="0,8,0,0"/>
@@ -68,16 +68,16 @@
                               IsChecked="{Binding SettingsEditor.DeliverToMailboxAndForward}"
                               Content="{loc:Loc Key=MailboxSettings.DeliverToMailboxEnabled}"
                               ToolTip="{loc:Loc Key=MailboxSettings.DeliverToMailboxTooltip}"/>
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.MaxSendLabel}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel008" Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.MaxSendLabel}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.MaxSendSize, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.MaxSendTooltip}"/>
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.MaxReceiveLabel}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel009" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.MaxReceiveLabel}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.MaxReceiveSize, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.MaxReceiveTooltip}"/>
                     <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Margin="0,6,0,0"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="{loc:Loc Key=MailboxSettings.SizeFormatHint}"/>
                 </Grid>
             </controls:SectionPanel>
@@ -112,7 +112,7 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditOwaEnabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdateOWAEnabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="0" Grid.Column="1"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.AllowsAccessThroughOutlookOnTheWebForTheSelectedMailbox}"/>
 
                         <CheckBox Grid.Row="1" Grid.Column="0" Margin="0,8,0,0"
@@ -121,7 +121,7 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditActiveSyncEnabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdateActiveSyncEnabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.ControlsSynchronizationForExchangeActiveSyncMobileClients}"/>
 
                         <CheckBox Grid.Row="2" Grid.Column="0" Margin="0,8,0,0"
@@ -130,7 +130,7 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditMapiEnabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdateMAPIEnabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.AllowsOrBlocksOutlookDesktopAndMAPIOverHTTPAccessForTheMailbox}"/>
 
                         <CheckBox Grid.Row="3" Grid.Column="0" Margin="0,8,0,0"
@@ -139,7 +139,7 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditPopEnabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdatePopEnabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.AllowsMessageDownloadThroughPOP}"/>
 
                         <CheckBox Grid.Row="4" Grid.Column="0" Margin="0,8,0,0"
@@ -148,7 +148,7 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditImapEnabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdateImapEnabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.AllowsAccessToMessagesThroughIMAP}"/>
 
                         <CheckBox Grid.Row="5" Grid.Column="0" Margin="0,8,0,0"
@@ -157,11 +157,11 @@
                                   IsEnabled="{Binding SettingsEditor.CanEditSmtpClientAuthenticationDisabled}"
                                   ToolTip="{loc:Loc Key=MailboxSettings.UpdateSmtpClientAuthenticationDisabledThroughSetCASMailbox}"/>
                         <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.IfEnabledBlocksSMTPClientAuthenticationForTheSelectedMailbox}"/>
 
                         <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Margin="0,8,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=MailboxSettings.OptionsThatCannotBeEditedDependOnTheCapabilitiesDetectedInTheCur}"/>
                     </Grid>
                 </StackPanel>
@@ -183,15 +183,15 @@
                               IsChecked="{Binding SettingsEditor.ArchiveEnabled}"
                               ToolTip="{loc:Loc Key=MailboxSettings.EnableOrDisableTheMailboxArchive}"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Features.ArchiveName}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ArchiveStatus}" FontWeight="SemiBold" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
                                Text="{Binding Features.ArchiveStatus}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.ArchiveGUID}" FontWeight="SemiBold" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
                                Text="{Binding Features.ArchiveGuid}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </Grid>
             </controls:SectionPanel>
 
@@ -212,11 +212,11 @@
                               IsChecked="{Binding SettingsEditor.LitigationHoldEnabled}"
                               ToolTip="{loc:Loc Key=MailboxSettings.PreserveAllContentForLegalHoldPurposes}"/>
                     <StackPanel Grid.Row="0" Grid.Column="1">
-                        <TextBlock Text="{Binding Features.LitigationHoldDate, StringFormat='{}Enabled since: {0:yyyy-MM-dd}'}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Text="{Binding Features.LitigationHoldDate, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.EnabledSinceFormat}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Visibility="{Binding SettingsEditor.LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
-                        <TextBlock Text="{Binding Features.LitigationHoldOwner, StringFormat='{}Owner: {0}'}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Text="{Binding Features.LitigationHoldOwner, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.OwnerFormat}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Visibility="{Binding SettingsEditor.LitigationHoldEnabled, Converter={StaticResource BoolToVisibility}}"/>
                     </StackPanel>
                     <CheckBox Grid.Row="1" Grid.Column="0" Content="{loc:Loc Key=MailboxSettings.AuditEnabled}"
@@ -224,8 +224,8 @@
                               Margin="0,8,0,0"
                               ToolTip="{loc:Loc Key=MailboxSettings.RecordMailboxAccessAndUpdateActivity}"/>
                     <TextBlock Grid.Row="1" Grid.Column="1"
-                               Text="{Binding Features.AuditLogAgeLimit, StringFormat='{}Log retention: {0}'}"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"/>
+                               Text="{Binding Features.AuditLogAgeLimit, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.RetentionFormat}"
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,0"/>
                     <CheckBox Grid.Row="2" Grid.Column="0" Content="{loc:Loc Key=MailboxSettings.SingleItemRecovery}"
                               IsChecked="{Binding SettingsEditor.SingleItemRecoveryEnabled}"
                               Margin="0,8,0,0"
@@ -252,7 +252,7 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.PolicyAssigned}" FontWeight="SemiBold"/>
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                        <ComboBox ItemsSource="{Binding SettingsEditor.AvailableRetentionPolicies}"
+                        <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.RetentionPolicy}" ItemsSource="{Binding SettingsEditor.AvailableRetentionPolicies}"
                                   SelectedValuePath="Name"
                                   SelectedValue="{Binding SettingsEditor.SelectedRetentionPolicy, UpdateSourceTrigger=PropertyChanged}"
                                   MinWidth="240">
@@ -282,12 +282,12 @@
 
                     <TextBlock Grid.Row="1" Grid.Column="1"
                                Text="{Binding SettingsEditor.SelectedRetentionPolicyDescription}"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Margin="0,6,0,0"
                                Visibility="{Binding SettingsEditor.SelectedRetentionPolicyDescription, Converter={StaticResource NullToVisibility}}"/>
                     <TextBlock Grid.Row="2" Grid.Column="1"
                                Text="{loc:Loc Key=MailboxSettings.TheArchiveIsNotRequiredToAssignARetentionPolicyButItIsRequiredTo}"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                TextWrapping="Wrap"
                                Margin="0,6,0,0"/>
                     <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource WarningBannerBorderStyle}" Padding="8" Margin="0,8,0,0"
@@ -312,24 +312,24 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.WarningQuota}" FontWeight="SemiBold"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
+                    <TextBlock x:Name="InputLabel010" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.WarningQuota}" FontWeight="SemiBold"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" Grid.Row="0" Grid.Column="1"
                              Text="{Binding SettingsEditor.IssueWarningQuota, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.SupportedFormat49GB512MBUnlimited}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.SendProhibitQuota}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel011" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.SendProhibitQuota}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.ProhibitSendQuota, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.SupportedFormat50GB1TBUnlimited}"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.SendReceiveProhibitQuota}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                    <TextBlock x:Name="InputLabel012" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.SendReceiveProhibitQuota}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
                              Text="{Binding SettingsEditor.ProhibitSendReceiveQuota, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{loc:Loc Key=MailboxSettings.SupportedFormat51GB1TBUnlimited}"/>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.UsedSpace}" FontWeight="SemiBold" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0"
                                Text="{Binding QuotaUsageSummary}"
-                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Margin="0,6,0,0"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="{loc:Loc Key=MailboxSettings.ExchangeOnlineAppliesTheFinalQuotaFormatValidationWhenSaving}"/>
                 </Grid>
             </controls:SectionPanel>
@@ -362,38 +362,38 @@
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.Start}" FontWeight="SemiBold"/>
-                        <DatePicker Grid.Row="0" Grid.Column="1"
+                        <TextBlock x:Name="InputLabel013" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.Start}" FontWeight="SemiBold"/>
+                        <DatePicker AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" Grid.Row="0" Grid.Column="1"
                                     SelectedDate="{Binding AutoReplyEditor.AutoReplyStartDate}"
                                     Margin="0,0,8,0"/>
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" Grid.Row="0" Grid.Column="2"
                                  Text="{Binding AutoReplyEditor.AutoReplyStartTime, UpdateSourceTrigger=PropertyChanged}"
                                  ToolTip="{loc:Loc Key=MailboxSettings.TimeFormatHHMm}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.End}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                        <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,8,8,0"
+                        <TextBlock x:Name="InputLabel014" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxSettings.End}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                        <DatePicker AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Grid.Row="1" Grid.Column="1" Margin="0,8,8,0"
                                     SelectedDate="{Binding AutoReplyEditor.AutoReplyEndDate}"/>
-                        <TextBox Grid.Row="1" Grid.Column="2" Margin="0,8,0,0"
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Grid.Row="1" Grid.Column="2" Margin="0,8,0,0"
                                  Text="{Binding AutoReplyEditor.AutoReplyEndTime, UpdateSourceTrigger=PropertyChanged}"
                                  ToolTip="{loc:Loc Key=MailboxSettings.TimeFormatHHMm}"/>
                     </Grid>
 
-                    <TextBlock Text="{loc:Loc Key=MailboxSettings.InternalMessage}" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                    <TextBox Text="{Binding AutoReplyEditor.AutoReplyInternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBlock x:Name="InputLabel001" Text="{loc:Loc Key=MailboxSettings.InternalMessage}" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Text="{Binding AutoReplyEditor.AutoReplyInternalMessage, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              Height="80"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
                              IsEnabled="{Binding AutoReplyEditor.AutoReplyEnabled}"/>
-                    <TextBlock Text="{loc:Loc Key=MailboxSettings.ExternalMessage}" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                    <TextBox Text="{Binding AutoReplyEditor.AutoReplyExternalMessage, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBlock x:Name="InputLabel002" Text="{loc:Loc Key=MailboxSettings.ExternalMessage}" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Text="{Binding AutoReplyEditor.AutoReplyExternalMessage, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              Height="80"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
                              IsEnabled="{Binding AutoReplyEditor.AutoReplyEnabled}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBlock Text="{loc:Loc Key=MailboxSettings.ExternalRecipients}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <ComboBox Margin="8,0,0,0" Width="160"
+                        <TextBlock x:Name="InputLabel003" Text="{loc:Loc Key=MailboxSettings.ExternalRecipients}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Margin="8,0,0,0" Width="160"
                                   SelectedValue="{Binding AutoReplyEditor.AutoReplyExternalAudience}"
                                   SelectedValuePath="Tag"
                                   IsEnabled="{Binding AutoReplyEditor.AutoReplyEnabled}">

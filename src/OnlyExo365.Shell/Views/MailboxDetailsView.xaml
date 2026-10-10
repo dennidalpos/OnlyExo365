@@ -36,7 +36,7 @@
                         <StackPanel Orientation="Horizontal"
                                     Visibility="{Binding HasPendingMailboxChanges, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{loc:Loc Key=Mailbox.PendingChangesLabel}"
-                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold"
                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <Button Content="{loc:Loc Key=Btn.Save}" Command="{Binding SaveMailboxChangesCommand}"
                                     Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
@@ -47,8 +47,8 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,0"
                                     Visibility="{Binding HasPendingChanges, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="{Binding PendingActionsCount, StringFormat={loc:Loc Key=Mailbox.PendingPermissionsFormat}}"
-                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding PendingActionsCount, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.PendingPermissionsFormat}"
+                                       Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold"
                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <Button Content="{loc:Loc Key=Btn.Save}" Command="{Binding SavePermissionsCommand}"
                                     Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
@@ -60,7 +60,7 @@
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="{Binding PrimarySmtpAddress}"
-                           Foreground="{StaticResource SecondaryTextBrush}" FontSize="12"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
             </StackPanel>
 
             <Button Grid.Column="2" Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding RefreshCommand}"
@@ -88,7 +88,7 @@
                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
                 <TextBlock Text="{loc:Loc Key=Mailbox.LoadingTitle}" HorizontalAlignment="Center" Margin="0,8,0,0"
-                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}"/>
             </StackPanel>
 
             <TabControl Grid.Row="2"

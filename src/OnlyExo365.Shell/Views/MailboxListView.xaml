@@ -22,12 +22,12 @@
                 <TextBlock Text="{loc:Loc Key=Mailbox.List.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                 <TextBlock Margin="12,0,0,0"
                            VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
                            Text="{Binding Mailboxes.StatusText}"
                            Visibility="{Binding Mailboxes.IsMailboxInventoryWorkspace, Converter={StaticResource BoolToVisibility}}"/>
                 <TextBlock Margin="12,0,0,0"
                            VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
                            Text="{Binding Mailboxes.Provisioning.StatusText}"
                            Visibility="{Binding Mailboxes.IsProvisioningWorkspace, Converter={StaticResource BoolToVisibility}}"/>
             </StackPanel>
@@ -90,7 +90,7 @@
                     <TextBlock Text="{loc:Loc Key=Mailbox.List.ExchangeInventoryHeading}"
                                FontSize="16"
                                FontWeight="SemiBold"
-                               Foreground="{StaticResource PrimaryTextBrush}"/>
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding Mailboxes.RefreshCommand}"
@@ -106,7 +106,7 @@
                         Margin="0,0,0,12"
                         Visibility="{Binding IsExchangeConnected, Converter={StaticResource InverseBoolToVisibility}}">
                     <TextBlock Text="{loc:Loc Key=Mailbox.List.InventoryDisconnectedMessage}"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                TextWrapping="Wrap"/>
                 </Border>
 
@@ -118,7 +118,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" Text="{Binding Mailboxes.SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0" Text="{Binding Mailboxes.SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,12,0">
                         <TextBox.Style>
                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -129,7 +129,7 @@
                         </TextBox.Style>
                     </TextBox>
 
-                    <ComboBox Grid.Column="1" Width="150" SelectedValue="{Binding Mailboxes.RecipientTypeFilter}"
+                    <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1" Width="150" SelectedValue="{Binding Mailboxes.RecipientTypeFilter}"
                               SelectedValuePath="Tag">
                         <ComboBoxItem Content="{loc:Loc Key=Mailbox.List.FilterUserMailboxes}" Tag="UserMailbox"/>
                         <ComboBoxItem Content="{loc:Loc Key=Mailbox.List.FilterSharedMailboxes}" Tag="SharedMailbox"/>
@@ -204,7 +204,7 @@
                                      helpers:PasswordBoxClearHelper.ClearTrigger="{Binding Mailboxes.NewMailboxPasswordClearTrigger}"
                                      Visibility="{Binding Mailboxes.IsUserMailboxCreation, Converter={StaticResource BoolToVisibility}}"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"
+                        <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=Mailbox.List.WillCreateFormat}" TextWrapping="Wrap"/>
                     </Grid>
                 </controls:SectionPanel>
@@ -222,10 +222,10 @@
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               GridLinesVisibility="Horizontal"
                               HeadersVisibility="Column"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
-                              RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                              AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}"
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                              AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
                               EnableRowVirtualization="True"
@@ -254,7 +254,7 @@
                                     <TextBlock Text="{Binding Mailboxes.LoadProgress.CountText}"
                                                Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
                                                Visibility="{Binding Mailboxes.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"
-                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -281,7 +281,7 @@
             </Grid>
 
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                          Background="{StaticResource BorderBrush}"
+                          Background="{DynamicResource BorderBrush}"
                           ResizeDirection="Columns"
                           ResizeBehavior="PreviousAndNext"/>
 
@@ -290,7 +290,7 @@
                         Visibility="{Binding MailboxDetails.HasDetails, Converter={StaticResource InverseBoolToVisibility}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="320">
                         <TextBlock Text="{loc:Loc Key=Mailbox.List.DetailsEmptyState}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -327,7 +327,7 @@
                     <StackPanel>
                         <TextBlock Text="{loc:Loc Key=Mailbox.List.UnlicensedMembersHeading}" FontSize="16" FontWeight="SemiBold"/>
                         <TextBlock Margin="0,4,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{loc:Loc Key=Mailbox.List.UnlicensedMembersDescription}"/>
                     </StackPanel>
 
@@ -343,7 +343,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0"
+                    <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0"
                              Text="{Binding Mailboxes.Provisioning.SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,12,0">
                         <TextBox.Style>
@@ -368,7 +368,7 @@
                 <Border Grid.Row="2"
                         Style="{StaticResource InsetPanelBorderStyle}"
                         Margin="0,0,0,12">
-                    <TextBlock Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap"
+                    <TextBlock Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"
                                Text="{loc:Loc Key=Mailbox.List.LicensingPanelInstructions}"/>
                 </Border>
 
@@ -384,10 +384,10 @@
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               GridLinesVisibility="Horizontal"
                               HeadersVisibility="Column"
-                              Background="{StaticResource SecondaryBackgroundBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
-                              RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                              AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
+                              RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                              AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="{loc:Loc Key=Mailbox.List.ColDisplayName}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="180"/>
                             <DataGridTextColumn Header="{loc:Loc Key=Mailbox.List.ColUPN}" Binding="{Binding UserPrincipalName}" Width="Auto" MinWidth="220"/>
@@ -411,7 +411,7 @@
                                     <TextBlock Text="{Binding Mailboxes.Provisioning.LoadProgress.CountText}"
                                                Style="{StaticResource CompactLoadingOverlayCountTextStyle}"
                                                Visibility="{Binding Mailboxes.Provisioning.LoadProgress.HasCount, Converter={StaticResource BoolToVisibility}}"
-                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -442,7 +442,7 @@
             </Grid>
 
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                          Background="{StaticResource BorderBrush}"
+                          Background="{DynamicResource BorderBrush}"
                           ResizeDirection="Columns"
                           ResizeBehavior="PreviousAndNext"/>
 
@@ -458,13 +458,13 @@
                     <TextBlock Text="{loc:Loc Key=Mailbox.List.LicensingPanelHeading}"
                                FontSize="16"
                                FontWeight="SemiBold"
-                               Foreground="{StaticResource PrimaryTextBrush}"/>
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
 
                     <StackPanel Grid.Row="1" Margin="0,12,0,12">
                         <TextBlock Text="{Binding Mailboxes.Provisioning.SelectedCandidateSummary}"
                                    FontWeight="SemiBold"/>
                         <TextBlock Margin="0,4,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{Binding Mailboxes.Provisioning.SelectedCandidate.Mail, TargetNullValue={loc:Loc Key=Mailbox.List.MailNotSet}, FallbackValue={loc:Loc Key=Mailbox.List.MailNotSet}}"/>
                     </StackPanel>
 
@@ -472,7 +472,7 @@
                             Style="{StaticResource InsetPanelBorderStyle}"
                             Visibility="{Binding Mailboxes.Provisioning.HasSelectedCandidate, Converter={StaticResource InverseBoolToVisibility}}">
                         <TextBlock Text="{loc:Loc Key=Mailbox.List.LicensingPanelEmptyState}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    TextWrapping="Wrap"/>
                     </Border>
 

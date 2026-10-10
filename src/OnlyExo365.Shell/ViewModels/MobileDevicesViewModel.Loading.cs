@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Shell.Helpers;
@@ -36,7 +37,7 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load mobile devices";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMobileDevices");
                 if (hasWorkspaceData)
                 {
                     ErrorMessage = errorMessage;
@@ -93,7 +94,7 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load mobile devices";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMobileDevices");
                 return;
             }
 
@@ -145,7 +146,7 @@ public partial class MobileDevicesViewModel
             {
                 if (IsStillSelected(requestedIdentity))
                 {
-                    ErrorMessage = detailsResult.Error?.Message ?? "Unable to load mobile device details.";
+                    ErrorMessage = detailsResult.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMobileDeviceDetails");
                 }
 
                 return;
@@ -197,7 +198,7 @@ public partial class MobileDevicesViewModel
 
         if (!result.IsSuccess || result.Value == null)
         {
-            ErrorMessage = result.Error?.Message ?? "Unable to load ActiveSync mailbox policies.";
+            ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadActiveSyncMailboxPolicies");
             Policies.Clear();
             return;
         }

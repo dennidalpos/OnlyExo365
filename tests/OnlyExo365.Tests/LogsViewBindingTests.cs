@@ -30,7 +30,7 @@ public sealed class LogsViewBindingTests
             .Descendants()
             .FirstOrDefault(candidate =>
                 candidate.Name.LocalName == "TextBlock" &&
-                string.Equals((string?)candidate.Attribute("Text"), "{Binding Logs.TotalCount, StringFormat={loc:Loc Key=Logs.EntryCount}}", StringComparison.Ordinal));
+                string.Equals((string?)candidate.Attribute("Text"), "{Binding Logs.TotalCount, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Logs.EntryCount}", StringComparison.Ordinal));
 
         Assert.NotNull(totalCountText);
 

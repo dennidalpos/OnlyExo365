@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -70,7 +71,7 @@ internal sealed class MailFlowAcceptedDomainsViewModel : MailFlowSectionViewMode
         MailFlowViewModelSupport.IsValidDomain(DomainFqdn) &&
         DomainTypes.Contains(DomainType);
 
-    public string DomainValidationMessage => IsDomainInputValid ? string.Empty : "Domain: name is required, FQDN must be valid, and DomainType must be supported.";
+    public string DomainValidationMessage => IsDomainInputValid ? string.Empty : Loc.Get("Presentation.DomainValidation");
 
     public string? DomainIdentity { get => _domainIdentity; set => SetProperty(ref _domainIdentity, value); }
     public string DomainName { get => _domainName; set => SetEditorProperty(ref _domainName, value); }
@@ -87,7 +88,7 @@ internal sealed class MailFlowAcceptedDomainsViewModel : MailFlowSectionViewMode
         var result = await WorkerService.GetAcceptedDomainsAsync(new GetAcceptedDomainsRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load accepted domains";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadAcceptedDomains");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow accepted domains load failed: {error}", "MailFlow");
             return;
@@ -121,7 +122,7 @@ internal sealed class MailFlowAcceptedDomainsViewModel : MailFlowSectionViewMode
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving domain failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveDomainFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save domain failed (domain={DomainFqdn}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -137,7 +138,9 @@ internal sealed class MailFlowAcceptedDomainsViewModel : MailFlowSectionViewMode
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting accepted domain\nTarget: {SelectedDomain.DomainName}\nImpact: can interrupt tenant-wide mail delivery/routing.\n\nConfirm?");
+        var selected = SelectedDomain;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteAcceptedDomainsMessage", selected.DomainName));
         if (!confirmed)
         {
             return;
@@ -147,14 +150,14 @@ internal sealed class MailFlowAcceptedDomainsViewModel : MailFlowSectionViewMode
         {
             var result = await WorkerService.RemoveAcceptedDomainAsync(new RemoveAcceptedDomainRequest
             {
-                Identity = SelectedDomain.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete domain";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteDomain");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove domain failed (domain={SelectedDomain.DomainName}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove domain failed (domain={selected.DomainName}): {error}", "MailFlow");
                 return;
             }
 

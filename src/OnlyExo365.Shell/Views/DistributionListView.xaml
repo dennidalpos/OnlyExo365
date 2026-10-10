@@ -29,7 +29,7 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{loc:Loc Key=Distribution.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                     <TextBlock Text="{Binding DistributionLists.StatusText}" Margin="12,0,0,0"
-                               VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"/>
+                               VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
 
                 <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Refresh}" Command="{Binding DistributionLists.RefreshCommand}"
@@ -43,10 +43,10 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" Margin="0,0,12,0"
+                <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0" Margin="0,0,12,0"
                          Text="{Binding DistributionLists.SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <ComboBox Grid.Column="1" Width="180" Margin="0,0,12,0"
+                <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1" Width="180" Margin="0,0,12,0"
                           ItemsSource="{Binding DistributionLists.GroupTypeFilters}"
                           SelectedItem="{Binding DistributionLists.SelectedGroupTypeFilter}"/>
 
@@ -71,28 +71,28 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Distribution.DisplayName}" Margin="0,0,8,6"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Distribution.Alias}" Margin="0,0,8,6"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Distribution.EmailLocalPart}" Margin="0,0,8,6"/>
+                    <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Distribution.DisplayName}" Margin="0,0,8,6"/>
+                    <TextBlock x:Name="InputLabel002" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Distribution.Alias}" Margin="0,0,8,6"/>
+                    <TextBlock x:Name="InputLabel003" Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Distribution.EmailLocalPart}" Margin="0,0,8,6"/>
 
-                    <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
                              Text="{Binding DistributionLists.NewDistributionListDisplayName, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,0"
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="1" Grid.Column="1" Margin="0,0,8,0"
                              Text="{Binding DistributionLists.NewDistributionListAlias, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Grid.Row="1" Grid.Column="2" Margin="0,0,8,0"
+                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="1" Grid.Column="2" Margin="0,0,8,0"
                              Text="{Binding DistributionLists.NewDistributionListLocalPart, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button Grid.Row="1" Grid.Column="3" Content="{loc:Loc Key=Btn.Create}"
                             Command="{Binding DistributionLists.CreateDistributionListCommand}"
                             Style="{StaticResource PrimaryButton}"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Distribution.EmailDomain}" Margin="0,8,8,6"/>
-                    <ComboBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                    <TextBlock x:Name="InputLabel004" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Distribution.EmailDomain}" Margin="0,8,8,6"/>
+                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                               ItemsSource="{Binding DistributionLists.AvailableMailDomains}"
                               SelectedItem="{Binding DistributionLists.SelectedDistributionListDomain}"
                               Margin="0,0,8,0"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="3" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="{loc:Loc Key=Distribution.DistributionGroupOnly}"/>
                 </Grid>
             </controls:SectionPanel>
@@ -115,7 +115,7 @@
                     Visibility="{Binding DistributionLists.HasMore, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="4" Background="{StaticResource BorderBrush}"
+        <GridSplitter Grid.Column="1" Width="4" Background="{DynamicResource BorderBrush}"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
         <Grid Grid.Column="2" Margin="16,0,0,0">
@@ -123,7 +123,7 @@
                 <Grid>
                     <TextBlock Text="{loc:Loc Key=Distribution.EmptyState}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource InverseBoolToVisibility}}"/>
 
                     <StackPanel Visibility="{Binding DistributionLists.HasDetails, Converter={StaticResource BoolToVisibility}}">
@@ -136,9 +136,9 @@
                             <StackPanel>
                                 <TextBlock Text="{Binding DistributionLists.SelectedDetails.DisplayName}" FontSize="18" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DistributionLists.SelectedDetails.PrimarySmtpAddress}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding DistributionLists.CurrentGroupTypeLabel}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
 
                             <Button Grid.Column="1" Content="{loc:Loc Key=Distribution.BackBtn}"
@@ -151,7 +151,7 @@
                             <StackPanel>
                                 <TextBlock Text="{loc:Loc Key=Distribution.UnsavedChangesLabel}" Style="{StaticResource WarningBannerTextStyle}" FontWeight="SemiBold"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <Button Content="{loc:Loc Key=Btn.Save}" Command="{Binding DistributionLists.SaveSettingsCommand}"
+                                    <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=Btn.Save}" Command="{Binding DistributionLists.SaveSettingsCommand}"
                                             Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"/>
                                     <Button Content="{loc:Loc Key=Btn.Cancel}" Command="{Binding DistributionLists.DiscardSettingsCommand}"
                                             Style="{StaticResource InlineActionButton}"/>
@@ -204,7 +204,7 @@
                                               Visibility="{Binding DistributionLists.HasOwners, Converter={StaticResource BoolToVisibility}}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" Margin="0,2" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding Name}" Margin="0,2" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -246,7 +246,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Margin="0,0,8,0"
+                                    <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.AllowedSender}" Grid.Column="0" Margin="0,0,8,0"
                                              Text="{Binding DistributionLists.NewAcceptedSender, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Add}"
                                             Command="{Binding DistributionLists.AddAcceptSenderCommand}"
@@ -277,7 +277,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Margin="0,0,8,0"
+                                    <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.BlockedSender}" Grid.Column="0" Margin="0,0,8,0"
                                              Text="{Binding DistributionLists.NewRejectedSender, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Add}"
                                             Command="{Binding DistributionLists.AddRejectSenderCommand}"
@@ -311,7 +311,7 @@
                                 </Border>
 
                                 <TextBlock Grid.Row="1" Text="{Binding DistributionLists.MembersStatusText}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
                                            Margin="0,0,0,8"/>
 
                                 <ListBox Grid.Row="2" ItemsSource="{Binding DistributionLists.Members}">
@@ -325,7 +325,7 @@
                                                 <StackPanel Grid.Column="0">
                                                     <TextBlock Text="{Binding Name}"/>
                                                     <TextBlock Text="{Binding PrimarySmtpAddress}" FontSize="11"
-                                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                                 </StackPanel>
                                                 <Button Grid.Column="1" Content="{loc:Loc Key=Btn.Remove}"
                                                         Command="{Binding DataContext.DistributionLists.RemoveMemberCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -345,7 +345,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Margin="0,0,8,0"
+                                    <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.MemberIdentity}" Grid.Column="0" Margin="0,0,8,0"
                                              Text="{Binding DistributionLists.NewMemberIdentity, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Button Grid.Column="1" Content="{loc:Loc Key=Distribution.AddMember}"
                                             Command="{Binding DistributionLists.AddMemberCommand}"

@@ -31,7 +31,7 @@
                     <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Details.EmailAddresses}" Margin="0,8,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,2"/>
+                                <TextBlock Text="{Binding}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -47,7 +47,7 @@
                             ToolTip="{loc:Loc Key=Mailbox.Overview.ConvertToSharedTooltip}"
                             Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
                     <TextBlock Text="{loc:Loc Key=Mailbox.Overview.AdminInterventionWarning}"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,6,0,0"
                                Visibility="{Binding CanConvertToSharedMailbox, Converter={StaticResource BoolToVisibility}}"/>
                     <Button Content="{loc:Loc Key=Mailbox.Overview.RestoreUserMailbox}"
                             Command="{Binding ConvertToRegularMailboxCommand}"
@@ -56,7 +56,7 @@
                             ToolTip="{loc:Loc Key=Mailbox.Overview.RestoreUserMailboxTooltip}"
                             Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
                     <TextBlock Text="{loc:Loc Key=Mailbox.Overview.RestoreDurationHint}"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,6,0,0"
                                Visibility="{Binding CanConvertToRegularMailbox, Converter={StaticResource BoolToVisibility}}"/>
                 </StackPanel>
             </controls:SectionPanel>
@@ -81,12 +81,12 @@
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Statistics.ItemCount}" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Mailbox.Overview.DeletedItems}" FontWeight="SemiBold" Margin="0,8,0,0"/>
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
-                        <TextBlock Text="{Binding Statistics.DeletedItemCount, StringFormat='{}{0} items'}"/>
-                        <TextBlock Text="{Binding Statistics.TotalDeletedItemSize}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding Statistics.DeletedItemCount, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Mailbox.ItemsFormat}"/>
+                        <TextBlock Text="{Binding Statistics.TotalDeletedItemSize}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     </StackPanel>
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Mailbox.Overview.LastAccess}" FontWeight="SemiBold" Margin="0,8,0,0"/>
                     <TextBlock Grid.Row="3" Grid.Column="1"
-                               Text="{Binding Statistics.LastLogonTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                               Text="{Binding Statistics.LastLogonTime, StringFormat='{}{0:g}'}"
                                Margin="0,8,0,0"/>
                 </Grid>
             </controls:SectionPanel>
@@ -95,23 +95,23 @@
                       Visibility="{Binding InboxRules, Converter={StaticResource NullToVisibility}}">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc Key=Mailbox.Overview.NoRulesConfigured}"
-                               Foreground="{StaticResource SecondaryTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Margin="0,8"
                                Visibility="{Binding InboxRules.Count, Converter={StaticResource ZeroToVisibility}}"/>
                     <ItemsControl ItemsSource="{Binding InboxRules}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{loc:Loc Key=Mailbox.Overview.RuleEnabled}" Foreground="{StaticResource SuccessBrush}" Margin="8,0,0,0"
+                                            <TextBlock Text="{loc:Loc Key=Mailbox.Overview.RuleEnabled}" Foreground="{DynamicResource SuccessBrush}" Margin="8,0,0,0"
                                                        Visibility="{Binding Enabled, Converter={StaticResource BoolToVisibility}}"/>
-                                            <TextBlock Text="{loc:Loc Key=Mailbox.Overview.RuleDisabled}" Foreground="{StaticResource SecondaryTextBrush}" Margin="8,0,0,0"
+                                            <TextBlock Text="{loc:Loc Key=Mailbox.Overview.RuleDisabled}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="8,0,0,0"
                                                        Visibility="{Binding Enabled, Converter={StaticResource InverseBoolToVisibility}}"/>
                                         </StackPanel>
                                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
-                                                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
                                         <StackPanel>
                                             <Border Style="{StaticResource WarningBannerBorderStyle}" Padding="8" Margin="0,4,0,0"
                                                     Visibility="{Binding ForwardTo, Converter={StaticResource NullToVisibility}}">

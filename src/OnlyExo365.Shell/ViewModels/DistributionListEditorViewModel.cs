@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
@@ -167,10 +168,10 @@ public sealed class DistributionListEditorViewModel : ViewModelBase
 
         var primarySmtpAddress = $"{NewDistributionListLocalPart!.Trim()}@{SelectedDistributionListDomain!.Trim()}";
         if (!ConfirmMutation(
-                "Create distribution list",
+                Loc.Get("Presentation.CreateDistributionList"),
                 primarySmtpAddress,
-                "Create a new distribution list in the tenant.",
-                "Confirm distribution list creation"))
+                Loc.Get("Presentation.CreateANewDistributionListInTheTenant"),
+                Loc.Get("Presentation.ConfirmDistributionListCreation")))
         {
             return;
         }
@@ -200,7 +201,7 @@ public sealed class DistributionListEditorViewModel : ViewModelBase
 
             if (!result.WasCancelled)
             {
-                _setErrorMessage(result.Error?.Message ?? "Unable to create the distribution list.");
+                _setErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.UnableToCreateTheDistributionList"));
             }
         }
         catch (OperationCanceledException)

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
 using OnlyExo365.Contracts.Dtos;
@@ -86,12 +87,12 @@ public sealed class MailboxRestoreViewModel : ViewModelBase
         ? "-"
         : RestoreMailboxResponse.Scenario switch
         {
-            RestoreMailboxScenario.SoftDeleted => "Soft-deleted",
-            RestoreMailboxScenario.Inactive => "Inactive",
-            RestoreMailboxScenario.HardDeleted => "Hard-deleted",
-            RestoreMailboxScenario.Existing => "Existing mailbox",
-            RestoreMailboxScenario.NotFound => "Not found",
-            _ => "Unknown"
+            RestoreMailboxScenario.SoftDeleted => Loc.Get("Mailbox.RestoreSoftDeleted"),
+            RestoreMailboxScenario.Inactive => Loc.Get("Mailbox.RestoreInactive"),
+            RestoreMailboxScenario.HardDeleted => Loc.Get("Mailbox.RestoreHardDeleted"),
+            RestoreMailboxScenario.Existing => Loc.Get("Presentation.ExistingMailbox"),
+            RestoreMailboxScenario.NotFound => Loc.Get("Presentation.NotFound"),
+            _ => Loc.Get("Status.Unknown")
         };
 
     public string RestoreActionText => RestoreMailboxResponse?.Action ?? "-";
@@ -100,10 +101,10 @@ public sealed class MailboxRestoreViewModel : ViewModelBase
         ? "-"
         : RestoreMailboxResponse.Status switch
         {
-            RestoreMailboxStatus.InProgress => "In progress",
-            RestoreMailboxStatus.Completed => "Completed",
-            RestoreMailboxStatus.Failed => "Error",
-            _ => "Not started"
+            RestoreMailboxStatus.InProgress => Loc.Get("Presentation.InProgress"),
+            RestoreMailboxStatus.Completed => Loc.Get("Mailbox.RestoreCompleted"),
+            RestoreMailboxStatus.Failed => Loc.Get("Mailbox.RestoreFailed"),
+            _ => Loc.Get("Status.Worker.NotStarted")
         };
 
     public string RestoreStatusDetail => RestoreMailboxResponse?.StatusDetail ?? "-";
@@ -131,8 +132,8 @@ public sealed class MailboxRestoreViewModel : ViewModelBase
         (RestoreMailboxResponse?.PercentComplete.HasValue == false);
 
     public string RestoreProgressText => RestoreMailboxResponse?.PercentComplete.HasValue == true
-        ? $"{RestoreMailboxResponse.PercentComplete}% completed"
-        : "Progress not available";
+        ? Loc.GetFormat("Mailbox.RestoreProgress", RestoreMailboxResponse.PercentComplete!)
+        : Loc.Get("Presentation.ProgressNotAvailable");
 
     public ICommand RestoreMailboxCommand { get; }
 
@@ -153,7 +154,7 @@ public sealed class MailboxRestoreViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(sourceIdentity))
         {
             RestoreMailboxResponse = null;
-            RestoreErrorMessage = "Specify the source mailbox UPN or GUID.";
+            RestoreErrorMessage = Loc.Get("Presentation.SpecifyTheSourceMailboxUPNOrGUID");
             return;
         }
 
@@ -188,8 +189,8 @@ public sealed class MailboxRestoreViewModel : ViewModelBase
             else
             {
                 RestoreErrorMessage = result.IsSuccess && result.Value == null
-                    ? "Restore response is not available."
-                    : result.Error?.Message ?? "Unable to start the mailbox restore.";
+                    ? Loc.Get("Mailbox.RestoreResponseUnavailable")
+                    : result.Error?.Message ?? Loc.Get("Presentation.UnableToStartTheMailboxRestore");
 
                 _shellViewModel.AddLog(LogLevel.Error, $"Mailbox restore failed: {RestoreErrorMessage}");
             }

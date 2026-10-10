@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Globalization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -180,7 +181,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
     public bool CanMutateLicenses => !IsLicenseWriteBlocked;
     public string LicenseWriteActionTooltip => IsLicenseWriteBlocked
         ? LicenseWriteDisabledMessage!
-        : "Assign or remove Microsoft 365 licenses for the selected user.";
+        : Loc.Get("Presentation.AssignOrRemoveMicrosoft365LicensesForThe");
     public bool CanAddLicense => SelectedLicenseToAdd != null && !string.IsNullOrEmpty(_getPrimarySmtpAddress()) && CanMutateLicenses;
     public bool CanApplySuggestedUsageLocation => !string.IsNullOrWhiteSpace(GetSelectedUsageLocationCode()) && CanMutateLicenses && !IsLicenseSaving;
     public string UsageLocationActionLabel
@@ -190,12 +191,12 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
             var usageLocationCode = GetSelectedUsageLocationCode();
             if (string.IsNullOrWhiteSpace(usageLocationCode))
             {
-                return "Refresh UsageLocation";
+                return Loc.Get("Presentation.RefreshUsageLocation");
             }
 
             return SelectedLicenseToAdd != null
-                ? $"Apply {usageLocationCode} and retry"
-                : $"Set UsageLocation to {usageLocationCode}";
+                ? Loc.GetFormat("License.ApplyLocationAndRetry", usageLocationCode)
+                : Loc.GetFormat("License.SetUsageLocation", usageLocationCode);
         }
     }
 
@@ -260,7 +261,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? "Unable to retrieve available licenses.");
+                _shellViewModel.AddLog(LogLevel.Warning, result.Error?.Message ?? Loc.Get("Presentation.UnableToRetrieveAvailableLicenses"));
             }
         }
         catch (OperationCanceledException)
@@ -302,7 +303,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                LicenseErrorMessage = result.Error?.Message ?? "Unable to retrieve user licenses.";
+                LicenseErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToRetrieveUserLicenses");
             }
 
             await LoadAvailableLicensesAsync(true, cancellationToken);
@@ -347,7 +348,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
                 },
                 $"Assigning license {SelectedLicenseToAdd.SkuPartNumber}...",
                 $"License {SelectedLicenseToAdd.SkuPartNumber} assigned",
-                "Unable to assign the license.",
+                Loc.Get("Presentation.UnableToAssignTheLicense"),
                 clearSelectedLicenseOnSuccess: true,
                 cancellationToken: cancellationToken);
         }
@@ -392,7 +393,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
                 },
                 $"Removing license {license.SkuPartNumber}...",
                 $"License {license.SkuPartNumber} removed",
-                "Unable to remove the license.",
+                Loc.Get("Presentation.UnableToRemoveTheLicense"),
                 clearSelectedLicenseOnSuccess: false,
                 cancellationToken: cancellationToken);
         }
@@ -443,7 +444,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
             {
                 if (!result.WasCancelled)
                 {
-                    LicenseErrorMessage = NormalizeLicenseErrorMessage(result.Error?.Message ?? "Unable to update UsageLocation.");
+                    LicenseErrorMessage = NormalizeLicenseErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateUsageLocation"));
                 }
 
                 return;
@@ -462,7 +463,7 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
                     },
                     $"Assigning license {SelectedLicenseToAdd.SkuPartNumber}...",
                     $"License {SelectedLicenseToAdd.SkuPartNumber} assigned",
-                    "Unable to assign the license.",
+                    Loc.Get("Presentation.UnableToAssignTheLicense"),
                     clearSelectedLicenseOnSuccess: true,
                     cancellationToken: cancellationToken);
             }
@@ -551,17 +552,17 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
     {
         const string scopeName = "LicenseAssignment.ReadWrite.All";
         var baseMessage =
-            $"License changes are disabled by the current configuration. Add {scopeName} to graphLicenseWriteScopes or ONLYEXO365_GRAPH_LICENSE_WRITE_SCOPES and reconnect the session.";
+            Loc.GetFormat("License.WriteDisabled", scopeName);
 
         return evaluation.HasMissingRequirements
-            ? $"{baseMessage} Validazione: {evaluation.MissingRequirementsDisplay}"
+            ? Loc.GetFormat("License.ValidationDetails", baseMessage, evaluation.MissingRequirementsDisplay)
             : baseMessage;
     }
 
     internal static string NormalizeLicenseErrorMessage(string? message)
     {
         return string.IsNullOrWhiteSpace(message)
-            ? "Unable to complete the license operation."
+            ? Loc.Get("Presentation.UnableToCompleteTheLicenseOperation")
             : message.Trim();
     }
 
@@ -597,17 +598,17 @@ public sealed class MailboxLicensesViewModel : ViewModelBase
     {
         var sourceLabel = suggestion.SuggestionSource switch
         {
-            "User" => "user",
-            "Tenant" => "tenant",
-            "Configuration" => "local configuration",
-            _ => "unspecified source"
+            "User" => Loc.Get("License.SourceUser"),
+            "Tenant" => Loc.Get("License.SourceTenant"),
+            "Configuration" => Loc.Get("License.SourceConfiguration"),
+            _ => Loc.Get("License.SourceUnknown")
         };
 
         var details = string.IsNullOrWhiteSpace(suggestion.SuggestionDetails)
             ? string.Empty
             : $" {suggestion.SuggestionDetails}";
 
-        return $"Suggested UsageLocation: {suggestion.SuggestedUsageLocation} (source: {sourceLabel}).{details}";
+        return Loc.GetFormat("License.LocationSuggestion", suggestion.SuggestedUsageLocation!, sourceLabel, details);
     }
 
     private void ClearUsageLocationSuggestion()

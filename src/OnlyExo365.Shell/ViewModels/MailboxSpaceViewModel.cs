@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -145,7 +146,7 @@ public class MailboxSpaceViewModel : ViewModelBase
 
     public bool HasProgressCount => ProgressCurrentItem.HasValue;
     public string ProgressPercentText => FormatProgressPercent(ProgressPercent);
-    public string? ProgressCountText => FormatProgressCount(ProgressCurrentItem, ProgressTotalItems, "mailboxes");
+    public string? ProgressCountText => FormatProgressCount(ProgressCurrentItem, ProgressTotalItems, Loc.Get("Noun.Mailboxes"));
 
     public ICommand StartScanCommand { get; }
     public ICommand ExportExcelCommand { get; }
@@ -166,7 +167,7 @@ public class MailboxSpaceViewModel : ViewModelBase
         Mailboxes.Clear();
         _shellViewModel.ClearPageAlert(AlertPage);
         ProgressPercent = 0;
-        ProgressStatus = "Starting scan...";
+        ProgressStatus = Loc.Get("Presentation.StartingScanInProgress");
         ProgressCurrentItem = null;
         ProgressTotalItems = null;
 
@@ -222,7 +223,7 @@ public class MailboxSpaceViewModel : ViewModelBase
             else if (!result.WasCancelled)
             {
                 DiagnosticCorrelationId = result.CorrelationId;
-                var errorMessage = result.Error?.Message ?? "Unable to load the mailbox storage report.";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadTheMailboxStorageReport");
                 ErrorMessage = null;
                 _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
                 _shellViewModel.AddLog(LogLevel.Error, errorMessage, correlationId: DiagnosticCorrelationId);
@@ -286,7 +287,7 @@ public class MailboxSpaceViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Export failed: {ex.Message}";
+            ErrorMessage = Loc.GetFormat("Ui.ExportFailed", ex.Message);
             _shellViewModel.AddLog(LogLevel.Error, $"Mailbox space export failed: {ex.Message}", correlationId: DiagnosticCorrelationId);
         }
     }
@@ -331,7 +332,7 @@ public class MailboxSpaceItemViewModel
     public string QuotaLabel { get; }
     public double? RemainingPercent { get; }
     public string RemainingCategory { get; }
-    public string RemainingPercentDisplay => RemainingPercent.HasValue ? $"{RemainingPercent.Value:0.0}%" : "N/D";
+    public string RemainingPercentDisplay => RemainingPercent.HasValue ? Loc.GetFormat("Ui.Percent", RemainingPercent.Value) : Loc.Get("Presentation.NotAvailable");
 }
 
 

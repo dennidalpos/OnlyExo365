@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Messages;
 
 namespace OnlyExo365.Shell.ViewModels;
@@ -64,7 +65,7 @@ public sealed class ShellProgressViewModel : ViewModelBase
     public bool HasGlobalItemProgress => GlobalCurrentItem.HasValue;
 
     public string GlobalProgressPercentText => FormatProgressPercent(GlobalProgress);
-    public string? GlobalProgressCountText => FormatProgressCount(GlobalCurrentItem, GlobalTotalItems, "items");
+    public string? GlobalProgressCountText => FormatProgressCount(GlobalCurrentItem, GlobalTotalItems, Loc.Get("Noun.Items"));
 
     public void RegisterBackgroundOperation(string correlationId)
     {

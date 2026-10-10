@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -93,7 +94,7 @@ internal sealed class MailFlowOrganizationRelationshipsViewModel : MailFlowSecti
         MailFlowViewModelSupport.IsValidOptionalUri(OrganizationRelationshipTargetApplicationUri) &&
         MailFlowViewModelSupport.IsValidOptionalUri(OrganizationRelationshipTargetAutodiscoverEpr);
 
-    public string OrganizationRelationshipValidationMessage => IsOrganizationRelationshipInputValid ? string.Empty : "Organization relationship: name is required, at least one valid domain is required, supported Free/Busy and MailTips levels must be selected, and optional URIs must use an absolute format.";
+    public string OrganizationRelationshipValidationMessage => IsOrganizationRelationshipInputValid ? string.Empty : Loc.Get("Presentation.OrganizationRelationshipValidation");
 
     public string? OrganizationRelationshipIdentity { get => _organizationRelationshipIdentity; set => SetEditorProperty(ref _organizationRelationshipIdentity, value); }
     public string OrganizationRelationshipName { get => _organizationRelationshipName; set => SetEditorProperty(ref _organizationRelationshipName, value); }
@@ -119,7 +120,7 @@ internal sealed class MailFlowOrganizationRelationshipsViewModel : MailFlowSecti
         var result = await WorkerService.GetOrganizationRelationshipsAsync(new GetOrganizationRelationshipsRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load organization relationships";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadOrganizationRelationships");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow organization relationships load failed: {error}", "MailFlow");
             return;
@@ -170,7 +171,7 @@ internal sealed class MailFlowOrganizationRelationshipsViewModel : MailFlowSecti
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving organization relationship failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveOrganizationRelationshipFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save organization relationship failed (name={OrganizationRelationshipName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -186,7 +187,9 @@ internal sealed class MailFlowOrganizationRelationshipsViewModel : MailFlowSecti
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting organization relationship\nTarget: {SelectedOrganizationRelationship.Name}\nImpact: can interrupt free/busy, MailTips, or cross-tenant integrations.\n\nConfirm?");
+        var selected = SelectedOrganizationRelationship;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteOrganizationRelationshipsMessage", selected.Name));
         if (!confirmed)
         {
             return;
@@ -196,14 +199,14 @@ internal sealed class MailFlowOrganizationRelationshipsViewModel : MailFlowSecti
         {
             var result = await WorkerService.RemoveOrganizationRelationshipAsync(new RemoveOrganizationRelationshipRequest
             {
-                Identity = SelectedOrganizationRelationship.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete organization relationship";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteOrganizationRelationship");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove organization relationship failed (name={SelectedOrganizationRelationship.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove organization relationship failed (name={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

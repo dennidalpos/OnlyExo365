@@ -200,7 +200,7 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
             return Loc.Get("Common.Never");
         }
 
-        return utc.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+        return utc.Value.ToLocalTime().ToString("g", System.Globalization.CultureInfo.GetCultureInfo(LocalizationService.Instance.CurrentLocale));
     }
 
     private static string FormatEntryCount(int entryCount)
@@ -228,6 +228,7 @@ public sealed class LicenseCatalogViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
+        ReleaseUiResources();
         _catalogService.CatalogUpdated -= OnCatalogUpdated;
         LocalizationService.Instance.CultureChanged -= OnCultureChanged;
     }

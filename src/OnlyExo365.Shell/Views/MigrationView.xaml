@@ -17,7 +17,7 @@
                 <TextBlock Text="{Binding Migration.StatusText}"
                            Margin="12,0,0,0"
                            VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}"/>
             </StackPanel>
             <Button DockPanel.Dock="Right"
                     Content="{loc:Loc Key=Migration.RefreshBatches}"
@@ -54,10 +54,10 @@
                                 <ColumnDefinition Width="220"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0"
+                            <TextBox AutomationProperties.Name="{loc:Loc Key=Ui.SearchLabel}" Grid.Column="0"
                                      Text="{Binding Migration.SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,12,0"/>
-                            <ComboBox Grid.Column="1"
+                            <ComboBox AutomationProperties.Name="{loc:Loc Key=Ui.FilterLabel}" Grid.Column="1"
                                       ItemsSource="{Binding Migration.StatusFilters}"
                                       SelectedItem="{Binding Migration.StatusFilter}"/>
                         </Grid>
@@ -72,10 +72,10 @@
                                   CanUserDeleteRows="False"
                                   GridLinesVisibility="Horizontal"
                                   HeadersVisibility="Column"
-                                  Background="{StaticResource SecondaryBackgroundBrush}"
-                                  BorderBrush="{StaticResource BorderBrush}"
-                                  RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                                  AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{DynamicResource BorderBrush}"
+                                  RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                                  AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="{loc:Loc Key=Migration.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="220"/>
                                 <DataGridTextColumn Header="{loc:Loc Key=Migration.Status}" Binding="{Binding Status}" Width="120"/>
@@ -118,7 +118,7 @@
 
                     <GridSplitter Grid.Column="1"
                                   Width="4"
-                                  Background="{StaticResource BorderBrush}"
+                                  Background="{DynamicResource BorderBrush}"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Stretch"
                                   ResizeDirection="Columns"
@@ -157,20 +157,20 @@
                                                    Width="420"/>
                                     </WrapPanel>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.Identity}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.StatusDetail}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.SelectedDetails.Identity}" IsReadOnly="True" Margin="0,0,8,0"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.SelectedDetails.StatusDetail}" IsReadOnly="True"/>
+                                    <TextBlock x:Name="InputLabel001" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.Identity}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel002" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.StatusDetail}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="3" Grid.Column="0" Text="{Binding Migration.SelectedDetails.Identity}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="3" Grid.Column="1" Text="{Binding Migration.SelectedDetails.StatusDetail}" IsReadOnly="True"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.Endpoints}" Margin="0,8,8,6"/>
+                                    <TextBlock x:Name="InputLabel003" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.Endpoints}" Margin="0,8,8,6"/>
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.Counters}" Margin="0,8,8,6"/>
-                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.SelectedDetails.SourceEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Grid.Row="5" Grid.Column="0" Text="{Binding Migration.SelectedDetails.SourceEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Migration.CountersText}" TextWrapping="Wrap" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetEndpoint}" Margin="0,8,8,6"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,8,8,6"/>
-                                    <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Migration.SelectedDetails.TargetEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
-                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Migration.NotificationEmailsText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                    <TextBlock x:Name="InputLabel004" Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetEndpoint}" Margin="0,8,8,6"/>
+                                    <TextBlock x:Name="InputLabel005" Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,8,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Grid.Row="7" Grid.Column="0" Text="{Binding Migration.SelectedDetails.TargetEndpoint}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Grid.Row="7" Grid.Column="1" Text="{Binding Migration.NotificationEmailsText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
 
                                     <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Migration.CreatedStartedCompleted}" Margin="0,8,8,6"/>
                                     <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Migration.Flags}" Margin="0,8,8,6"/>
@@ -254,7 +254,7 @@
                         <WrapPanel Grid.Row="0" Margin="0,0,0,12">
                             <Button Content="{loc:Loc Key=Migration.RefreshEndpoints}" Command="{Binding Migration.RefreshEndpointsCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
                             <Button Content="{loc:Loc Key=Migration.NewEndpoint}" Command="{Binding Migration.NewEndpointCommand}" Style="{StaticResource ToolbarButton}"/>
-                            <Button Content="{loc:Loc Key=Migration.SaveEndpoint}" Command="{Binding Migration.SaveEndpointCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
+                            <Button ToolTip="{loc:Loc Key=Ui.RequiredFieldsGuidance}" Content="{loc:Loc Key=Migration.SaveEndpoint}" Command="{Binding Migration.SaveEndpointCommand}" Style="{StaticResource ToolbarPrimaryButton}"/>
                             <Button Content="{loc:Loc Key=Migration.TestEndpoint}" Command="{Binding Migration.TestEndpointCommand}" Style="{StaticResource ToolbarButton}"/>
                         </WrapPanel>
 
@@ -268,10 +268,10 @@
                                   CanUserDeleteRows="False"
                                   GridLinesVisibility="Horizontal"
                                   HeadersVisibility="Column"
-                                  Background="{StaticResource SecondaryBackgroundBrush}"
-                                  BorderBrush="{StaticResource BorderBrush}"
-                                  RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                                  AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                                  Background="{DynamicResource SecondaryBackgroundBrush}"
+                                  BorderBrush="{DynamicResource BorderBrush}"
+                                  RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                                  AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="{loc:Loc Key=Migration.Name}" Binding="{Binding Name}" Width="Auto" MinWidth="200"/>
                                 <DataGridTextColumn Header="{loc:Loc Key=Migration.Type}" Binding="{Binding EndpointType}" Width="140"/>
@@ -284,7 +284,7 @@
 
                     <GridSplitter Grid.Column="1"
                                   Width="4"
-                                  Background="{StaticResource BorderBrush}"
+                                  Background="{DynamicResource BorderBrush}"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Stretch"
                                   ResizeDirection="Columns"
@@ -311,30 +311,30 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Name}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Type}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.EndpointTypes}" SelectedItem="{Binding Migration.EndpointType}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel006" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Name}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel007" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Type}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.EndpointTypes}" SelectedItem="{Binding Migration.EndpointType}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteServer}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.EmailAddress}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointRemoteServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointEmailAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel008" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteServer}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel009" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.EmailAddress}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointRemoteServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointEmailAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.RPCProxyServer}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.ExchangeServer}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.EndpointRpcProxyServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Migration.EndpointExchangeServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel010" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.RPCProxyServer}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel011" Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.ExchangeServer}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" Grid.Row="5" Grid.Column="0" Text="{Binding Migration.EndpointRpcProxyServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" Grid.Row="5" Grid.Column="1" Text="{Binding Migration.EndpointExchangeServer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteTenant}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.Port}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="7" Grid.Column="0" Text="{Binding Migration.EndpointRemoteTenant, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Migration.EndpointPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel012" Grid.Row="6" Grid.Column="0" Text="{loc:Loc Key=Migration.RemoteTenant}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel013" Grid.Row="6" Grid.Column="1" Text="{loc:Loc Key=Migration.Port}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" Grid.Row="7" Grid.Column="0" Text="{Binding Migration.EndpointRemoteTenant, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" Grid.Row="7" Grid.Column="1" Text="{Binding Migration.EndpointPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Migration.Security}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Migration.Authentication}" Margin="0,0,8,6"/>
-                                    <ComboBox Grid.Row="9" Grid.Column="0" ItemsSource="{Binding Migration.EndpointSecurities}" SelectedItem="{Binding Migration.EndpointSecurity}" Margin="0,0,8,8"/>
-                                    <ComboBox Grid.Row="9" Grid.Column="1" ItemsSource="{Binding Migration.EndpointAuthentications}" SelectedItem="{Binding Migration.EndpointAuthentication}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel014" Grid.Row="8" Grid.Column="0" Text="{loc:Loc Key=Migration.Security}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel015" Grid.Row="8" Grid.Column="1" Text="{loc:Loc Key=Migration.Authentication}" Margin="0,0,8,6"/>
+                                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Grid.Row="9" Grid.Column="0" ItemsSource="{Binding Migration.EndpointSecurities}" SelectedItem="{Binding Migration.EndpointSecurity}" Margin="0,0,8,8"/>
+                                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel015}" Grid.Row="9" Grid.Column="1" ItemsSource="{Binding Migration.EndpointAuthentications}" SelectedItem="{Binding Migration.EndpointAuthentication}" Margin="0,0,0,8"/>
                                 </Grid>
                             </controls:SectionPanel>
 
@@ -353,19 +353,19 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Username}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Password}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointUsername, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <PasswordBox Grid.Row="1"
+                                    <TextBlock x:Name="InputLabel016" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.Username}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel017" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.Password}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel016}" Grid.Row="1" Grid.Column="0" Text="{Binding Migration.EndpointUsername, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <PasswordBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel017}" Grid.Row="1"
                                                  Grid.Column="1"
                                                  Margin="0,0,0,8"
                                                  PasswordChanged="EndpointPasswordBox_OnPasswordChanged"
                                                  helpers:PasswordBoxClearHelper.ClearTrigger="{Binding Migration.EndpointPasswordClearTrigger}"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.MaxConcurrentMigrations}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.MaxIncrementalSyncs}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointMaxConcurrentMigrations, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointMaxConcurrentIncrementalSyncs, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel018" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.MaxConcurrentMigrations}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel019" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.MaxIncrementalSyncs}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel018}" Grid.Row="3" Grid.Column="0" Text="{Binding Migration.EndpointMaxConcurrentMigrations, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel019}" Grid.Row="3" Grid.Column="1" Text="{Binding Migration.EndpointMaxConcurrentIncrementalSyncs, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
                                     <CheckBox Grid.Row="4" Grid.Column="0" Content="{loc:Loc Key=Migration.SkipVerification}" IsChecked="{Binding Migration.EndpointSkipVerification}" Margin="0,0,8,8"/>
                                     <CheckBox Grid.Row="4" Grid.Column="1" Content="{loc:Loc Key=Migration.AcceptUntrustedCertificates}" IsChecked="{Binding Migration.EndpointAcceptUntrustedCertificates}" Margin="0,0,0,8"/>
@@ -398,25 +398,25 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.BatchName}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.BatchType}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Migration.NewBatchName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.BatchTypes}" SelectedItem="{Binding Migration.NewBatchType}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel020" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Migration.BatchName}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel021" Grid.Row="0" Grid.Column="1" Text="{loc:Loc Key=Migration.BatchType}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel020}" Grid.Row="1" Grid.Column="0" Text="{Binding Migration.NewBatchName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel021}" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Migration.BatchTypes}" SelectedItem="{Binding Migration.NewBatchType}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.EndpointIdentity}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.CSVFilePath}" Margin="0,0,8,6"/>
-                                    <ComboBox Grid.Row="3" Grid.Column="0"
+                                    <TextBlock x:Name="InputLabel022" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Migration.EndpointIdentity}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel023" Grid.Row="2" Grid.Column="1" Text="{loc:Loc Key=Migration.CSVFilePath}" Margin="0,0,8,6"/>
+                                    <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel022}" Grid.Row="3" Grid.Column="0"
                                               ItemsSource="{Binding Migration.Endpoints}"
                                               SelectedValuePath="Identity"
                                               DisplayMemberPath="Name"
                                               SelectedValue="{Binding Migration.NewBatchEndpointIdentity}"
                                               Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Migration.NewBatchCsvFilePath, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel023}" Grid.Row="3" Grid.Column="1" Text="{Binding Migration.NewBatchCsvFilePath, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetDeliveryDomain}" Margin="0,0,8,6"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,0,8,6"/>
-                                    <TextBox Grid.Row="5" Grid.Column="0" Text="{Binding Migration.NewBatchTargetDeliveryDomain, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
-                                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Migration.NewBatchNotificationEmailsText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputLabel024" Grid.Row="4" Grid.Column="0" Text="{loc:Loc Key=Migration.TargetDeliveryDomain}" Margin="0,0,8,6"/>
+                                    <TextBlock x:Name="InputLabel025" Grid.Row="4" Grid.Column="1" Text="{loc:Loc Key=Migration.NotificationEmails}" Margin="0,0,8,6"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel024}" Grid.Row="5" Grid.Column="0" Text="{Binding Migration.NewBatchTargetDeliveryDomain, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+                                    <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel025}" Grid.Row="5" Grid.Column="1" Text="{Binding Migration.NewBatchNotificationEmailsText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
 
                                     <CheckBox Grid.Row="6" Grid.Column="0" Content="{loc:Loc Key=Migration.AutoStart}" IsChecked="{Binding Migration.NewBatchAutoStart}" Margin="0,0,8,8"/>
                                     <CheckBox Grid.Row="6" Grid.Column="1" Content="{loc:Loc Key=Migration.AutoComplete}" IsChecked="{Binding Migration.NewBatchAutoComplete}" Margin="0,0,0,8"/>

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -15,7 +16,7 @@ public class PermissionsViewModel : ViewModelBase
 
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private bool _isLoading;
     private bool _isLoadingDetails;
@@ -37,6 +38,7 @@ public class PermissionsViewModel : ViewModelBase
 
     public PermissionsViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
@@ -240,22 +242,22 @@ public class PermissionsViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{RoleGroups.Count} of {TotalCount} role groups";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", RoleGroups.Count, TotalCount, Loc.Get("Noun.RoleGroups"));
     public string SelectedRoleGroupSummary => SelectedRoleGroup == null
-        ? "Select a role group to review RBAC roles, membership, and scope."
-        : $"{SelectedRoleGroup.DisplayName} - {SelectedRoleGroup.MemberCount} members, {SelectedRoleGroup.RoleCount} roles";
+        ? Loc.Get("Presentation.SelectARoleGroupToReviewRBACRoles")
+        : Loc.GetFormat("Permissions.GroupSummary", SelectedRoleGroup.DisplayName, SelectedRoleGroup.MemberCount, SelectedRoleGroup.RoleCount);
 
     public string RolesText => SelectedRoleGroupDetails == null || SelectedRoleGroupDetails.Roles.Count == 0
-        ? "(none)"
+        ? Loc.Get("Common.None")
         : string.Join(", ", SelectedRoleGroupDetails.Roles);
 
     public string MembersCountText => SelectedRoleGroupDetails == null
         ? "-"
-        : $"{SelectedRoleGroupDetails.Members.Count} members";
+        : Loc.GetFormat("Ui.MemberCount", SelectedRoleGroupDetails.Members.Count);
 
     public string ScopesText => SelectedRoleGroupDetails == null
         ? "-"
-        : $"Read: {SelectedRoleGroupDetails.RecipientReadScope ?? "-"} | Write: {SelectedRoleGroupDetails.RecipientWriteScope ?? "-"} | Custom recipient: {SelectedRoleGroupDetails.CustomRecipientWriteScope ?? "-"} | Custom config: {SelectedRoleGroupDetails.CustomConfigWriteScope ?? "-"}";
+        : Loc.GetFormat("Permissions.ScopesSummary", SelectedRoleGroupDetails.RecipientReadScope ?? "-", SelectedRoleGroupDetails.RecipientWriteScope ?? "-", SelectedRoleGroupDetails.CustomRecipientWriteScope ?? "-", SelectedRoleGroupDetails.CustomConfigWriteScope ?? "-");
 
     public bool IsCopyMode => !string.IsNullOrWhiteSpace(CopyFromRoleGroupIdentity);
     public bool CanRefresh => !IsLoading && !IsLoadingDetails && !IsSaving && _shellViewModel.IsExchangeConnected;
@@ -337,7 +339,7 @@ public class PermissionsViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading role groups...", "role groups");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingRoleGroupsInProgress"), Loc.Get("Presentation.RoleGroups"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(RoleGroups.Count);
@@ -359,7 +361,7 @@ public class PermissionsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load role groups";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadRoleGroups");
                 return;
             }
 
@@ -393,7 +395,7 @@ public class PermissionsViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading role groups...", "role groups");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingRoleGroupsInProgress"), Loc.Get("Presentation.RoleGroups"));
         ErrorMessage = null;
 
         try
@@ -411,7 +413,7 @@ public class PermissionsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load role groups";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadRoleGroups");
                 return;
             }
 
@@ -449,7 +451,7 @@ public class PermissionsViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load role group details.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadRoleGroupDetails");
                 return;
             }
 
@@ -473,10 +475,10 @@ public class PermissionsViewModel : ViewModelBase
     private async Task SaveRoleGroupAsync(CancellationToken cancellationToken)
     {
         if (!ConfirmMutation(
-                "Saving role group",
-                NewRoleGroupName?.Trim() ?? "New role group",
-                "Create or update membership and roles for the selected role group.",
-                "Confirm role group save"))
+                Loc.Get("Presentation.SavingRoleGroup"),
+                NewRoleGroupName?.Trim() ?? Loc.Get("Presentation.NewRoleGroup"),
+                Loc.Get("Presentation.CreateOrUpdateMembershipAndRolesForThe"),
+                Loc.Get("Presentation.ConfirmRoleGroupSave")))
         {
             return;
         }
@@ -499,7 +501,7 @@ public class PermissionsViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to save the role group.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToSaveTheRoleGroup");
                 return;
             }
 
@@ -555,13 +557,13 @@ public class PermissionsViewModel : ViewModelBase
         }
 
         var operation = action == RoleGroupMemberAction.Add
-            ? "Add member to role group"
-            : "Remove member from role group";
+            ? Loc.Get("Presentation.AddMemberToRoleGroup")
+            : Loc.Get("Presentation.RemoveMemberFromRoleGroup");
         if (!ConfirmMutation(
                 operation,
                 $"{member} -> {SelectedRoleGroup.Identity}",
-                "Update the administrative membership of the role group.",
-                "Confirm membership update"))
+                Loc.Get("Presentation.UpdateTheAdministrativeMembershipOfTheRoleGroup"),
+                Loc.Get("Presentation.ConfirmMembershipUpdate")))
         {
             return;
         }
@@ -582,7 +584,7 @@ public class PermissionsViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to update membership.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToUpdateMembership");
                 return;
             }
 

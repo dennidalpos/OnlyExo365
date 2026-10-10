@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.ComponentModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -13,6 +14,8 @@ public class ResourcesPageViewModel : ViewModelBase
     private readonly ShellViewModel _shellViewModel;
 
     private bool _isSaving;
+    private int _detailsLoadingCount;
+    private ResourceMailboxDetailsDto? _loadedDetails;
     private string? _errorMessage;
 
     public ResourcesPageViewModel(IResourcesWorkerService workerService, ShellViewModel shellViewModel)
@@ -22,6 +25,8 @@ public class ResourcesPageViewModel : ViewModelBase
 
         Editor = new ResourceMailboxEditorViewModel();
         List = new ResourcesListStateViewModel(workerService, shellViewModel, OnResourceSelected, SetErrorMessage);
+
+        List.CanReplaceDraft = CanReplaceDraft;
 
         Editor.PropertyChanged += OnEditorPropertyChanged;
         List.PropertyChanged += OnListPropertyChanged;
@@ -37,6 +42,8 @@ public class ResourcesPageViewModel : ViewModelBase
 
     public bool IsLoading => List.IsLoading;
 
+    public bool IsEditorBusy => IsLoading || IsSaving || _detailsLoadingCount > 0;
+
     public bool IsSaving
     {
         get => _isSaving;
@@ -45,6 +52,7 @@ public class ResourcesPageViewModel : ViewModelBase
             if (SetProperty(ref _isSaving, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -78,10 +86,26 @@ public class ResourcesPageViewModel : ViewModelBase
         await List.LoadAsync(CancellationToken.None);
     }
 
+    private bool CanReplaceDraft()
+    {
+        if (IsSaving || !HasPendingChanges) return true;
+        if (!ErrorDialogService.ConfirmDiscardChanges()) return false;
+        DiscardDraft();
+        return true;
+    }
+
+    public void DiscardDraft()
+    {
+        if (_loadedDetails != null) Editor.ApplyDetails(_loadedDetails);
+        else Editor.BeginCreate();
+    }
+
     private void BeginCreate()
     {
-        List.ClearSelection();
+        if (!CanReplaceDraft()) return;
+        _loadedDetails = null;
         Editor.BeginCreate();
+        List.ClearSelection();
         SetErrorMessage(null);
     }
 
@@ -99,6 +123,8 @@ public class ResourcesPageViewModel : ViewModelBase
     {
         SetErrorMessage(null);
 
+        _detailsLoadingCount++;
+        OnPropertyChanged(nameof(IsEditorBusy));
         try
         {
             var result = await _workerService.GetResourceMailboxDetailsAsync(
@@ -110,15 +136,24 @@ public class ResourcesPageViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                SetErrorMessage(result.Error?.Message ?? "Unable to load resource details.");
+                SetErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadResourceDetails"));
                 return;
             }
 
-            Editor.ApplyDetails(result.Value);
+            if (ReferenceEquals(List.SelectedResource, selected))
+            {
+                _loadedDetails = result.Value;
+                Editor.ApplyDetails(result.Value);
+            }
         }
         catch (Exception ex)
         {
             SetErrorMessage(ex.Message);
+        }
+        finally
+        {
+            _detailsLoadingCount--;
+            OnPropertyChanged(nameof(IsEditorBusy));
         }
     }
 
@@ -129,15 +164,16 @@ public class ResourcesPageViewModel : ViewModelBase
             return;
         }
 
-        var primarySmtpAddress = Editor.PrimarySmtpAddress.Trim();
+        var request = Editor.BuildUpsertRequest();
+        var primarySmtpAddress = request.PrimarySmtpAddress;
         var permissionActions = Editor.BuildPermissionDelta();
         if (!ConfirmMutation(
-                string.IsNullOrWhiteSpace(Editor.ResourceIdentity) ? "Creating resource mailbox" : "Updating resource mailbox",
+                string.IsNullOrWhiteSpace(Editor.ResourceIdentity) ? Loc.Get("Presentation.CreatingResourceMailbox") : Loc.Get("Presentation.UpdatingResourceMailbox"),
                 primarySmtpAddress,
                 permissionActions.Count > 0
-                    ? $"Save the resource mailbox and apply {permissionActions.Count} delegation changes."
-                    : "Save resource mailbox attributes and configuration.",
-                "Confirm resource mailbox save"))
+                    ? Loc.GetFormat("Resources.DelegationImpact", permissionActions.Count)
+                    : Loc.Get("Presentation.SaveResourceMailboxAttributesAndConfiguration"),
+                Loc.Get("Presentation.ConfirmResourceMailboxSave")))
         {
             return;
         }
@@ -148,12 +184,12 @@ public class ResourcesPageViewModel : ViewModelBase
         try
         {
             var saveResult = await _workerService.UpsertResourceMailboxAsync(
-                Editor.BuildUpsertRequest(),
+                request,
                 cancellationToken: cancellationToken);
 
             if (!saveResult.IsSuccess || saveResult.Value == null)
             {
-                SetErrorMessage(saveResult.Error?.Message ?? "Unable to save the resource mailbox.");
+                SetErrorMessage(saveResult.Error?.Message ?? Loc.Get("Presentation.UnableToSaveTheResourceMailbox"));
                 return;
             }
 
@@ -169,7 +205,7 @@ public class ResourcesPageViewModel : ViewModelBase
 
                 if (!permissionResult.IsSuccess)
                 {
-                    SetErrorMessage(permissionResult.Error?.Message ?? "Mailbox saved but delegation update failed");
+                    SetErrorMessage(permissionResult.Error?.Message ?? Loc.Get("Presentation.MailboxSavedButDelegationUpdateFailed"));
                     return;
                 }
             }
@@ -216,6 +252,7 @@ public class ResourcesPageViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(IsEditorBusy));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -227,6 +264,7 @@ public class ResourcesPageViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(IsEditorBusy));
         CommandManager.InvalidateRequerySuggested();
     }
 
@@ -238,7 +276,14 @@ public class ResourcesPageViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(IsEditorBusy));
         CommandManager.InvalidateRequerySuggested();
+    }
+    public override void ReleaseUiResources()
+    {
+        base.ReleaseUiResources();
+        List.ReleaseUiResources();
+        Editor.ReleaseUiResources();
     }
 }
 

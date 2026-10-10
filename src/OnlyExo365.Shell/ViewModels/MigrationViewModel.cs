@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -17,7 +18,7 @@ public partial class MigrationViewModel : ViewModelBase
 
     private readonly IMigrationWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private bool _isLoading;
     private bool _isLoadingDetails;
@@ -67,6 +68,7 @@ public partial class MigrationViewModel : ViewModelBase
 
     public MigrationViewModel(IMigrationWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
@@ -282,7 +284,7 @@ public partial class MigrationViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{Batches.Count} of {TotalCount} batch";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Batches.Count, TotalCount, Loc.Get("Noun.Batches"));
 
     public MigrationBatchListItemDto? SelectedBatch
     {
@@ -316,26 +318,26 @@ public partial class MigrationViewModel : ViewModelBase
     }
 
     public string SelectedBatchSummary => SelectedBatch == null
-        ? "Select a migration batch to review status, counters, and available actions."
+        ? Loc.Get("Presentation.SelectAMigrationBatchToReviewStatusCounters")
         : $"{SelectedBatch.Name} - {SelectedBatch.Status}";
 
     public bool HasSelectedBatchDetails => SelectedDetails != null;
 
     public string BatchDetailsStatusText => SelectedBatch switch
     {
-        null => "Select a migration batch to enable loading the full details.",
-        _ when IsLoadingDetails => "Loading the full migration batch details and report...",
-        _ when SelectedDetails != null => "Full details and report loaded on demand.",
-        _ => "Full details and report are not preloaded. Use \"Load details\" to fetch them when needed."
+        null => Loc.Get("Presentation.SelectAMigrationBatchToEnableLoadingThe"),
+        _ when IsLoadingDetails => Loc.Get("Presentation.LoadingTheFullMigrationBatchDetailsAndReportInProgress"),
+        _ when SelectedDetails != null => Loc.Get("Presentation.FullDetailsAndReportLoadedOnDemand"),
+        _ => Loc.Get("Presentation.FullDetailsAndReportAreNotPreloadedUse")
     };
 
     public string NotificationEmailsText => SelectedDetails == null || SelectedDetails.NotificationEmails.Count == 0
-        ? "(none)"
+        ? Loc.Get("Common.None")
         : string.Join("; ", SelectedDetails.NotificationEmails);
 
     public string CountersText => SelectedDetails == null
         ? "-"
-        : $"Total {SelectedDetails.TotalCount ?? 0} | Active {SelectedDetails.ActiveCount ?? 0} | Synced {SelectedDetails.SyncedCount ?? 0} | Finalized {SelectedDetails.FinalizedCount ?? 0} | Failed {SelectedDetails.FailedCount ?? 0} | Stopped {SelectedDetails.StoppedCount ?? 0}";
+        : Loc.GetFormat("Migration.CountersSummary", SelectedDetails.TotalCount ?? 0, SelectedDetails.ActiveCount ?? 0, SelectedDetails.SyncedCount ?? 0, SelectedDetails.FinalizedCount ?? 0, SelectedDetails.FailedCount ?? 0, SelectedDetails.StoppedCount ?? 0);
 
     public bool CanRefresh => !IsBusy && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsBusy && HasMore && _shellViewModel.IsExchangeConnected;
@@ -433,7 +435,7 @@ public partial class MigrationViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading migration batches...", "batch");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMigrationBatchesInProgress"), Loc.Get("Presentation.Batch"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Batches.Count);
@@ -449,7 +451,7 @@ public partial class MigrationViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load migration batches";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMigrationBatches");
                 if (hasWorkspaceData)
                 {
                     ErrorMessage = errorMessage;
@@ -499,7 +501,7 @@ public partial class MigrationViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading migration batches...", "batch");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMigrationBatchesInProgress"), Loc.Get("Presentation.Batch"));
         ErrorMessage = null;
 
         try
@@ -511,7 +513,7 @@ public partial class MigrationViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load migration batches";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMigrationBatches");
                 return;
             }
 
@@ -549,7 +551,7 @@ public partial class MigrationViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load migration batch details.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadMigrationBatchDetails");
                 return;
             }
 
@@ -574,10 +576,10 @@ public partial class MigrationViewModel : ViewModelBase
     {
         if (SelectedBatch == null ||
             !ConfirmMutation(
-                "Start migration batch",
+                Loc.Get("Presentation.StartMigrationBatch"),
                 SelectedBatch.Identity,
-                "Start the selected migration batch.",
-                "Confirm migration batch start"))
+                Loc.Get("Presentation.StartTheSelectedMigrationBatch"),
+                Loc.Get("Presentation.ConfirmMigrationBatchStart")))
         {
             return;
         }
@@ -593,10 +595,10 @@ public partial class MigrationViewModel : ViewModelBase
     {
         if (SelectedBatch == null ||
             !ConfirmMutation(
-                "Complete migration batch",
+                Loc.Get("Presentation.CompleteMigrationBatch"),
                 SelectedBatch.Identity,
-                "Complete the selected migration batch.",
-                "Confirm migration batch completion"))
+                Loc.Get("Presentation.CompleteTheSelectedMigrationBatch"),
+                Loc.Get("Presentation.ConfirmMigrationBatchCompletion")))
         {
             return;
         }
@@ -616,7 +618,7 @@ public partial class MigrationViewModel : ViewModelBase
         }
 
         var confirmed = ErrorDialogService.ShowConfirmation(
-            "Confirm migration batch removal",
+            Loc.Get("Presentation.ConfirmMigrationBatchRemoval"),
             $"Operation: remove migration batch\nBatch: {SelectedBatch.Name}\nIdentity: {SelectedBatch.Identity}\n\nConfirm?");
 
         if (!confirmed)
@@ -650,7 +652,7 @@ public partial class MigrationViewModel : ViewModelBase
             var result = await executor(request, cancellationToken);
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? $"Unable to execute {actionName} on the migration batch.";
+                ErrorMessage = result.Error?.Message ?? Loc.GetFormat("Migration.ActionFailed", actionName);
                 return;
             }
 

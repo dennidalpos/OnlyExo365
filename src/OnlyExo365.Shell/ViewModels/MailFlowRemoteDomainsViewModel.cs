@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -84,7 +85,7 @@ internal sealed class MailFlowRemoteDomainsViewModel : MailFlowSectionViewModelB
         MailFlowViewModelSupport.IsValidRemoteDomain(RemoteDomainDomainName, allowDefaultWildcard: RemoteDomainIdentity != null) &&
         AllowedOofTypes.Contains(RemoteDomainAllowedOofType);
 
-    public string RemoteDomainValidationMessage => IsRemoteDomainInputValid ? string.Empty : "Remote domain: name is required, domain must be valid or wildcard `*.domain.tld`, and AllowedOOFType must be supported.";
+    public string RemoteDomainValidationMessage => IsRemoteDomainInputValid ? string.Empty : Loc.Get("Presentation.RemoteDomainValidation");
 
     public string? RemoteDomainIdentity { get => _remoteDomainIdentity; set => SetEditorProperty(ref _remoteDomainIdentity, value); }
     public string RemoteDomainName { get => _remoteDomainName; set => SetEditorProperty(ref _remoteDomainName, value); }
@@ -108,7 +109,7 @@ internal sealed class MailFlowRemoteDomainsViewModel : MailFlowSectionViewModelB
         var result = await WorkerService.GetRemoteDomainsAsync(new GetRemoteDomainsRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load remote domains";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadRemoteDomains");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow remote domains load failed: {error}", "MailFlow");
             return;
@@ -156,7 +157,7 @@ internal sealed class MailFlowRemoteDomainsViewModel : MailFlowSectionViewModelB
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving remote domain failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveRemoteDomainFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save remote domain failed (domain={RemoteDomainDomainName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -172,7 +173,9 @@ internal sealed class MailFlowRemoteDomainsViewModel : MailFlowSectionViewModelB
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting remote domain\nTarget: {SelectedRemoteDomain.DomainName}\nImpact: updates auto-reply and reporting behavior for the remote domain.\n\nConfirm?");
+        var selected = SelectedRemoteDomain;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteRemoteDomainsMessage", selected.DomainName));
         if (!confirmed)
         {
             return;
@@ -182,14 +185,14 @@ internal sealed class MailFlowRemoteDomainsViewModel : MailFlowSectionViewModelB
         {
             var result = await WorkerService.RemoveRemoteDomainAsync(new RemoveRemoteDomainRequest
             {
-                Identity = SelectedRemoteDomain.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete remote domain";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteRemoteDomain");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove remote domain failed (domain={SelectedRemoteDomain.DomainName}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove remote domain failed (domain={selected.DomainName}): {error}", "MailFlow");
                 return;
             }
 

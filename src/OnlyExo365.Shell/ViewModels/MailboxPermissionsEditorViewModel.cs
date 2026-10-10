@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -423,7 +424,7 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
             {
                 if (!result.WasCancelled)
                 {
-                    _setErrorMessage(result.Error?.Message ?? "Failed to load mailbox folder permissions");
+                    _setErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMailboxFolderPermissions"));
                 }
 
                 return;
@@ -473,10 +474,10 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
             ? _getMailboxIdentity()
             : _getPrimarySmtpAddress();
         if (!ConfirmMutation(
-                "Apply mailbox permission changes",
+                Loc.Get("Presentation.ApplyMailboxPermissionChanges"),
                 targetIdentity!,
                 $"Apply {_pendingActions.Count} mailbox permission changes.",
-                "Confirm mailbox permission update"))
+                Loc.Get("Presentation.ConfirmMailboxPermissionUpdate")))
         {
             return;
         }
@@ -521,7 +522,7 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
                     var failedMessages = result.Value.Results
                         .Where(r => !r.Success)
                         .Select(r => $"{r.Action.Description}: {r.ErrorMessage}");
-                    _setErrorMessage($"Some actions failed:\n{string.Join("\n", failedMessages)}");
+                    _setErrorMessage(Loc.GetFormat("Mailbox.PermissionActionsFailed", string.Join(Environment.NewLine, failedMessages)));
                 }
 
                 ClearPendingChanges();
@@ -529,7 +530,7 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                _setErrorMessage(result.Error?.Message ?? "Failed to apply permissions");
+                _setErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.FailedToApplyPermissions"));
             }
         }
         catch (OperationCanceledException)
@@ -630,19 +631,19 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
 
         var operation = action switch
         {
-            PermissionAction.Add => "Add mailbox folder permission",
-            PermissionAction.Modify => "Updating permission folder mailbox",
-            PermissionAction.Remove => "Remove mailbox folder permission",
-            _ => "Updating permission folder mailbox"
+            PermissionAction.Add => Loc.Get("Mailbox.AddFolderPermission"),
+            PermissionAction.Modify => Loc.Get("Mailbox.UpdateFolderPermission"),
+            PermissionAction.Remove => Loc.Get("Mailbox.RemoveFolderPermission"),
+            _ => Loc.Get("Mailbox.UpdateFolderPermission")
         };
         var impact = action == PermissionAction.Remove
-            ? "Remove the delegate from the selected mailbox folder."
-            : $"Assign the role '{role ?? "N/A"}' to the selected mailbox folder.";
+            ? Loc.Get("Presentation.RemoveTheDelegateFromTheSelectedMailboxFolder")
+            : Loc.GetFormat("Mailbox.AssignFolderRoleImpact", role ?? Loc.Get("Presentation.NotAvailable"));
         if (!ConfirmMutation(
                 operation,
                 $"{user} -> {mailboxIdentity}\\{NormalizeFolderPath(FolderPermissionFolderPath)}",
                 impact,
-                "Confirm folder permission update"))
+                Loc.Get("Presentation.ConfirmFolderPermissionUpdate")))
         {
             return;
         }
@@ -666,7 +667,7 @@ public sealed class MailboxPermissionsEditorViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                _setErrorMessage(result.Error?.Message ?? "Failed to apply mailbox folder permission");
+                _setErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.FailedToApplyMailboxFolderPermission"));
                 return;
             }
 

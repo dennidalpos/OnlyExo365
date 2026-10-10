@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -13,11 +14,12 @@ public class PublicFoldersViewModel : ViewModelBase
     private const NavigationPage AlertPage = NavigationPage.PublicFolders;
     private readonly IWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private bool _isLoading;
     private bool _isSaving;
-    private bool _hasPendingChanges;
+    private int _detailsLoadingCount;
+    private FolderDraft? _originalDraft;
     private bool _suspendDirtyTracking;
     private string? _errorMessage;
     private string? _searchQuery;
@@ -45,11 +47,13 @@ public class PublicFoldersViewModel : ViewModelBase
 
     public PublicFoldersViewModel(IWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync, () => CanLoadMore);
+        HasPendingChanges = false;
         SaveCommand = new AsyncRelayCommand(SaveAsync, () => CanSave);
         NewFolderCommand = new RelayCommand(BeginCreate, () => !IsSaving);
         AddPermissionCommand = new AsyncRelayCommand(AddPermissionAsync, () => CanAddPermission);
@@ -62,7 +66,6 @@ public class PublicFoldersViewModel : ViewModelBase
     public ObservableCollection<PublicFolderPermissionDisplayItem> PermissionEntries { get; } = new();
     public CollectionLoadProgressViewModel LoadProgress { get; } = new();
 
-    public IReadOnlyList<string> MailEnabledFilters { get; } = new[] { "All", "Mail-enabled only", "Mail-disabled only" };
     public IReadOnlyList<string> PublicFolderPermissionRoles { get; } =
     [
         "Owner",
@@ -85,12 +88,15 @@ public class PublicFoldersViewModel : ViewModelBase
                 OnPropertyChanged(nameof(CanRefresh));
                 OnPropertyChanged(nameof(CanLoadMore));
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 OnPropertyChanged(nameof(CanDelete));
                 OnPropertyChanged(nameof(CanAddPermission));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
     }
+
+    public bool IsEditorBusy => IsLoading || IsSaving || _detailsLoadingCount > 0;
 
     public bool IsSaving
     {
@@ -100,6 +106,7 @@ public class PublicFoldersViewModel : ViewModelBase
             if (SetProperty(ref _isSaving, value))
             {
                 OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(IsEditorBusy));
                 OnPropertyChanged(nameof(CanDelete));
                 OnPropertyChanged(nameof(CanAddPermission));
                 CommandManager.InvalidateRequerySuggested();
@@ -109,8 +116,12 @@ public class PublicFoldersViewModel : ViewModelBase
 
     public bool HasPendingChanges
     {
-        get => _hasPendingChanges;
-        set => SetProperty(ref _hasPendingChanges, value);
+        get => _originalDraft != CaptureDraft();
+        set
+        {
+            if (!value) _originalDraft = CaptureDraft();
+            OnPropertyChanged();
+        }
     }
 
     public string? ErrorMessage
@@ -176,13 +187,18 @@ public class PublicFoldersViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{Folders.Count} of {TotalCount} public folders";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Folders.Count, TotalCount, Loc.Get("Noun.PublicFolders"));
 
     public PublicFolderListItemDto? SelectedFolder
     {
         get => _selectedFolder;
         set
         {
+            if (!ReferenceEquals(_selectedFolder, value) && !CanReplaceDraft())
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(() => OnPropertyChanged(nameof(SelectedFolder)));
+                return;
+            }
             if (SetProperty(ref _selectedFolder, value) && value != null)
             {
                 _ = LoadDetailsAsync(value);
@@ -354,6 +370,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!CanReplaceDraft()) return;
         var hasExistingFolders = Folders.Count > 0;
         if (!_shellViewModel.IsExchangeConnected)
         {
@@ -366,7 +383,7 @@ public class PublicFoldersViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading public folders...", "folders");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingPublicFoldersInProgress"), Loc.Get("Presentation.Folders"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Folders.Count);
@@ -387,7 +404,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load public folders";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadPublicFolders");
                 ErrorMessage = hasExistingFolders ? errorMessage : null;
                 if (!hasExistingFolders)
                 {
@@ -425,7 +442,7 @@ public class PublicFoldersViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading public folders...", "folders");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingPublicFoldersInProgress"), Loc.Get("Presentation.Folders"));
         ErrorMessage = null;
 
         try
@@ -443,7 +460,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load public folders";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadPublicFolders");
                 return;
             }
 
@@ -472,6 +489,8 @@ public class PublicFoldersViewModel : ViewModelBase
     {
         ErrorMessage = null;
 
+        _detailsLoadingCount++;
+        OnPropertyChanged(nameof(IsEditorBusy));
         try
         {
             var result = await _workerService.GetPublicFolderDetailsAsync(
@@ -483,15 +502,20 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to load public folder details.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadPublicFolderDetails");
                 return;
             }
 
-            ApplyDetails(result.Value);
+            if (ReferenceEquals(SelectedFolder, selected)) ApplyDetails(result.Value);
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            _detailsLoadingCount--;
+            OnPropertyChanged(nameof(IsEditorBusy));
         }
     }
 
@@ -502,11 +526,22 @@ public class PublicFoldersViewModel : ViewModelBase
             return;
         }
 
+        var request = new UpsertPublicFolderRequest
+        {
+            Identity = Identity,
+            Name = Name.Trim(),
+            ParentPath = NormalizeParentPath(ParentPath),
+            MailEnabled = MailEnabled,
+            Alias = string.IsNullOrWhiteSpace(Alias) ? null : Alias.Trim(),
+            PrimarySmtpAddress = string.IsNullOrWhiteSpace(PrimarySmtpAddress) ? null : PrimarySmtpAddress.Trim(),
+            HiddenFromAddressListsEnabled = HiddenFromAddressListsEnabled
+        };
+
         if (!ConfirmMutation(
-                string.IsNullOrWhiteSpace(Identity) ? "Creating public folder" : "Updating public folder",
+                string.IsNullOrWhiteSpace(Identity) ? Loc.Get("Presentation.CreatingPublicFolder") : Loc.Get("Presentation.UpdatingPublicFolder"),
                 string.IsNullOrWhiteSpace(Identity) ? Name.Trim() : Identity,
-                "Save the public folder structure, mail settings, and attributes.",
-                "Confirm public folder save"))
+                Loc.Get("Presentation.SaveThePublicFolderStructureMailSettingsAnd"),
+                Loc.Get("Presentation.ConfirmPublicFolderSave")))
         {
             return;
         }
@@ -517,21 +552,12 @@ public class PublicFoldersViewModel : ViewModelBase
         try
         {
             var result = await _workerService.UpsertPublicFolderAsync(
-                new UpsertPublicFolderRequest
-                {
-                    Identity = Identity,
-                    Name = Name.Trim(),
-                    ParentPath = NormalizeParentPath(ParentPath),
-                    MailEnabled = MailEnabled,
-                    Alias = string.IsNullOrWhiteSpace(Alias) ? null : Alias.Trim(),
-                    PrimarySmtpAddress = string.IsNullOrWhiteSpace(PrimarySmtpAddress) ? null : PrimarySmtpAddress.Trim(),
-                    HiddenFromAddressListsEnabled = HiddenFromAddressListsEnabled
-                },
+                request,
                 cancellationToken: cancellationToken);
 
             if (!result.IsSuccess || result.Value == null)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to save the public folder.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToSaveThePublicFolder");
                 return;
             }
 
@@ -565,6 +591,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
     private void BeginCreate()
     {
+        if (!CanReplaceDraft()) return;
         _suspendDirtyTracking = true;
 
         try
@@ -625,7 +652,7 @@ public class PublicFoldersViewModel : ViewModelBase
                 });
             }
             PermissionsSummary = details.Permissions.Count == 0
-                ? "No explicit client permissions detected"
+                ? Loc.Get("Presentation.NoExplicitClientPermissionsDetected")
                 : string.Join(Environment.NewLine, details.Permissions.Select(permission =>
                     $"{permission.User}: {string.Join(", ", permission.AccessRights)}"));
         }
@@ -650,9 +677,37 @@ public class PublicFoldersViewModel : ViewModelBase
 
         if (!_suspendDirtyTracking)
         {
-            HasPendingChanges = true;
+            OnPropertyChanged(nameof(HasPendingChanges));
         }
     }
+
+    private bool CanReplaceDraft()
+    {
+        if (_suspendDirtyTracking || IsLoading || IsSaving || !HasPendingChanges) return true;
+        if (!ErrorDialogService.ConfirmDiscardChanges()) return false;
+        DiscardDraft();
+        return true;
+    }
+
+    public void DiscardDraft()
+    {
+        if (_originalDraft is not { } draft) return;
+        _suspendDirtyTracking = true;
+        try
+        {
+            Name = draft.Name;
+            ParentPath = draft.ParentPath;
+            MailEnabled = draft.MailEnabled;
+            Alias = draft.Alias;
+            PrimarySmtpAddress = draft.Address;
+            HiddenFromAddressListsEnabled = draft.Hidden;
+        }
+        finally { _suspendDirtyTracking = false; }
+        OnPropertyChanged(nameof(HasPendingChanges));
+    }
+
+    private FolderDraft CaptureDraft() => new(Name, ParentPath, MailEnabled, Alias, PrimarySmtpAddress, HiddenFromAddressListsEnabled);
+    private sealed record FolderDraft(string Name, string ParentPath, bool MailEnabled, string Alias, string Address, bool Hidden);
 
     private static bool? NormalizeMailEnabledFilter(string? value)
     {
@@ -753,13 +808,13 @@ public class PublicFoldersViewModel : ViewModelBase
             _ => "Updating client permission"
         };
         var impact = action == PermissionAction.Remove
-            ? "The delegate loses explicit client access to the public folder."
+            ? Loc.Get("Presentation.TheDelegateLosesExplicitClientAccessToThe")
             : $"The delegate receives the '{role ?? "N/A"}' role on the public folder.";
         if (!ConfirmMutation(
                 operation,
                 $"{user} -> {Identity}",
                 impact,
-                "Confirm public folder permission update"))
+                Loc.Get("Presentation.ConfirmPublicFolderPermissionUpdate")))
         {
             return;
         }
@@ -781,7 +836,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to update public folder client permissions.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToUpdatePublicFolderClientPermissions");
                 return;
             }
 
@@ -814,12 +869,12 @@ public class PublicFoldersViewModel : ViewModelBase
         }
 
         if (!ConfirmMutation(
-                HasSubFolders ? "Deleting recursive public folder" : "Deleting public folder",
+                HasSubFolders ? Loc.Get("Presentation.DeletingRecursivePublicFolder") : Loc.Get("Presentation.DeletingPublicFolder"),
                 Identity,
                 HasSubFolders
-                    ? "Remove the public folder and all of its subfolders."
-                    : "Permanently remove the selected public folder.",
-                "Confirm public folder deletion"))
+                    ? Loc.Get("Presentation.RemoveThePublicFolderAndAllOfIts")
+                    : Loc.Get("Presentation.PermanentlyRemoveTheSelectedPublicFolder"),
+                Loc.Get("Presentation.ConfirmPublicFolderDeletion")))
         {
             return;
         }
@@ -839,7 +894,7 @@ public class PublicFoldersViewModel : ViewModelBase
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to delete the public folder";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteThePublicFolder");
                 return;
             }
 

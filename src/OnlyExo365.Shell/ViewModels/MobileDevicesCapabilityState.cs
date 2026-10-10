@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 
 namespace OnlyExo365.Shell.ViewModels;
@@ -58,7 +59,7 @@ internal sealed class MobileDevicesCapabilityState
                 canManageAccessState: false,
                 canAssignPolicy: false,
                 canRemoteWipe: false,
-                message: $"The Mobile Devices module is not available: the current Exchange session does not expose Get-MobileDevice{reason}.");
+                message: Loc.GetFormat("MobileDevices.CapabilityUnavailable", reason));
         }
 
         var warnings = new List<string>();
@@ -69,17 +70,17 @@ internal sealed class MobileDevicesCapabilityState
 
         if (!canLoadPolicies)
         {
-            warnings.Add($"mailbox policy not available ({DescribeCmdletAvailability(capabilities, "Get-MobileDeviceMailboxPolicy").TrimStart(':', ' ')})");
+            warnings.Add(Loc.GetFormat("MobileDevices.PolicyUnavailable", DescribeCmdletAvailability(capabilities, "Get-MobileDeviceMailboxPolicy").TrimStart(':', ' ')));
         }
 
         if (!canManageAccessState)
         {
-            warnings.Add($"Allow/Block/Quarantine actions are disabled ({DescribeCombinedAvailability(capabilities, "Get-CASMailbox", "Set-CASMailbox")})");
+            warnings.Add(Loc.GetFormat("MobileDevices.AccessActionsDisabled", DescribeCombinedAvailability(capabilities, "Get-CASMailbox", "Set-CASMailbox")));
         }
 
         if (!canRemoteWipe)
         {
-            warnings.Add($"remote wipe is disabled ({DescribeCmdletAvailability(capabilities, "Clear-MobileDevice").TrimStart(':', ' ')})");
+            warnings.Add(Loc.GetFormat("MobileDevices.WipeDisabled", DescribeCmdletAvailability(capabilities, "Clear-MobileDevice").TrimStart(':', ' ')));
         }
 
         return new MobileDevicesCapabilityState(
@@ -90,7 +91,7 @@ internal sealed class MobileDevicesCapabilityState
             canRemoteWipe: canRemoteWipe,
             message: warnings.Count == 0
                 ? null
-                : $"The Mobile Devices module is available with reduced functionality: {string.Join("; ", warnings)}.");
+                : Loc.GetFormat("MobileDevices.CapabilityLimitations", string.Join("; ", warnings)));
     }
 
     private static string DescribeCombinedAvailability(CapabilityMapDto capabilities, params string[] cmdletNames)
@@ -107,16 +108,16 @@ internal sealed class MobileDevicesCapabilityState
     {
         if (!capabilities.Cmdlets.TryGetValue(cmdletName, out var cmdlet))
         {
-            return " (capability not detected)";
+            return Loc.Get("Presentation.CapabilityNotDetected");
         }
 
         if (cmdlet.IsAvailable)
         {
-            return " (cmdlet available)";
+            return Loc.Get("Presentation.CmdletAvailable");
         }
 
         return string.IsNullOrWhiteSpace(cmdlet.UnavailableReason)
-            ? " (cmdlet not available)"
+            ? Loc.Get("Presentation.CmdletNotAvailable")
             : $": {cmdlet.UnavailableReason}";
     }
 }

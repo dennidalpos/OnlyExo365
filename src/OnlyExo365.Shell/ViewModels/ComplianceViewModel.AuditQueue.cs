@@ -145,7 +145,7 @@ public sealed partial class ComplianceViewModel
 
                 if (!_shellViewModel.IsExchangeConnected)
                 {
-                    nextTask.MarkFailed("Exchange session disconnected before execution.", nextTask.CorrelationId);
+                    nextTask.MarkFailed(Loc.Get("Presentation.ExchangeSessionDisconnectedBeforeExecution"), nextTask.CorrelationId);
                     continue;
                 }
 
@@ -181,7 +181,7 @@ public sealed partial class ComplianceViewModel
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var message = result.Error?.Message ?? "Audit search failed.";
+                var message = result.Error?.Message ?? Loc.Get("Presentation.AuditSearchFailed");
                 task.MarkFailed(message, correlationId);
                 _shellViewModel.AddLog(LogLevel.Error, $"{task.Title} failed: {message}", "Compliance", correlationId);
                 return;
@@ -291,7 +291,7 @@ public sealed partial class ComplianceViewModel
     {
         foreach (var auditTask in AuditSearchTasks.Where(task => task.IsQueued).ToList())
         {
-            auditTask.MarkFailed("Exchange session disconnected before execution.", auditTask.CorrelationId);
+            auditTask.MarkFailed(Loc.Get("Presentation.ExchangeSessionDisconnectedBeforeExecution"), auditTask.CorrelationId);
         }
 
         if (SelectedAuditSearchTask == null && AuditSearchTasks.Count == 0)

@@ -21,7 +21,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{loc:Loc Key=Nav.MailboxStorage}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
                 <TextBlock Text="{loc:Loc Key=MailboxSpace.SortedByFreeSpace}" Margin="12,0,0,0" VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                           Foreground="{DynamicResource SecondaryTextBrush}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -68,10 +68,10 @@
                       CanUserDeleteRows="False"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
-                      Background="{StaticResource SecondaryBackgroundBrush}"
-                      BorderBrush="{StaticResource BorderBrush}"
-                      RowBackground="{StaticResource SecondaryBackgroundBrush}"
-                      AlternatingRowBackground="{StaticResource TertiaryBackgroundBrush}">
+                      Background="{DynamicResource SecondaryBackgroundBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}"
+                      RowBackground="{DynamicResource SecondaryBackgroundBrush}"
+                      AlternatingRowBackground="{DynamicResource TertiaryBackgroundBrush}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="{loc:Loc Key=MailboxSpace.ColName}" Binding="{Binding DisplayName}" Width="Auto" MinWidth="180"/>
                     <DataGridTextColumn Header="{loc:Loc Key=MailboxSpace.ColEmail}" Binding="{Binding PrimarySmtpAddress}" Width="Auto" MinWidth="220"/>
@@ -83,16 +83,16 @@
                                 <TextBlock Text="{Binding RemainingPercentDisplay}" HorizontalAlignment="Right">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RemainingCategory}" Value="Critical">
-                                                    <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding RemainingCategory}" Value="Warning">
-                                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding RemainingCategory}" Value="Ok">
-                                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -284,7 +285,7 @@ public class MailFlowViewModel : ViewModelBase
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         var hadWorkspaceData = HasWorkspaceData;
-        _coordinator.BeginOperation("Loading Mail Flow workspace...");
+        _coordinator.BeginOperation(Loc.Get("Presentation.LoadingMailFlowWorkspaceInProgress"));
         _coordinator.ClearError();
         _shellViewModel.ClearPageAlert(AlertPage);
 
@@ -311,7 +312,7 @@ public class MailFlowViewModel : ViewModelBase
             }
             else if (!hadWorkspaceData && !HasWorkspaceData)
             {
-                var errorMessage = ErrorMessage ?? "Unable to load the Mail Flow workspace.";
+                var errorMessage = ErrorMessage ?? Loc.Get("Presentation.UnableToLoadTheMailFlowWorkspace");
                 _coordinator.ClearError();
                 _shellViewModel.ShowPageLoadFailedAlert(AlertPage, errorMessage);
             }

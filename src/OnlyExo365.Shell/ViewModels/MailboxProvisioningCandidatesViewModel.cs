@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -16,7 +17,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
 
     private readonly IMailboxesWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
 
     private CancellationTokenSource? _loadCts;
     private bool _isLoading;
@@ -31,6 +32,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
 
     public MailboxProvisioningCandidatesViewModel(IMailboxesWorkerService workerService, ShellViewModel shellViewModel)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
 
@@ -161,10 +163,10 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
 
     public bool HasSelectedCandidate => SelectedCandidate != null;
 
-    public string StatusText => $"{Candidates.Count} of {TotalCount} users";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Candidates.Count, TotalCount, Loc.Get("Noun.Users"));
 
     public string SelectedCandidateSummary => SelectedCandidate == null
-        ? "Select a member user to review and assign licenses."
+        ? Loc.Get("Presentation.SelectAMemberUserToReviewAndAssign")
         : $"{SelectedCandidate.DisplayName} ({SelectedCandidate.UserPrincipalName})";
 
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
@@ -234,7 +236,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
         var selectedUpn = SelectedCandidate?.UserPrincipalName;
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         IsLoading = true;
-        LoadProgress.Start("Loading users Member...", "users");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMemberUsersInProgress"), Loc.Get("Presentation.Users"));
         ErrorMessage = null;
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Candidates.Count);
@@ -261,7 +263,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                var errorMessage = result.Error?.Message ?? "Failed to load member users";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMemberUsers");
                 ErrorMessage = hasExistingCandidates ? errorMessage : null;
                 if (!hasExistingCandidates)
                 {
@@ -297,7 +299,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
         _loadCts?.Cancel();
         _loadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         IsLoading = true;
-        LoadProgress.Start("Loading users Member...", "users");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingMemberUsersInProgress"), Loc.Get("Presentation.Users"));
         ErrorMessage = null;
 
         try
@@ -323,7 +325,7 @@ public sealed class MailboxProvisioningCandidatesViewModel : ViewModelBase
             }
             else if (!result.WasCancelled)
             {
-                ErrorMessage = result.Error?.Message ?? "Failed to load more member users";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.FailedToLoadMoreMemberUsers");
             }
         }
         catch (OperationCanceledException)

@@ -65,38 +65,38 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.StartDate}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <DatePicker SelectedDate="{Binding Compliance.AuditStartDate}"/>
+                                <TextBlock x:Name="InputLabel001" Text="{loc:Loc Key=Compliance.StartDate}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <DatePicker AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" SelectedDate="{Binding Compliance.AuditStartDate}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.EndDate}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <DatePicker SelectedDate="{Binding Compliance.AuditEndDate}"/>
+                                <TextBlock x:Name="InputLabel002" Text="{loc:Loc Key=Compliance.EndDate}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <DatePicker AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" SelectedDate="{Binding Compliance.AuditEndDate}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,12,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.UserIds}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding Compliance.AuditUserIdsText, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel003" Text="{loc:Loc Key=Compliance.UserIds}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel003}" Text="{Binding Compliance.AuditUserIdsText, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="3" Margin="0,0,0,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.Operations}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding Compliance.AuditOperationsText, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel004" Text="{loc:Loc Key=Compliance.Operations}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel004}" Text="{Binding Compliance.AuditOperationsText, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.ObjectIds}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding Compliance.AuditObjectIdsText, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel005" Text="{loc:Loc Key=Compliance.ObjectIds}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel005}" Text="{Binding Compliance.AuditObjectIdsText, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,12,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.FreeText}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding Compliance.AuditFreeText, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel006" Text="{loc:Loc Key=Compliance.FreeText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel006}" Text="{Binding Compliance.AuditFreeText, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,0,8">
-                                <TextBlock Text="{loc:Loc Key=Compliance.MaxResults}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox Text="{Binding Compliance.AuditMaxResults, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="InputLabel007" Text="{loc:Loc Key=Compliance.MaxResults}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel007}" Text="{Binding Compliance.AuditMaxResults, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
@@ -106,15 +106,15 @@
                                 <TextBlock Text="{Binding Compliance.AuditStatusText}"
                                            Margin="12,0,0,0"
                                            VerticalAlignment="Center"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                         </Grid>
 
                         <TextBlock Text="{Binding Compliance.AuditTaskCenterStatus}"
                                    Margin="0,0,0,8"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
 
-                        <DataGrid ItemsSource="{Binding Compliance.AuditSearchTasks}"
+                        <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" ItemsSource="{Binding Compliance.AuditSearchTasks}"
                                   SelectedItem="{Binding Compliance.SelectedAuditSearchTask}"
                                   AutoGenerateColumns="False"
                                   MinHeight="140"
@@ -161,11 +161,11 @@
                                        FontWeight="SemiBold"/>
                             <TextBlock Text="{Binding Compliance.SelectedAuditTaskFilterSummary}"
                                        Margin="0,4,0,0"
-                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
 
-                        <DataGrid ItemsSource="{Binding Compliance.AuditResults}"
+                        <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" ItemsSource="{Binding Compliance.AuditResults}"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   MinHeight="220">
@@ -203,10 +203,10 @@
                                 <TextBlock Text="{Binding Compliance.SearchesStatusText}"
                                            Margin="12,0,0,0"
                                            VerticalAlignment="Center"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
 
-                            <DataGrid Grid.Row="1"
+                            <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" Grid.Row="1"
                                       ItemsSource="{Binding Compliance.Searches}"
                                       SelectedItem="{Binding Compliance.SelectedSearch}"
                                       AutoGenerateColumns="False"
@@ -225,32 +225,32 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                     <TextBlock Text="{loc:Loc Key=Compliance.Locations}"/>
                                     <TextBlock Text="{Binding Compliance.SelectedSearchExchangeLocations, Mode=OneWay}"
-                                               Foreground="{StaticResource SecondaryTextBrush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 </StackPanel>
                                 <TextBlock Text="{Binding Compliance.SelectedSearchQuery, Mode=OneWay}"
                                            TextWrapping="Wrap"
                                            Margin="0,4,0,0"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                         </Grid>
 
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="{loc:Loc Key=Compliance.NewSearchHeading}" FontWeight="SemiBold"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldName}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding Compliance.CreateSearchName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel008" Text="{loc:Loc Key=Compliance.FieldName}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel008}" Text="{Binding Compliance.CreateSearchName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldCase}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding Compliance.CreateSearchCaseName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel009" Text="{loc:Loc Key=Compliance.FieldCase}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel009}" Text="{Binding Compliance.CreateSearchCaseName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldExchangeLocations}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding Compliance.CreateExchangeLocationsText, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBlock x:Name="InputLabel010" Text="{loc:Loc Key=Compliance.FieldExchangeLocations}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel010}" Text="{Binding Compliance.CreateExchangeLocationsText, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="True"
                                      MinHeight="72"
                                      TextWrapping="Wrap"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldContentQuery}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding Compliance.CreateContentMatchQuery, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBlock x:Name="InputLabel011" Text="{loc:Loc Key=Compliance.FieldContentQuery}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel011}" Text="{Binding Compliance.CreateContentMatchQuery, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="True"
                                      MinHeight="72"
                                      TextWrapping="Wrap"/>
@@ -272,21 +272,21 @@
                                     Command="{Binding Compliance.RemoveSearchCommand}"
                                     Style="{StaticResource DangerButton}"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldPurgeType}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding Compliance.PurgeTypes}"
+                            <TextBlock x:Name="InputLabel012" Text="{loc:Loc Key=Compliance.FieldPurgeType}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel012}" ItemsSource="{Binding Compliance.PurgeTypes}"
                                       SelectedItem="{Binding Compliance.SelectedPurgeType}"/>
                             <Button Content="{loc:Loc Key=Compliance.RunPurgeBtn}"
                                     Command="{Binding Compliance.PurgeSearchCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0,8,0,0"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldCaseForHold}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <ComboBox ItemsSource="{Binding Compliance.Cases}"
+                            <TextBlock x:Name="InputLabel013" Text="{loc:Loc Key=Compliance.FieldCaseForHold}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel013}" ItemsSource="{Binding Compliance.Cases}"
                                       SelectedItem="{Binding Compliance.SelectedCase}"
                                       DisplayMemberPath="Name"/>
 
-                            <TextBlock Text="{loc:Loc Key=Compliance.FieldHoldName}" Margin="0,8,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <TextBox Text="{Binding Compliance.HoldName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock x:Name="InputLabel014" Text="{loc:Loc Key=Compliance.FieldHoldName}" Margin="0,8,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel014}" Text="{Binding Compliance.HoldName, UpdateSourceTrigger=PropertyChanged}"/>
 
                             <Button Content="{loc:Loc Key=Compliance.CreateHoldBtn}"
                                     Command="{Binding Compliance.HoldSearchCommand}"
@@ -306,8 +306,8 @@
                         <StackPanel Grid.Column="0" Margin="0,0,12,0">
                             <TextBlock Text="{Binding Compliance.CasesStatusText}"
                                        Margin="0,0,0,8"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <DataGrid ItemsSource="{Binding Compliance.Cases}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" ItemsSource="{Binding Compliance.Cases}"
                                       SelectedItem="{Binding Compliance.SelectedCase}"
                                       AutoGenerateColumns="False"
                                       MinHeight="220">
@@ -322,8 +322,8 @@
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="{Binding Compliance.ActionsStatusText}"
                                        Margin="0,0,0,8"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
-                            <DataGrid ItemsSource="{Binding Compliance.Actions}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <DataGrid MaxHeight="320" VirtualizingPanel.VirtualizationMode="Recycling" ItemsSource="{Binding Compliance.Actions}"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       MinHeight="220">

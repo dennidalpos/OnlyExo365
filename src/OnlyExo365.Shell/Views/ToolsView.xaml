@@ -35,14 +35,14 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.Status}" Margin="0,0,12,4"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ExchangeStateDisplay}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                    <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsExchangeConnected}" Value="True">
-                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -50,15 +50,15 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.User}" Margin="0,4,12,4"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ConnectedUser, FallbackValue='-'}" Margin="0,4,0,4"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.Organization}" Margin="0,4,12,4"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ConnectedOrganization, FallbackValue='-'}" Margin="0,4,0,4"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Key=Tools.Capabilities}" Margin="0,4,12,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,4,0,0" Text="{Binding CapabilitiesDisplay}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -82,7 +82,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerState}" Margin="0,0,12,4"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                             <Ellipse Style="{StaticResource StatusIndicator}" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <Ellipse.Fill>
@@ -93,14 +93,14 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerRunning}" Margin="0,4,12,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,4,0,0" Text="{Binding WorkerRunningDisplay}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                    <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsWorkerRunning}" Value="True">
-                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -108,7 +108,7 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.WorkerConsole}" Margin="0,8,12,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
                             <CheckBox Content="{loc:Loc Key=Tools.WorkerConsoleToggle}"
                                       IsChecked="{Binding IsWorkerConsoleVisible, Mode=OneWay}"
@@ -117,7 +117,7 @@
                                       IsEnabled="{Binding CanToggleWorkerConsole}"/>
                             <TextBlock Margin="0,4,0,0"
                                        Text="{Binding WorkerConsoleVisibilityDisplay}"
-                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
                     </Grid>
                 </controls:SectionPanel>
@@ -127,7 +127,7 @@
                     <StackPanel>
                         <!-- Indeterminate progress during update -->
                         <ProgressBar IsIndeterminate="True" Height="3"
-                                     Foreground="{StaticResource AccentBrush}"
+                                     Foreground="{DynamicResource AccentBrush}"
                                      Background="Transparent"
                                      Visibility="{Binding Tools.Catalog.IsUpdating, Converter={StaticResource BoolToVisibility}}"
                                      Margin="0,0,0,8"/>
@@ -149,7 +149,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="{loc:Loc Key=Tools.Status}" Margin="0,0,12,0"
-                                       Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding Tools.Catalog.StatusSummary}"
                                        VerticalAlignment="Center" TextWrapping="Wrap"/>
                             <Button Grid.Column="2"
@@ -177,33 +177,33 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=Tools.Version}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,12,4"/>
                             <TextBlock Grid.Row="0" Grid.Column="1"
                                        Text="{Binding Tools.Catalog.CatalogVersion, FallbackValue='—'}"
                                        Margin="0,0,24,4"/>
 
                             <TextBlock Grid.Row="0" Grid.Column="2" Text="{loc:Loc Key=Tools.Entries}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,12,4"/>
                             <TextBlock Grid.Row="0" Grid.Column="3"
                                        Text="{Binding Tools.Catalog.EntryCount}"
                                        Margin="0,0,0,4"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=Tools.LastChecked}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,12,4"/>
                             <TextBlock Grid.Row="1" Grid.Column="1"
                                        Text="{Binding Tools.Catalog.LastChecked, FallbackValue='Never'}"
                                        Margin="0,0,24,4"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="{loc:Loc Key=Tools.LastUpdated}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,12,4"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,12,4"/>
                             <TextBlock Grid.Row="1" Grid.Column="3"
                                        Text="{Binding Tools.Catalog.LastUpdated, FallbackValue='Never'}"
                                        Margin="0,0,0,4"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.AutoUpdate}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,12,0"
+                            <TextBlock x:Name="InputLabel001" Grid.Row="2" Grid.Column="0" Text="{loc:Loc Key=Tools.AutoUpdate}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,12,0"
                                        VerticalAlignment="Center"/>
-                            <ComboBox Grid.Row="2" Grid.Column="1"
+                            <ComboBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="2" Grid.Column="1"
                                       ItemsSource="{Binding Tools.Catalog.AutoUpdateModes}"
                                       DisplayMemberPath="DisplayName"
                                       SelectedValuePath="Mode"
@@ -220,7 +220,7 @@
                                    Margin="0,0,0,8"/>
                         <TextBlock Text="{loc:Loc Key=Tools.TheMatrixValidatesAuthenticationModesGraphScopesAndDetectedCmdle}"
                                    TextWrapping="Wrap"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Margin="0,0,0,12"/>
 
                         <ItemsControl ItemsSource="{Binding Tools.LeastPrivilegeMatrix}">
@@ -237,7 +237,7 @@
 
                                                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
                                                     <TextBlock Text="{Binding FeatureName}" FontWeight="SemiBold"/>
-                                                    <TextBlock Foreground="{StaticResource SecondaryTextBrush}"
+                                                    <TextBlock Foreground="{DynamicResource SecondaryTextBrush}"
                                                                Margin="0,2,0,0">
                                                         <Run Text="{loc:Loc Key=Tools.ModulePrefix}"/>
                                                         <Run Text="{Binding ModuleName, Mode=OneWay}"/>
@@ -290,7 +290,7 @@
                                             </TextBlock>
                                             <TextBlock Margin="0,6,0,0"
                                                        TextWrapping="Wrap"
-                                                       Foreground="{StaticResource SecondaryTextBrush}">
+                                                       Foreground="{DynamicResource SecondaryTextBrush}">
                                                 <Run Text="{loc:Loc Key=Tools.NotesPrefix}"/>
                                                 <Run Text="{Binding NotesDisplay, Mode=OneWay}"/>
                                             </TextBlock>
@@ -321,16 +321,16 @@
                         <StackPanel Margin="0,0,0,8"
                                     Visibility="{Binding Tools.IsChecking, Converter={StaticResource BoolToVisibility}}">
                             <ProgressBar Minimum="0" Maximum="100" Value="{Binding Tools.InstallProgress, Mode=OneWay}"
-                                         Height="4" Foreground="{StaticResource AccentBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"/>
+                                         Height="4" Foreground="{DynamicResource AccentBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"/>
                             <TextBlock Text="{Binding Tools.InstallStatus}" HorizontalAlignment="Center" Margin="0,4,0,0"
                                        Style="{StaticResource CaptionTextStyle}"/>
                         </StackPanel>
                         <StackPanel Margin="0,0,0,8"
                                     Visibility="{Binding Tools.IsInstalling, Converter={StaticResource BoolToVisibility}}">
                             <ProgressBar Minimum="0" Maximum="100" Value="{Binding Tools.InstallProgress, Mode=OneWay}"
-                                         Height="4" Foreground="{StaticResource AccentBrush}"
-                                         Background="{StaticResource TertiaryBackgroundBrush}"/>
+                                         Height="4" Foreground="{DynamicResource AccentBrush}"
+                                         Background="{DynamicResource TertiaryBackgroundBrush}"/>
                             <TextBlock Text="{Binding Tools.InstallStatus}" HorizontalAlignment="Center" Margin="0,4,0,0"
                                        Style="{StaticResource CaptionTextStyle}"/>
                         </StackPanel>
@@ -348,7 +348,7 @@
                                 Visibility="{Binding Tools.HasChecked, Converter={StaticResource BoolToVisibility}}">
                             <StackPanel>
                                 <TextBlock Text="{Binding Tools.PrerequisiteSummary}" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                                <TextBlock Text="{Binding Tools.SuggestedActions}" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding Tools.SuggestedActions}" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                         </Border>
 
@@ -363,10 +363,10 @@
                             <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
-                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Tools.IsPowerShell7}" Value="True">
-                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                                <Setter Property="Fill" Value="{DynamicResource SuccessBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -375,7 +375,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{loc:Loc Key=Tools.PowerShell7}"/>
                                 <TextBlock Text="{Binding Tools.PowerShellVersion, Mode=OneWay, FallbackValue=''}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                             <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallPowerShellCommand}"
                                     Style="{StaticResource ActionGroupButton}"/>
@@ -393,10 +393,10 @@
                             <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
-                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Tools.ExchangeModuleInstalled}" Value="True">
-                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                                <Setter Property="Fill" Value="{DynamicResource SuccessBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -405,7 +405,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{loc:Loc Key=Tools.ExchangeOnlineManagement}"/>
                                 <TextBlock Text="{Binding Tools.ExchangeModuleVersion, Mode=OneWay, FallbackValue=''}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                             <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallExchangeModuleCommand}"
                                     Style="{StaticResource ActionGroupButton}"/>
@@ -421,10 +421,10 @@
                             <Ellipse Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicator}">
-                                        <Setter Property="Fill" Value="{StaticResource ErrorBrush}"/>
+                                        <Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Tools.GraphModuleInstalled}" Value="True">
-                                                <Setter Property="Fill" Value="{StaticResource SuccessBrush}"/>
+                                                <Setter Property="Fill" Value="{DynamicResource SuccessBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -433,7 +433,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{loc:Loc Key=Tools.MicrosoftGraphBundle}"/>
                                 <TextBlock Text="{Binding Tools.GraphModuleVersion, Mode=OneWay, FallbackValue=''}"
-                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
                             <Button Grid.Column="2" Content="{loc:Loc Key=Tools.Install}" Command="{Binding Tools.InstallGraphModuleCommand}"
                                     Style="{StaticResource ActionGroupButton}"/>

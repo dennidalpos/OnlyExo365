@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -73,7 +74,7 @@ internal sealed class MailFlowSharingPoliciesViewModel : MailFlowSectionViewMode
     public string SharingPolicyValidationMessage
         => IsSharingPolicyInputValid
             ? string.Empty
-            : "Sharing policy: Name is required and at least one Domains entry is required (for example, domain.tld: CalendarSharingFreeBusyDetail).";
+            : Loc.Get("Presentation.SharingPolicyValidation");
 
     public string? SharingPolicyIdentity { get => _sharingPolicyIdentity; set => SetEditorProperty(ref _sharingPolicyIdentity, value); }
     public string SharingPolicyName { get => _sharingPolicyName; set => SetEditorProperty(ref _sharingPolicyName, value); }
@@ -91,7 +92,7 @@ internal sealed class MailFlowSharingPoliciesViewModel : MailFlowSectionViewMode
         var result = await WorkerService.GetSharingPoliciesAsync(new GetSharingPoliciesRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load sharing policies";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadSharingPolicies");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow sharing policies load failed: {error}", "MailFlow");
             return;
@@ -133,7 +134,7 @@ internal sealed class MailFlowSharingPoliciesViewModel : MailFlowSectionViewMode
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving sharing policy failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveSharingPolicyFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save sharing policy failed (name={SharingPolicyName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -149,7 +150,9 @@ internal sealed class MailFlowSharingPoliciesViewModel : MailFlowSectionViewMode
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting sharing policy\nTarget: {SelectedSharingPolicy.Name}\nImpact: can update calendar or contacts sharing rules toward external domains.\n\nConfirm?");
+        var selected = SelectedSharingPolicy;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteSharingPoliciesMessage", selected.Name));
         if (!confirmed)
         {
             return;
@@ -159,14 +162,14 @@ internal sealed class MailFlowSharingPoliciesViewModel : MailFlowSectionViewMode
         {
             var result = await WorkerService.RemoveSharingPolicyAsync(new RemoveSharingPolicyRequest
             {
-                Identity = SelectedSharingPolicy.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete sharing policy";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteSharingPolicy");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove sharing policy failed (name={SelectedSharingPolicy.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove sharing policy failed (name={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

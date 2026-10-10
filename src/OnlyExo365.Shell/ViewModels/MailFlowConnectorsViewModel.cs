@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -77,7 +78,7 @@ internal sealed class MailFlowConnectorsViewModel : MailFlowSectionViewModelBase
         MailFlowViewModelSupport.AreValidDomains(MailFlowViewModelSupport.SplitCsv(ConnectorSenderDomains)) &&
         MailFlowViewModelSupport.AreValidDomains(MailFlowViewModelSupport.SplitCsv(ConnectorRecipientDomains));
 
-    public string ConnectorValidationMessage => IsConnectorInputValid ? string.Empty : "Connector: name is required, type must be valid, and domains must use the correct format.";
+    public string ConnectorValidationMessage => IsConnectorInputValid ? string.Empty : Loc.Get("Presentation.ConnectorValidation");
 
     public string? ConnectorIdentity { get => _connectorIdentity; set => SetProperty(ref _connectorIdentity, value); }
     public string? ConnectorIdentityDisplay { get => _connectorIdentityDisplay; set => SetProperty(ref _connectorIdentityDisplay, value); }
@@ -97,7 +98,7 @@ internal sealed class MailFlowConnectorsViewModel : MailFlowSectionViewModelBase
         var result = await WorkerService.GetConnectorsAsync(new GetConnectorsRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load connector";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadConnector");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow connectors load failed: {error}", "MailFlow");
             return;
@@ -117,38 +118,28 @@ internal sealed class MailFlowConnectorsViewModel : MailFlowSectionViewModelBase
             return;
         }
 
-        if (SelectedConnector != null && SelectedConnector.Enabled && !ConnectorEnabled)
+        var request = new UpsertConnectorRequest
         {
-            var disableConfirmed = ErrorDialogService.ShowConfirmation(
-                "Confirm tenant-wide disable",
-                $"Operation: DisEnablezione connector {SelectedConnector.Type}\n" +
-                $"Target: {SelectedConnector.Name}\n" +
-                "Impact: can interrupt tenant-wide mail flow.\n\n" +
-                "Confirm?");
-
-            if (!disableConfirmed)
-            {
-                return;
-            }
-        }
+            Identity = string.IsNullOrWhiteSpace(ConnectorIdentity) ? null : ConnectorIdentity,
+            Type = ConnectorType,
+            Name = ConnectorName.Trim(),
+            Comment = ConnectorComment,
+            Enabled = ConnectorEnabled,
+            SenderDomains = MailFlowViewModelSupport.SplitCsv(ConnectorSenderDomains),
+            RecipientDomains = MailFlowViewModelSupport.SplitCsv(ConnectorRecipientDomains)
+        };
+        if (SelectedConnector != null && SelectedConnector.Enabled && !request.Enabled &&
+            !ConfirmMutation(Loc.Get("MailFlow.DisableConnector"), request.Name,
+                Loc.Get("MailFlow.ConnectorImpact"), Loc.Get("Presentation.ConfirmTenantWideDisable"))) return;
 
         await ExecuteBusyActionAsync(async ct =>
         {
-            var result = await WorkerService.UpsertConnectorAsync(new UpsertConnectorRequest
-            {
-                Identity = string.IsNullOrWhiteSpace(ConnectorIdentity) ? null : ConnectorIdentity,
-                Type = ConnectorType,
-                Name = ConnectorName.Trim(),
-                Comment = ConnectorComment,
-                Enabled = ConnectorEnabled,
-                SenderDomains = MailFlowViewModelSupport.SplitCsv(ConnectorSenderDomains),
-                RecipientDomains = MailFlowViewModelSupport.SplitCsv(ConnectorRecipientDomains)
-            }, cancellationToken: ct);
+            var result = await WorkerService.UpsertConnectorAsync(request, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving connector failed. Check the fields and try again (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveConnectorFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save connector failed (name={ConnectorName}, type={ConnectorType}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -164,7 +155,9 @@ internal sealed class MailFlowConnectorsViewModel : MailFlowSectionViewModelBase
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting connector {SelectedConnector.Type}\nTarget: {SelectedConnector.Name}\nImpact: update routing posta tenant-wide.\n\nConfirm?");
+        var selected = SelectedConnector;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteConnectorsMessage", selected.Name, selected.Type));
         if (!confirmed)
         {
             return;
@@ -174,15 +167,15 @@ internal sealed class MailFlowConnectorsViewModel : MailFlowSectionViewModelBase
         {
             var result = await WorkerService.RemoveConnectorAsync(new RemoveConnectorRequest
             {
-                Identity = SelectedConnector.Identity,
-                Type = SelectedConnector.Type
+                Identity = selected.Identity,
+                Type = selected.Type
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete connector";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteConnector");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove connector failed (connector={SelectedConnector.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove connector failed (connector={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

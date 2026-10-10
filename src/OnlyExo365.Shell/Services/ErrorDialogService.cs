@@ -6,6 +6,8 @@ using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Contracts.Errors;
 using OnlyExo365.Shell.Text;
 using OnlyExo365.Shell.ViewModels;
+using OnlyExo365.Shell.Views;
+using OnlyExo365.Shell.Localization;
 
 namespace OnlyExo365.Shell.Services;
 
@@ -91,26 +93,35 @@ public class ErrorDialogService
                  
                                                               
                   
-    public static bool ShowConfirmation(string title, string message)
+    private static bool _confirmationOpen;
+
+    public static bool ShowConfirmation(string title, string message, string? confirmLabel = null, string? cancelLabel = null)
     {
-        if (ConfirmationHandlerOverride != null)
+        if (ConfirmationHandlerOverride != null) return ConfirmationHandlerOverride(title, message);
+        var application = Application.Current;
+        if (application == null || application.Dispatcher.HasShutdownStarted) return false;
+        return application.Dispatcher.Invoke(() =>
         {
-            return ConfirmationHandlerOverride(title, message);
-        }
-
-        if (TryGetShellPrompt(out var prompt))
-        {
-            return prompt.ShowConfirmationBlocking(title, message);
-        }
-
-        var result = MessageBox.Show(
-            message,
-            title,
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        return result == MessageBoxResult.Yes;
+            if (_confirmationOpen) return false;
+            _confirmationOpen = true;
+            try
+            {
+                var dialog = new ConfirmationDialog(title, message, confirmLabel, cancelLabel)
+                {
+                    Owner = application.MainWindow
+                };
+                return dialog.ShowDialog() == true;
+            }
+            finally
+            {
+                _confirmationOpen = false;
+            }
+        });
     }
+
+    public static bool ConfirmDiscardChanges() => ShowConfirmation(
+        UserMessageCatalog.UnsavedChangesTitle, UserMessageCatalog.UnsavedChangesMessage,
+        Loc.Get("Btn.DiscardChanges"), Loc.Get("Btn.Stay"));
 
     private static bool TryGetShellPrompt(out ShellPromptViewModel prompt)
     {

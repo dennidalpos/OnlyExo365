@@ -42,7 +42,7 @@
 
                     <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AssignedHeading}" FontWeight="SemiBold" Margin="0,0,0,4"/>
                     <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.NoLicensesAssigned}"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8"
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"
                                Visibility="{Binding Licenses.HasAssignedLicenses, Converter={StaticResource InverseBoolToVisibility}}"/>
                     <ItemsControl ItemsSource="{Binding Licenses.AssignedLicenses}" Margin="0,0,0,8">
                         <ItemsControl.ItemTemplate>
@@ -77,13 +77,13 @@
 
                     <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.UsageLocationHeading}" FontWeight="SemiBold" Margin="0,8,0,4"/>
                     <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.UsageLocationInstructions}"
-                               Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,0,0,6"/>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0"
+                        <ComboBox AutomationProperties.Name="{loc:Loc Key=Mailbox.Licenses.UsageLocationTooltip}" Grid.Column="0"
                                   ItemsSource="{Binding Licenses.UsageLocations}"
                                   SelectedItem="{Binding Licenses.SelectedUsageLocation}"
                                   DisplayMemberPath="DisplayLabel"
@@ -104,7 +104,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0" ItemsSource="{Binding Licenses.AvailableLicenses}"
+                        <ComboBox AutomationProperties.Name="{loc:Loc Key=Mailbox.Licenses.SelectLicenseTooltip}" Grid.Column="0" ItemsSource="{Binding Licenses.AvailableLicenses}"
                                   SelectedItem="{Binding Licenses.SelectedLicenseToAdd}"
                                   Margin="0,0,8,0"
                                   ToolTip="{loc:Loc Key=Mailbox.Licenses.SelectLicenseTooltip}">
@@ -112,12 +112,12 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding DisplayName, Mode=OneWay}"/>
-                                        <TextBlock Text=" - " Foreground="{StaticResource SecondaryTextBrush}"/>
-                                        <TextBlock Text="{loc:Loc Key=Dashboard.SkuPrefix}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                        <TextBlock Text="{Binding SkuPartNumber, Mode=OneWay}" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                        <TextBlock Text=" (" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                        <TextBlock Text="{Binding Available, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
-                                        <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AvailableSuffix}" Foreground="{StaticResource SecondaryTextBrush}"/>
+                                        <TextBlock Text=" - " Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{loc:Loc Key=Dashboard.SkuPrefix}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding SkuPartNumber, Mode=OneWay}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text=" (" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Available, Mode=OneWay}" Foreground="{DynamicResource SuccessBrush}"/>
+                                        <TextBlock Text="{loc:Loc Key=Mailbox.Licenses.AvailableSuffix}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>

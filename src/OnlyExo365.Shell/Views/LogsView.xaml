@@ -20,8 +20,8 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{loc:Loc Key=Logs.Title}" Style="{StaticResource PageTitleTextStyle}" Margin="0"/>
-                    <TextBlock Text="{Binding Logs.TotalCount, StringFormat={loc:Loc Key=Logs.EntryCount}}" Margin="12,0,0,0"
-                               VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <TextBlock Text="{Binding Logs.TotalCount, Converter={StaticResource LocalizedFormatConverter}, ConverterParameter=Logs.EntryCount}" Margin="12,0,0,0"
+                               VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
                 <TextBlock Text="{Binding Logs.PersistentLogPolicySummary}" Margin="0,4,0,0"
                            Style="{StaticResource CaptionTextStyle}"/>
@@ -90,17 +90,17 @@
 
                                  
             <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Border Background="{StaticResource SuccessChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
+                <Border Background="{DynamicResource SuccessChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
                         ToolTip="{loc:Loc Key=Logs.TooltipInfo}">
-                    <TextBlock Text="{Binding Logs.InfoCount}" Foreground="{StaticResource SuccessBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
+                    <TextBlock Text="{Binding Logs.InfoCount}" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
                 </Border>
-                <Border Background="{StaticResource WarningChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
+                <Border Background="{DynamicResource WarningChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
                         ToolTip="{loc:Loc Key=Logs.TooltipWarning}">
-                    <TextBlock Text="{Binding Logs.WarningCount}" Foreground="{StaticResource WarningBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
+                    <TextBlock Text="{Binding Logs.WarningCount}" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
                 </Border>
-                <Border Background="{StaticResource ErrorChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
+                <Border Background="{DynamicResource ErrorChipBackgroundBrush}" Style="{StaticResource StatusChipBorderStyle}"
                         ToolTip="{loc:Loc Key=Logs.TooltipError}">
-                    <TextBlock Text="{Binding Logs.ErrorCount}" Foreground="{StaticResource ErrorBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
+                    <TextBlock Text="{Binding Logs.ErrorCount}" Foreground="{DynamicResource ErrorBrush}" Style="{StaticResource StatusChipValueTextStyle}"/>
                 </Border>
             </StackPanel>
         </Grid>
@@ -111,8 +111,8 @@
                  VirtualizingStackPanel.IsVirtualizing="True"
                  VirtualizingStackPanel.VirtualizationMode="Recycling"
                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                 Background="{StaticResource SecondaryBackgroundBrush}"
-                 BorderBrush="{StaticResource BorderBrush}">
+                 Background="{DynamicResource SecondaryBackgroundBrush}"
+                 BorderBrush="{DynamicResource BorderBrush}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                         <Grid Margin="0,1">
@@ -125,16 +125,16 @@
                             </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{Binding FormattedTimestamp}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Column="1" Text="{Binding LevelIcon}" FontWeight="Bold">
                             <TextBlock.Foreground>
                                 <SolidColorBrush Color="{Binding LevelColor}"/>
                             </TextBlock.Foreground>
                         </TextBlock>
                         <TextBlock Grid.Column="2" Text="{Binding Source}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Grid.Column="3" Text="{Binding CorrelationDisplay}"
-                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    ToolTip="{Binding CorrelationDisplay}"/>
                         <TextBlock Grid.Column="4" Text="{Binding Message}" TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis"
@@ -149,11 +149,11 @@
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Level}" Value="{x:Static local:LogLevel.Error}"
                                      xmlns:local="clr-namespace:OnlyExo365.Contracts.Messages;assembly=OnlyExo365.Contracts">
-                            <Setter Property="Background" Value="{StaticResource ErrorChipBackgroundBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource ErrorChipBackgroundBrush}"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Level}" Value="{x:Static local:LogLevel.Warning}"
                                      xmlns:local="clr-namespace:OnlyExo365.Contracts.Messages;assembly=OnlyExo365.Contracts">
-                            <Setter Property="Background" Value="{StaticResource WarningChipBackgroundBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource WarningChipBackgroundBrush}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

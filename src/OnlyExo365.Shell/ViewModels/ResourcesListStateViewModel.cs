@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -15,7 +16,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
     private readonly IResourcesWorkerService _workerService;
     private readonly ShellViewModel _shellViewModel;
-    private readonly DebounceHelper _searchDebounce = new();
+    private readonly DebounceHelper _searchDebounce;
     private readonly Action<ResourceMailboxListItemDto?> _onSelectionChanged;
     private readonly Action<string?> _setErrorMessage;
 
@@ -33,6 +34,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
         Action<ResourceMailboxListItemDto?> onSelectionChanged,
         Action<string?> setErrorMessage)
     {
+        _searchDebounce = CreateDebounceHelper();
         _workerService = workerService;
         _shellViewModel = shellViewModel;
         _onSelectionChanged = onSelectionChanged;
@@ -110,19 +112,26 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
         }
     }
 
-    public string StatusText => $"{Resources.Count} of {TotalCount} resources";
+    public string StatusText => Loc.GetFormat("Ui.InventoryFormat", Resources.Count, TotalCount, Loc.Get("Noun.Resources"));
 
     public ResourceMailboxListItemDto? SelectedResource
     {
         get => _selectedResource;
         set
         {
+            if (!ReferenceEquals(_selectedResource, value) && !IsLoading && !CanReplaceDraft())
+            {
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(() => OnPropertyChanged(nameof(SelectedResource)));
+                return;
+            }
             if (SetProperty(ref _selectedResource, value) && value != null)
             {
                 _onSelectionChanged(value);
             }
         }
     }
+
+    internal Func<bool> CanReplaceDraft { get; set; } = () => true;
 
     public bool CanRefresh => !IsLoading && _shellViewModel.IsExchangeConnected;
     public bool CanLoadMore => !IsLoading && HasMore && _shellViewModel.IsExchangeConnected;
@@ -155,6 +164,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!CanReplaceDraft()) return;
         var hasExistingResources = Resources.Count > 0;
 
         if (!_shellViewModel.IsExchangeConnected)
@@ -168,7 +178,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading resource mailboxes...", "resources");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingResourceMailboxesInProgress"), Loc.Get("Presentation.Resources"));
         _setErrorMessage(null);
         _shellViewModel.ClearPageAlert(AlertPage);
         var refreshPageSize = GetRefreshPageSize(Resources.Count);
@@ -183,7 +193,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                var errorMessage = result.Error?.Message ?? "Unable to load resources";
+                var errorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadResources");
                 if (hasExistingResources)
                 {
                     _setErrorMessage(errorMessage);
@@ -229,7 +239,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
         }
 
         IsLoading = true;
-        LoadProgress.Start("Loading resource mailboxes...", "resources");
+        LoadProgress.Start(Loc.Get("Presentation.LoadingResourceMailboxesInProgress"), Loc.Get("Presentation.Resources"));
         _setErrorMessage(null);
 
         try
@@ -241,7 +251,7 @@ public sealed class ResourcesListStateViewModel : ViewModelBase
 
             if (!result.IsSuccess || result.Value == null)
             {
-                _setErrorMessage(result.Error?.Message ?? "Unable to load resources");
+                _setErrorMessage(result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadResources"));
                 return;
             }
 

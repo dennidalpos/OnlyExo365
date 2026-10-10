@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Shell.Services;
@@ -137,7 +138,7 @@ public partial class MigrationViewModel
             if (!result.IsSuccess || result.Value == null)
             {
                 ErrorMessage = string.IsNullOrWhiteSpace(result.Error?.Message)
-                    ? "Unable to run migration preflight."
+                    ? Loc.Get("Presentation.UnableToRunMigrationPreflight")
                     : result.Error.Message;
                 return;
             }
@@ -153,7 +154,7 @@ public partial class MigrationViewModel
                     $"Headers: {(result.Value.CsvHeaders.Count == 0 ? "(none)" : string.Join(", ", result.Value.CsvHeaders))}",
                     string.Empty,
                     result.Value.Messages.Count == 0
-                        ? "No preflight messages."
+                        ? Loc.Get("Presentation.NoPreflightMessages")
                         : string.Join(Environment.NewLine, result.Value.Messages)
                 });
 
@@ -181,10 +182,10 @@ public partial class MigrationViewModel
 
         var createdName = NewBatchName.Trim();
         if (!ConfirmMutation(
-                "Creating migration batch",
+                Loc.Get("Presentation.CreatingMigrationBatch"),
                 createdName,
-                "Create a new migration batch using the current endpoint, CSV, and options.",
-                "Confirm migration batch creation"))
+                Loc.Get("Presentation.CreateANewMigrationBatchUsingTheCurrent"),
+                Loc.Get("Presentation.ConfirmMigrationBatchCreation")))
         {
             return;
         }
@@ -211,7 +212,7 @@ public partial class MigrationViewModel
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to create the migration batch.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToCreateTheMigrationBatch");
                 return;
             }
 

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 
@@ -13,10 +14,10 @@ public partial class MobileDevicesViewModel
         }
 
         if (!ConfirmMutation(
-                "Change device access state",
+                Loc.Get("Presentation.ChangeDeviceAccessState"),
                 $"{SelectedDevice.MailboxIdentity} / {SelectedDevice.DeviceId}",
-                $"Set the device status to {accessState}.",
-                "Confirm device state change"))
+                Loc.GetFormat("MobileDevices.SetStateImpact", accessState),
+                Loc.Get("Presentation.ConfirmDeviceStateChange")))
         {
             return;
         }
@@ -37,7 +38,7 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? $"Unable to set status {accessState}.";
+                ErrorMessage = result.Error?.Message ?? Loc.GetFormat("MobileDevices.StateFailed", accessState);
                 return;
             }
 
@@ -62,10 +63,10 @@ public partial class MobileDevicesViewModel
         }
 
         if (!ConfirmMutation(
-                "Remote wipe device",
+                Loc.Get("Presentation.RemoteWipeDevice"),
                 $"{SelectedDevice.MailboxIdentity} / {SelectedDevice.DeviceId}",
-                "Send a remote wipe to the selected device.",
-                "Confirm remote wipe"))
+                Loc.Get("Presentation.SendARemoteWipeToTheSelectedDevice"),
+                Loc.Get("Presentation.ConfirmRemoteWipe")))
         {
             return;
         }
@@ -84,7 +85,7 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to send the remote wipe.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToSendTheRemoteWipe");
                 return;
             }
 
@@ -110,10 +111,10 @@ public partial class MobileDevicesViewModel
 
         var label = GetSelectedPolicyDisplayName();
         if (!ConfirmMutation(
-                "Assign device mailbox policy",
+                Loc.Get("Presentation.AssignDeviceMailboxPolicy"),
                 $"{SelectedDevice.MailboxIdentity} / {SelectedDevice.DeviceId}",
-                $"Assign the {label} policy to the selected device.",
-                "Confirm policy assignment"))
+                Loc.GetFormat("MobileDevices.AssignPolicyImpact", label),
+                Loc.Get("Presentation.ConfirmPolicyAssignment")))
         {
             return;
         }
@@ -133,7 +134,7 @@ public partial class MobileDevicesViewModel
 
             if (!result.IsSuccess)
             {
-                ErrorMessage = result.Error?.Message ?? "Unable to assign the mailbox policy.";
+                ErrorMessage = result.Error?.Message ?? Loc.Get("Presentation.UnableToAssignTheMailboxPolicy");
                 return;
             }
 
@@ -154,7 +155,7 @@ public partial class MobileDevicesViewModel
     {
         if (string.IsNullOrWhiteSpace(SelectedMailboxPolicyIdentity))
         {
-            return "(default tenant behavior)";
+            return Loc.Get("Presentation.DefaultTenantBehavior");
         }
 
         return Policies.FirstOrDefault(policy => string.Equals(policy.Identity, SelectedMailboxPolicyIdentity, StringComparison.OrdinalIgnoreCase))?.Name

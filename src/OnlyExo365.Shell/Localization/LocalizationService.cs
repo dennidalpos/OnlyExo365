@@ -32,7 +32,7 @@ public sealed class LocalizationService : ILocalizationService
     public string GetFormat(string key, params object[] args)
     {
         var template = Get(key);
-        return args.Length == 0 ? template : string.Format(template, args);
+        return args.Length == 0 ? template : string.Format(CultureInfo.GetCultureInfo(_currentLocale), template, args);
     }
 
     public void SetLocale(string localeCode)

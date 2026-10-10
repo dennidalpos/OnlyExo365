@@ -8,7 +8,7 @@
             <controls:SectionPanel Header="{loc:Loc Key=MailboxRestore.Heading}" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc Key=MailboxRestore.Description}"
-                               Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8" TextWrapping="Wrap"/>
 
                     <Grid>
                         <Grid.RowDefinitions>
@@ -21,12 +21,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxRestore.SourceMailbox}" FontWeight="SemiBold"/>
-                        <TextBox Grid.Row="0" Grid.Column="1"
+                        <TextBlock x:Name="InputLabel001" Grid.Row="0" Grid.Column="0" Text="{loc:Loc Key=MailboxRestore.SourceMailbox}" FontWeight="SemiBold"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel001}" Grid.Row="0" Grid.Column="1"
                                  Text="{Binding RestoreMailbox.RestoreSourceIdentity, UpdateSourceTrigger=PropertyChanged}"
                                  ToolTip="{loc:Loc Key=MailboxRestore.SourceMailboxTooltip}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxRestore.TargetMailbox}" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
+                        <TextBlock x:Name="InputLabel002" Grid.Row="1" Grid.Column="0" Text="{loc:Loc Key=MailboxRestore.TargetMailbox}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                        <TextBox AutomationProperties.LabeledBy="{Binding ElementName=InputLabel002}" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0"
                                  Text="{Binding RestoreMailbox.RestoreTargetMailbox, UpdateSourceTrigger=PropertyChanged}"
                                  ToolTip="{loc:Loc Key=MailboxRestore.TargetMailboxTooltip}"/>
                         <CheckBox Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0"
@@ -45,7 +45,7 @@
                                 Visibility="{Binding RestoreMailbox.IsRestoringMailbox, Converter={StaticResource BoolToVisibility}}">
                         <ProgressBar IsIndeterminate="True" Width="120" Height="4"/>
                         <TextBlock Text="{loc:Loc Key=MailboxRestore.InProgress}" Margin="8,0,0,0"
-                                   Foreground="{StaticResource SecondaryTextBrush}" FontSize="11"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"/>
                     </StackPanel>
 
                     <Border Style="{StaticResource ErrorBannerBorderStyle}" Padding="8" Margin="0,8,0,0"
@@ -95,7 +95,7 @@
                                          Maximum="100"
                                          Value="{Binding RestoreMailbox.RestoreProgressValue, Mode=OneWay}"/>
                             <TextBlock Text="{Binding RestoreMailbox.RestoreProgressText}"
-                                       Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" Margin="0,4,0,0"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,4,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

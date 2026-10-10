@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -75,7 +76,7 @@ internal sealed class MailFlowAddressBookPoliciesViewModel : MailFlowSectionView
     public string AddressBookPolicyValidationMessage
         => IsAddressBookPolicyInputValid
             ? string.Empty
-            : "Address book policy: Name, at least one AddressList, a GlobalAddressList, and an OfflineAddressBook are required.";
+            : Loc.Get("Presentation.AddressBookPolicyValidation");
 
     public string? AddressBookPolicyIdentity { get => _addressBookPolicyIdentity; set => SetEditorProperty(ref _addressBookPolicyIdentity, value); }
     public string AddressBookPolicyName { get => _addressBookPolicyName; set => SetEditorProperty(ref _addressBookPolicyName, value); }
@@ -93,7 +94,7 @@ internal sealed class MailFlowAddressBookPoliciesViewModel : MailFlowSectionView
         var result = await WorkerService.GetAddressBookPoliciesAsync(new GetAddressBookPoliciesRequest(), cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
-            var error = result.Error?.Message ?? "Unable to load address book policies";
+            var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToLoadAddressBookPolicies");
             SetError(error);
             ShellViewModel.AddLog(LogLevel.Error, $"MailFlow address book policies load failed: {error}", "MailFlow");
             return;
@@ -136,7 +137,7 @@ internal sealed class MailFlowAddressBookPoliciesViewModel : MailFlowSectionView
             if (!result.IsSuccess)
             {
                 var correlationId = Guid.NewGuid().ToString("N");
-                SetError($"Saving address book policy failed (ref: {correlationId}).");
+                SetError(Loc.GetFormat("MailFlow.SaveAddressBookPolicyFailed", correlationId));
                 ShellViewModel.AddLog(LogLevel.Error, $"[{correlationId}] Save address book policy failed (name={AddressBookPolicyName}): {result.Error?.Message}", "MailFlow");
                 return;
             }
@@ -152,7 +153,9 @@ internal sealed class MailFlowAddressBookPoliciesViewModel : MailFlowSectionView
             return;
         }
 
-        var confirmed = ErrorDialogService.ShowConfirmation("Confirm tenant-wide deletion", $"Operation: Deleting address book policy\nTarget: {SelectedAddressBookPolicy.Name}\nImpact: can change address book segmentation for assigned mailboxes.\n\nConfirm?");
+        var selected = SelectedAddressBookPolicy;
+
+        var confirmed = ErrorDialogService.ShowConfirmation(Loc.Get("Ui.TenantDeletion"), Loc.GetFormat("MailFlow.DeleteAddressBookPoliciesMessage", selected.Name));
         if (!confirmed)
         {
             return;
@@ -162,14 +165,14 @@ internal sealed class MailFlowAddressBookPoliciesViewModel : MailFlowSectionView
         {
             var result = await WorkerService.RemoveAddressBookPolicyAsync(new RemoveAddressBookPolicyRequest
             {
-                Identity = SelectedAddressBookPolicy.Identity
+                Identity = selected.Identity
             }, cancellationToken: ct);
 
             if (!result.IsSuccess)
             {
-                var error = result.Error?.Message ?? "Unable to delete address book policy";
+                var error = result.Error?.Message ?? Loc.Get("Presentation.UnableToDeleteAddressBookPolicy");
                 SetError(error);
-                ShellViewModel.AddLog(LogLevel.Error, $"Remove address book policy failed (name={SelectedAddressBookPolicy.Name}): {error}", "MailFlow");
+                ShellViewModel.AddLog(LogLevel.Error, $"Remove address book policy failed (name={selected.Name}): {error}", "MailFlow");
                 return;
             }
 

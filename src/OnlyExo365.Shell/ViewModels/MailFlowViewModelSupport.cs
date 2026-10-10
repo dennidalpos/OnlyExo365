@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using OnlyExo365.Shell.Services;
@@ -45,7 +46,7 @@ internal sealed class MailFlowOperationCoordinator : ViewModelBase
 {
     private int _busyCount;
     private string? _errorMessage;
-    private string _loadingOverlayText = "Loading Mail Flow workspace...";
+    private string _loadingOverlayText = Loc.Get("Presentation.LoadingMailFlowWorkspaceInProgress");
 
     public bool IsLoading => _busyCount > 0;
     public string LoadingOverlayText
@@ -160,7 +161,7 @@ internal abstract class MailFlowSectionViewModelBase : ViewModelBase
 
     protected async Task ExecuteBusyActionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken)
     {
-        Coordinator.BeginOperation("Applying Mail Flow changes...");
+        Coordinator.BeginOperation(Loc.Get("Presentation.ApplyingMailFlowChangesInProgress"));
         Coordinator.ClearError();
 
         try

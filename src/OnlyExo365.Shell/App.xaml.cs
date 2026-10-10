@@ -11,11 +11,13 @@ namespace OnlyExo365.Shell;
 public partial class App : System.Windows.Application
 {
     private AppRuntimeContext? _runtimeContext;
+    private ThemePaletteService? _themePalette;
     private GlobalExceptionMonitor? _globalExceptionMonitor;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        _themePalette = new ThemePaletteService(Resources);
 
         _globalExceptionMonitor = new GlobalExceptionMonitor(new PersistentLogWriter("ui"));
         _globalExceptionMonitor.Register(this);
@@ -59,6 +61,7 @@ public partial class App : System.Windows.Application
         }
         finally
         {
+            _themePalette?.Dispose();
             _globalExceptionMonitor?.Dispose();
             _globalExceptionMonitor = null;
             _runtimeContext = null;

@@ -1,3 +1,4 @@
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 
@@ -155,7 +156,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
     {
         State = ComplianceAuditSearchTaskState.Running;
         ProgressPercent = Math.Max(ProgressPercent, 1);
-        StatusMessage = "Running Search-UnifiedAuditLog...";
+        StatusMessage = Loc.Get("Presentation.RunningSearchUnifiedAuditLogInProgress");
     }
 
     public void ApplyProgress(ProgressEventPayload payload)
@@ -163,7 +164,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         State = ComplianceAuditSearchTaskState.Running;
         ProgressPercent = payload.PercentComplete;
         StatusMessage = string.IsNullOrWhiteSpace(payload.StatusMessage)
-            ? "Running Search-UnifiedAuditLog..."
+            ? Loc.Get("Presentation.RunningSearchUnifiedAuditLogInProgress")
             : payload.StatusMessage!;
     }
 

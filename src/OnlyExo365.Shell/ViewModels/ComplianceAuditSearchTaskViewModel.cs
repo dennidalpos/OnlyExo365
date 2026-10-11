@@ -1,6 +1,8 @@
-using OnlyExo365.Shell.Localization;
+using System.Globalization;
+using System.Windows;
 using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
+using OnlyExo365.Shell.Localization;
 
 namespace OnlyExo365.Shell.ViewModels;
 
@@ -16,7 +18,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
 {
     private ComplianceAuditSearchTaskState _state = ComplianceAuditSearchTaskState.Queued;
     private int _progressPercent;
-    private string _statusMessage = "Queued";
+    private string? _workerStatusMessage;
     private int _resultCount;
     private string? _warning;
     private string? _errorMessage;
@@ -28,15 +30,17 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         Sequence = sequence;
         Request = request;
         RequestedAtLocal = DateTime.Now;
-        Title = $"Audit #{sequence:000}";
-        FilterSummary = BuildFilterSummary(request);
+        WeakEventManager<LocalizationService, EventArgs>.AddHandler(
+            LocalizationService.Instance,
+            nameof(LocalizationService.CultureChanged),
+            OnCultureChanged);
     }
 
     public int Sequence { get; }
-    public string Title { get; }
+    public string Title => Loc.GetFormat("Compliance.AuditTaskTitle", Sequence);
     public DateTime RequestedAtLocal { get; }
     public SearchUnifiedAuditLogRequest Request { get; }
-    public string FilterSummary { get; }
+    public string FilterSummary => BuildFilterSummary(Request);
 
     public ComplianceAuditSearchTaskState State
     {
@@ -50,6 +54,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsRunning));
                 OnPropertyChanged(nameof(IsCompleted));
                 OnPropertyChanged(nameof(IsFailed));
+                OnPropertyChanged(nameof(StatusMessage));
                 OnPropertyChanged(nameof(TaskSummary));
             }
         }
@@ -57,11 +62,11 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
 
     public string StateLabel => State switch
     {
-        ComplianceAuditSearchTaskState.Queued => "Queued",
-        ComplianceAuditSearchTaskState.Running => "Running",
-        ComplianceAuditSearchTaskState.Completed => "Completed",
-        ComplianceAuditSearchTaskState.Failed => "Failed",
-        _ => "Unknown"
+        ComplianceAuditSearchTaskState.Queued => Loc.Get("Compliance.AuditStateQueued"),
+        ComplianceAuditSearchTaskState.Running => Loc.Get("Compliance.AuditStateRunning"),
+        ComplianceAuditSearchTaskState.Completed => Loc.Get("Compliance.AuditStateCompleted"),
+        ComplianceAuditSearchTaskState.Failed => Loc.Get("Compliance.AuditStateFailed"),
+        _ => Loc.Get("Compliance.AuditStateUnknown")
     };
 
     public bool IsQueued => State == ComplianceAuditSearchTaskState.Queued;
@@ -84,17 +89,11 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
 
     public string ProgressText => FormatProgressPercent(ProgressPercent);
 
-    public string StatusMessage
+    public string StatusMessage => State switch
     {
-        get => _statusMessage;
-        private set
-        {
-            if (SetProperty(ref _statusMessage, value))
-            {
-                OnPropertyChanged(nameof(TaskSummary));
-            }
-        }
-    }
+        ComplianceAuditSearchTaskState.Running => _workerStatusMessage ?? Loc.Get("Presentation.RunningSearchUnifiedAuditLogInProgress"),
+        _ => StateLabel
+    };
 
     public int ResultCount
     {
@@ -148,24 +147,25 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         private set => SetProperty(ref _results, value);
     }
 
-    public string RequestedAtDisplay => RequestedAtLocal.ToString("g");
+    public string RequestedAtDisplay => RequestedAtLocal.ToString(
+        "g", CultureInfo.GetCultureInfo(LocalizationService.Instance.CurrentLocale));
 
-    public string TaskSummary => $"{Title} | {StateLabel} | {ProgressText} | {ResultCount} rec";
+    public string TaskSummary => Loc.GetFormat("Compliance.AuditTaskSummary", Title, StateLabel, ProgressText, ResultCount);
 
     public void MarkRunning()
     {
         State = ComplianceAuditSearchTaskState.Running;
         ProgressPercent = Math.Max(ProgressPercent, 1);
-        StatusMessage = Loc.Get("Presentation.RunningSearchUnifiedAuditLogInProgress");
+        _workerStatusMessage = null;
+        OnPropertyChanged(nameof(StatusMessage));
     }
 
     public void ApplyProgress(ProgressEventPayload payload)
     {
         State = ComplianceAuditSearchTaskState.Running;
         ProgressPercent = payload.PercentComplete;
-        StatusMessage = string.IsNullOrWhiteSpace(payload.StatusMessage)
-            ? Loc.Get("Presentation.RunningSearchUnifiedAuditLogInProgress")
-            : payload.StatusMessage!;
+        _workerStatusMessage = string.IsNullOrWhiteSpace(payload.StatusMessage) ? null : payload.StatusMessage;
+        OnPropertyChanged(nameof(StatusMessage));
     }
 
     public void MarkCompleted(SearchUnifiedAuditLogResponse response, string? correlationId)
@@ -176,7 +176,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         Warning = response.Warning;
         ErrorMessage = null;
         ProgressPercent = 100;
-        StatusMessage = "Completed";
+        _workerStatusMessage = null;
         State = ComplianceAuditSearchTaskState.Completed;
     }
 
@@ -188,7 +188,7 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         Warning = null;
         ErrorMessage = message;
         ProgressPercent = 100;
-        StatusMessage = "Failed";
+        _workerStatusMessage = null;
         State = ComplianceAuditSearchTaskState.Failed;
     }
 
@@ -197,30 +197,40 @@ public sealed class ComplianceAuditSearchTaskViewModel : ViewModelBase
         var parts = new List<string>
         {
             $"{request.StartDate:yyyy-MM-dd} -> {request.EndDate:yyyy-MM-dd}",
-            $"Max {Math.Max(1, request.MaxResults)}"
+            Loc.GetFormat("Compliance.AuditFilterMax", Math.Max(1, request.MaxResults))
         };
 
         if (request.UserIds.Count > 0)
         {
-            parts.Add($"Users: {string.Join(", ", request.UserIds)}");
+            parts.Add(Loc.GetFormat("Compliance.AuditFilterUsers", string.Join(", ", request.UserIds)));
         }
 
         if (request.Operations.Count > 0)
         {
-            parts.Add($"Ops: {string.Join(", ", request.Operations)}");
+            parts.Add(Loc.GetFormat("Compliance.AuditFilterOperations", string.Join(", ", request.Operations)));
         }
 
         if (request.ObjectIds.Count > 0)
         {
-            parts.Add($"Objects: {string.Join(", ", request.ObjectIds)}");
+            parts.Add(Loc.GetFormat("Compliance.AuditFilterObjects", string.Join(", ", request.ObjectIds)));
         }
 
         if (!string.IsNullOrWhiteSpace(request.FreeText))
         {
-            parts.Add($"Text: {request.FreeText.Trim()}");
+            parts.Add(Loc.GetFormat("Compliance.AuditFilterText", request.FreeText.Trim()));
         }
 
         return string.Join(" | ", parts);
+    }
+
+    private void OnCultureChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(FilterSummary));
+        OnPropertyChanged(nameof(StateLabel));
+        OnPropertyChanged(nameof(StatusMessage));
+        OnPropertyChanged(nameof(RequestedAtDisplay));
+        OnPropertyChanged(nameof(TaskSummary));
     }
 }
 

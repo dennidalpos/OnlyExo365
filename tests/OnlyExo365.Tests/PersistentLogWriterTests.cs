@@ -85,6 +85,8 @@ public sealed class PersistentLogWriterTests : IDisposable
         File.WriteAllText(Path.Combine(_tempDirectory, "worker-20260312.log"), "{\"message\":\"worker\"}");
 
         var archivePath = Path.Combine(_tempDirectory, "exports", "logs.zip");
+        Directory.CreateDirectory(Path.GetDirectoryName(archivePath)!);
+        File.WriteAllText(archivePath, "previous archive");
         var exportedCount = PersistentLogStore.ExportLogArchive(
             archivePath,
             _tempDirectory,

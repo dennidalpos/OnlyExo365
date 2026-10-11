@@ -28,4 +28,4 @@ Replace `vX.Y.Z` with the intended tag. Under `artifacts/publish/release-assets/
 
 [OnlyExo365.iss](../../installer/OnlyExo365.iss) removes installed payload, default logs and IPC secrets while preserving exports and unknown installation files. It does not indiscriminately delete the application directory, consistent with [Inno Setup guidance](https://jrsoftware.org/ishelp/topic_uninstalldeletesection.htm).
 
-Compilation/reproducibility does not verify install/uninstall. Use [isolated qualification](../development/qualification.md) for recovery and installed-payload checks; [signing](signing.md) for the signed release order. AUD-07 remains pending and current Release artifacts must include the MainWindow startup repair.
+Compilation/reproducibility does not verify install/uninstall. Use [isolated qualification](../development/qualification.md) for recovery and installed-payload checks; [signing](signing.md) for the signed release order. That qualification is unverified, and a future Release package must include the MainWindow startup repair.

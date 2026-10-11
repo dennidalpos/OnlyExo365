@@ -4,12 +4,57 @@ using OnlyExo365.Contracts.Dtos;
 using OnlyExo365.Contracts.Messages;
 using OnlyExo365.Contracts.Results;
 using OnlyExo365.Shell.Ipc;
+using OnlyExo365.Shell.Localization;
 using OnlyExo365.Shell.ViewModels;
 
 namespace OnlyExo365.Tests;
 
 public sealed class ComplianceViewModelTests
 {
+    [Fact]
+    public void AuditTask_LocalizesShellLabelsAndPreservesWorkerStatus()
+    {
+        var localization = LocalizationService.Instance;
+        var originalLocale = localization.CurrentLocale;
+        try
+        {
+            localization.SetLocale("en");
+            var task = new ComplianceAuditSearchTaskViewModel(7, new SearchUnifiedAuditLogRequest
+            {
+                StartDate = new DateTime(2026, 10, 1),
+                EndDate = new DateTime(2026, 10, 2),
+                UserIds = ["admin@example.com"],
+                MaxResults = 20
+            });
+            Assert.Equal("Queued", task.StateLabel);
+            var changedProperties = new List<string?>();
+            task.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
+
+            localization.SetLocale("it");
+            Assert.Equal("In coda", task.StateLabel);
+            Assert.Contains("Utenti: admin@example.com", task.FilterSummary);
+            Assert.Contains("record", task.TaskSummary);
+            Assert.Contains(nameof(task.StateLabel), changedProperties);
+            Assert.Contains(nameof(task.FilterSummary), changedProperties);
+
+            task.MarkRunning();
+            task.ApplyProgress(new ProgressEventPayload { StatusMessage = "Get-UnifiedAuditLog: page 1", PercentComplete = 40 });
+            Assert.Equal("Get-UnifiedAuditLog: page 1", task.StatusMessage);
+
+            task.MarkCompleted(new SearchUnifiedAuditLogResponse(), "audit-007");
+            Assert.Equal("Completato", task.StateLabel);
+            Assert.Equal("Completato", task.StatusMessage);
+
+            localization.SetLocale("en");
+            Assert.Equal("Completed", task.StateLabel);
+            Assert.Equal("Completed", task.StatusMessage);
+        }
+        finally
+        {
+            localization.SetLocale(originalLocale);
+        }
+    }
+
     [Fact]
     public async Task LoadAsync_PopulatesWorkspaceCollections()
     {

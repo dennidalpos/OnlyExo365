@@ -1,8 +1,8 @@
 # Environment qualification
 
-These checks are separate from offline tests and the local gate. Status/closure belongs to [PROJECT_STATUS.json](../../PROJECT_STATUS.json); previous results to the three [audit reports](../../README.md#documentation).
+These checks are separate from offline tests and the local gate. Installer and tenant qualification were removed from the active task list at user request on 2026-10-11 because the required environments are unavailable. Their quality gates remain unverified in [PROJECT_STATUS.json](../../PROJECT_STATUS.json); the procedures are retained for future qualification. Previous results are in the three [audit reports](../../README.md#documentation).
 
-## AUD-07: disposable installer host
+## Disposable installer host
 
 Regenerate Release payload/setup from current source before qualification. Use a disposable Windows VM without an existing installation:
 
@@ -15,7 +15,7 @@ Smoke checks publish completeness, offline Shell/Worker startup, authenticated I
 
 Backup entries/hashes are written atomically before moves. Restore validates backups, separates smoke-created data and verifies original hashes. Any incomplete recovery fails and retains backup/manifest; only an empty recovered root is removed. Packaging or disposable signing alone does not qualify this flow. See [signing](../releases/signing.md).
 
-## AUD-08: dedicated test tenant
+## Dedicated test tenant
 
 External PowerShell 7.6+, exact approved modules and a dedicated test tenant are required; never use production for audit validation. Configure [settings](../configuration/settings.md) and inspect [run-tenant-validation.ps1](../../build/run-tenant-validation.ps1) before execution.
 

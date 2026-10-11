@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.VisualBasic.FileIO;
 
 namespace OnlyExo365.Shell.Services;
 
@@ -96,15 +97,21 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         string sourceUrl,
         string csvDownloadUrl)
     {
-        using var reader = new System.IO.StringReader(csvContent);
+        using var reader = new TextFieldParser(new System.IO.StringReader(csvContent))
+        {
+            TextFieldType = FieldType.Delimited,
+            HasFieldsEnclosedInQuotes = true,
+            TrimWhiteSpace = true
+        };
+        reader.SetDelimiters(",");
 
-        var headerLine = reader.ReadLine();
-        if (string.IsNullOrWhiteSpace(headerLine))
+        var headers = ReadCsvFields(reader);
+        if (headers is null || headers.Count == 0 || headers.All(string.IsNullOrWhiteSpace))
         {
             throw new CatalogDownloadException("The Microsoft 365 licensing CSV has no header row.");
         }
 
-        var headers = ParseCsvRow(headerLine);
+        headers[0] = headers[0].TrimStart('\uFEFF');
         var colGuid = FindColumn(headers, "GUID");
         var colStringId = FindColumn(headers, "String_Id");
         var colProductName = FindColumn(headers, "Product_Display_Name");
@@ -115,15 +122,13 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         var groups = new Dictionary<string, LocalSkuCatalogEntry>(
             StringComparer.OrdinalIgnoreCase);
 
-        string? line;
-        while ((line = reader.ReadLine()) != null)
+        while (!reader.EndOfData)
         {
-            if (string.IsNullOrWhiteSpace(line))
+            var cols = ReadCsvFields(reader);
+            if (cols is null)
             {
-                continue;
+                break;
             }
-
-            var cols = ParseCsvRow(line);
 
             var skuId = GetColumn(cols, colGuid);
             var skuPartNumber = GetColumn(cols, colStringId);
@@ -191,57 +196,17 @@ public sealed partial class LicenseCatalogDownloader : IDisposable
         };
     }
 
-    /// <summary>Handles quoted fields and embedded commas.</summary>
-    internal static List<string> ParseCsvRow(string line)
+    private static List<string>? ReadCsvFields(TextFieldParser reader)
     {
-        var fields = new List<string>();
-        var sb = new StringBuilder();
-        var inQuotes = false;
-
-        for (var i = 0; i < line.Length; i++)
+        try
         {
-            var ch = line[i];
-
-            if (inQuotes)
-            {
-                if (ch == '"')
-                {
-                    // Unescape doubled quotes.
-                    if (i + 1 < line.Length && line[i + 1] == '"')
-                    {
-                        sb.Append('"');
-                        i++;
-                    }
-                    else
-                    {
-                        inQuotes = false;
-                    }
-                }
-                else
-                {
-                    sb.Append(ch);
-                }
-            }
-            else
-            {
-                if (ch == '"')
-                {
-                    inQuotes = true;
-                }
-                else if (ch == ',')
-                {
-                    fields.Add(sb.ToString().Trim());
-                    sb.Clear();
-                }
-                else
-                {
-                    sb.Append(ch);
-                }
-            }
+            return reader.ReadFields()?.ToList();
         }
-
-        fields.Add(sb.ToString().Trim());
-        return fields;
+        catch (MalformedLineException ex)
+        {
+            throw new CatalogDownloadException(
+                $"The Microsoft 365 licensing CSV contains a malformed row at line {reader.ErrorLineNumber}.", ex);
+        }
     }
 
     private static int FindColumn(List<string> headers, string name)

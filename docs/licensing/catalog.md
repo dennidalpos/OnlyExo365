@@ -14,7 +14,7 @@ Worker embeds [Microsoft365SkuCatalog.json](../../src/OnlyExo365.Worker/Data/Mic
 | `downloadTimeoutSeconds` | 30 |
 | `localCachePath` | null → [default LocalAppData path](../configuration/storage.md); custom text is used literally, without `%VAR%` expansion |
 
-Daily/Monthly timers use 24 hours/30 days; due checks use 23 hours/29 days. Disabled stops scheduling/startup refresh; manual forced refresh remains available. Catalog writes validate JSON then replace atomically. The application CSV parser remains manual (IMP-03).
+Daily/Monthly timers use 24 hours/30 days; due checks use 23 hours/29 days. Disabled stops scheduling/startup refresh; manual forced refresh remains available. Catalog writes validate JSON then replace atomically. Shell catalog downloads use the built-in .NET `TextFieldParser` for quoted fields, embedded newlines and malformed-row detection; no new package is required.
 
 ## Embedded catalog maintenance
 

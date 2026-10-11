@@ -95,6 +95,35 @@ public sealed class ExcelExportServiceTests
     }
 
     [Fact]
+    public void ExportWorkbook_PreservesExistingReportWhenRowsFail()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "OnlyExo365.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var destination = Path.Combine(directory, "report.xlsx");
+
+        try
+        {
+            File.WriteAllText(destination, "previous report");
+
+            Assert.Throws<InvalidOperationException>(() => ExcelExportService.ExportWorkbook(
+                destination, "Report", ["User"], FailingRows()));
+
+            Assert.Equal("previous report", File.ReadAllText(destination));
+            Assert.Equal([destination], Directory.GetFiles(directory));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+
+        static IEnumerable<IReadOnlyList<string?>> FailingRows()
+        {
+            yield return ["first@contoso.com"];
+            throw new InvalidOperationException("row generation failed");
+        }
+    }
+
+    [Fact]
     public void MailboxAccessExportCommand_CanExecuteOnlyWhenRowsAreAvailable()
     {
         using var shell = CreateConnectedShell();

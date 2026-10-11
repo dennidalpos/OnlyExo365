@@ -5,37 +5,6 @@ namespace OnlyExo365.Tests;
 public sealed class LicenseCatalogDownloaderTests
 {
 
-    [Fact]
-    public void ParseCsvRow_SplitsSimpleRow()
-    {
-        var result = LicenseCatalogDownloader.ParseCsvRow("a,b,c");
-        Assert.Equal(["a", "b", "c"], result);
-    }
-
-    [Fact]
-    public void ParseCsvRow_HandlesQuotedField()
-    {
-        var result = LicenseCatalogDownloader.ParseCsvRow("\"hello, world\",b,c");
-        Assert.Equal(3, result.Count);
-        Assert.Equal("hello, world", result[0]);
-    }
-
-    [Fact]
-    public void ParseCsvRow_HandlesEscapedQuoteInsideQuotedField()
-    {
-        var result = LicenseCatalogDownloader.ParseCsvRow("\"say \"\"hi\"\"\",b");
-        Assert.Equal(2, result.Count);
-        Assert.Equal("say \"hi\"", result[0]);
-    }
-
-    [Fact]
-    public void ParseCsvRow_TrimsUnquotedFields()
-    {
-        var result = LicenseCatalogDownloader.ParseCsvRow(" a , b , c ");
-        Assert.Equal(["a", "b", "c"], result);
-    }
-
-
     private static string BuildMinimalCsv(params (string Guid, string StringId, string ProductName)[] rows)
     {
         var sb = new System.Text.StringBuilder();
@@ -169,6 +138,32 @@ public sealed class LicenseCatalogDownloaderTests
 
         Assert.Equal("https://my.source", doc.Source);
         Assert.Equal("https://my.csv", doc.CsvDownload);
+    }
+
+    [Fact]
+    public void ConvertCsvToDocument_ParsesQuotedMultilineAndEscapedFields()
+    {
+        const string csv = "\uFEFFProduct_Display_Name,String_Id,GUID,Service_Plan_Name,Service_Plan_Id,Service_Plans_Included_Friendly_Names\n" +
+            "\"Product, \"\"Premium\"\"\", SKU_A ,guid-a,PLAN_A,plan-id-a,\"First line\nSecond line\"\n";
+
+        var doc = LicenseCatalogDownloader.ConvertCsvToDocument(csv, "https://source.example", "https://csv.example");
+
+        var entry = Assert.Single(doc.Entries);
+        Assert.Equal("SKU_A", entry.SkuPartNumber);
+        Assert.Equal("Product, \"Premium\"", entry.ProductName);
+        Assert.Equal("First line\nSecond line", Assert.Single(entry.ServicePlans).FriendlyName);
+    }
+
+    [Fact]
+    public void ConvertCsvToDocument_RejectsUnclosedQuotedField()
+    {
+        const string csv = "Product_Display_Name,String_Id,GUID,Service_Plan_Name,Service_Plan_Id,Service_Plans_Included_Friendly_Names\n" +
+            "\"Unclosed product,SKU_A,guid-a,PLAN_A,plan-id-a,Plan A\n";
+
+        var error = Assert.Throws<CatalogDownloadException>(
+            () => LicenseCatalogDownloader.ConvertCsvToDocument(csv, "https://source.example", "https://csv.example"));
+
+        Assert.Contains("malformed row", error.Message, StringComparison.OrdinalIgnoreCase);
     }
 }
 

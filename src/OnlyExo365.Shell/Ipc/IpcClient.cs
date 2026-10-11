@@ -14,9 +14,9 @@ public class IpcClient : IAsyncDisposable
     private readonly string _sessionToken;
     private NamedPipeClientStream? _requestPipe;
     private NamedPipeClientStream? _eventPipe;
-    private StreamReader? _requestReader;
+    private IpcLineReader? _requestReader;
     private StreamWriter? _requestWriter;
-    private StreamReader? _eventReader;
+    private IpcLineReader? _eventReader;
 
     private readonly ConcurrentDictionary<string, TaskCompletionSource<ResponseEnvelope>> _pendingRequests = new();
     private readonly ConcurrentDictionary<string, Action<EventEnvelope>> _eventHandlers = new();
@@ -60,9 +60,9 @@ public class IpcClient : IAsyncDisposable
                 _requestPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken),
                 _eventPipe.ConnectAsync(IpcConstants.ConnectionTimeoutMs, cancellationToken)).ConfigureAwait(false);
 
-            _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
+            _requestReader = new IpcLineReader(_requestPipe);
             _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
-            _eventReader = new StreamReader(_eventPipe, Encoding.UTF8, leaveOpen: true);
+            _eventReader = new IpcLineReader(_eventPipe);
 
             var handshakeRequest = new HandshakeRequest
             {
@@ -72,22 +72,22 @@ public class IpcClient : IAsyncDisposable
             };
             await SendRawAsync(handshakeRequest, cancellationToken).ConfigureAwait(false);
 
-            var responseJson = await ReadLineWithTimeoutAsync(
+            var handshakeLine = await ReadLineWithTimeoutAsync(
                 _requestReader,
                 TimeSpan.FromMilliseconds(IpcConstants.HandshakeTimeoutMs),
                 cancellationToken).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(responseJson))
+            if (handshakeLine?.IsTooLarge == true)
+            {
+                throw new InvalidOperationException($"Handshake response exceeds maximum size ({handshakeLine.Value.SizeBytes} bytes)");
+            }
+
+            if (handshakeLine is null || string.IsNullOrEmpty(handshakeLine.Value.Line))
             {
                 throw new InvalidOperationException("Empty handshake response from worker");
             }
 
-            if (!IpcConstants.IsValidMessageSize(responseJson.Length))
-            {
-                throw new InvalidOperationException($"Handshake response exceeds maximum size ({responseJson.Length} bytes)");
-            }
-
-            var response = JsonMessageSerializer.Deserialize<HandshakeResponse>(responseJson);
+            var response = JsonMessageSerializer.Deserialize<HandshakeResponse>(handshakeLine.Value.Line);
             if (response == null)
             {
                 throw new InvalidOperationException("Invalid handshake response from worker (deserialization failed)");
@@ -246,9 +246,10 @@ public class IpcClient : IAsyncDisposable
 
             var json = JsonMessageSerializer.Serialize(message);
 
-            if (!IpcConstants.IsValidMessageSize(json.Length))
+            var sizeBytes = Encoding.UTF8.GetByteCount(json);
+            if (!IpcConstants.IsValidMessageSize(sizeBytes))
             {
-                throw new InvalidOperationException($"Message exceeds maximum size ({json.Length} bytes)");
+                throw new InvalidOperationException($"Message exceeds maximum size ({sizeBytes} bytes)");
             }
 
             await _requestWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false);
@@ -260,8 +261,8 @@ public class IpcClient : IAsyncDisposable
         }
     }
 
-    private async Task<string?> ReadLineWithTimeoutAsync(
-        StreamReader reader,
+    private async Task<IpcLineReadResult?> ReadLineWithTimeoutAsync(
+        IpcLineReader reader,
         TimeSpan timeout,
         CancellationToken cancellationToken)
     {
@@ -284,10 +285,10 @@ public class IpcClient : IAsyncDisposable
         {
             while (!cancellationToken.IsCancellationRequested && _requestReader != null && !_isDisposing)
             {
-                string? line;
+                IpcLineReadResult? result;
                 try
                 {
-                    line = await _requestReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                    result = await _requestReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (IOException ex)
                 {
@@ -295,18 +296,19 @@ public class IpcClient : IAsyncDisposable
                     break;
                 }
 
-                if (line == null)
+                if (result == null)
                 {
                     Debug.WriteLine("[IpcClient] ResponseLoop: pipe closed (null read)");
                     break;
                 }
 
-                if (!IpcConstants.IsValidMessageSize(line.Length))
+                if (result.Value.IsTooLarge)
                 {
-                    Debug.WriteLine($"[IpcClient] ResponseLoop: message too large ({line.Length} bytes), skipping");
+                    Debug.WriteLine($"[IpcClient] ResponseLoop: message too large ({result.Value.SizeBytes} bytes), skipping");
                     continue;
                 }
 
+                var line = result.Value.Line!;
                 IpcMessage? message;
                 try
                 {
@@ -358,10 +360,10 @@ public class IpcClient : IAsyncDisposable
         {
             while (!cancellationToken.IsCancellationRequested && _eventReader != null && !_isDisposing)
             {
-                string? line;
+                IpcLineReadResult? result;
                 try
                 {
-                    line = await _eventReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                    result = await _eventReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (IOException ex)
                 {
@@ -369,18 +371,19 @@ public class IpcClient : IAsyncDisposable
                     break;
                 }
 
-                if (line == null)
+                if (result == null)
                 {
                     Debug.WriteLine("[IpcClient] EventLoop: pipe closed (null read)");
                     break;
                 }
 
-                if (!IpcConstants.IsValidMessageSize(line.Length))
+                if (result.Value.IsTooLarge)
                 {
-                    Debug.WriteLine($"[IpcClient] EventLoop: message too large ({line.Length} bytes), skipping");
+                    Debug.WriteLine($"[IpcClient] EventLoop: message too large ({result.Value.SizeBytes} bytes), skipping");
                     continue;
                 }
 
+                var line = result.Value.Line!;
                 EventEnvelope? evt;
                 try
                 {
@@ -503,9 +506,7 @@ public class IpcClient : IAsyncDisposable
         _eventLoopCts?.Dispose();
         _eventLoopCts = null;
 
-        try { _requestReader?.Dispose(); } catch { }
         try { _requestWriter?.Dispose(); } catch { }
-        try { _eventReader?.Dispose(); } catch { }
         try { _requestPipe?.Dispose(); } catch { }
         try { _eventPipe?.Dispose(); } catch { }
 

@@ -3,6 +3,7 @@ using System.IO;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OnlyExo365.Contracts;
 
 namespace OnlyExo365.Shell.Services;
 
@@ -32,6 +33,15 @@ internal static class ExcelExportService
         ArgumentNullException.ThrowIfNull(headers);
         ArgumentNullException.ThrowIfNull(rows);
 
+        AtomicFileWriter.Write(filePath, temporaryPath => WriteWorkbook(temporaryPath, sheetName, headers, rows));
+    }
+
+    private static void WriteWorkbook(
+        string filePath,
+        string sheetName,
+        IReadOnlyList<string> headers,
+        IEnumerable<IReadOnlyList<string?>> rows)
+    {
         using var spreadsheet = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
         var workbookPart = spreadsheet.AddWorkbookPart();
         workbookPart.Workbook = new Workbook();

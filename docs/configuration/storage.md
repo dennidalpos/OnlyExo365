@@ -11,6 +11,8 @@
 
 `ONLYEXO365_LOG_RETENTION_DAYS` accepts a positive integer; default is **14 days**. [PersistentLogWriter](../../src/OnlyExo365.Contracts/Diagnostics/PersistentLogWriter.cs) / [PersistentLogStore](../../src/OnlyExo365.Contracts/Diagnostics/PersistentLogStore.cs) apply retention and export diagnostics. [UserPreferencesService](../../src/OnlyExo365.Shell/Services/UserPreferencesService.cs) uses roaming AppData, so not all state is under LocalAppData.
 
+XLSX reports and diagnostic ZIP archives are written to a unique temporary file beside the selected destination, then moved or replaced after generation succeeds. A generation failure leaves an existing destination intact and removes the partial temporary file.
+
 Uninstall removes installed payload plus the uninstalling account's default logs/IPC secrets. It preserves exports, catalog/preferences and unknown installation files; it does not scan every Windows user's profile or custom export directories. See [packaging](../releases/packaging.md).
 
 Repository clean targets only generated outputs and preserves reports, inputs and personal state. Installer smoke temporarily backs up default product data and retains recovery evidence on failure; use an isolated host. See [workflow](../development/workflow.md) and [qualification](../development/qualification.md).

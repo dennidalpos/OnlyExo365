@@ -25,7 +25,7 @@ public sealed class IpcServer : IDisposable
 
     private NamedPipeServerStream? _requestPipe;
     private NamedPipeServerStream? _eventPipe;
-    private StreamReader? _requestReader;
+    private IpcLineReader? _requestReader;
     private StreamWriter? _requestWriter;
     private StreamWriter? _eventWriter;
 
@@ -95,7 +95,7 @@ public sealed class IpcServer : IDisposable
 
         ConsoleLogger.Success("IPC", "Client connected");
 
-        _requestReader = new StreamReader(_requestPipe, Encoding.UTF8, leaveOpen: true);
+        _requestReader = new IpcLineReader(_requestPipe);
         _requestWriter = new StreamWriter(_requestPipe, Encoding.UTF8, leaveOpen: true);
         _eventWriter = new StreamWriter(_eventPipe, Encoding.UTF8, leaveOpen: true);
 
@@ -181,10 +181,10 @@ public sealed class IpcServer : IDisposable
         {
             while (!cancellationToken.IsCancellationRequested && _isRunning && _requestReader != null)
             {
-                string? line;
+                IpcLineReadResult? result;
                 try
                 {
-                    line = await _requestReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                    result = await _requestReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (IOException ex)
                 {
@@ -192,18 +192,19 @@ public sealed class IpcServer : IDisposable
                     break;
                 }
 
-                if (line == null)
+                if (result == null)
                 {
                     ConsoleLogger.Warning("IPC", "Client disconnected (null read)");
                     break;
                 }
 
-                if (!IpcConstants.IsValidMessageSize(line.Length))
+                if (result.Value.IsTooLarge)
                 {
-                    ConsoleLogger.Warning("IPC", $"Message too large ({line.Length} bytes), rejecting");
+                    ConsoleLogger.Warning("IPC", $"Message too large ({result.Value.SizeBytes} bytes), rejecting");
                     continue;
                 }
 
+                var line = result.Value.Line!;
                 IpcMessage? message;
                 try
                 {
@@ -589,7 +590,7 @@ public sealed class IpcServer : IDisposable
         {
             var json = SerializeResponseForTransport(message, operationCorrelationId);
 
-            ConsoleLogger.Verbose("IPC", $"Sending response ({json.Length} bytes, type: {typeof(T).Name})");
+            ConsoleLogger.Verbose("IPC", $"Sending response ({Encoding.UTF8.GetByteCount(json)} bytes, type: {typeof(T).Name})");
             await WriteSerializedMessageAsync(_requestWriter, _requestWriteLock, json).ConfigureAwait(false);
             ConsoleLogger.Debug("IPC", "Response sent successfully");
         }
@@ -610,7 +611,8 @@ public sealed class IpcServer : IDisposable
     internal static string SerializeResponseForTransport<T>(T message, string? operationCorrelationId = null) where T : IpcMessage
     {
         var json = JsonMessageSerializer.Serialize(message);
-        if (IpcConstants.IsValidMessageSize(json.Length))
+        var sizeBytes = Encoding.UTF8.GetByteCount(json);
+        if (IpcConstants.IsValidMessageSize(sizeBytes))
         {
             return json;
         }
@@ -624,15 +626,16 @@ public sealed class IpcServer : IDisposable
 
         if (string.IsNullOrWhiteSpace(correlationId))
         {
-            throw new InvalidOperationException($"Response too large ({json.Length} bytes) and no correlation id was available for fallback.");
+            throw new InvalidOperationException($"Response too large ({sizeBytes} bytes) and no correlation id was available for fallback.");
         }
 
-        var oversizeError = CreateOversizeResponse(correlationId, json.Length);
+        var oversizeError = CreateOversizeResponse(correlationId, sizeBytes);
         var oversizeJson = JsonMessageSerializer.Serialize(oversizeError);
+        var oversizeSizeBytes = Encoding.UTF8.GetByteCount(oversizeJson);
 
-        if (!IpcConstants.IsValidMessageSize(oversizeJson.Length))
+        if (!IpcConstants.IsValidMessageSize(oversizeSizeBytes))
         {
-            throw new InvalidOperationException($"Oversize fallback response also exceeded the maximum size ({oversizeJson.Length} bytes).");
+            throw new InvalidOperationException($"Oversize fallback response also exceeded the maximum size ({oversizeSizeBytes} bytes).");
         }
 
         return oversizeJson;
@@ -698,9 +701,10 @@ public sealed class IpcServer : IDisposable
             var json = JsonMessageSerializer.Serialize(evt);
 
                                                    
-            if (!IpcConstants.IsValidMessageSize(json.Length))
+            var sizeBytes = Encoding.UTF8.GetByteCount(json);
+            if (!IpcConstants.IsValidMessageSize(sizeBytes))
             {
-                ConsoleLogger.Error("IPC", $"Event too large ({json.Length} bytes), dropping");
+                ConsoleLogger.Error("IPC", $"Event too large ({sizeBytes} bytes), dropping");
                 return;
             }
 
@@ -724,7 +728,6 @@ public sealed class IpcServer : IDisposable
     private void Cleanup()
     {
         _pendingRequests?.Writer.TryComplete();
-        try { _requestReader?.Dispose(); } catch { }
         try { _requestWriter?.Dispose(); } catch { }
         try { _eventWriter?.Dispose(); } catch { }
         try { _requestPipe?.Dispose(); } catch { }

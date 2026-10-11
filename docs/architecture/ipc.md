@@ -11,7 +11,7 @@ Sources: [IpcConstants](../../src/OnlyExo365.Contracts/IpcConstants.cs), [IpcSes
 
 | Setting | Default |
 | --- | --- |
-| Message guard / pipe buffer | 10,485,760 .NET string characters / 64 KiB |
+| Message guard / pipe buffer | 10,485,760 UTF-8 bytes / 64 KiB |
 | Pending request capacity | 8 |
 | Event count guard | Counter must remain below 10,000 |
 | Pipe connection / handshake / request deadline | 10 s / 5 s / 15 min |
@@ -19,7 +19,7 @@ Sources: [IpcConstants](../../src/OnlyExo365.Contracts/IpcConstants.cs), [IpcSes
 | Heartbeat interval / timeout / grace | 5 s / 15 s / 5 s |
 | Missed heartbeat threshold | 3; elapsed-time checks also participate in recovery |
 
-Despite its `MaxMessageSizeBytes` name, the guard receives `string.Length`, not UTF-8 byte count, and runs after `ReadLineAsync` allocates the complete line. A 4,000,002-character JSON string of 12,000,002 UTF-8 bytes passes the declared 10,485,760-byte limit. `MaxReadBufferSize` is declared but unused. IPC-01 tracks byte-accurate enforcement and bounded reads; see the [review](../audits/2026-10-10-documentation-review.md). Console visibility uses a dedicated request after handshake, without stopping Worker.
+The reader counts transport bytes while scanning each line in a 256 KiB buffer. It discards a line that exceeds the limit before allocating the full payload, then resumes at the next newline. The first-line UTF-8 BOM and CRLF are accepted; the BOM and delimiter are excluded from the JSON byte count. Outbound messages use `Encoding.UTF8.GetByteCount` before writing. This closes IPC-01; the earlier defect is recorded in the [review](../audits/2026-10-10-documentation-review.md). Console visibility uses a dedicated request after handshake, without stopping Worker.
 
 ## Requests and recovery
 

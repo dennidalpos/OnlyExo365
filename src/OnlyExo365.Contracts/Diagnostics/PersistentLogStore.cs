@@ -76,17 +76,6 @@ public static class PersistentLogStore
         }
 
         var archivePath = destinationArchivePath.Trim();
-        var archiveDirectory = Path.GetDirectoryName(archivePath);
-        if (!string.IsNullOrWhiteSpace(archiveDirectory))
-        {
-            Directory.CreateDirectory(archiveDirectory);
-        }
-
-        if (File.Exists(archivePath))
-        {
-            File.Delete(archivePath);
-        }
-
         var sourceDirectory = ResolveLogDirectoryPath(logDirectoryPath);
         var resolvedRetentionDays = PersistentLogWriter.ResolveRetentionDays(retentionDays);
         var exportTimestampUtc = exportedAtUtc ?? DateTime.UtcNow;
@@ -94,38 +83,41 @@ public static class PersistentLogStore
         var files = GetLogFiles(sourceDirectory);
         var summary = BuildSummary(sourceDirectory, exportTimestampUtc);
 
-        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create);
-
-        foreach (var filePath in files)
+        AtomicFileWriter.Write(archivePath, temporaryPath =>
         {
-            archive.CreateEntryFromFile(filePath, Path.GetFileName(filePath), CompressionLevel.Optimal);
-        }
+            using var archive = ZipFile.Open(temporaryPath, ZipArchiveMode.Create);
 
-        var summaryEntry = archive.CreateEntry(SummaryFileName, CompressionLevel.Optimal);
-        using (var summaryStream = summaryEntry.Open())
-        using (var summaryWriter = new StreamWriter(summaryStream, new UTF8Encoding(false)))
-        {
-            summaryWriter.Write(JsonSerializer.Serialize(summary, ManifestJsonOptions));
-        }
-
-        var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
-        using var manifestStream = manifestEntry.Open();
-        using var manifestWriter = new StreamWriter(manifestStream, new UTF8Encoding(false));
-        manifestWriter.Write(JsonSerializer.Serialize(
-            new
+            foreach (var filePath in files)
             {
-                exportedAtUtc = exportTimestampUtc,
-                logDirectoryPath = sourceDirectory,
-                retentionDays = resolvedRetentionDays,
-                summaryFileName = SummaryFileName,
-                summary,
-                files = files.Select(path => new
+                archive.CreateEntryFromFile(filePath, Path.GetFileName(filePath), CompressionLevel.Optimal);
+            }
+
+            var summaryEntry = archive.CreateEntry(SummaryFileName, CompressionLevel.Optimal);
+            using (var summaryStream = summaryEntry.Open())
+            using (var summaryWriter = new StreamWriter(summaryStream, new UTF8Encoding(false)))
+            {
+                summaryWriter.Write(JsonSerializer.Serialize(summary, ManifestJsonOptions));
+            }
+
+            var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
+            using var manifestStream = manifestEntry.Open();
+            using var manifestWriter = new StreamWriter(manifestStream, new UTF8Encoding(false));
+            manifestWriter.Write(JsonSerializer.Serialize(
+                new
                 {
-                    name = Path.GetFileName(path),
-                    sizeBytes = new FileInfo(path).Length
-                }).ToArray()
-            },
-            ManifestJsonOptions));
+                    exportedAtUtc = exportTimestampUtc,
+                    logDirectoryPath = sourceDirectory,
+                    retentionDays = resolvedRetentionDays,
+                    summaryFileName = SummaryFileName,
+                    summary,
+                    files = files.Select(path => new
+                    {
+                        name = Path.GetFileName(path),
+                        sizeBytes = new FileInfo(path).Length
+                    }).ToArray()
+                },
+                ManifestJsonOptions));
+        });
 
         return files.Count;
     }

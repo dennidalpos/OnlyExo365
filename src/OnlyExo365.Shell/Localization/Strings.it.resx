@@ -2592,6 +2592,18 @@ Prova a riavviare il worker o l'applicazione.</value>
   <data name="Compliance.AuditFailed" xml:space="preserve">
     <value>{0} non riusciti</value>
   </data>
+  <data name="Compliance.AuditTaskTitle" xml:space="preserve"><value>Audit n. {0:000}</value></data>
+  <data name="Compliance.AuditTaskSummary" xml:space="preserve"><value>{0} | {1} | {2} | {3} record</value></data>
+  <data name="Compliance.AuditStateQueued" xml:space="preserve"><value>In coda</value></data>
+  <data name="Compliance.AuditStateRunning" xml:space="preserve"><value>In esecuzione</value></data>
+  <data name="Compliance.AuditStateCompleted" xml:space="preserve"><value>Completato</value></data>
+  <data name="Compliance.AuditStateFailed" xml:space="preserve"><value>Non riuscito</value></data>
+  <data name="Compliance.AuditStateUnknown" xml:space="preserve"><value>Sconosciuto</value></data>
+  <data name="Compliance.AuditFilterMax" xml:space="preserve"><value>Max {0}</value></data>
+  <data name="Compliance.AuditFilterUsers" xml:space="preserve"><value>Utenti: {0}</value></data>
+  <data name="Compliance.AuditFilterOperations" xml:space="preserve"><value>Operazioni: {0}</value></data>
+  <data name="Compliance.AuditFilterObjects" xml:space="preserve"><value>Oggetti: {0}</value></data>
+  <data name="Compliance.AuditFilterText" xml:space="preserve"><value>Testo: {0}</value></data>
   <data name="Resources.IdentityPrefix" xml:space="preserve">
     <value>Identita: </value>
   </data>

@@ -12,27 +12,27 @@ pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
 pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
 ```
 
-Requirements and verification commands: [development workflow](docs/development/workflow.md).
+Requirements and verification commands: [development workflow](docs/development/workflow.md). Detailed index by domain: [Documentation Index](docs/README.md).
 
 ## Documentation
 
-| Area | Reference |
-| --- | --- |
-| Runtime and source responsibilities | [Architecture](docs/architecture/overview.md) |
-| Transport, authentication, cancellation | [IPC](docs/architecture/ipc.md) |
-| Exchange/Graph settings and environment | [Configuration](docs/configuration/settings.md) |
-| Files, retention and preservation | [Local storage](docs/configuration/storage.md) |
-| Install and first connection | [Operator guide](docs/operations/operator-guide.md) |
-| Approved modules and authentication limits | [Modules and authentication](docs/operations/authentication.md) |
-| Logs, console and troubleshooting | [Diagnostics](docs/operations/diagnostics.md) |
-| SKU cache and embedded catalog maintenance | [License catalog](docs/licensing/catalog.md) |
-| Build, clean, tests and local gate | [Development workflow](docs/development/workflow.md) |
-| Isolated installer, tenant and UI checks | [Qualification](docs/development/qualification.md) |
-| Installer and release asset generation | [Packaging](docs/releases/packaging.md) |
-| Payload signing and verification | [Signing](docs/releases/signing.md) |
-| Reliability / UI / script evidence | [Critical audit](docs/audits/2026-10-10-critical-audit.md), [UI audit](docs/audits/2026-10-10-ui-ux-audit.md), [PowerShell audit](docs/audits/2026-10-10-powershell-audit.md) |
-| Retained fixture cleanup | [Cleanup record](docs/audits/2026-10-10-retained-fixtures.md) |
-| Documentation/code reconciliation | [Review](docs/audits/2026-10-10-documentation-review.md) |
+| Area | Focus | Reference |
+| --- | --- | --- |
+| **Architecture** | Runtime & project responsibilities | [Architecture overview](docs/architecture/overview.md) |
+| | Named pipe transport, limits, cancellation | [IPC protocol](docs/architecture/ipc.md) |
+| **Configuration** | Settings precedence & environment overrides | [Configuration](docs/configuration/settings.md) |
+| | Paths, logs, atomic reports & data preservation | [Local storage](docs/configuration/storage.md) |
+| **Licensing** | SKU cache & embedded catalog update | [License catalog](docs/licensing/catalog.md) |
+| **Operations** | Installation, first connection & Message Trace | [Operator guide](docs/operations/operator-guide.md) |
+| | Visual user workflows & Mermaid diagrams | [Visual user guide](docs/operations/visual-guide.md) |
+| | Exact module policy & authentication modes | [Modules and authentication](docs/operations/authentication.md) |
+| | Console toggle, persistent logs & culture | [Diagnostics](docs/operations/diagnostics.md) |
+| **Development** | Pinned toolchain, build, clean & local gate | [Development workflow](docs/development/workflow.md) |
+| | Isolated VM installer, tenant & UI checks | [Qualification](docs/development/qualification.md) |
+| **Releases** | Inno Setup packaging & release bundle | [Packaging](docs/releases/packaging.md) |
+| | Windows SDK Authenticode signing pipeline | [Signing](docs/releases/signing.md) |
+| **Audits & Evidence** | Reliability, UI, PowerShell, fixtures, review | [Critical audit](docs/audits/2026-10-10-critical-audit.md), [UI audit](docs/audits/2026-10-10-ui-ux-audit.md), [PowerShell audit](docs/audits/2026-10-10-powershell-audit.md), [Retained fixtures](docs/audits/2026-10-10-retained-fixtures.md), [Documentation review](docs/audits/2026-10-10-documentation-review.md) |
+| | Bounded IPC read, atomic exports, runspaces | [Local remediation](docs/audits/2026-10-11-local-remediation.md) |
 
 Open work and current qualification status: [PROJECT_STATUS.json](PROJECT_STATUS.json). Audit results describe their recorded revisions; they do not qualify later changes.
 

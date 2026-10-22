@@ -25,6 +25,6 @@ The shipped [appsettings.json](../../src/OnlyExo365.Shell/appsettings.json) sele
 | `ONLYEXO365_DEFAULT_USAGE_LOCATION` | `defaultUsageLocation`: two-letter country code |
 | `ONLYEXO365_ENABLE_GRAPH` | `enableGraphAfterExchangeConnect`: 1/0 or true/false |
 
-`ONLYEXO365_DISABLE_EXO=1` or `true` blocks Exchange connections in Shell/Worker independently of the JSON hierarchy. The IPC session environment variable is internal; see [IPC](../architecture/ipc.md).
+`ONLYEXO365_DISABLE_EXO=1` or `true` blocks initiating Exchange connections from the Shell UI independently of the JSON hierarchy. The IPC session environment variable is internal; see [IPC](../architecture/ipc.md).
 
 Catalog settings belong to [catalog](../licensing/catalog.md); file paths and log/export overrides to [storage](storage.md); connection limitations to [authentication](../operations/authentication.md).

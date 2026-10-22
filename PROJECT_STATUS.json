@@ -1,8 +1,8 @@
 {
   "project_name": "OnlyExo365",
   "status": "active",
-  "current_phase": "Local remediation and localization decision complete; interactive UI and retained fixture cleanup remain open; installer and tenant qualification deferred by user",
-  "last_updated": "2026-10-11T20:46:11+02:00",
+  "current_phase": "Documentation audit, Mermaid visual guide, live UI screenshots, and poster copy complete; gate tests verified (821 tests passed)",
+  "last_updated": "2026-10-22T15:43:00+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
   "active_objective": "Qualify UX-08 when an interactive Windows UI and representative data are available; preserve CLEAN-01 until cleanup is allowed. Installer and tenant qualification were removed from the task list at user request; their gates remain unverified.",
@@ -78,7 +78,7 @@
     "isolated_install_uninstall": "pending",
     "tenant_validation": "Offline canonical policy/minimal config/session arguments/failure report/app-only coverage pass. Real qualification is unverified and was removed from the active task list at user request because no dedicated test tenant is available; search authentication limitations fail explicitly.",
     "interactive_ui": "Startup verified from scripts via start.ps1: full Debug window, Worker 7.6.6, authenticated IPC, normal close, exit 0; Exchange disabled in child process. Approved Exchange module unavailable. DPI/accessibility qualification remains UX-08.",
-    "documentation": "2026-10-11 IPC-01, IMP-02, IMP-01, IMP-03, IMP-04, localization decision and Shell audit queue labels are recorded in docs/architecture/ipc.md, docs/architecture/overview.md, docs/configuration/storage.md, docs/licensing/catalog.md and docs/audits/2026-10-11-local-remediation.md. The 2026-10-10 source/documentation reconciliation remains historical evidence."
+    "documentation": "2026-10-22 documentation review complete: created docs/README.md domain index, updated README.md navigation, corrected settings.md on ONLYEXO365_DISABLE_EXO scope, linked IPC-01 closure in ipc.md, cleaned empty docs/decisions, and verified 185 markdown links with 0 broken. SecondBrain dossier context.md and memory.md updated and synced. Historical audits remain immutable evidence."
   },
   "commands": {
     "install": "pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64",

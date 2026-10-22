@@ -2,7 +2,7 @@
   "project_name": "OnlyExo365",
   "status": "active",
   "current_phase": "Documentation audit, Mermaid visual guide, live UI screenshots, and poster copy complete; gate tests verified (821 tests passed)",
-  "last_updated": "2026-10-22T15:43:00+02:00",
+  "last_updated": "2026-10-22T16:18:00+02:00",
   "production_target": true,
   "summary": "Windows-only WPF application for Exchange Online administration with PowerShell-based build, gate, packaging, and maintenance scripts.",
   "active_objective": "Qualify UX-08 when an interactive Windows UI and representative data are available; preserve CLEAN-01 until cleanup is allowed. Installer and tenant qualification were removed from the task list at user request; their gates remain unverified.",

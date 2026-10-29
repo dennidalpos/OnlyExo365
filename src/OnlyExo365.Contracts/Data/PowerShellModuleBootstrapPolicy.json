@@ -1,0 +1,27 @@
+{
+  "generatedOn": "2026-10-27",
+  "repositoryName": "PSGallery",
+  "repositorySourceLocation": "https://www.powershellgallery.com/api/v2",
+  "modules": [
+    {
+      "requestName": "ExchangeOnlineManagement",
+      "moduleName": "ExchangeOnlineManagement",
+      "requiredVersion": "3.10.1",
+      "aliases": []
+    },
+    {
+      "requestName": "Microsoft.Graph",
+      "moduleName": "Microsoft.Graph.Authentication",
+      "requiredVersion": "2.41.2",
+      "requiredModules": [
+        "Microsoft.Graph.Authentication",
+        "Microsoft.Graph.Users",
+        "Microsoft.Graph.Users.Actions",
+        "Microsoft.Graph.Identity.DirectoryManagement"
+      ],
+      "aliases": [
+        "Microsoft.Graph.Authentication"
+      ]
+    }
+  ]
+}

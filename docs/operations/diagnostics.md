@@ -12,4 +12,4 @@ UI, Worker and Supervisor persist timestamped JSON-line logs; paths, retention a
 | Operation times out or is cancelled | Check tenant state before repeating a write; cancellation does not roll back submitted changes |
 | Source launch exits nonzero | Read UI/Worker/Supervisor logs; start.ps1 propagates application failure |
 
-The repaired MainWindow language conversion uses explicit `ConverterCulture=en-US`; IT/EN still controls display culture. Startup reproduction and verification are retained in the [UI audit](../audits/2026-10-10-ui-ux-audit.md).
+The repaired MainWindow language conversion uses explicit `ConverterCulture=en-US`; IT/EN still controls display culture. See the [historical UI note](../audits/2026-10-10-ui-ux-audit.md) for context and the [qualification guide](../development/qualification.md) for checks still required.

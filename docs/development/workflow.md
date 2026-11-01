@@ -22,7 +22,7 @@ Run from repository root. Restore precedes compile/test when outputs are absent:
 ```powershell
 pwsh ./scripts/agents/doctor.ps1 -CheckPackaging
 pwsh ./scripts/bootstrap.ps1 -RuntimeIdentifier win-x64
-pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64
+pwsh ./scripts/build.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -Clean:$false -LockedMode
 pwsh ./scripts/start.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBuild
 pwsh ./scripts/agents/compile.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap
 pwsh ./scripts/agents/test.ps1 -Configuration Debug -RuntimeIdentifier win-x64 -NoBootstrap -NoBuild -NoRestore
@@ -33,6 +33,8 @@ pwsh ./build/run-secret-scan.ps1 -SourcePath . -ReportPath artifacts/security/gi
 
 The test runner accepts `-ResultsDirectory`; select focused cases directly through `dotnet test --filter` with `--artifacts-path artifacts/build`, as release CI does. The architecture gate checks required files and hotspot line limits. No dedicated formatter is configured; use `git diff --check` for whitespace. Coverage enforcement is in the shared release CI action, with a 20% Worker/Contracts minimum for its selected backend tests.
 
+The public wrappers use `artifacts/` under the checkout; they do not expose a general output-root override. For an isolated build, invoke `dotnet build OnlyExo365.sln --configuration Release --artifacts-path <output-root> -p:RestoreLockedMode=true` with an approved output location, then launch the Shell executable from that build's `bin/OnlyExo365.Shell/release` directory. Replace `<output-root>` before execution. This is a parameterized example; the repository wrappers still use their own layout. The quick-start build disables their default cleanup with `-Clean:$false`.
+
 ## Clean and gate
 
 ```powershell
@@ -41,7 +43,7 @@ pwsh ./scripts/clean.ps1
 pwsh ./scripts/gate.ps1 -RuntimeIdentifier win-x64
 ```
 
-Clean validates all targets before deletion: `artifacts/build`, `artifacts/publish`, `artifacts/packages`, and direct .NET project bin/obj under src/tests. It rejects tracked files, reparse points, external/root/ancestor targets. Reports, coverage, IDE files, unknown directories and default exports/imports survive. Explicit export/import cleanup must stay under the matching artifacts directory. `-All` additionally clears NuGet HTTP cache. Locks and native failures return nonzero; build does not stop operator processes.
+Run cleanup only when that deletion scope is intended; the dry run does not authorize deletion. Clean validates all targets before deletion: `artifacts/build`, `artifacts/publish`, `artifacts/packages`, and direct .NET project bin/obj under src/tests. It rejects tracked files, reparse points, external/root/ancestor targets. Reports, coverage, IDE files, unknown directories and default exports/imports survive. Explicit export/import cleanup must stay under the matching artifacts directory. `-All` additionally clears NuGet HTTP cache. Locks and native failures return nonzero; build does not stop operator processes.
 
 Gate performs clean `-All`, prerequisites, locked restore, Debug compilation/tests, architecture/security and Release packaging. Reproducibility and disposable signing validation require `-RunReproducibility` / `-RunSigningValidation`. Gate does not invoke installer smoke, tenant validation or interactive UI qualification. It checks packaging prerequisites even when packaging is skipped; inspect [gate.ps1](../../scripts/gate.ps1) before choosing flags.
 

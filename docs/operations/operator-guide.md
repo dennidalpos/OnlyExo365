@@ -7,7 +7,19 @@ Windows x64, outbound Microsoft 365 connectivity and operation-specific Exchange
 3. Configure the tenant/authentication using [settings](../configuration/settings.md), then connect. Check Shell/Worker and Exchange/Graph status separately; a running Worker does not prove a tenant connection.
 4. If import fails, Tools remains available for repair. Use [authentication](authentication.md) for module/version and Compliance limits, [diagnostics](diagnostics.md) for logs/console, and [storage](../configuration/storage.md) for preserved data.
 
-Visual workflow diagrams for all core user journeys: [Visual user guide](visual-guide.md).
+Visual workflow diagrams for the main connection, reporting and editing journeys: [Visual user guide](visual-guide.md).
+
+## Working with changes
+
+Read the selected object's current values before editing. Review the confirmation for the specific action; different editors have separate save commands. When leaving a page with pending changes, the discard prompt lets you remain or discard the draft; it does not save all tabs for you.
+
+OnlyExo365 does not automatically retry cloud writes and provides no automatic rollback; vendor modules can have their own retry behavior. If a save times out, is cancelled or fails partway through, refresh and verify the remote values before repeating it. A local cancellation does not prove that the tenant rejected a request already submitted.
+
+Compliance search creation and execution are separate actions. Purge exposes SoftDelete and HardDelete; select the intended type and review the search before confirming. Hold availability depends on the selected case and service capabilities. These actions do not establish legal or regulatory compliance.
+
+## Getting help
+
+Check [Diagnostics](diagnostics.md) and record the application version, affected page, authentication mode, operation and diagnostic reference. Contact the maintainer through the channel that supplied your package. Diagnostic archives can contain tenant identifiers and service messages: review and sanitize them before sharing. No support SLA is declared by this repository.
 
 ## Message Trace
 

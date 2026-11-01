@@ -1,6 +1,6 @@
 # Environment qualification
 
-These checks are separate from offline tests and the local gate. Installer and tenant qualification were removed from the active task list at user request on 2026-10-11 because the required environments are unavailable. Their quality gates remain unverified in 02-areas/products/OnlyExo365/tracker.json (nel dossier SecondBrain) (SecondBrain: `02-areas/products/OnlyExo365/tracker.json`); the procedures are retained for future qualification. Previous results are in the three [audit reports](../../README.md#documentation).
+These checks are separate from offline tests and the local gate. Installer and real-tenant qualification remain unverified; the procedures below describe the environments and checks needed. A build, an offline test run or a disconnected screenshot does not replace them. The [documentation index](../README.md#audit-storici) lists historical audit notes; they apply only to their recorded revisions.
 
 ## Disposable installer host
 

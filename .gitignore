@@ -59,11 +59,6 @@ artifacts/
 *.sln.iml
 
 # User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
 
 # NuGet
 *.nupkg
@@ -74,12 +69,8 @@ artifacts/
 *.nuget.targets
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 # .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
 
 # Publish output
 publish/
@@ -99,7 +90,6 @@ $RECYCLE.BIN/
 *.iml
 *.ipr
 *.iws
-.idea/
 
 # Test results
 [Tt]est[Rr]esult*/
@@ -120,7 +110,6 @@ nCrunchTemp_*
 BenchmarkDotNet.Artifacts/
 
 # Application logs
-*.log
 logs/
 
 # Secrets and credentials
@@ -169,10 +158,7 @@ launchSettings.local.json
 tools/nssm/
 
 # Build artifacts (redundant but explicit)
-artifacts/
-publish/
 
 # Temp WPF files
-*_wpftmp.csproj
 *.g.cs
 *.g.i.cs

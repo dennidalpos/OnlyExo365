@@ -260,7 +260,7 @@
     <value>Ricarica i dettagli e le autorizzazioni della cassetta postale</value>
   </data>
   <data name="Mailbox.PendingChangesLabel" xml:space="preserve">
-    <value>âš  Modifiche cassetta postale in sospeso</value>
+    <value>⚠ Modifiche cassetta postale in sospeso</value>
   </data>
   <data name="Mailbox.PendingChangesTooltip" xml:space="preserve">
     <value>Applica tutte le modifiche in sospeso alla cassetta postale</value>
@@ -275,7 +275,7 @@
     <value>Elimina le modifiche in sospeso e ripristina lo stato corrente</value>
   </data>
   <data name="Mailbox.PendingPermissionsFormat" xml:space="preserve">
-    <value>âš  {0} modifiche autorizzazioni in sospeso</value>
+    <value>⚠ {0} modifiche autorizzazioni in sospeso</value>
   </data>
   <data name="Msg.DetailsHeading" xml:space="preserve">
     <value>Dettagli:</value>
@@ -1984,7 +1984,7 @@ Prova a riavviare il worker o l'applicazione.</value>
     <value>The archive is not required to assign a retention policy, but it is required to apply tags that use the 'MoveToArchive' action.</value>
   </data>
   <data name="MailboxSettings.TheMailboxDoesNotHaveAnEnabledArchiveSomeTagsInThisPolicyRequire" xml:space="preserve">
-    <value>âš  The mailbox does not have an enabled archive: some tags in this policy require the archive mailbox.</value>
+    <value>⚠ The mailbox does not have an enabled archive: some tags in this policy require the archive mailbox.</value>
   </data>
   <data name="MailboxSettings.WarningQuota" xml:space="preserve">
     <value>Warning quota:</value>

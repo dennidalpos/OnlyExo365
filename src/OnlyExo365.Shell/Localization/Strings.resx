@@ -260,7 +260,7 @@
     <value>Reload mailbox details and permissions</value>
   </data>
   <data name="Mailbox.PendingChangesLabel" xml:space="preserve">
-    <value>âš  Pending mailbox changes</value>
+    <value>⚠ Pending mailbox changes</value>
   </data>
   <data name="Mailbox.PendingChangesTooltip" xml:space="preserve">
     <value>Apply all pending mailbox changes</value>
@@ -275,7 +275,7 @@
     <value>Discard pending changes and restore the current state</value>
   </data>
   <data name="Mailbox.PendingPermissionsFormat" xml:space="preserve">
-    <value>âš  {0} pending permission changes</value>
+    <value>⚠ {0} pending permission changes</value>
   </data>
   <data name="Msg.DetailsHeading" xml:space="preserve">
     <value>Details:</value>
@@ -1984,7 +1984,7 @@ Try restarting the worker or the application.</value>
     <value>The archive is not required to assign a retention policy, but it is required to apply tags that use the 'MoveToArchive' action.</value>
   </data>
   <data name="MailboxSettings.TheMailboxDoesNotHaveAnEnabledArchiveSomeTagsInThisPolicyRequire" xml:space="preserve">
-    <value>âš  The mailbox does not have an enabled archive: some tags in this policy require the archive mailbox.</value>
+    <value>⚠ The mailbox does not have an enabled archive: some tags in this policy require the archive mailbox.</value>
   </data>
   <data name="MailboxSettings.WarningQuota" xml:space="preserve">
     <value>Warning quota:</value>

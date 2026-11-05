@@ -1,52 +1,33 @@
-# OnlyExo365 Documentation Index
+# OnlyExo365 documentation
 
-Guide per amministratori Exchange Online, help desk e manutentori. Per iniziare: [README del prodotto](../README.md), [guida operatore](operations/operator-guide.md) e [percorsi visivi](operations/visual-guide.md). Le funzionalità dipendono dalle capacità e dai permessi della sessione.
+[Italian reference](README.it.md)
 
-## Operatività
+Guides for Exchange Online administrators, help desks and maintainers. Start with the [product README](../README.md), [operator guide](operations/operator-guide.md) and [visual workflows](operations/visual-guide.md). Available actions depend on authentication, permissions and session capabilities.
 
-| Documento | Contenuto | Fonti principali |
-| --- | --- | --- |
-| [Guida operatore](operations/operator-guide.md) | Installazione, prima connessione, modifiche, Message Trace, flusso posta e assistenza | `Shell/ViewModels`, `ExoMessageTraceCommands.cs` |
-| [Percorsi visivi](operations/visual-guide.md) | Otto flussi Mermaid: connessione, Dashboard, cassette, trace, sicurezza, conformità, flusso posta e diagnostica | `Shell/Views`, `Shell/ViewModels` |
-| [Moduli e autenticazione](operations/authentication.md) | Versioni esatte, modalità e limiti Exchange/Graph/Compliance | `Contracts/Data/PowerShellModuleBootstrapPolicy.json`, `Contracts/Data/CloudEnvironments.json` |
-| [Diagnostica](operations/diagnostics.md) | Console Worker, log persistenti ed esportazione | `WorkerConsoleController.cs`, `PersistentLogStore.cs` |
-| [Asset pubblici](assets/README.md) | Schermata reale, versione, scenario e riproduzione | `assets/dashboard-disconnected.png` |
-| [Copy per locandine](operations/locandine-copy.md) | Testi informativi e limiti da mantenere nel materiale pubblico | README, guide e asset pubblici |
+| Area | Guide |
+|---|---|
+| Daily operations and confirmation | [Operator guide](operations/operator-guide.md) |
+| Eight user workflows | [Visual guide](operations/visual-guide.md) |
+| Approved modules, Exchange/Graph/Compliance connections | [Authentication](operations/authentication.md) |
+| Worker console, persistent logs and export | [Diagnostics](operations/diagnostics.md) |
+| Real public screenshot and provenance | [Assets](assets/README.md) |
+| Product information copy and its limits | [Public copy](operations/locandine-copy.md) |
+| Defaults, app files, machine policy and environment overrides | [Settings](configuration/settings.md) |
+| Paths, DPAPI references, reports and uninstall data | [Storage](configuration/storage.md) |
+| Embedded SKU data, cache and CSV parsing | [License catalog](licensing/catalog.md) |
+| WPF Shell, separate Worker and Contracts | [Architecture](architecture/overview.md) |
+| Named-pipe security, framing, cancellation and recovery | [IPC](architecture/ipc.md) |
+| Pinned toolchain, build/test and local gates | [Development workflow](development/workflow.md) |
+| Disposable installer host, test tenant and interactive UI | [Environment qualification](development/qualification.md) |
+| Inno Setup and release assets | [Packaging](releases/packaging.md) |
+| Authenticode signing and verification | [Signing](releases/signing.md) |
 
-## Configurazione e dati
+The configuration and architecture guides are maintained in English. The former Italian visual/index/public-copy pages are retained as linked counterparts. Exact source filenames and UI labels remain unchanged.
 
-| Documento | Contenuto | Fonti principali |
-| --- | --- | --- |
-| [Configurazione](configuration/settings.md) | Default, file dell'applicazione, policy macchina e override di ambiente | `ExchangeConfigurationLoader.cs`, `ExchangeOnlineConfiguration.cs` |
-| [Archiviazione locale](configuration/storage.md) | Percorsi, log, riferimenti DPAPI, report atomici, preferenze e disinstallazione | `PersistentLogWriter.cs`, `AtomicFileWriter.cs`, `installer/OnlyExo365.iss` |
-| [Catalogo licenze](licensing/catalog.md) | Catalogo incorporato, cache locale, aggiornamento e parsing CSV | `LicenseCatalogDownloader.cs`, `Microsoft365SkuCatalog.json` |
+## Historical audits
 
-## Architettura e sviluppo
+The files under [audits/](audits/) describe their dated revision and scenario, not qualification of the current build. They include the October 10 critical/UI/PowerShell/documentation reviews, October 11 remediation and October 26–27 mail-flow/dependency/application reviews. Preserve their original text and evidence links.
 
-| Documento | Contenuto | Fonti principali |
-| --- | --- | --- |
-| [Architettura](architecture/overview.md) | Shell WPF, Worker isolato, Contracts e sequenza delle richieste | `src/`, `Shell/Bootstrap`, `Worker/Operations` |
-| [IPC](architecture/ipc.md) | Named pipe, autenticazione sessione, framing, limiti e cancellazione | `Contracts/IpcLineReader.cs`, `Contracts/IpcConstants.cs`, `Worker/Ipc/IpcServer.cs` |
-| [Workflow di sviluppo](development/workflow.md) | Toolchain vincolata, restore, build, test e gate | `global.json`, `scripts/`, `build/` |
-| [Qualifica degli ambienti](development/qualification.md) | Verifiche su VM, tenant dedicato e UI interattiva; limiti delle prove offline | `run-smoke-tests.ps1`, `run-tenant-validation.ps1` |
-| [Packaging](releases/packaging.md) | Installer, pacchetti e bundle di rilascio | `scripts/pack.ps1`, `installer/OnlyExo365.iss` |
-| [Firma digitale](releases/signing.md) | Sequenza di firma e verifica Authenticode | `build/sign-artifacts.ps1`, `build/verify-signatures.ps1` |
+Current behavior is established from the source revision under review. Fixture results, a disconnected screenshot, successful authentication, clean-host installation, live tenant operations and a signed release are separate forms of evidence. A Purview command response is not a general compliance certification.
 
-I nomi di sorgente nelle tabelle sono riferimenti sintetici; i collegamenti alle guide portano ai percorsi completi.
-
-## Audit storici
-
-Le note seguenti descrivono le revisioni indicate, non la qualifica della versione corrente. Queste pagine conservano sintesi tecniche o rimandi: i rapporti integrali e le prove operative sono nel dossier del progetto e non in questa raccolta pubblica.
-
-- [Affidabilità critica — 10/10/2026](audits/2026-10-10-critical-audit.md).
-- [UI/UX — 10/10/2026](audits/2026-10-10-ui-ux-audit.md).
-- [PowerShell — 10/10/2026](audits/2026-10-10-powershell-audit.md).
-- [Fixture conservate — 10/10/2026](audits/2026-10-10-retained-fixtures.md).
-- [Revisione documentazione — 10/10/2026](audits/2026-10-10-documentation-review.md).
-- [Rimedi locali — 11/10/2026](audits/2026-10-11-local-remediation.md).
-- [Mail flow P1 — 26/10/2026](audits/2026-10-26-mailflow-p1.md).
-- [Dipendenze NuGet — 26/10/2026](audits/2026-10-26-nuget-remediation.md).
-- [Rimedi P2 — 27/10/2026](audits/2026-10-27-p2-remediation.md).
-- [Audit applicazione — 27/10/2026](audits/2026-10-27-application-audit.md).
-
-Per i requisiti delle prove correnti consultare [qualifica](development/qualification.md); per il comportamento usare le guide e le sorgenti della revisione in esame.
+Use [Contributing](../CONTRIBUTING.md) for maintenance and [Security](../SECURITY.md) for private vulnerability reporting.

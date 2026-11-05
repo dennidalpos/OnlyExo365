@@ -1,195 +1,136 @@
-# Guida visiva ai percorsi utente
+# Visual user workflows
 
-Percorsi per amministratori Exchange Online e help desk, ricavati da viste, ViewModel e comandi Worker. I diagrammi descrivono il comportamento implementato; le operazioni reali richiedono permessi e qualifica nel tenant di destinazione. Le etichette sono descrittive e possono differire tra UI italiana e inglese.
+[Italian reference](visual-guide.it.md)
 
-## Indice
+These flows describe the implemented views, view models and Worker commands. They do not demonstrate live tenant qualification. The UI is available in English and Italian; descriptive diagram labels may differ from individual controls.
 
-1. [Connessione](#1-connessione)
-2. [Dashboard](#2-dashboard)
-3. [Cassette postali](#3-cassette-postali)
-4. [Tracciamento messaggi](#4-tracciamento-messaggi)
-5. [Sicurezza posta](#5-sicurezza-posta)
-6. [Conformità](#6-conformità)
-7. [Flusso di posta](#7-flusso-di-posta)
-8. [Strumenti e diagnostica](#8-strumenti-e-diagnostica)
+## 1. Connection
 
-## 1. Connessione
+Start the Shell/Worker and inspect Tools. Approved module versions must be present; a newer version is not an automatic substitute. Review [settings](../configuration/settings.md) and [authentication](authentication.md).
 
-Avviare il Worker e controllare i prerequisiti in Strumenti. Le versioni approvate dei moduli devono essere disponibili prima della connessione; una versione più recente non sostituisce quella richiesta. La modalità di autenticazione si configura tramite [impostazioni](../configuration/settings.md).
+~~~mermaid
+flowchart LR
+    Start[Start Shell and Worker] --> Policy{Connections allowed?}
+    Policy -->|No| Inspect[Review machine/app policy]
+    Policy -->|Yes| Modules[Check approved modules in Tools]
+    Modules --> Connect[Connect using configured authentication]
+    Connect --> Result{Authenticated?}
+    Result -->|No or cancelled| Diagnose[Inspect diagnostic reference]
+    Result -->|Yes| Capabilities[Check Exchange and Graph separately]
+~~~
 
-```mermaid
-flowchart TD
-    Start["Avvio Shell e Worker"] --> Policy{"Connessioni abilitate dalla policy?"}
-    Policy -->|"No"| Blocked["Avviso di blocco; verificare la configurazione"]
-    Policy -->|"Sì"| Tools["Controllare prerequisiti e versioni moduli in Strumenti"]
-    Tools --> Ready{"Moduli approvati disponibili?"}
-    Ready -->|"No"| Repair["Installare o riparare i moduli approvati"]
-    Repair --> Tools
-    Ready -->|"Sì"| Connect["Connetti Exchange con la modalità configurata"]
-    Connect --> Auth{"Autenticazione riuscita?"}
-    Auth -->|"No / annullata"| Error["Leggere errore e riferimento diagnostico"]
-    Error --> Tools
-    Auth -->|"Sì"| Status["Verificare separatamente Exchange, Graph e capacità disponibili"]
-    Status --> Page["Aprire la pagina richiesta"]
-```
-
-Il Worker in esecuzione non prova l'accesso a Exchange. Graph può avere uno stato diverso; Compliance apre sessioni separate. Per le quattro modalità e i rispettivi limiti consultare [autenticazione](authentication.md).
-
-Fonti: [stato connessione](../../src/OnlyExo365.Shell/ViewModels/ShellConnectionStateViewModel.cs), [bootstrap interattivo](../../src/OnlyExo365.Shell/Services/InteractiveExchangeBootstrapService.cs), [policy moduli](../../src/OnlyExo365.Contracts/Data/PowerShellModuleBootstrapPolicy.json).
+A running Worker does not prove Exchange access. Graph and Compliance have separate status and capability requirements.
 
 ## 2. Dashboard
 
-La Dashboard mostra conteggi di cassette e gruppi, licenze e utenti amministrativi quando disponibili. Non è un monitor generale della salute dei servizi Microsoft 365.
+Open or refresh the Dashboard after connection. It shows available mailbox/group counts, licenses and administrative users. Partial reads remain warnings; a failed read is not an empty result. The cache is session-scoped and invalidated by connection changes. This page is not a general Microsoft 365 service-health monitor.
 
-```mermaid
-flowchart TD
-    Open["Aprire Dashboard"] --> Connected{"Exchange connesso?"}
-    Connected -->|"No"| Empty["Invito a connettersi; riepilogo non disponibile"]
-    Connected -->|"Sì"| Load["Caricare o aggiornare il riepilogo"]
-    Load --> Result{"Esito letture"}
-    Result -->|"Dati disponibili"| Show["Conteggi, licenze e utenti disponibili"]
-    Result -->|"Dati parziali"| Partial["Riepilogo con avvisi espliciti"]
-    Result -->|"Errore"| Error["Messaggio e riferimento diagnostico"]
-    Show --> Action{"Azione operatore"}
-    Partial --> Action
-    Action -->|"Aggiorna"| Load
-    Action -->|"Collegamento al conteggio"| Navigate["Aprire la pagina collegata"]
-    Error --> Load
-```
+~~~mermaid
+flowchart LR
+    Open[Open Dashboard] --> Load[Load available summary]
+    Load --> State{Read result}
+    State -->|Complete| Show[Display summary]
+    State -->|Partial| Warn[Display available data and warnings]
+    State -->|Failed| Error[Inspect error and retry intentionally]
+    Show --> Page[Open linked detail page]
+~~~
 
-La cache è limitata alla sessione; cambi di connessione invalidano i valori. Un elenco vuoto e una lettura fallita hanno significati diversi.
+## 3. Mailboxes
 
-Fonti: [DashboardView](../../src/OnlyExo365.Shell/Views/DashboardView.xaml), [DashboardViewModel](../../src/OnlyExo365.Shell/ViewModels/DashboardViewModel.cs).
+Search, select a mailbox and open its details. Settings, automatic replies, delegates and licenses have separate actions; license writes additionally require Graph and its consent.
 
-## 3. Cassette postali
+~~~mermaid
+flowchart LR
+    Select[Search and select] --> Edit[Edit exposed fields]
+    Edit --> Save[Save that editor]
+    Save --> Confirm{Review and confirm?}
+    Confirm -->|Yes| Worker[Send to Worker]
+    Worker --> Check[Refresh and inspect remote state]
+    Confirm -->|No| Edit
+~~~
 
-Cercare una cassetta, selezionarla e aprire i dettagli. Impostazioni, risposte automatiche, deleghe e licenze hanno azioni specifiche; le scritture di licenze richiedono anche Graph e il relativo consenso.
+Navigation with pending edits lets you remain or discard; it does not save every editor universally. A save can involve multiple operations and a later failure does not roll back earlier writes. After timeout, inspect remote state before retrying.
 
-```mermaid
-flowchart TD
-    List["Cercare e selezionare una cassetta"] --> Details["Consultare dettagli e schede"]
-    Details --> Edit["Modificare i campi esposti dall'editor"]
-    Edit --> Save["Salvare tramite l'azione della scheda"]
-    Save --> Confirm{"Confermare il riepilogo dell'operazione?"}
-    Confirm -->|"No"| Edit
-    Confirm -->|"Sì"| Submit["Inviare la richiesta al Worker"]
-    Submit --> Result{"Esito"}
-    Result -->|"Successo"| Updated["Aggiornare e controllare i dati"]
-    Result -->|"Errore / timeout"| Inspect["Leggere l'errore e verificare lo stato remoto prima di ripetere"]
-    Edit --> Navigate{"Lasciare la pagina con modifiche pendenti?"}
-    Navigate -->|"Annullare lo spostamento"| Edit
-    Navigate -->|"Confermare lo scarto"| Leave["Abbandonare la bozza"]
-```
+## 4. Message Trace
 
-L'avviso di navigazione permette di confermare lo scarto o restare: non offre un salvataggio universale di tutte le schede. Un salvataggio può comprendere più operazioni; il fallimento di una fase non annulla quelle già eseguite.
+Set increasing start/end dates: at most 10 days within the last 90, without future dates. Search by supported sender/recipient/page-size filters, browse pages/status filters and inspect events for the selected trace.
 
-Fonti: [dettagli](../../src/OnlyExo365.Shell/ViewModels/MailboxDetailsViewModel.cs), [editor permessi](../../src/OnlyExo365.Shell/ViewModels/MailboxPermissionsEditorViewModel.cs), [licenze](../../src/OnlyExo365.Shell/ViewModels/MailboxLicensesViewModel.cs).
+~~~mermaid
+flowchart LR
+    Filters[Validate date and address filters] --> Search[Search page]
+    Search --> Result{Result}
+    Result -->|Error| Diagnose[Inspect diagnostics]
+    Result -->|Empty| Empty[No messages for these filters]
+    Result -->|Data| View[Inspect visible rows and events]
+    View --> Next[Load next available page]
+    View --> Export[Export current view to XLSX]
+~~~
 
-## 4. Tracciamento messaggi
+Counts remain partial while more pages exist. Worker lookahead determines HasMore, not the tenant-wide total. Export does not automatically download every search page.
 
-Impostare inizio e fine in ordine crescente: massimo 10 giorni negli ultimi 90, senza date future. I risultati possono essere paginati e filtrati per stato. L'export usa i risultati presenti nella vista, senza scaricare automaticamente tutta la ricerca.
+## 5. Mail security
 
-```mermaid
-flowchart TD
-    Form["Impostare date, mittente, destinatario e dimensione pagina"] --> Validate{"Filtri validi?"}
-    Validate -->|"No"| Fix["Correggere i campi segnalati"]
-    Fix --> Form
-    Validate -->|"Sì"| Search["Cercare i messaggi"]
-    Search --> Result{"Esito"}
-    Result -->|"Errore"| Error["Leggere diagnosi; restringere la ricerca se opportuno"]
-    Error --> Form
-    Result -->|"Vuoto"| Empty["Nessun messaggio per i filtri richiesti"]
-    Result -->|"Dati"| Grid["Consultare la pagina e il filtro stato"]
-    Grid --> Action{"Azione"}
-    Action -->|"Pagina precedente / successiva disponibile"| Search
-    Action -->|"Seleziona messaggio e dettagli"| Events["Consultare gli eventi della traccia"]
-    Action -->|"Esporta Excel"| Export["Salvare i risultati della vista in XLSX"]
-```
+Supported categories include inbound/outbound spam, phishing, malware, quarantine and DKIM, subject to session capabilities. Load policies, select one and change only exposed fields.
 
-I conteggi restano parziali finché esistono altre pagine. Il Worker usa una pagina di lookahead per determinare `HasMore`; non equivale a conoscere il totale del tenant.
+~~~mermaid
+flowchart LR
+    Policies[Load and select policy] --> Edit[Edit selected fields]
+    Edit --> Save[Save selected policy]
+    Save --> Drafts[Review any other draft-discard warning]
+    Drafts --> Confirm[Confirm intended operation]
+    Confirm --> Reload[Reload and check values and warnings]
+~~~
 
-Fonti: [ViewModel](../../src/OnlyExo365.Shell/ViewModels/MessageTraceViewModel.cs), [comandi Worker](../../src/OnlyExo365.Worker/PowerShell/ExoMessageTraceCommands.cs).
+Preserve useful drafts before accepting their discard. Applying a policy is not proof of its protective effectiveness across a tenant.
 
-## 5. Sicurezza posta
+## 6. Compliance
 
-Le categorie esposte sono spam in entrata/uscita, phishing, malware, quarantena e DKIM. Disponibilità e modifiche ammesse dipendono dalle capacità della sessione.
+Audit searches and eDiscovery use distinct requirements. The supported eDiscovery connection is interactive delegated search authentication. Creating a search and starting it are separate actions.
 
-```mermaid
-flowchart TD
-    Open["Aprire Sicurezza posta e caricare i criteri"] --> Select["Selezionare categoria e criterio"]
-    Select --> Edit["Modificare i campi disponibili"]
-    Edit --> Save["Salvare il criterio selezionato"]
-    Save --> Drafts{"Altre bozze pendenti?"}
-    Drafts -->|"Sì"| Warn["Valutare l'avviso di scarto delle altre bozze"]
-    Drafts -->|"No"| Confirm["Confermare l'operazione"]
-    Warn --> Confirm
-    Confirm -->|"Annulla"| Edit
-    Confirm -->|"Conferma"| Submit["Inviare aggiornamento e ricaricare"]
-    Submit --> Check["Controllare esito, avvisi e valori remoti"]
-```
+~~~mermaid
+flowchart LR
+    Open[Open Compliance] --> Action{Task}
+    Action --> Audit[Queue audit query and follow selected task]
+    Action --> Search[Refresh cases searches and actions]
+    Search --> Create[Create a search]
+    Create --> Start[Start it separately]
+    Search --> Change[Review remove purge or hold selection]
+    Change --> Confirm[Confirm only intended remote operation]
+~~~
 
-Conservare le modifiche utili prima di accettare lo scarto di altre bozze. Nessun diagramma garantisce l'efficacia di un criterio di protezione sul tenant.
+Purge exposes SoftDelete and HardDelete; do not describe every request as permanent deletion. Hold requires the supported case/parameters, and listing holds may be reported unsupported. Responses do not certify legal retention or general compliance.
 
-Fonte: [MailSecurityViewModel](../../src/OnlyExo365.Shell/ViewModels/MailSecurityViewModel.cs).
+## 7. Mail flow
 
-## 6. Conformità
+The page groups rules, connectors, accepted/remote domains, organization relationships, sharing policies, address lists, offline address books and address-book policies. Editors save their exposed fields only.
 
-Audit e ricerche hanno requisiti distinti. eDiscovery richiede la connessione di ricerca interattiva delegata supportata dall'applicazione. La creazione di una ricerca e il suo avvio sono azioni separate.
+~~~mermaid
+flowchart LR
+    Open[Choose area and load selection] --> Action{Operation}
+    Action --> Test[Test supported rule conditions]
+    Test --> Match[Match no-match or indeterminate with reasons]
+    Action --> Edit[Create edit delete or change state]
+    Edit --> Confirm[Review summary and confirm once]
+    Confirm --> Verify[Refresh and inspect remote outcome]
+~~~
 
-```mermaid
-flowchart TD
-    Open["Aprire Conformità"] --> Task{"Attività"}
-    Task -->|"Audit"| Audit["Impostare filtri e accodare una ricerca audit"]
-    Audit --> Results["Seguire stato e risultati del task selezionato"]
-    Task -->|"Workspace ricerche"| Refresh["Aggiornare ricerche, casi e azioni disponibili"]
-    Refresh --> Select{"Azione disponibile"}
-    Select -->|"Crea"| Create["Inserire nome, posizioni e query; confermare"]
-    Create --> Saved["Ricerca creata; avviarla con l'azione separata"]
-    Select -->|"Avvia ricerca selezionata"| Start["Confermare avvio e aggiornare lo stato"]
-    Select -->|"Rimuovi / Purge / Hold"| Confirm["Controllare selezione, parametri e riepilogo"]
-    Confirm --> Submit["Confermare solo l'operazione voluta"]
-    Submit --> Verify["Verificare esito e stato delle azioni remote"]
-```
+Emptying an exposed rule field can clear its remote value. Updating and enabling/disabling are separate commands, so partial success is possible. Test evaluates a supported subset of conditions; it does not simulate Exchange delivery or actions. See [mail-flow details](operator-guide.md#mail-flow-editing).
 
-Purge espone `SoftDelete` e `HardDelete`: non descrive ogni richiesta come eliminazione definitiva. Un hold richiede il caso e i parametri previsti; la risposta di un comando non certifica conservazione legale o conformità normativa. L'elenco hold può essere segnalato come non supportato.
+## 8. Tools and diagnostics
 
-Fonti: [ComplianceViewModel](../../src/OnlyExo365.Shell/ViewModels/ComplianceViewModel.cs), [coda audit](../../src/OnlyExo365.Shell/ViewModels/ComplianceViewModel.AuditQueue.cs), [autenticazione](authentication.md).
+Tools remains available for prerequisite repair after tenant connection failure. Inspect modules before intentionally installing the approved version. Worker console visibility does not stop the Worker. License-catalog update reports its own status/outcome.
 
-## 7. Flusso di posta
+~~~mermaid
+flowchart LR
+    Tools[Open Tools] --> Modules[Inspect or repair approved modules]
+    Tools --> Console[Show or hide Worker console]
+    Tools --> Catalog[Update license catalog]
+    Tools --> Logs[Inspect persistent logs]
+    Logs --> Export[Review diagnostic archive before sharing]
+~~~
 
-La pagina raggruppa regole, connettori, domini accettati/remoti, relazioni organizzative, criteri di condivisione, elenchi indirizzi, rubriche offline e criteri rubrica. Il salvataggio riguarda i campi esposti dall'editor.
+Logs can contain tenant identifiers and service messages. See [diagnostics](diagnostics.md), [storage](../configuration/storage.md) and [catalog](../licensing/catalog.md).
 
-```mermaid
-flowchart TD
-    Open["Aprire Flusso di posta e scegliere l'ambito"] --> Read["Caricare e selezionare l'elemento"]
-    Read --> Action{"Azione"}
-    Action -->|"Regole: Test"| Preview["Valutare il sottoinsieme supportato di condizioni"]
-    Preview --> Outcome["Match, nessun match o indeterminato con motivi"]
-    Action -->|"Crea / modifica / elimina / stato"| Edit["Compilare e validare i campi dell'azione"]
-    Edit --> Confirm["Controllare il riepilogo e confermare"]
-    Confirm --> Submit["Inviare una volta l'operazione"]
-    Submit --> Check["Aggiornare e verificare valori e stato remoto"]
-```
+## Source map
 
-Per le regole, svuotare un campo esposto può rimuoverne il valore remoto. Aggiornamento e abilitazione/disabilitazione sono comandi separati: può riuscire il primo e fallire il secondo. Il Test non simula consegna o azioni Exchange. Vedere i dettagli nella [guida operatore](operator-guide.md#mail-flow-editing).
-
-Fonti: [MailFlowViewModel](../../src/OnlyExo365.Shell/ViewModels/MailFlowViewModel.cs), [regole](../../src/OnlyExo365.Shell/ViewModels/MailFlowRulesViewModel.cs), [comandi](../../src/OnlyExo365.Worker/PowerShell/ExoTransportRuleCommands.cs).
-
-## 8. Strumenti e diagnostica
-
-Strumenti resta disponibile per la riparazione dei prerequisiti anche quando una connessione al tenant fallisce. Il controllo dei componenti non dimostra che tutte le operazioni siano autorizzate.
-
-```mermaid
-flowchart TD
-    Tools["Aprire Strumenti e verificare i prerequisiti"] --> Choice{"Attività"}
-    Choice -->|"Modulo mancante o versione diversa"| Install["Installare la versione approvata"]
-    Install --> Verify["Ripetere la verifica; controllare eventuali errori"]
-    Choice -->|"Console Worker"| Console["Mostrare o nascondere la console senza arrestare il Worker"]
-    Choice -->|"Catalogo licenze"| Catalog["Aggiornare il catalogo; controllare stato ed esito"]
-    Choice -->|"Log"| Logs["Consultare i log persistenti ed esportare l'archivio diagnostico"]
-    Logs --> Review["Esaminare l'archivio prima di condividerlo"]
-```
-
-I log possono contenere identificatori del tenant e messaggi del servizio. Consultare [diagnostica](diagnostics.md), [archiviazione](../configuration/storage.md) e [catalogo licenze](../licensing/catalog.md).
-
-Fonti: [ToolsViewModel](../../src/OnlyExo365.Shell/ViewModels/ToolsViewModel.cs), [LogsViewModel](../../src/OnlyExo365.Shell/ViewModels/LogsViewModel.cs).
+Connection: ShellConnectionStateViewModel/InteractiveExchangeBootstrapService; Dashboard: DashboardViewModel; mailbox editors: MailboxDetails/Permissions/LicensesViewModel; traces: MessageTraceViewModel and ExoMessageTraceCommands; security: MailSecurityViewModel; Compliance: ComplianceViewModel and its AuditQueue partial; mail flow: MailFlow/RulesViewModel and ExoTransportRuleCommands; diagnostics: Tools/LogsViewModel. All belong to the current [source tree](../../src/).

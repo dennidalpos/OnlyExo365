@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -130,21 +130,21 @@ jobs:
           --clobber
 
       - name: Upload signed publish artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: publish-win-x64-signed
           path: artifacts/publish/**
           if-no-files-found: error
 
       - name: Upload signed installer artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: installer-win-x64-signed
           path: artifacts/packages/**
           if-no-files-found: error
 
       - name: Upload release assets bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-assets-signed
           path: artifacts/publish/release-assets/**
@@ -152,7 +152,7 @@ jobs:
 
       - name: Upload security reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-reports-signed
           path: artifacts/security/**
@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload smoke reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: smoke-reports-signed
           path: artifacts/smoke/**

@@ -215,8 +215,10 @@ public sealed class ContactsViewModelTests
         });
         await WaitForPropertyAsync(
             viewModel,
-            nameof(viewModel.DisplayName),
-            () => viewModel.ContactIdentity == second.Identity && viewModel.DisplayName == second.DisplayName);
+            nameof(viewModel.PrimarySmtpAddress),
+            () => viewModel.ContactIdentity == second.Identity
+                && viewModel.DisplayName == second.DisplayName
+                && viewModel.PrimarySmtpAddress == second.PrimarySmtpAddress);
 
         firstRequest.SetResult(new ContactDetailsDto
         {

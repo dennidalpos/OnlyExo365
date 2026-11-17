@@ -8,13 +8,16 @@ on:
   pull_request:
   workflow_dispatch:
 
-jobs:
+permissions:
+  contents: read
+
+
   build-test-package:
     runs-on: windows-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -26,14 +29,14 @@ jobs:
         run: ./build/run-smoke-tests.ps1 -PublishPath artifacts/publish -SetupExePath artifacts/packages/OnlyExo365.Setup.exe -ReportPath artifacts/smoke/smoke-report.json
 
       - name: Upload publish artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: publish-win-x64
           path: artifacts/publish/**
           if-no-files-found: error
 
       - name: Upload installer artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: installer-win-x64
           path: artifacts/packages/**
@@ -41,7 +44,7 @@ jobs:
 
       - name: Upload security reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: security-reports
           path: artifacts/security/**
@@ -49,7 +52,7 @@ jobs:
 
       - name: Upload smoke reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: smoke-reports
           path: artifacts/smoke/**
